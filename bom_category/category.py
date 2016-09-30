@@ -44,7 +44,14 @@ class MRPBom(orm.Model):
     _inherit = 'mrp.bom'
     
     _columns = {
-        'subparent_id': fields.many2one(
-            'mrp.bom', 'Sub parent bom'),        
+        'bom_category': fields.selection([
+            ('cost', 'Cost'),
+            ('product', 'Product'),
+            ('lavoration', 'Lavoration'), # used?
+            ('semi', 'Half worked'),            
+            ], 'Category')            
+        }
+    _defaults = {
+        'bom_category': lambda *x: 'product',
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

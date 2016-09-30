@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ###############################################################################
 #
 #    Copyright (C) 2001-2014 Micronaet SRL (<http://www.micronaet.it>).
@@ -17,34 +16,28 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import os
-import sys
-import logging
-import openerp
-import openerp.netsvc as netsvc
-import openerp.addons.decimal_precision as dp
-from openerp.osv import fields, osv, expression, orm
-from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
-from openerp import SUPERUSER_ID, api
-from openerp import tools
-from openerp.tools.translate import _
-from openerp.tools.float_utils import float_round as round
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
-    DEFAULT_SERVER_DATETIME_FORMAT, 
-    DATETIME_FORMATS_MAP, 
-    float_compare)
 
-
-_logger = logging.getLogger(__name__)
-
-class MRPBom(orm.Model):
-    """ Model name: MRPBom
-    """    
-    _inherit = 'mrp.bom'
-    
-    _columns = {
-        'subparent_id': fields.many2one(
-            'mrp.bom', 'Sub parent bom'),        
-        }
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+{
+    'name': 'MRP BOM Category',
+    'version': '0.1',
+    'category': 'MRP',
+    'description': '''        
+        Add category for bom
+        ''',
+    'author': 'Micronaet S.r.l. - Nicola Riolini',
+    'website': 'http://www.micronaet.it',
+    'license': 'AGPL-3',
+    'depends': [
+        'base',
+        'mrp',
+        ],
+    'init_xml': [],
+    'demo': [],
+    'data': [
+        #'security/ir.model.access.csv',    
+        'category_view.xml',
+        ],
+    'active': False,
+    'installable': True,
+    'auto_install': False,
+    }

@@ -1,7 +1,32 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
-
+        <record model="ir.ui.view" id="view_bom_parent_code_form">
+            <field name="name">mrp.bom.parent.code.form</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+            <field name="arch" type="xml">
+                <field name="code" position="before">
+                    <group colspan="2" col="3">
+                        <field name="subparent_id" domain="[('bom_category','=','half')]" context="{'default_bom_category': 'half'}"/>
+                        <button name="assign_parent_bom" string="Auto assign" type="object" colspan="1"/>
+                    </group>
+                </field>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_view_mrp_bom_filter_parent_search">
+            <field name="name">mrp.bom.parent.code.search</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.view_mrp_bom_filter"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="subparent_id" domain="[('bom_category','=','half')]"/>
+                </field>
+                <filter string="Product" position="after">
+                    <filter name="group_subparent" string="Parent BOM" context="{'group_by': 'subparent_id'}"/>
+                </filter>
+            </field>
+        </record>
     </data>
 </openerp>
 

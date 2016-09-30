@@ -42,6 +42,59 @@ class MRPBom(orm.Model):
     """ Model name: MRPBom
     """    
     _inherit = 'mrp.bom'
+
+    def get_config_parameter_list(self, cr, uid, context=None):
+        ''' Read parameter: 
+        '''    
+        key = 'product.default.product.parent.bom'
+        config_pool = self.pool.get('ir.config_parameter')
+        config_ids = config_pool.search(cr, uid, [
+            ('key', '=', key)], context=context)
+        if not config_ids:
+            _logger.warning('Parameter not found: %s' % key)
+            return []
+        config_proxy = config_pool.browse(
+            cr, uid, config_ids, context=context)[0]
+        return eval(config_proxy.value)    
+    
+    def assign_parent_bom(self, cr, uid, ids, context=None):
+        ''' Assign bom depend on code format
+        '''    
+        bom_code_split = self.get_config_parameter_list(
+            cr, uid, context=context)
+        if not bom_code_split:
+            raise osv.except_osv(
+                _('Error'), 
+                _('Setup config paremeter!'))
+            
+        bom_proxy = self.browse(cr, uid, ids, context=context)[0]
+        default_code = bom_proxy.product_id.default_code
+        if not bom_code_split:
+            raise osv.except_osv(
+                _('Error'), 
+                _('No default code in product!'))
+
+        bom_ids = False        
+        for to in bom_code_split:  
+            partial = default_code[0:to]
+            bom_ids = self.search(cr, uid, [
+                ('bom_category', '=', 'half'), 
+                ('product_id.default_code', '=', partial),
+                ], context=context)
+            if bom_ids:
+                break
+                
+        if not bom_ids:
+            raise osv.except_osv(
+                _('Error'), 
+                _('No default code in product!'))
+                
+        if len(bom_ids) > 1:
+            _logger.error('Found more parent bom!')
+                
+        return self.write(cr, uid, ids, {
+            'subparent_id': bom_ids[0],
+            }, context=context)        
     
     _columns = {
         'subparent_id': fields.many2one(

@@ -30,12 +30,14 @@
     'depends': [
         'base',
         'mrp',
+        'bom_category',
         ],
     'init_xml': [],
     'demo': [],
     'data': [
         #'security/ir.model.access.csv',    
-        'parent_view.xml',
+        'parent_view.xml',        
+        'data/config_data.xml',
         ],
     'active': False,
     'installable': True,

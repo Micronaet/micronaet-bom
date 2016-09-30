@@ -48,7 +48,7 @@ class MRPBom(orm.Model):
             ('cost', 'Cost'),
             ('product', 'Product'),
             ('lavoration', 'Lavoration'), # used?
-            ('semi', 'Half worked'),            
+            ('half', 'Half worked'),            
             ], 'Category')            
         }
     _defaults = {

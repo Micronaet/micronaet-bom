@@ -10,7 +10,7 @@ import sys
 import ConfigParser
 import os
 
-cfg_file = 'openerp.cfg'
+cfg_file = os.path.expanduser('~/etl/Access/import/openerp.cfg')
 
 config = ConfigParser.ConfigParser()
 config.read([cfg_file])
@@ -24,20 +24,18 @@ verbose = eval(config.get('import_mode', 'verbose'))
 
 header = 1 # non header on CSV file
 
-# -----------------------------------------------------------------------------
-# IMPORT PIPES:
-# -----------------------------------------------------------------------------
-
-filename = './data/elenco_tubi.csv'
-pipes = {}
-# XMLRPC connection for autentication (UID) and proxy 
 sock = xmlrpclib.ServerProxy(
     'http://%s:%s/xmlrpc/common' % (server, port), allow_none=True)
 uid = sock.login(dbname, user, pwd)
 sock = xmlrpclib.ServerProxy(
     'http://%s:%s/xmlrpc/object' % (server, port), allow_none=True)
 
-import pdb; pdb.set_trace()
+# -----------------------------------------------------------------------------
+# IMPORT PIPES:
+# -----------------------------------------------------------------------------
+filename = os.path.expanduser('~/etl/Access/import/data/elenco_tubi.csv')
+pipes = {}
+
 lines = csv.reader(
     open(filename, 'rb'), 
     delimiter=separator,
@@ -78,7 +76,7 @@ for line in lines:
         pipes[ID] = item_ids[0]
         sock.execute( # Search new code (if yet created)
             dbname, uid, pwd, 'product.product', 'write', item_ids, {
-                'is_pipe': True
+                'is_pipe': True,
                 'name': name,
                 'default_code': default_code,
                 'uom_id': 1,
@@ -89,7 +87,7 @@ for line in lines:
     else:
         pipes[ID] = sock.execute( # Search new code (if yet created)
             dbname, uid, pwd, 'product.product', 'create', {
-                'is_pipe': True
+                'is_pipe': True,
                 'name': name,
                 'default_code': default_code,
                 'uom_id': 1,
@@ -98,4 +96,45 @@ for line in lines:
                 'pipe_thick': thick, 
                 })
 
+print pipes
+# -----------------------------------------------------------------------------
+# READ PRODUCT USED:
+# -----------------------------------------------------------------------------
+filename = os.path.expanduser('~/etl/Access/import/data/elenco_articoli.csv')
+product = {}
 
+lines = csv.reader(
+    open(filename, 'rb'), 
+    delimiter=separator,
+    )
+counter = -header
+for line in lines:
+    counter += 1 
+    if counter <= 0:
+       continue
+
+    if not len(line): # jump empty lines
+        continue
+    
+    default_code = line[0]
+    name = line[1]
+               
+    item_ids = sock.execute(dbname, uid, pwd, 'product.product', 'search', [
+           ('default_code', '=', default_code)])
+    if item_ids:
+        product[default_code] = item_ids[0]        
+        sock.execute( # Search new code (if yet created)
+            dbname, uid, pwd, 'product.product', 'write', item_ids, {
+                'name': name or 'Code %s' % default_code,
+                'default_code': default_code,
+                'uom_id': 1,
+                })
+    else:
+        product[default_code] = sock.execute( # Search new code (if yet created)
+            dbname, uid, pwd, 'product.product', 'create', {
+                'name': name or 'Code %s' % default_code,
+                'default_code': default_code,
+                'uom_id': 1,
+                })
+
+print product

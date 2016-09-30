@@ -44,9 +44,9 @@ class ProductProduct(orm.Model):
     _inherit = 'product.product'
     
     _columns = {
-        'is_pipes': fields.boolean('Is Pipes'),
-        'pipes_diameter': fields.float('Pipes diameter', digits=(16, 3)),
-        'pipes_thick': fields.float('Pipes thick', digits=(16, 3)),
-        'pipes_length': fields.float('Pipes length', digits=(16, 3)),
+        'is_pipe': fields.boolean('Is Pipe'),
+        'pipe_diameter': fields.float('Pipe diameter', digits=(16, 3)),
+        'pipe_thick': fields.float('Pipe thick', digits=(16, 3)),
+        'pipe_length': fields.float('Pipe length', digits=(16, 3)),
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

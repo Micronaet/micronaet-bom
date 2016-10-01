@@ -1,6 +1,21 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+        <!--mrp.bom-->
+        <record model="ir.ui.view" id="view_mrp_bom_compoment_form">
+            <field name="name">mrp.bom.form</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='bom_line_ids']//tree/field[@name='product_qty']" position="after">
+                     <field name="length_cut" />
+                     <field name="waste_cut" />
+                     <field name="part_x_pipe" />
+                     <field name="pipe_total" />
+                </xpath>
+            </field>
+        </record>
+        <!--product.product-->
         <record model="ir.ui.view" id="view_product_product_pipes_form">
             <field name="name">product.product.pipe.form</field>
             <field name="model">product.product</field>

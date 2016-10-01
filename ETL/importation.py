@@ -183,7 +183,11 @@ for line in lines:
     component_code = line[0].upper()
     description = line[1] 
     product_code = line[2]
-    length_cut = eval(line[3])
+    try:
+        length_cut = eval(line[3])
+    except:
+        print 'Length error or 0, jump'
+        continue    
     #waste_cut = eval(line[3])
     pipe_id = int(line[4])
     part_x_pipe = eval(line[5])
@@ -200,7 +204,7 @@ for line in lines:
             ])
         
     data = {
-        'default_code': default_code,
+        'default_code': component_code,
         'name': name,
         'uom_id': 1,                
         }    
@@ -225,7 +229,7 @@ for line in lines:
     component_id = product[component_code]
     if component_id not in boms:
         data = {
-            'code': default_code,
+            'code': component_code,
             'product_tmpl_id': product_tmpl_id,
             'product_id': product[component_code],
             'product_qty': 1, 

@@ -47,7 +47,7 @@ class MRPBom(orm.Model):
         'bom_category': fields.selection([
             ('cost', 'Cost'),
             ('product', 'Product'),
-            ('lavoration', 'Lavoration'), # used?
+            ('lavoration', 'Lavoration'), # used for family?
             ('half', 'Half worked'),            
             ], 'Category')            
         }

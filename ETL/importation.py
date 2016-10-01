@@ -185,9 +185,9 @@ for line in lines:
     product_code = line[2]
     length_cut = eval(line[3])
     #waste_cut = eval(line[3])
-    pipe_id = line[4]
+    pipe_id = int(line[4])
     part_x_pipe = eval(line[5])
-    pipe_total = line[6]    
+    pipe_total = int(line[6])
     
     name = '%s %s per %s' % (description, component_code, product_code)
     
@@ -213,7 +213,6 @@ for line in lines:
             dbname, uid, pwd, 'product.product', 'create', data)
             
     # Read template:        
-    import pdb; pdb.set_trace()
     component_id = product[component_code]
     template = sock.execute( 
         dbname, uid, pwd, 'product.product', 'read', component_id, 
@@ -226,7 +225,7 @@ for line in lines:
     component_id = product[component_code]
     if component_id not in boms:
         data = {
-            'default_code': default_code,
+            'code': default_code,
             'product_tmpl_id': product_tmpl_id,
             'product_id': product[component_code],
             'product_qty': 1, 

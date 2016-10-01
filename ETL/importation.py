@@ -239,16 +239,22 @@ for line in lines:
     # -------------------------------------------------------------------------
     #                           BOM line add:
     # -------------------------------------------------------------------------
-    bom_id = _id = boms[component_id]
-    if component_id not in boms:
-        data = {
-            'default_code': default_code,
-            'product_id': product[component_code],
-            'product_qty': 1, 
-            'product_uom': 1,
-            'code': component_code,
-            'bom_line_ids': [6, 0, False], # reset bon lines (first time)
-            }
+    bom_id = boms[component_id] 
+    if pipe_id not in pipes:
+        print 'Pipe %s not found' % pipe_id
+        continue
+       
+    data = {
+        'product_id': pipes[pipe_id],
+        'type': 'normal',
+        'product_qty': 
+        'default_code': default_code,
+        'product_id': product[component_code],
+        'product_qty': 1, 
+        'product_uom': 1,
+        'code': component_code,
+        'bom_line_ids': [6, 0, False], # reset bon lines (first time)
+        }
 
         bom_ids = sock.execute(dbname, uid, pwd, 'mrp.bom', 'search', [
             ('product_id', '=', component_id), # TODO template?

@@ -46,6 +46,10 @@ class MRPBomLine(orm.Model):
     _columns = {
         'waste_cut': fields.float('Waste cut', digits=(16, 2), 
             help='Part for cut pipe that will be wasted'), 
+        'part_x_pipe': fields.integer('Part per pipe',
+            help='Number of parts for create component in a bar'), 
+        'pipe_total': fields.integer('Pipe per part', 
+            help='Total pipes for create the part')
         }
 
 class ProductProduct(orm.Model):

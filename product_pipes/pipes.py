@@ -54,9 +54,9 @@ class ProductProduct(orm.Model):
     
     _columns = {
         'is_pipe': fields.boolean('Is Pipe'),
-        'pipe_diameter': fields.float('Pipe diameter', digits=(16, 3)),
-        'pipe_thick': fields.float('Pipe thick', digits=(16, 3)),
-        'pipe_length': fields.float('Pipe length', digits=(16, 3)),
+        'pipe_diameter': fields.float('Pipe diameter mm.', digits=(16, 2)),
+        'pipe_thick': fields.float('Pipe thick mm.', digits=(16, 2)),
+        'pipe_length': fields.float('Pipe length mm.', digits=(16, 2)),
         'pipe_min_order': fields.integer('Pipe min order'),
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -32,9 +32,14 @@
                     <field name="name" />
                     <field name="default_code" />
                     <field name="uom_id" />
+                    <separator string="Dimension:" colspan="4"/>
                     <field name="pipe_diameter" />
                     <field name="pipe_thick" />
                     <field name="pipe_length" />
+                    <separator string="Price" colspan="4"/>
+                    <field name="standard_price" />
+                    <field name="lst_price" />
+                    <field name="first_supplier_id" />
                     <field name="pipe_min_order" />
                 </tree>
             </field>
@@ -45,7 +50,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_product_product_pipes_tree"/>
-            <field name="context">{'form_view_ref':'product_pipes.iew_product_product_pipes_form', 'default_is_pipe':True}</field>
+            <field name="context">{'form_view_ref':'product_pipes.view_product_product_pipes_form', 'default_is_pipe':True}</field>
             <field name="domain">[('is_pipe','=',True)]</field>
         </record>
         <menuitem 

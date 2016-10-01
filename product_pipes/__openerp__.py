@@ -31,6 +31,7 @@
         'base',
         'product',
         'mrp',
+        'purchase_extra_field', # first supplier
         ],
     'init_xml': [],
     'demo': [],

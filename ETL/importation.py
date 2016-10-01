@@ -160,7 +160,7 @@ for line in lines:
                 })
 
 # -----------------------------------------------------------------------------
-# DETAILS:
+#                                DETAILS:
 # -----------------------------------------------------------------------------
 filename = os.path.expanduser(
     '~/etl/Access/import/dati/dettagli_componenti.csv')
@@ -189,12 +189,13 @@ for line in lines:
     
     name = '%s %s per %s' % (description, compoment_code, product_code)
     
-    # -------------
-    # Product part:
-    # -------------
-    component_ids = sock.execute(dbname, uid, pwd, 'product.product', 'search', [
-        ('default_code', '=', component_code),
-        ])
+    # -------------------------------------------------------------------------
+    #                         Component part:
+    # -------------------------------------------------------------------------
+    component_ids = sock.execute(
+        dbname, uid, pwd, 'product.product', 'search', [
+            ('default_code', '=', component_code),
+            ])
         
     data = {
         'default_code': default_code,
@@ -209,26 +210,55 @@ for line in lines:
         sock.execute( 
             dbname, uid, pwd, 'product.product', 'create', data)
 
-    # -------------
-    # Product part:
-    # -------------
-    product_id = product[component_code]
-    if product_id not in boms:
+    # -------------------------------------------------------------------------
+    #                        BOM for component (HEADER):
+    # -------------------------------------------------------------------------
+    component_id = product[component_code]
+    if component_id not in boms:
+        data = {
+            'default_code': default_code,
+            'product_id': product[component_code],
+            'product_qty': 1, 
+            'product_uom': 1,
+            'code': component_code,
+            'bom_line_ids': [6, 0, False], # reset bon lines (first time)
+            }
+
         bom_ids = sock.execute(dbname, uid, pwd, 'mrp.bom', 'search', [
-            ('product_id', '=', product_id),
-            # for template?
+            ('product_id', '=', component_id), # TODO template?
             ])
+            
         if bom_ids:
-            boms[product_id] = bom_ids        
+            boms[component_id] = bom_ids        
+            sock.execute(
+                dbname, uid, pwd, 'mrp.bom', 'write', bom_ids, data)
         else:
-            boms[product_id] = sock.execute(
-                dbname, uid, pwd, 'mrp.bom', 'create', {
-                    'default_code': default_code,
-                    'product_id': product[component_code],
-                    'product_qty': 1, 
-                    'product_uom': 1,
-                    'code': component_code,
-                    })
-                    
-    # Search also in bom lines                    
+            boms[component_id] = sock.execute(
+                dbname, uid, pwd, 'mrp.bom', 'create', data)
+                
+    # -------------------------------------------------------------------------
+    #                           BOM line add:
+    # -------------------------------------------------------------------------
+    bom_id = _id = boms[component_id]
+    if component_id not in boms:
+        data = {
+            'default_code': default_code,
+            'product_id': product[component_code],
+            'product_qty': 1, 
+            'product_uom': 1,
+            'code': component_code,
+            'bom_line_ids': [6, 0, False], # reset bon lines (first time)
+            }
+
+        bom_ids = sock.execute(dbname, uid, pwd, 'mrp.bom', 'search', [
+            ('product_id', '=', component_id), # TODO template?
+            ])
+            
+        if bom_ids:
+            boms[component_id] = bom_ids        
+            sock.execute(
+                dbname, uid, pwd, 'mrp.bom', 'write', bom_ids, data)
+        else:
+            boms[component_id] = sock.execute(
+                dbname, uid, pwd, 'mrp.bom', 'create', data)
       

@@ -44,7 +44,8 @@ class MRPBomLine(orm.Model):
     _inherit = 'mrp.bom.line'
      
     _columns = {
-        'pipe_cut': fields.float('Pipe cut', digits=(16, 3)), 
+        'waste_cut': fields.float('Waste cut', digits=(16, 2), 
+            help='Part for cut pipe that will be wasted'), 
         }
 
 class ProductProduct(orm.Model):

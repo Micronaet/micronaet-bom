@@ -2,7 +2,7 @@
 <openerp>
     <data>
         <record model="ir.ui.view" id="view_product_product_pipes_form">
-            <field name="name">product.product.form</field>
+            <field name="name">product.product.pipe.form</field>
             <field name="model">product.product</field>
             <field name="priority" eval="50" />
             <field name="arch" type="xml">
@@ -13,9 +13,14 @@
                             <field name="uom_id" />
                             <field name="default_code" />
                             <field name="is_pipe" />
+                            <separator string="Dimension:" colspan="4"/>
                             <field name="pipe_diameter" />
                             <field name="pipe_thick" />
                             <field name="pipe_length" />
+                            <separator string="Price" colspan="4"/>
+                            <field name="standard_price" />
+                            <field name="lst_price" />
+                            <field name="first_supplier_id" />
                             <field name="pipe_min_order" />
                         </group>
                     </sheet>        
@@ -23,25 +28,42 @@
             </field>
         </record>
         <record model="ir.ui.view" id="view_product_product_pipes_tree">
-            <field name="name">product.product.tree</field>
+            <field name="name">product.product.pipe.tree</field>
             <field name="model">product.product</field>
             <field name="priority" eval="50" />
             <field name="arch" type="xml">
-                <tree string="Pipes" version="7.0">        
-                    <field name="is_pipe" />
+                <tree string="Pipes">
+                    <!--<field name="is_pipe" />-->
                     <field name="name" />
                     <field name="default_code" />
                     <field name="uom_id" />
-                    <separator string="Dimension:" colspan="4"/>
                     <field name="pipe_diameter" />
                     <field name="pipe_thick" />
                     <field name="pipe_length" />
-                    <separator string="Price" colspan="4"/>
                     <field name="standard_price" />
                     <field name="lst_price" />
                     <field name="first_supplier_id" />
                     <field name="pipe_min_order" />
                 </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_product_product_pipes_search">
+            <field name="name">product.product.pipe.search</field>
+            <field name="model">product.product</field>
+            <field name="priority" eval="50" />
+            <field name="arch" type="xml">
+                <search string="Pipes" version="7.0">        
+                    <field name="name" />
+                    <field name="default_code" />
+                    <field name="first_supplier_id" filter_domain="[('first_supplier_id.name','=',self)]"/>
+                    <group expand="0" string="Group By...">
+                        <filter name="group_supplier" string="First Supplier" context="{'group_by': 'first_supplier_id'}"/>
+                        <filter name="group_diameter" string="Pipe diameter" context="{'group_by': 'pipe_diameter'}"/>
+                        <filter name="group_thick" string="Pipe thick" context="{'group_by': 'pipe_thick'}"/>
+                        <filter name="group_length" string="Pipe length" context="{'group_by': 'pipe_length'}"/>
+                        <filter name="group_order" string="Pipe order" context="{'group_by': 'pipe_min_order'}"/>
+                    </group>                
+                </search>
             </field>
         </record>
         <record model="ir.actions.act_window" id="action_product_product_pipes">
@@ -50,6 +72,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_product_product_pipes_tree"/>
+            <field name="search_view_id" ref="view_product_product_pipes_search" />
             <field name="context">{'form_view_ref':'product_pipes.view_product_product_pipes_form', 'default_is_pipe':True}</field>
             <field name="domain">[('is_pipe','=',True)]</field>
         </record>

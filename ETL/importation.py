@@ -31,7 +31,7 @@ sock = xmlrpclib.ServerProxy(
     'http://%s:%s/xmlrpc/object' % (server, port), allow_none=True)
 
 # -----------------------------------------------------------------------------
-# IMPORT PIPES:
+#                          IMPORT PIPES:
 # -----------------------------------------------------------------------------
 filename = os.path.expanduser('~/etl/Access/import/data/elenco_tubi.csv')
 pipes = {}
@@ -70,34 +70,27 @@ for line in lines:
         thick,
         )
                
+    data = {
+        'is_pipe': True,
+        'name': name,
+        'default_code': default_code,
+        'uom_id': 1,
+        'pipe_length':length,
+        'pipe_diameter': diameter,
+        'pipe_thick': thick, 
+        }           
     item_ids = sock.execute(dbname, uid, pwd, 'product.product', 'search', [
            ('default_code', '=', default_code)])
     if item_ids:
         pipes[ID] = item_ids[0]
         sock.execute( # Search new code (if yet created)
-            dbname, uid, pwd, 'product.product', 'write', item_ids, {
-                'is_pipe': True,
-                'name': name,
-                'default_code': default_code,
-                'uom_id': 1,
-                'pipe_length':length,
-                'pipe_diameter': diameter,
-                'pipe_thick': thick, 
-                })
+            dbname, uid, pwd, 'product.product', 'write', item_ids, data)
     else:
         pipes[ID] = sock.execute( # Search new code (if yet created)
-            dbname, uid, pwd, 'product.product', 'create', {
-                'is_pipe': True,
-                'name': name,
-                'default_code': default_code,
-                'uom_id': 1,
-                'pipe_length':length,
-                'pipe_diameter': diameter,
-                'pipe_thick': thick, 
-                })
+            dbname, uid, pwd, 'product.product', 'create', data)
 
 # -----------------------------------------------------------------------------
-# READ PRODUCT USED:
+#                        READ PRODUCT USED (PARENT):
 # -----------------------------------------------------------------------------
 filename = os.path.expanduser('~/etl/Access/import/data/elenco_articoli.csv')
 product = {}
@@ -118,29 +111,25 @@ for line in lines:
     default_code = line[0]
     name = line[1]
                
+    data = {
+        'name': name or 'Code %s' % default_code,
+        'default_code': default_code,
+        'uom_id': 1,
+        }
     item_ids = sock.execute(dbname, uid, pwd, 'product.product', 'search', [
            ('default_code', '=', default_code)])
     if item_ids:
         product[default_code] = item_ids[0]        
         sock.execute( # Search new code (if yet created)
-            dbname, uid, pwd, 'product.product', 'write', item_ids, {
-                'name': name or 'Code %s' % default_code,
-                'default_code': default_code,
-                'uom_id': 1,
-                })
+            dbname, uid, pwd, 'product.product', 'write', item_ids, data)
     else:
         product[default_code] = sock.execute( # Search new code (if yet created)
-            dbname, uid, pwd, 'product.product', 'create', {
-                'name': name or 'Code %s' % default_code,
-                'default_code': default_code,
-                'uom_id': 1,
-                })
+            dbname, uid, pwd, 'product.product', 'create', data)
 
 # -----------------------------------------------------------------------------
-# SET MIN ORDER:
+#                                 SET MIN ORDER:
 # -----------------------------------------------------------------------------
 filename = os.path.expanduser('~/etl/Access/import/data/multipli_ordine.csv')
-product = {}
 
 lines = csv.reader(
     open(filename, 'rb'),
@@ -165,7 +154,6 @@ for line in lines:
         ])
         
     if item_ids:
-        product[default_code] = item_ids[0]        
         sock.execute( # Search new code (if yet created)
             dbname, uid, pwd, 'product.product', 'write', item_ids, {
                 'pipe_min_order': pipe_min_order,
@@ -174,7 +162,8 @@ for line in lines:
 # -----------------------------------------------------------------------------
 # DETAILS:
 # -----------------------------------------------------------------------------
-filename = os.path.expanduser('~/etl/Access/import/dati/dettagli_componenti.csv')
+filename = os.path.expanduser(
+    '~/etl/Access/import/dati/dettagli_componenti.csv')
 boms = {}
 lines = csv.reader(
     open(filename, 'rb'),
@@ -198,26 +187,27 @@ for line in lines:
     cut = eval(line[5])
     total = line[6]    
     
+    name = '%s %s per %s' % (description, compoment_code, product_code)
+    
     # -------------
     # Product part:
     # -------------
-    item_ids = sock.execute(dbname, uid, pwd, 'product.product', 'search', [
+    component_ids = sock.execute(dbname, uid, pwd, 'product.product', 'search', [
         ('default_code', '=', component_code),
         ])
         
-    if item_ids:
-        product[component_code] = item_ids[0]        
+    data = {
+        'default_code': default_code,
+        'name': name
+        'uom_id': 1,                
+        }    
+    if component_ids:
+        product[component_code] = component_ids[0]        
         sock.execute( # Search new code (if yet created)
-            dbname, uid, pwd, 'product.product', 'write', item_ids, {
-                'default_code': default_code,
-                })
+            dbname, uid, pwd, 'product.product', 'write', component_ids, data)
     else:
         sock.execute( 
-            dbname, uid, pwd, 'product.product', 'create', {
-                'default_code': default_code,
-                'name': '%s per %s' % (description, product_code),
-                'uid_id': 1,                
-                })
+            dbname, uid, pwd, 'product.product', 'create', data)
 
     # -------------
     # Product part:

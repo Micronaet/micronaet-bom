@@ -44,8 +44,10 @@ class MRPBomLine(orm.Model):
     _inherit = 'mrp.bom.line'
      
     _columns = {
-        'waste_cut': fields.float('Waste cut', digits=(16, 2), 
+        'length_cut': fields.float('Length cut', digits=(16, 2), 
             help='Part for cut pipe that will be wasted'), 
+        'waste_cut': fields.float('Waste cut', digits=(16, 2), 
+            help='Part for cut pipe that will be wasted'), # not used for now
         'part_x_pipe': fields.integer('Part per pipe',
             help='Number of parts for create component in a bar'), 
         'pipe_total': fields.integer('Pipe per part', 

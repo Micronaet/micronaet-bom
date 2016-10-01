@@ -94,6 +94,7 @@ for line in lines:
 # -----------------------------------------------------------------------------
 filename = os.path.expanduser('~/etl/Access/import/data/elenco_articoli.csv')
 product = {}
+template = {}
 
 lines = csv.reader(
     open(filename, 'rb'), 
@@ -160,14 +161,13 @@ for line in lines:
                 })
 
 # -----------------------------------------------------------------------------
-#                                DETAILS:
+#                                BOM DETAILS:
 # -----------------------------------------------------------------------------
-import pdb; pdb.set_trace()
 filename = os.path.expanduser(
-    '~/etl/Access/import/dati/dettagli_componenti.csv')
+    '~/etl/Access/import/data/dettagli_componenti.csv')
 boms = {}
 lines = csv.reader(
-    open(filename, 'rb'),
+    open(filename, 'r'),
     delimiter=separator,
     )
 
@@ -183,12 +183,13 @@ for line in lines:
     component_code = line[0].upper()
     description = line[1] 
     product_code = line[2]
-    waste_cut = eval(line[3])
+    length_cut = eval(line[3])
+    #waste_cut = eval(line[3])
     pipe_id = line[4]
     part_x_pipe = eval(line[5])
     pipe_total = line[6]    
     
-    name = '%s %s per %s' % (description, compoment_code, product_code)
+    name = '%s %s per %s' % (description, component_code, product_code)
     
     # -------------------------------------------------------------------------
     #                         Component part:
@@ -200,7 +201,7 @@ for line in lines:
         
     data = {
         'default_code': default_code,
-        'name': name
+        'name': name,
         'uom_id': 1,                
         }    
     if component_ids:
@@ -208,9 +209,17 @@ for line in lines:
         sock.execute( # Search new code (if yet created)
             dbname, uid, pwd, 'product.product', 'write', component_ids, data)
     else:
-        sock.execute( 
+        product[component_code] = sock.execute( 
             dbname, uid, pwd, 'product.product', 'create', data)
-
+            
+    # Read template:        
+    import pdb; pdb.set_trace()
+    component_id = product[component_code]
+    template = sock.execute( 
+        dbname, uid, pwd, 'product.product', 'read', component_id, 
+        ('product_tmpl_id', ))
+    product_tmpl_id = template['product_tmpl_id'][0]
+    
     # -------------------------------------------------------------------------
     #                        BOM for component (HEADER):
     # -------------------------------------------------------------------------
@@ -218,11 +227,13 @@ for line in lines:
     if component_id not in boms:
         data = {
             'default_code': default_code,
+            'product_tmpl_id': product_tmpl_id,
             'product_id': product[component_code],
             'product_qty': 1, 
             'product_uom': 1,
             'code': component_code,
-            'bom_line_ids': [6, 0, False], # reset bon lines (first time)
+            'bom_category': 'half',
+            'bom_line_ids': [(5, False, False)], # reset bon lines (first time)
             }
 
         bom_ids = sock.execute(dbname, uid, pwd, 'mrp.bom', 'search', [
@@ -255,7 +266,8 @@ for line in lines:
         'type': 'normal',
         'product_qty': product_qty,
                 
-        'waste_cut': waste_cut,
+        'length_cut': length_cut,
+        # waste_cut
         'part_x_pipe': part_x_pipe,
         'pipe_total': pipe_total,
         

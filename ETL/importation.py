@@ -162,6 +162,7 @@ for line in lines:
 # -----------------------------------------------------------------------------
 #                                DETAILS:
 # -----------------------------------------------------------------------------
+import pdb; pdb.set_trace()
 filename = os.path.expanduser(
     '~/etl/Access/import/dati/dettagli_componenti.csv')
 boms = {}
@@ -182,10 +183,10 @@ for line in lines:
     component_code = line[0].upper()
     description = line[1] 
     product_code = line[2]
-    cut_dimension = eval(line[3])
+    waste_cut = eval(line[3])
     pipe_id = line[4]
-    cut = eval(line[5])
-    total = line[6]    
+    part_x_pipe = eval(line[5])
+    pipe_total = line[6]    
     
     name = '%s %s per %s' % (description, compoment_code, product_code)
     
@@ -243,28 +244,26 @@ for line in lines:
     if pipe_id not in pipes:
         print 'Pipe %s not found' % pipe_id
         continue
+    if not part_x_pipe:
+        print 'Part per pipe is 0'
+        continue
        
+    product_qty = pipe_total * 1.0 / part_x_pipe
     data = {
+        'bom_id': bom_id,
         'product_id': pipes[pipe_id],
         'type': 'normal',
-        'product_qty': 
-        'default_code': default_code,
-        'product_id': product[component_code],
-        'product_qty': 1, 
+        'product_qty': product_qty,
+                
+        'waste_cut': waste_cut,
+        'part_x_pipe': part_x_pipe,
+        'pipe_total': pipe_total,
+        
         'product_uom': 1,
-        'code': component_code,
-        'bom_line_ids': [6, 0, False], # reset bon lines (first time)
+        'product_rounding': 1,
+        'product_efficiency': 1,        
         }
 
-        bom_ids = sock.execute(dbname, uid, pwd, 'mrp.bom', 'search', [
-            ('product_id', '=', component_id), # TODO template?
-            ])
-            
-        if bom_ids:
-            boms[component_id] = bom_ids        
-            sock.execute(
-                dbname, uid, pwd, 'mrp.bom', 'write', bom_ids, data)
-        else:
-            boms[component_id] = sock.execute(
-                dbname, uid, pwd, 'mrp.bom', 'create', data)
+    boms[component_id] = sock.execute(
+        dbname, uid, pwd, 'mrp.bom.line', 'create', data)
       

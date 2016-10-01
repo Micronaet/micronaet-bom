@@ -38,6 +38,15 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+class MRPBomLine(orm.Model):
+    """ Model name: Bom line
+    """    
+    _inherit = 'mrp.bom.line'
+     
+    _columns = {
+        'pipe_cut': fields.float('Pipe cut', digits=(16, 3)), 
+        }
+
 class ProductProduct(orm.Model):
     """ Model name: Product
     """    
@@ -48,5 +57,6 @@ class ProductProduct(orm.Model):
         'pipe_diameter': fields.float('Pipe diameter', digits=(16, 3)),
         'pipe_thick': fields.float('Pipe thick', digits=(16, 3)),
         'pipe_length': fields.float('Pipe length', digits=(16, 3)),
+        'pipe_min_order': fields.integer('Pipe min order'),
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

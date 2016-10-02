@@ -242,10 +242,15 @@ for line in lines:
         print 'Length error or 0, jump'
         continue    
     #waste_cut = eval(line[3])
-    pipe_id = int(line[4])
+    try:
+        pipe_id = int(line[4])
+    except:
+        print 'Pipe ID error or not present'
+        continue
+        
     part_x_pipe = eval(line[5])
     pipe_total = int(line[6])
-    
+
     name = '%s %s per %s' % (description, component_code, default_code)
     
     # -------------------------------------------------------------------------

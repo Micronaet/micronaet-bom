@@ -10,7 +10,13 @@ import sys
 import ConfigParser
 import os
 
-path = os.path.expanduser('~/etl/Access/import/data/alluminio')
+import pdb; pdb.set_trace()
+
+folder = sys.argv[1]
+path = os.path.expanduser(os.path.join(
+    '~/etl/Access/import/data',
+    folder,
+    ))
 cfg_file = os.path.expanduser('~/etl/Access/import/openerp.cfg')
 
 config = ConfigParser.ConfigParser()
@@ -57,6 +63,10 @@ for line in lines:
     resistence = line[4]
     length = eval(line[5])
     note = line[6]
+    if len(line) == 7:
+        weight = eval(line[7].replace(',', '.'))
+    else:
+        weight = 0    
     
     name = '%s Diam. %s Sp. %s L. %s' % (
         name,
@@ -79,6 +89,7 @@ for line in lines:
         'pipe_length':length,
         'pipe_diameter': diameter,
         'pipe_thick': thick, 
+        'weight': weight, # only Fe
         }           
     item_ids = sock.execute(dbname, uid, pwd, 'product.product', 'search', [
            ('default_code', '=', default_code)])
@@ -270,7 +281,7 @@ for line in lines:
     # -------------------------------------------------------------------------
     if default_code not in parents:
         print 'Code not in parent bom'
-       import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
     parent_id = parents[default_code] 
    
     product_qty = 1 # TODO where find?

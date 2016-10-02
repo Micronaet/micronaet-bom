@@ -11,6 +11,8 @@ import ConfigParser
 import os
 
 folder = sys.argv[1]
+pipe_material = folder[:2] # first 2 char are symbol
+
 path = os.path.expanduser(os.path.join(
     '~/etl/Access/import/data',
     folder,
@@ -84,6 +86,7 @@ for line in lines:
         'name': name,
         'default_code': default_code,
         'uom_id': 1,
+        'pipe_material': pipe_material,
         'pipe_length':length,
         'pipe_diameter': diameter,
         'pipe_thick': thick, 

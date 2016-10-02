@@ -28,6 +28,7 @@
                             <field name="uom_id" />
                             <field name="default_code" />
                             <field name="is_pipe" />
+                            <field name="pipe_material" />
 
                             <separator string="Dimension:" colspan="4"/>
                             <field name="pipe_diameter" />
@@ -56,6 +57,7 @@
                     <field name="name" />
                     <field name="default_code" />
                     <field name="uom_id" />
+                    <field name="pipe_material" />
                     <field name="pipe_diameter" />
                     <field name="pipe_thick" />
                     <field name="pipe_length" />
@@ -77,8 +79,10 @@
                     <field name="name" />
                     <field name="default_code" />
                     <field name="first_supplier_id" filter_domain="[('first_supplier_id.name','=',self)]"/>
+                    <field name="pipe_material" />
                     <group expand="0" string="Group By...">
                         <filter name="group_supplier" string="First Supplier" context="{'group_by': 'first_supplier_id'}"/>
+                        <filter name="group_material" string="Materialr" context="{'group_by': 'pipe_material'}"/>
                         <filter name="group_diameter" string="Pipe diameter" context="{'group_by': 'pipe_diameter'}"/>
                         <filter name="group_thick" string="Pipe thick" context="{'group_by': 'pipe_thick'}"/>
                         <filter name="group_length" string="Pipe length" context="{'group_by': 'pipe_length'}"/>

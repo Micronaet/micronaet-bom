@@ -66,5 +66,10 @@ class ProductProduct(orm.Model):
         'pipe_length': fields.float('Pipe length mm.', digits=(16, 2)),
         'pipe_resistence': fields.char('Pipe resistence', size=32),
         'pipe_min_order': fields.integer('Pipe min order'),
+        'pipe_material': fields.selection([
+            ('fe', 'Iron'),
+            ('al', 'Aluminium'),
+            ], 'Pipe material')
+            
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

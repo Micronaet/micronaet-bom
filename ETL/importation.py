@@ -45,10 +45,10 @@ lines = csv.reader(
     open(filename, 'rb'), 
     delimiter=separator,
     )
-counter = -header
+i = -header
 for line in lines:
-    counter += 1 
-    if counter <= 0:
+    i += 1 
+    if i <= 0:
        continue
 
     if not len(line): # jump empty lines
@@ -100,6 +100,7 @@ for line in lines:
             dbname, uid, pwd, 'product.product', 'create', data)
 
 print 'Pipes:', pipes
+print filename, 'row:', i
 
 # -----------------------------------------------------------------------------
 #                        READ PRODUCT USED (PARENT):
@@ -112,10 +113,10 @@ lines = csv.reader(
     open(filename, 'r'), 
     delimiter=separator,
     )
-counter = -header
+i = -header
 for line in lines:
-    counter += 1 
-    if counter <= 0:
+    i += 1 
+    if i <= 0:
        continue
 
     if not len(line): # jump empty lines
@@ -179,6 +180,8 @@ for line in lines:
 print 'Products:', products
 print 'Parents:', parents
 
+print filename, 'row:', i
+
 # -----------------------------------------------------------------------------
 #                                 SET MIN ORDER:
 # -----------------------------------------------------------------------------
@@ -189,10 +192,10 @@ if folder == 'alluminio':
         open(filename, 'rb'),
         delimiter=separator,
         )
-    counter = -header
+    i = -header
     for line in lines:
-        counter += 1 
-        if counter <= 0:
+        i += 1 
+        if i <= 0:
            continue
 
         if not len(line): # jump empty lines
@@ -214,6 +217,7 @@ if folder == 'alluminio':
                     'pipe_min_order': pipe_min_order,
                     })
 
+    print filename, 'row:', i
 # -----------------------------------------------------------------------------
 #                                BOM DETAILS:
 # -----------------------------------------------------------------------------
@@ -224,10 +228,10 @@ lines = csv.reader(
     delimiter=separator,
     )
 
-counter = -header
+i = -header
 for line in lines:
-    counter += 1 
-    if counter <= 0:
+    i += 1 
+    if i <= 0:
        continue
 
     if not len(line): # jump empty lines
@@ -239,13 +243,13 @@ for line in lines:
     try:
         length_cut = eval(line[3])
     except:
-        print 'Length error or 0, jump'
+        print i, 'Length error or 0, jump'
         continue    
     #waste_cut = eval(line[3])
     try:
         pipe_id = int(line[4])
     except:
-        print 'Pipe ID error or not present'
+        print i, 'Pipe ID error or not present, jump'
         continue
         
     part_x_pipe = eval(line[5])
@@ -285,7 +289,7 @@ for line in lines:
     # Add component in parent bom:
     # -------------------------------------------------------------------------
     if default_code not in parents:
-        print 'Code not in parent bom', default_code
+        print i, 'Code not in parent bom', default_code
         continue
         
     parent_id = parents[default_code] 
@@ -337,10 +341,10 @@ for line in lines:
     # -------------------------------------------------------------------------
     bom_id = boms[component_id] 
     if pipe_id not in pipes:
-        print 'Pipe %s not found' % pipe_id
+        print i, 'Pipe %s not found' % pipe_id
         continue
     if not part_x_pipe:
-        print 'Part per pipe is 0'
+        print i, 'Part per pipe is 0'
         continue
        
     product_qty = pipe_total * 1.0 / part_x_pipe
@@ -363,7 +367,7 @@ for line in lines:
         boms[component_id] = sock.execute(
             dbname, uid, pwd, 'mrp.bom.line', 'create', data)
     except:
-        print 'Create bom line with data not correct', data
+        print i, 'Create bom line with data not correct', data
         continue
-
-      
+        
+print filename, 'row:', i      

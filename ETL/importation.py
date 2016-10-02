@@ -10,8 +10,6 @@ import sys
 import ConfigParser
 import os
 
-import pdb; pdb.set_trace()
-
 folder = sys.argv[1]
 path = os.path.expanduser(os.path.join(
     '~/etl/Access/import/data',
@@ -279,11 +277,12 @@ for line in lines:
     product_tmpl_id = template['product_tmpl_id'][0]
 
     # -------------------------------------------------------------------------
-    # Add compoment in parent bom:
+    # Add component in parent bom:
     # -------------------------------------------------------------------------
     if default_code not in parents:
-        print 'Code not in parent bom'
-        import pdb; pdb.set_trace()
+        print 'Code not in parent bom', default_code
+        continue
+        
     parent_id = parents[default_code] 
    
     product_qty = 1 # TODO where find?
@@ -360,5 +359,6 @@ for line in lines:
             dbname, uid, pwd, 'mrp.bom.line', 'create', data)
     except:
         print 'Create bom line with data not correct', data
-        import pdb; pdb.set_trace()        
+        continue
+
       

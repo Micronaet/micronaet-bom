@@ -28,10 +28,13 @@
                             <field name="uom_id" />
                             <field name="default_code" />
                             <field name="is_pipe" />
+
                             <separator string="Dimension:" colspan="4"/>
                             <field name="pipe_diameter" />
                             <field name="pipe_thick" />
                             <field name="pipe_length" />
+                            <field name="weight" />
+                            
                             <separator string="Price" colspan="4"/>
                             <field name="standard_price" />
                             <field name="lst_price" />

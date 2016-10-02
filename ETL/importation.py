@@ -184,35 +184,37 @@ print 'Parents:', parents
 # -----------------------------------------------------------------------------
 #                                 SET MIN ORDER:
 # -----------------------------------------------------------------------------
-filename = os.path.join(path, 'multipli_ordine.csv')
+if folder == 'alluminio':
+    filename = os.path.join(path, 'multipli_ordine.csv')
 
-lines = csv.reader(
-    open(filename, 'rb'),
-    delimiter=separator,
-    )
-counter = -header
-for line in lines:
-    counter += 1 
-    if counter <= 0:
-       continue
+    lines = csv.reader(
+        open(filename, 'rb'),
+        delimiter=separator,
+        )
+    counter = -header
+    for line in lines:
+        counter += 1 
+        if counter <= 0:
+           continue
 
-    if not len(line): # jump empty lines
-        continue
-    
-    description = line[0] # not used
-    pipe_min_order = int(line[1])
-    diameter = line[3]
-               
-    item_ids = sock.execute(dbname, uid, pwd, 'product.product', 'search', [
-        ('is_pipe', '=', True),
-        ('pipe_diameter', '=', diameter),
-        ])
+        if not len(line): # jump empty lines
+            continue
         
-    if item_ids:
-        sock.execute( # Search new code (if yet created)
-            dbname, uid, pwd, 'product.product', 'write', item_ids, {
-                'pipe_min_order': pipe_min_order,
-                })
+        description = line[0] # not used
+        pipe_min_order = int(line[1])
+        diameter = line[3]
+                   
+        item_ids = sock.execute(
+            dbname, uid, pwd, 'product.product', 'search', [
+                ('is_pipe', '=', True),
+                ('pipe_diameter', '=', diameter),
+                ])
+            
+        if item_ids:
+            sock.execute( # Search new code (if yet created)
+                dbname, uid, pwd, 'product.product', 'write', item_ids, {
+                    'pipe_min_order': pipe_min_order,
+                    })
 
 # -----------------------------------------------------------------------------
 #                                BOM DETAILS:

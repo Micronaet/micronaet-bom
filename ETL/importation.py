@@ -10,6 +10,7 @@ import sys
 import ConfigParser
 import os
 
+path = os.path.expanduser('~/etl/Access/import/data/alluminio')
 cfg_file = os.path.expanduser('~/etl/Access/import/openerp.cfg')
 
 config = ConfigParser.ConfigParser()
@@ -33,7 +34,7 @@ sock = xmlrpclib.ServerProxy(
 # -----------------------------------------------------------------------------
 #                          IMPORT PIPES:
 # -----------------------------------------------------------------------------
-filename = os.path.expanduser('~/etl/Access/import/data/elenco_tubi.csv')
+filename = os.path.join(path, 'elenco_tubi.csv')
 pipes = {}
 
 lines = csv.reader(
@@ -89,15 +90,17 @@ for line in lines:
         pipes[ID] = sock.execute( # Search new code (if yet created)
             dbname, uid, pwd, 'product.product', 'create', data)
 
+print 'Pipes:', pipes
+
 # -----------------------------------------------------------------------------
 #                        READ PRODUCT USED (PARENT):
 # -----------------------------------------------------------------------------
-filename = os.path.expanduser('~/etl/Access/import/data/elenco_articoli.csv')
-product = {}
-template = {}
+filename = os.path.join(path, 'elenco_articoli.csv')
+products = {}
+parents = {}
 
 lines = csv.reader(
-    open(filename, 'rb'), 
+    open(filename, 'r'), 
     delimiter=separator,
     )
 counter = -header
@@ -111,7 +114,10 @@ for line in lines:
     
     default_code = line[0]
     name = line[1]
-               
+
+    # -------------------------------------------------------------------------
+    # Manage product:                
+    # -------------------------------------------------------------------------
     data = {
         'name': name or 'Code %s' % default_code,
         'default_code': default_code,
@@ -120,17 +126,54 @@ for line in lines:
     item_ids = sock.execute(dbname, uid, pwd, 'product.product', 'search', [
            ('default_code', '=', default_code)])
     if item_ids:
-        product[default_code] = item_ids[0]        
+        products[default_code] = item_ids[0]        
         sock.execute( # Search new code (if yet created)
             dbname, uid, pwd, 'product.product', 'write', item_ids, data)
     else:
-        product[default_code] = sock.execute( # Search new code (if yet created)
+        products[default_code] = sock.execute( # Search new code (if yet created)
             dbname, uid, pwd, 'product.product', 'create', data)
+
+    # -------------------------------------------------------------------------
+    # Manage BOM:
+    # -------------------------------------------------------------------------
+    # Read template:        
+    product_id = products[default_code]
+    template = sock.execute( 
+        dbname, uid, pwd, 'product.product', 'read', product_id, 
+        ('product_tmpl_id', ))
+    product_tmpl_id = template['product_tmpl_id'][0]
+    
+    if default_code not in parents:
+        data = {
+            'code': default_code,
+            'product_tmpl_id': product_tmpl_id,
+            'product_id': product_id,
+            'product_qty': 1, 
+            'product_uom': 1,
+            'code': default_code,
+            'bom_category': 'half',
+            'bom_line_ids': [(5, False, False)], # reset bon lines (first time)
+            }
+
+        parent_ids = sock.execute(dbname, uid, pwd, 'mrp.bom', 'search', [
+            ('product_id', '=', product_id), # TODO template?
+            ])
+            
+        if parent_ids:
+            parents[default_code] = parent_ids[0]        
+            sock.execute(
+                dbname, uid, pwd, 'mrp.bom', 'write', parent_ids, data)
+        else:
+            parents[default_code] = sock.execute(
+                dbname, uid, pwd, 'mrp.bom', 'create', data)
+
+print 'Products:', products
+print 'Parents:', parents
 
 # -----------------------------------------------------------------------------
 #                                 SET MIN ORDER:
 # -----------------------------------------------------------------------------
-filename = os.path.expanduser('~/etl/Access/import/data/multipli_ordine.csv')
+filename = os.path.join(path, 'multipli_ordine.csv')
 
 lines = csv.reader(
     open(filename, 'rb'),
@@ -163,8 +206,7 @@ for line in lines:
 # -----------------------------------------------------------------------------
 #                                BOM DETAILS:
 # -----------------------------------------------------------------------------
-filename = os.path.expanduser(
-    '~/etl/Access/import/data/dettagli_componenti.csv')
+filename = os.path.join(path, 'dettagli_componenti.csv')
 boms = {}
 lines = csv.reader(
     open(filename, 'r'),
@@ -182,7 +224,7 @@ for line in lines:
 
     component_code = line[0].upper()
     description = line[1] 
-    product_code = line[2]
+    default_code = line[2]
     try:
         length_cut = eval(line[3])
     except:
@@ -193,7 +235,7 @@ for line in lines:
     part_x_pipe = eval(line[5])
     pipe_total = int(line[6])
     
-    name = '%s %s per %s' % (description, component_code, product_code)
+    name = '%s %s per %s' % (description, component_code, default_code)
     
     # -------------------------------------------------------------------------
     #                         Component part:
@@ -209,29 +251,51 @@ for line in lines:
         'uom_id': 1,                
         }    
     if component_ids:
-        product[component_code] = component_ids[0]        
+        products[component_code] = component_ids[0]        
         sock.execute( # Search new code (if yet created)
             dbname, uid, pwd, 'product.product', 'write', component_ids, data)
     else:
-        product[component_code] = sock.execute( 
+        products[component_code] = sock.execute( 
             dbname, uid, pwd, 'product.product', 'create', data)
             
     # Read template:        
-    component_id = product[component_code]
+    component_id = products[component_code]
     template = sock.execute( 
         dbname, uid, pwd, 'product.product', 'read', component_id, 
         ('product_tmpl_id', ))
     product_tmpl_id = template['product_tmpl_id'][0]
-    
+
+    # -------------------------------------------------------------------------
+    # Add compoment in parent bom:
+    # -------------------------------------------------------------------------
+    if default_code not in parents:
+        print 'Code not in parent bom'
+       import pdb; pdb.set_trace()
+    parent_id = parents[default_code] 
+   
+    product_qty = 1 # TODO where find?
+    data = {
+        'bom_id': parent_id,
+        'product_id': component_id,
+        'type': 'normal',
+        'product_qty': product_qty,
+                
+        'product_uom': 1,
+        'product_rounding': 1,
+        'product_efficiency': 1,        
+        }
+
+    sock.execute(dbname, uid, pwd, 'mrp.bom.line', 'create', data)
+              
     # -------------------------------------------------------------------------
     #                        BOM for component (HEADER):
     # -------------------------------------------------------------------------
-    component_id = product[component_code]
+    component_id = products[component_code]
     if component_id not in boms:
         data = {
             'code': component_code,
             'product_tmpl_id': product_tmpl_id,
-            'product_id': product[component_code],
+            'product_id': products[component_code],
             'product_qty': 1, 
             'product_uom': 1,
             'code': component_code,
@@ -244,7 +308,7 @@ for line in lines:
             ])
             
         if bom_ids:
-            boms[component_id] = bom_ids        
+            boms[component_id] = bom_ids[0]       
             sock.execute(
                 dbname, uid, pwd, 'mrp.bom', 'write', bom_ids, data)
         else:
@@ -278,7 +342,10 @@ for line in lines:
         'product_rounding': 1,
         'product_efficiency': 1,        
         }
-
-    boms[component_id] = sock.execute(
-        dbname, uid, pwd, 'mrp.bom.line', 'create', data)
+    try:
+        boms[component_id] = sock.execute(
+            dbname, uid, pwd, 'mrp.bom.line', 'create', data)
+    except:
+        print 'Create bom line with data not correct', data
+        import pdb; pdb.set_trace()        
       

@@ -33,6 +33,7 @@
                             <field name="pipe_diameter" />
                             <field name="pipe_thick" />
                             <field name="pipe_length" />
+                            <field name="pipe_resistence" />
                             <field name="weight" />
                             
                             <separator string="Price" colspan="4"/>
@@ -58,6 +59,8 @@
                     <field name="pipe_diameter" />
                     <field name="pipe_thick" />
                     <field name="pipe_length" />
+                    <field name="pipe_resistence" />
+                    <field name="weight" />
                     <field name="standard_price" />
                     <field name="lst_price" />
                     <field name="first_supplier_id" />

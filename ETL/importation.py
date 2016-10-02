@@ -61,10 +61,10 @@ for line in lines:
     resistence = line[4]
     length = eval(line[5])
     note = line[6]
-    if len(line) == 7:
-        weight = eval(line[7].replace(',', '.'))
+    if len(line) == 8:
+        weight = float(line[7] or '0')
     else:
-        weight = 0    
+        weight = 0.0
     
     name = '%s Diam. %s Sp. %s L. %s' % (
         name,
@@ -87,6 +87,7 @@ for line in lines:
         'pipe_length':length,
         'pipe_diameter': diameter,
         'pipe_thick': thick, 
+        'pipe_resistence': resistence,
         'weight': weight, # only Fe
         }           
     item_ids = sock.execute(dbname, uid, pwd, 'product.product', 'search', [
@@ -253,7 +254,7 @@ for line in lines:
         continue
         
     part_x_pipe = eval(line[5])
-    pipe_total = int(line[6])
+    total = int(line[6])
 
     name = '%s %s per %s' % (description, component_code, default_code)
     
@@ -294,7 +295,7 @@ for line in lines:
         
     parent_id = parents[default_code] 
    
-    product_qty = 1 # TODO where find?
+    product_qty = total # 1 # XXX
     data = {
         'bom_id': parent_id,
         'product_id': component_id,
@@ -347,7 +348,7 @@ for line in lines:
         print i, 'Part per pipe is 0'
         continue
        
-    product_qty = pipe_total * 1.0 / part_x_pipe
+    product_qty = 1.0 / part_x_pipe # total * 1.0 / part_x_pipe # XXX
     data = {
         'bom_id': bom_id,
         'product_id': pipes[pipe_id],
@@ -357,7 +358,7 @@ for line in lines:
         'length_cut': length_cut,
         # waste_cut
         'part_x_pipe': part_x_pipe,
-        'pipe_total': pipe_total,
+        'pipe_total': 1.0, # total, # XXX remove
         
         'product_uom': 1,
         'product_rounding': 1,

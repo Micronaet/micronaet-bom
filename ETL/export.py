@@ -13,10 +13,6 @@ import os
 folder = sys.argv[1]
 pipe_material = folder[:2] # first 2 char are symbol
 
-path = os.path.expanduser(os.path.join(
-    '~/etl/Access/import/data',
-    folder,
-    ))
 cfg_file = os.path.expanduser('~/etl/Access/import/openerp.cfg')
 
 config = ConfigParser.ConfigParser()
@@ -36,18 +32,6 @@ sock = xmlrpclib.ServerProxy(
 uid = sock.login(dbname, user, pwd)
 sock = xmlrpclib.ServerProxy(
     'http://%s:%s/xmlrpc/object' % (server, port), allow_none=True)
-
-def get_code(material, length, diameter, thick):
-    import pdb; pdb.set_trace()
-    diameter = int(diameter)
-    thick = ('%3.1f' % thick).replace('.', ',')
-    length = int(length)
-    return 'TB%s%sx%sx%s' % (
-        material,
-        diameter,
-        thick,
-        length,
-        )
 
 # -----------------------------------------------------------------------------
 #                          IMPORT PIPES:
@@ -87,9 +71,11 @@ for line in lines:
         length,
         )
         
-    default_code = get_code(pipe_material, length, diameter, thick)
-    if not default_code:
-        print 'Error generating code'
+    default_code = 'TBAL%sD%sS%s' % (
+        length,
+        diameter,
+        thick,
+        )
                
     data = {
         'is_pipe': True,

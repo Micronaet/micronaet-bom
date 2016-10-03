@@ -165,7 +165,7 @@ for line in lines:
             'product_qty': 1, 
             'product_uom': 1,
             'code': default_code,
-            'bom_category': 'half',
+            'bom_category': 'parent',
             'bom_line_ids': [(5, False, False)], # reset bon lines (first time)
             }
 

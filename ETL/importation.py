@@ -43,7 +43,7 @@ def get_code(material, length, diameter, thick):
     thick = ('%3.1f' % thick).replace('.', ',')
     length = int(length)
     return 'TB%s%sx%sx%s' % (
-        material,
+        material.upper(),
         diameter,
         thick,
         length,

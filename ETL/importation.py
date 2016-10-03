@@ -37,17 +37,25 @@ uid = sock.login(dbname, user, pwd)
 sock = xmlrpclib.ServerProxy(
     'http://%s:%s/xmlrpc/object' % (server, port), allow_none=True)
 
-def get_code(material, length, diameter, thick):
-    import pdb; pdb.set_trace()
+def get_code(material, length, diameter, thick, name):
     diameter = int(diameter)
     thick = ('%3.1f' % thick).replace('.', ',')
     length = int(length)
-    return 'TB%s%sx%sx%s' % (
-        material.upper(),
-        diameter,
-        thick,
-        length,
-        )
+
+    return (
+        'TB%s%sx%sx%s' % (
+            material.upper(),
+            diameter,
+            thick,
+            length,
+            ),
+        '%s Diam. %s Spess. %s Lung. %s' % (
+            name,
+            diameter,
+            thick,
+            length,
+            )
+        ) 
 
 # -----------------------------------------------------------------------------
 #                          IMPORT PIPES:
@@ -80,14 +88,7 @@ for line in lines:
     else:
         weight = 0.0
     
-    name = '%s Diam. %s Sp. %s L. %s' % (
-        name,
-        diameter,
-        thick,
-        length,
-        )
-        
-    default_code = get_code(pipe_material, length, diameter, thick)
+    default_code, name = get_code(pipe_material, length, diameter, thick, name)
     if not default_code:
         print 'Error generating code'
                

@@ -48,7 +48,8 @@ class MRPBom(orm.Model):
             ('cost', 'Cost'),
             ('product', 'Product'),
             ('lavoration', 'Lavoration'), # used for family?
-            ('half', 'Half worked'),            
+            ('half', 'Half worked (component)'),
+            ('parent', 'Parent'),
             ], 'Category')            
         }
     _defaults = {

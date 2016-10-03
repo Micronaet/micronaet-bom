@@ -171,6 +171,7 @@ for line in lines:
 
         parent_ids = sock.execute(dbname, uid, pwd, 'mrp.bom', 'search', [
             ('product_id', '=', product_id), # TODO template?
+            ('bom_category', '=', 'parent'),
             ])
             
         if parent_ids:
@@ -330,6 +331,7 @@ for line in lines:
 
         bom_ids = sock.execute(dbname, uid, pwd, 'mrp.bom', 'search', [
             ('product_id', '=', component_id), # TODO template?
+            ('bom_category', '=', 'half'),
             ])
             
         if bom_ids:

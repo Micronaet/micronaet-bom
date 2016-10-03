@@ -8,6 +8,8 @@
             <field name="arch" type="xml">
                 <field name="type" position="after">
                     <field name="bom_category" />
+                    <field name="force_empty" />
+                    <button name="set_empty_category" string="Set empty" type="object" />
                 </field>
             </field>
         </record>

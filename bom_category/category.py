@@ -43,13 +43,20 @@ class MRPBom(orm.Model):
     """    
     _inherit = 'mrp.bom'
     
+    def set_empty_category(self, cr, uid, ids, context=None):
+        ''' Set category to empty
+        '''
+        return self.write(cr, uid, ids, {
+            'bom_category': 'empty',
+            }, context=context)
     _columns = {
         'bom_category': fields.selection([
-            ('cost', 'Cost'),
-            ('product', 'Product'),
-            ('lavoration', 'Lavoration'), # used for family?
-            ('half', 'Half worked (component)'),
-            ('parent', 'Parent'),
+            ('empty', 'Empty'), # for production purposes
+            ('cost', 'Cost'), # for generate cost
+            ('product', 'Product'), # Normal product (final)
+            ('lavoration', 'Lavoration'), # used for family
+            ('half', 'Half worked (component)'), # components
+            ('parent', 'Parent'), # parent element only
             ], 'Category')            
         }
     _defaults = {

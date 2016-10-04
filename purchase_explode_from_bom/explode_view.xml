@@ -10,11 +10,11 @@
                     <field name="explode_bom" />
                 </field>
                 <xpath expr="//page[1]" position="after">
-                    <button name="explode_bom_purchase_line" string="Explode BOM" type="object" />
-                    <page string="BOM explode">
+                    <page string="BOM explode" attrs="{'invisible': [('explode_bom','=',False)]}">
+                        <button name="explode_bom_purchase_line" string="Explode BOM" type="object" />
                         <field name="explode_bom_ids">
                             <tree editable="bottom" string="Explode BOM">
-                                <field name="bom_id" />
+                                <field name="bom_id" domain="[('bom_category','=','parent')]"/>
                                 <field name="quantity" />
                                 <field name="note" />
                             </tree>

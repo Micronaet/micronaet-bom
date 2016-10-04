@@ -48,8 +48,7 @@ class PurchaseOrderBOM(orm.Model):
     _rec_name = 'bom_id'
     
     _columns = {
-        'bom_id': fields.many2one('mrp.bom', 'BOM', required=True,
-            domain=[('bom_category', '=', 'parent')]),
+        'bom_id': fields.many2one('mrp.bom', 'BOM', required=True),
         'quantity': fields.integer('Total', required=True),        
         # XXX always explode half worked
         'note': fields.text('Note'),

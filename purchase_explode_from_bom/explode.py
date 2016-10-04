@@ -142,12 +142,13 @@ class PurchaseOrder(orm.Model):
                                 })
                             line_pool.create(cr, uid, data, context=context)
                             bom_data[bom.id][0] += _(
-                                '%s: %s x %s x %s = %s\n') % (
+                                '%s: %s x %s x %s = %s  [%s]\n') % (
                                     half.product_id.default_code or 'cod. ?',
                                     bom.quantity,
                                     half.product_qty,
                                     item.product_qty,
                                     qty,
+                                    item.product_id.default_code or 'cod. ?',
                                     )
                         else:    
                             bom_data[bom.id][0] += _(

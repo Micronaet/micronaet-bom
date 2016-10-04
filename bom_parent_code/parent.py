@@ -69,13 +69,15 @@ class MRPBom(orm.Model):
             
         bom_proxy = self.browse(cr, uid, ids, context=context)[0]
         default_code = bom_proxy.product_id.default_code
-        if not bom_code_split:
+        if not default_code:
             raise osv.except_osv(
                 _('Error'), 
                 _('No default code in product!'))
 
         bom_ids = False        
         for to in bom_code_split:  
+            if len(default_code) <= to:
+                continue
             partial = default_code[0:to]
             bom_ids = self.search(cr, uid, [
                 ('bom_category', '=', 'half'), 

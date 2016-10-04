@@ -245,6 +245,7 @@ lines = csv.reader(
     )
 
 i = -header
+import pdb; pdb.set_trace()
 for line in lines:
     i += 1 
     if i <= 0:

@@ -48,6 +48,7 @@ class PurchaseOrderBOM(orm.Model):
     _rec_name = 'bom_id'
     
     _columns = {
+        'purchase_id': fields.many2one('purchase.order', 'Order'),
         'bom_id': fields.many2one('mrp.bom', 'BOM', required=True),
         'quantity': fields.integer('Total', required=True),        
         # XXX always explode half worked
@@ -71,7 +72,7 @@ class PurchaseOrder(orm.Model):
         'explode_bom_error': fields.text('Explode error'), 
         
         'explode_bom_ids': fields.one2many(
-            'purchase.order.bom', 'bom_id', 
+            'purchase.order.bom', 'purchase_id', 
             'Explode BOM'),
         }
 

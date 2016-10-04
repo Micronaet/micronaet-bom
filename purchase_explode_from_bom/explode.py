@@ -38,21 +38,11 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
-class PurchaseOrder(orm.Model):
-    """ Model name: PurchaseOrder
-    """
-    
-    _inherit = 'purchase.order'
-    
-    _columns = {
-        'explode_bom': fields.boolean('Explode from BOM'),
-        'explode_bom_calc': fields.text('Explode calc'), 
-        'explode_bom_error': fields.text('Explode error'), 
-        }
     
 class PurchaseOrderBOM(orm.Model):
     """ Model name: PurchaseOrderBOM
     """    
+    
     _name = 'purchase.order.bom'
     _description = 'Purchase from BOM'
     _rec_name = 'bom_id'
@@ -62,5 +52,37 @@ class PurchaseOrderBOM(orm.Model):
             domain=[('bom_category', '=', 'parent')]),
         'quantity': fields.integer('Total', required=True),        
         # XXX always explode half worked
+        'note': fields.text('Note'),
+        }
+
+class PurchaseOrder(orm.Model):
+    """ Model name: PurchaseOrder
+    """
+    
+    _inherit = 'purchase.order'
+    
+    def explode_bom_purchase_line(self, cr, uid, ids, context=None):
+        ''' Generate order depend on final component for bom selected
+        '''
+        return True
+    
+    _columns = {
+        'explode_bom': fields.boolean('Explode from BOM'),
+        'explode_bom_calc': fields.text('Explode calc'), 
+        'explode_bom_error': fields.text('Explode error'), 
+        
+        'explode_bom_ids': fields.one2many(
+            'purchase.order.bom', 'bom_id', 
+            'Explode BOM'),
+        }
+
+class PurchaseOrder(orm.Model):
+    """ Model name: PurchaseOrder
+    """
+    
+    _inherit = 'purchase.order.line'
+        
+    _columns = {
+        'explode_bom_id': fields.many2one('purchase.order.bom', 'Explode BOM'),
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

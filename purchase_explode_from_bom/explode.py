@@ -53,6 +53,8 @@ class PurchaseOrderBOM(orm.Model):
         'quantity': fields.integer('Total', required=True),        
         # XXX always explode half worked
         'note': fields.text('Note'),
+        'explode_bom_calc': fields.text('Explode calc', readonly=True), 
+        'explode_bom_error': fields.text('Explode error', readonly=True), 
         }
 
 class PurchaseOrder(orm.Model):
@@ -61,15 +63,83 @@ class PurchaseOrder(orm.Model):
     
     _inherit = 'purchase.order'
     
+    def get_bom_for_half_worked(self, cr, uid, product_id, context=None):
+        ''' Search bom for product passed
+        '''
+        bom_pool = self.pool.get('mrp.bom')
+        return = bom_pool.search(cr, uid, [
+            ('product_id', '=', product_id),
+            ('bom_category', '=', 'half'),
+            ], context=context)
+                    
+
     def explode_bom_purchase_line(self, cr, uid, ids, context=None):
         ''' Generate order depend on final component for bom selected
         '''
+        assert len(ids) == 1, 'Works only with one record a time'
+        
+        line_pool = self.pool.get('purchase.order.line')
+        bom_pool = self.pool.get('mrp.bom')
+        
+        order_proxy = self.browse(cr, uid, ids, context=context)[0]
+        
+        # Remove previous line (only generated line):
+        remove_ids = [
+            line.id for line in order_proxy.order_line if line.explode_bom_id]
+        line_pool.unlink(cr, uid, remove_ids, context=context)
+            
+        # Generate current lines:
+        error = {}
+        
+        for bom in order_proxy.explode_bom_ids:
+            error[bom.id] = ''            
+            for half in bom.bom_line_ids:
+                bom_ids = self.get_bom_for_half_worked(
+                    cr, uid, product_id, context=context)
+
+                if not bom_ids:
+                    error[bom.id] += _(
+                        'No BOM for component %s\n') % \
+                            half.product_id.default_code
+                elif len(bom_ids) > 1: # XXX warning?
+                    error[bom.id] += _(
+                        'Multi BOM for component %s\n') % \
+                            half.product_id.default_code
+                else:   
+                    bom_proxy = bom_pool.browse(
+                        cr, uid, bom_ids, context=context)[0]
+                        
+                    # Generate final product from half worked bom:
+                    for item in bom_proxy.bom_line_ids:
+                        qty = bom.quantity * item.product_qty
+                     
+                        data = self.onchange_product_id(
+                            cr, uid, ids, order_proxy.pricelist_id.id, 
+                            item.product_id.id, qty, 
+                            item.product_id.uom_id, order_proxy.partner_id.id, 
+                            order_proxy.date_order, 
+                            order_proxy.fiscal_position_id.id,
+                            order_proxy.date_planned, 
+                            #name, 
+                            #price_unit=False, 
+                            #state='draft', 
+                            context=context,
+                            ).get('value', {})
+                        if data:                      
+                            # TODO log event
+                            data.update({
+                                'order_id': ids[0],
+                                #'product_id': ,
+                                })
+                            line_pool.create(cr, uid, data, context=context)
+                               
+        # Write error for bom load:
+        for bom_id, error in error.iteritems():
+            pass # TODO
         return True
     
     _columns = {
         'explode_bom': fields.boolean('Explode from BOM'),
-        'explode_bom_calc': fields.text('Explode calc'), 
-        'explode_bom_error': fields.text('Explode error'), 
         
         'explode_bom_ids': fields.one2many(
             'purchase.order.bom', 'purchase_id', 

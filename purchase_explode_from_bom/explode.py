@@ -138,7 +138,7 @@ class PurchaseOrder(orm.Model):
                             data.update({
                                 'order_id': ids[0],
                                 'explode_bom_id': bom.id,
-                                #'product_id': ,
+                                'product_id': item.product_id.id,
                                 })
                             line_pool.create(cr, uid, data, context=context)
                             bom_data[bom.id][0] += _(

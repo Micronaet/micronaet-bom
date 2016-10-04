@@ -67,7 +67,7 @@ class PurchaseOrder(orm.Model):
         ''' Search bom for product passed
         '''
         bom_pool = self.pool.get('mrp.bom')
-        return = bom_pool.search(cr, uid, [
+        return bom_pool.search(cr, uid, [
             ('product_id', '=', product_id),
             ('bom_category', '=', 'half'),
             ], context=context)
@@ -77,8 +77,8 @@ class PurchaseOrder(orm.Model):
         ''' Generate order depend on final component for bom selected
         '''
         assert len(ids) == 1, 'Works only with one record a time'
-        
         line_pool = self.pool.get('purchase.order.line')
+        bom_line_pool = self.pool.get('purchase.order.bom')
         bom_pool = self.pool.get('mrp.bom')
         
         order_proxy = self.browse(cr, uid, ids, context=context)[0]
@@ -89,53 +89,76 @@ class PurchaseOrder(orm.Model):
         line_pool.unlink(cr, uid, remove_ids, context=context)
             
         # Generate current lines:
-        error = {}
+        bom_data = {} # key = ID: Value = [calc, error]
         
         for bom in order_proxy.explode_bom_ids:
-            error[bom.id] = ''            
-            for half in bom.bom_line_ids:
+            bom_data[bom.id] = ['', '']
+            for half in bom.bom_id.bom_line_ids:
                 bom_ids = self.get_bom_for_half_worked(
-                    cr, uid, product_id, context=context)
+                    cr, uid, half.product_id.id, context=context)
 
                 if not bom_ids:
-                    error[bom.id] += _(
+                    bom_data[bom.id][1] += _(
                         'No BOM for component %s\n') % \
                             half.product_id.default_code
+                    bom_data[bom.id][0] += _(
+                        '%s not exploded') % bom.product_id.name
                 elif len(bom_ids) > 1: # XXX warning?
-                    error[bom.id] += _(
+                    bom_data[bom.id][1] += _(
                         'Multi BOM for component %s\n') % \
                             half.product_id.default_code
-                else:   
+                    bom_data[bom.id][0] += _(
+                        '%s multi BOM') % bom.product_id.name
+                else:
                     bom_proxy = bom_pool.browse(
                         cr, uid, bom_ids, context=context)[0]
                         
                     # Generate final product from half worked bom:
                     for item in bom_proxy.bom_line_ids:
-                        qty = bom.quantity * item.product_qty
-                     
-                        data = self.onchange_product_id(
+                        # Product Q X Component Q X Final element Q.
+                        qty = bom.quantity * half.product_qty * \
+                            item.product_qty
+                        partner = order_proxy.partner_id
+                        data = line_pool.onchange_product_id(
                             cr, uid, ids, order_proxy.pricelist_id.id, 
                             item.product_id.id, qty, 
-                            item.product_id.uom_id, order_proxy.partner_id.id, 
+                            item.product_id.uom_id.id, partner.id, 
                             order_proxy.date_order, 
-                            order_proxy.fiscal_position_id.id,
-                            order_proxy.date_planned, 
+                            partner.property_account_position.id,
+                            # Line property:
+                            #order_proxy.date_planned, 
                             #name, 
                             #price_unit=False, 
                             #state='draft', 
                             context=context,
                             ).get('value', {})
+
                         if data:                      
                             # TODO log event
                             data.update({
                                 'order_id': ids[0],
+                                'explode_bom_id': bom.id,
                                 #'product_id': ,
                                 })
                             line_pool.create(cr, uid, data, context=context)
+                            bom_data[bom.id][0] += _(
+                                '%s: %s x %s x %s = %s\n') % (
+                                    half.product_id.default_code or 'cod. ?',
+                                    bom.quantity,
+                                    half.product_qty,
+                                    item.product_qty,
+                                    qty,
+                                    )
+                        else:    
+                            bom_data[bom.id][0] += _(
+                                '%s No data to write') % bom.product_id.name
                                
         # Write error for bom load:
-        for bom_id, error in error.iteritems():
-            pass # TODO
+        for bom_id, data in bom_data.iteritems():
+            bom_line_pool.write(cr, uid, bom_id, {
+                'explode_bom_calc': data[0],
+                'explode_bom_error': data[1] or False,
+                }, context=context)
         return True
     
     _columns = {

@@ -52,7 +52,6 @@ class StructureStructure(orm.Model):
 
         structure_proxy = self.browse(cr, uid, ids, context=context)
 
-        
         if structure_proxy.dynamic_bom_id:
             dynamic_bom_id = structure_proxy.dynamic_bom_id.id
         else:
@@ -65,6 +64,7 @@ class StructureStructure(orm.Model):
             product_proxy = product_pool.browse(
                 cr, uid, product_id, context=context)
                 
+            # Create BOM
             dynamic_bom_id = bom_pool.create(cr, uid, {
                 'code': product_proxy.default_code,
                 'product_tmpl_id': product_proxy.product_tmpl_id.id,
@@ -74,17 +74,21 @@ class StructureStructure(orm.Model):
                 'bom_category': 'dynamic',
                 'structure_id': structure_proxy.id,
                 }, context=context)
-        
+            
+            # Update BOM in structure:    
+            self.write(cr, uid, ids, {
+                'dynamic_bom_id': dynamic_bom_id,
+                }, context=context)
     
         return {
             'type': 'ir.actions.act_window',
             'name': _('Structured dynamic BOM'),
             'view_type': 'form',
-            'view_mode': 'tree,form',
+            'view_mode': 'form,tree',
             'res_id': dynamic_bom_id,
             'res_model': 'mrp.bom',
             #'view_id': view_id, # False
-            'views': [(False, 'tree'), (False, 'form')],
+            'views': [(False, 'form'), (False, 'tree')],
             'domain': [],
             'context': context,
             'target': 'current', # 'new'

@@ -7,8 +7,8 @@
             <field name="inherit_id" ref="product_speech_code.view_structure_structure_form"/>
             <field name="arch" type="xml">
                 <field name="name" position="after">
-                    <field name="dynamic_bom_id" invisible="1" />
                     <button name="create_dynamic_bom" string="Dyamic BOM" type="object" />
+                    <field name="dynamic_bom_id" invisible="1" />
                 </field>
             </field>             
         </record>

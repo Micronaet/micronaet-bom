@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        <template id="assets_backend" name="bom_dynamic_structured_css_bom assets" inherit_id="web.assets_backend">
+        <template id="assets_backend" name="bom_dynamic_structured assets" inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
                 <link rel="stylesheet" href="/bom_dynamic_structured/static/src/css/bom_custom.css"/>
             </xpath>

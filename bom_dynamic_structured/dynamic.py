@@ -80,6 +80,11 @@ class StructureStructure(orm.Model):
                 'dynamic_bom_id': dynamic_bom_id,
                 }, context=context)
     
+        model_pool = self.pool.get('ir.model.data')
+
+        form_view_id = model_pool.get_object_reference(cr, uid,
+            'bom_dynamic_structured', 'view_mrp_bom_dynamic_new_form')[1]
+
         return {
             'type': 'ir.actions.act_window',
             'name': _('Structured dynamic BOM'),
@@ -87,8 +92,8 @@ class StructureStructure(orm.Model):
             'view_mode': 'form,tree',
             'res_id': dynamic_bom_id,
             'res_model': 'mrp.bom',
-            #'view_id': view_id, # False
-            'views': [(False, 'form'), (False, 'tree')],
+            'view_id': form_view_id,
+            'views': [(form_view_id, 'form'), (False, 'tree')],
             'domain': [],
             'context': context,
             'target': 'current', # 'new'

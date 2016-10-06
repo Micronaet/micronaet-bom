@@ -12,7 +12,7 @@
                         <button name="assign_parent_bom" string="Auto assign" type="object" colspan="1"/>
                         
                         <!--EXTRA BLOCK-->
-                        <button name="migrate_assign_parent_bom" string="Migrate BOM" type="object" colspan="1"/>                        
+                        <button name="migrate_assign_parent_bom" string="Migrate BOM" type="object" colspan="1" attrs="{'invisible': [('bom_category','!=','parent'), ]}"/>                        
                         <!--EXTRA BLOCK-->
                         
                     </group>

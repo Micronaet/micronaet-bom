@@ -53,11 +53,11 @@ class MRPBom(orm.Model):
         
         # Create rule in dynamic:
         bom_proxy = self.browse(cr, uid, ids, context=context)[0]
-        structure_id = bom_proxy.product_id.structure_id.id or 1 # XXX
+        structure = bom_proxy.product_id.structure_id
         
         for line in bom_proxy.bom_line_ids:
             line_pool.create(cr, uid, {
-                'bom_id': structure_id.dynamic_bom_id.id,
+                'bom_id': structure.dynamic_bom_id.id,
                 'product_id': line.product_id.id,
                 'dynamic_mask': '%s%s' % (bom_proxy.product_id.code, '%'),
                 'product_qty': line.product_qty,

@@ -15,14 +15,63 @@
         </record>
         
         <!--mrp.bom-->
-        <record model="ir.ui.view" id="view_mrp_bom_dynamic_form">
+        <record model="ir.ui.view" id="view_mrp_bom_dynamic_new_form">
+            <field name="name">mrp.bom.dynamic.form</field>
+            <field name="model">mrp.bom</field>
+            <field name="priority" eval="50" />
+            <field name="arch" type="xml">
+                <form string="BOM dynamic" version="7.0">
+                   <sheet>
+    	                <group>
+		                    <group>
+			                    <field name="product_tmpl_id" on_change="onchange_product_tmpl_id(product_tmpl_id, product_qty, context)" required="1"/>
+			                    <field name="product_id" /><label for="product_qty" />
+			                    <div>
+				                    <field name="product_qty" class="oe_inline" on_change="onchange_product_tmpl_id(product_tmpl_id, product_qty, context)" required="1"/>
+				                    <newline/>
+				                    <field name="product_uom" class="oe_inline" on_change="onchange_uom(product_tmpl_id, product_uom)" required="1"/>
+			                    </div>
+		                    </group>
+		                    <group>
+			                    <field name="name" invisible="1" />
+			                    <field name="code" />
+			                    <field name="type"  required="1"/>
+			                    <field name="bom_category" />
+			                    <field name="company_id" widget="selection" invisible="1" />
+		                    </group>
+	                        <notebook>
+		                        <page string="Components">
+                                    <group colspan="4" col="4" attrs="{'invisible': [('bom_category','!=','dynamic')]}">
+                                        <field name="structure_id" readonly="1" colspan="2"/>
+                                        <button name="open_bom_dynamic_lines" string="Manage dynamic lines" type="object" icon="gtk-justify-fill"/>
+                                        <separator string="Dynamic BOM" colspan="4"/>
+                                        <field name="bom_line_ids" context="{'default_type': 'normal'}" nolabel="1" colspan="4">
+                                            <tree string="Dynamic BOM" editable="bottom">
+                                                <field name="bom_id" invisible="1"/>
+                                                <field name="product_id" />
+                                                <field name="dynamic_mask" on_change="onchange_dynamic_mask(dynamic_mask, bom_id)"/>
+                                                <field name="product_qty" />
+                                                <field name="product_uom" />
+                                            </tree>
+                                        </field>
+                                    </group>
+		                        </page>
+	                        </notebook>
+	                    </group>
+	                    <!--<div class="oe_chatter">
+		                    <field name="message_follower_ids" widget="mail_followers" modifiers="{}"/>
+		                    <field name="message_ids" colspan="4" widget="mail_thread" nolabel="1" modifiers="{}" options="{'display_log_button': true}"/>
+	                    </div>-->
+                   </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!--<record model="ir.ui.view" id="view_mrp_bom_dynamic_form">
             <field name="name">mrp.bom.dynamic.bom.form</field>
             <field name="model">mrp.bom</field>
             <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>            
             <field name="arch" type="xml">
-                <field name="bom_line_ids" position="attributes">
-                    <attribute name="attrs">{'invisible': [('bom_category','=','dynamic')]}</attribute>
-                </field>                
                 <field name="bom_line_ids" position="after">
                     <group colspan="4" col="4" attrs="{'invisible': [('bom_category','!=','dynamic')]}">
                         <field name="structure_id" readonly="1" colspan="2"/>
@@ -31,16 +80,19 @@
                         <field name="bom_line_ids" context="{'default_type': 'normal'}" nolabel="1" colspan="4">
                             <tree string="Dynamic BOM" editable="bottom">
                                 <field name="bom_id" invisible="1"/>
-                                <field name="product_id" /><!--onchange-->
-                                <field name="dynamic_mask" />
+                                <field name="product_id" />
+                                <field name="dynamic_mask" on_change="onchange_dynamic_mask(dynamic_mask, bom_id)"/>
                                 <field name="product_qty" />
                                 <field name="product_uom" />
                             </tree>
                         </field>
                     </group>    
                 </field>
+                <field name="bom_line_ids" position="attributes">
+                    <attribute name="attrs">{'invisible': [('bom_category','=','dynamic')]}</attribute>
+                </field>                
             </field>
-        </record>
+        </record>-->
         
         <!--mrp.bom.line-->
         <record model="ir.ui.view" id="view_mrp_bom_line_dynamic_tree">

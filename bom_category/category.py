@@ -57,6 +57,7 @@ class MRPBom(orm.Model):
             ('lavoration', 'Lavoration'), # used for family
             ('half', 'Half worked (component)'), # components
             ('parent', 'Parent'), # parent element only
+            ('dynamic', 'Dynamic'), # Dynamic BOM with mask
             ], 'Category')            
         }
     _defaults = {

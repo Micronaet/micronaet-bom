@@ -31,6 +31,7 @@
         'base',
         'mrp',
         'product',
+        'bom_category',
         'product_speech_code',
         ],
     'init_xml': [],

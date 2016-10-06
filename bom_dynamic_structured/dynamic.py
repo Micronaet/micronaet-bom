@@ -44,6 +44,53 @@ class StructureStructure(orm.Model):
     
     _inherit = 'structure.structure'
         
+    def create_dynamic_bom(self, cr, uid, ids, context=None):
+        ''' Create BOM if not present
+        '''
+        bom_pool = self.pool.get('mrp.bom')
+        product_pool = self.pool.get('product.product')
+
+        structure_proxy = self.browse(cr, uid, ids, context=context)
+
+        
+        if structure_proxy.dynamic_bom_id:
+            dynamic_bom_id = structure_proxy.dynamic_bom_id.id
+        else:
+            # Create a temp product:
+            product_id = product_pool.create(cr, uid, {
+                'default_code': 'DYNAMIC.%s' % structure_proxy.id,
+                'name': structure_proxy.name,     
+                'uom_id': 1,           
+                }, context=context)
+            product_proxy = product_pool.browse(
+                cr, uid, product_id, context=context)
+                
+            dynamic_bom_id = bom_pool.create(cr, uid, {
+                'code': product_proxy.default_code,
+                'product_tmpl_id': product_proxy.product_tmpl_id.id,
+                'product_id': product_proxy.id,
+                'product_qty': 1, 
+                'product_uom': 1,
+                'bom_category': 'dynamic',
+                'structure_id': structure_proxy.id,
+                }, context=context)
+        
+    
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Structured dynamic BOM'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_id': dynamic_bom_id,
+            'res_model': 'mrp.bom',
+            #'view_id': view_id, # False
+            'views': [(False, 'tree'), (False, 'form')],
+            'domain': [],
+            'context': context,
+            'target': 'current', # 'new'
+            'nodestroy': False,
+            }        
+        
     _columns = {
         'dynamic_bom_id': fields.many2one('mrp.bom', 'Dynamic BOM', 
             help='Dynamic BOM with all element masked depend on code struct.'),

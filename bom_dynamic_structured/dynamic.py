@@ -117,7 +117,7 @@ class ProductProduct(orm.Model):
             default_code = product.default_code
             
             if not structure or not structure.dynamic_bom_id or not \
-                    defaut_code:
+                    default_code:
                 res[product.id] = []
             else:                
                 dynamic_bom_id = structure.dynamic_bom_id.id
@@ -125,7 +125,7 @@ class ProductProduct(orm.Model):
                 # Search dynamic element in BOM
                 cr.execute('''
                     SELECT id 
-                    FROM mdp_bom_line
+                    FROM mrp_bom_line
                     WHERE 
                         bom_id = %s AND                        
                         %s ilike dynamic_mask;

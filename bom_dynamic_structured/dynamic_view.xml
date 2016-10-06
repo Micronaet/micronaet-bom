@@ -12,6 +12,32 @@
                 </field>
             </field>             
         </record>
+        
+        <!--mrp.bom-->
+        <record model="ir.ui.view" id="view_mrp_bom_dynamic_form">
+            <field name="name">mrp.bom.dynamic.bom.form</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>            
+            <field name="arch" type="xml">
+                <field name="bom_line_ids" position="attributes">
+                    <attribute name="attrs">{'invisible': [('bom_category','=','dynamic')]}</attribute>
+                </field>
+                
+                <field name="bom_line_ids" position="after">
+                    <group colspan="4" col="4">
+                        <field name="structure_id" />
+                        <separator string="Dynamic BOM" colspan="4"/>
+                        <field name="bom_line_ids" attrs="{'invisible': [('bom_category','!=','dynamic')]}" context="{'default_type': 'normal'}" nolabel="1">
+                            <tree string="Dynamic BOM" editable="bottom" colspan="4">
+                                <field name="product_id" /><!--onchange-->
+                                <field name="dynamic_mask" />
+                                <field name="product_qty" />
+                            </tree>
+                        </field>
+                    </group>    
+                </field>
+            </field>
+        </record>
     </data>
 </openerp>
 

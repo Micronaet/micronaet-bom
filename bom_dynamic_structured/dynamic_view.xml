@@ -70,7 +70,7 @@
                             <field name="structure_id" />
                             <separator string="Dynamic BOM line" colspan="4"/>
                             <field name="dynamic_bom_line_ids" nolabel="1" colspan="4" readonly="1">
-                                <tree string="Dynamic BOM:">
+                                <tree string="Dynamic BOM:" class="dynamic_mask_css">
                                     <field name="product_id" />
                                     <field name="dynamic_mask" />
                                     <field name="product_qty" />

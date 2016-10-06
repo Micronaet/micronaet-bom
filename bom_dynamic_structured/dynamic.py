@@ -62,7 +62,25 @@ class ProductProduct(orm.Model):
         line_pool = self.pool.get('mrp.bom.line')        
         res = {}
         for product in self.browse(cr, uid, ids, context=context):
-            res[product.id] = []  # TODO
+            structure = product.structure_id
+            default_code = product.default_code
+            
+            if not structure or not structure.dynamic_bom_id or not \
+                    defaut_code:
+                res[product.id] = []
+            else:                
+                dynamic_bom_id = structure.dynamic_bom_id.id
+                
+                # Search dynamic element in BOM
+                cr.execute('''
+                    SELECT id 
+                    FROM mdp_bom_line
+                    WHERE 
+                        bom_id = %s AND                        
+                        %s ilike dynamic_mask;
+                    ''', (dynamic_bom_id, default_code))
+                
+                res[product.id] = [item for item in cr.fetchall()]
         return res
 
     _columns = {

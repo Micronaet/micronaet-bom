@@ -125,13 +125,12 @@ class ProductProduct(orm.Model):
                 # Search dynamic element in BOM
                 cr.execute('''
                     SELECT id 
-                    FROM mrp_bom_line
+                    FROM mrp_bom_line 
                     WHERE 
-                        bom_id = %s AND                        
-                        %s ilike dynamic_mask;
+                        bom_id = %s AND 
+                        %s ilike dynamic_mask;                    
                     ''', (dynamic_bom_id, default_code))
-                
-                res[product.id] = [item for item in cr.fetchall()]
+                res[product.id] = [item[0] for item in cr.fetchall()]
         return res
 
     _columns = {

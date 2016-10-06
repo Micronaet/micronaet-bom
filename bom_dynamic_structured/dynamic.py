@@ -158,6 +158,29 @@ class MRPBom(orm.Model):
     
     _inherit = 'mrp.bom'
         
+    # Button event:
+    def open_bom_dynamic_lines(self, cr, uid, ids, context=None):
+        ''' Open line for dynamic bom with correct mask
+        '''
+        assert len(ids) == 1, 'Works only with one record a time'
+        model_pool = self.pool.get('ir.model.data')
+        tree_view_id = model_pool.get_object_reference(cr, uid, 
+            'bom_dynamic_structured', 'view_mrp_bom_line_dynamic_tree')[1]
+        
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Dynamic lines'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_model': 'mrp.bom.line',
+            'view_id': tree_view_id,
+            'views': [(False, 'tree'), (False, 'form')],
+            'domain': [('bom_id', '=', ids[0])],
+            'context': context,
+            'target': 'current',
+            'nodestroy': False,
+            }
+        
     _columns = {
         'structure_id': fields.many2one('structure.structure', 'Structure', 
             help='Structure reference'),

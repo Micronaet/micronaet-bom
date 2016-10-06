@@ -38,4 +38,61 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+class StructureStructure(orm.Model):
+    """ Model name: StructureStructure
+    """
+    
+    _inherit = 'structure.structure'
+        
+    _columns = {
+        'dynamic_bom_id': fields.many2one('mrp.bom', 'Dynamic BOM', 
+            help='Dynamic BOM with all element masked depend on code struct.'),
+        }
+
+class ProductProduct(orm.Model):
+    """ Model name: Product bom directly 
+    """
+    
+    _inherit = 'product.product'
+        
+    def _get_dynamic_bom_line_ids(self, cr, uid, ids, fields, args, 
+            context=None):
+        ''' Fields function for calculate BOM lines
+        '''
+        line_pool = self.pool.get('mrp.bom.line')        
+        res = {}
+        for product in self.browse(cr, uid, ids, context=context):
+            res[product.id] = []  # TODO
+        return res
+
+    _columns = {
+        'dynamic_bom_line_ids': fields.function(
+            _get_dynamic_bom_line_ids, method=True, 
+            type='one2many', relation='mrp.bom.line', 
+            string='Dynamic BOM line', readonly=True, store=False),                        
+        }
+
+class MRPBomLine(orm.Model):
+    """ Model name: MRP Bom line
+    """
+    
+    _inherit = 'mrp.bom.line'
+    
+    
+    _columns = {
+        'dynamic_mask': fields.char('Dynamic mask', size=20),
+        }
+
+class MRPBom(orm.Model):
+    """ Model name: MRP Bom new bom_line_ids
+    """
+    
+    _inherit = 'mrp.bom'
+        
+    _columns = {
+        'structure_id': fields.many2one('structure.structure', 'Structure', 
+            help='Structure reference'),
+        }
+
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

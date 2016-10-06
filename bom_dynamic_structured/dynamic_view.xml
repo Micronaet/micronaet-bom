@@ -30,6 +30,7 @@
                         <separator string="Dynamic BOM" colspan="4"/>
                         <field name="bom_line_ids" attrs="{'invisible': [('bom_category','!=','dynamic')]}" context="{'default_type': 'normal'}" nolabel="1" colspan="4">
                             <tree string="Dynamic BOM" editable="bottom">
+                                <field name="bom_id" invisible="1"/>
                                 <field name="product_id" /><!--onchange-->
                                 <field name="dynamic_mask" />
                                 <field name="product_qty" />
@@ -47,9 +48,10 @@
             <field name="model">mrp.bom.line</field>
             <field name="priority" eval="50"/>
             <field name="arch" type="xml">
-                <tree string="String" editable="mrp_bom_line">        
+                <tree string="String" editable="bottom">        
+                    <field name="bom_id" invisible="1"/>
                     <field name="product_id" /><!--onchange-->
-                    <field name="dynamic_mask" />
+                    <field name="dynamic_mask" on_change="onchange_dynamic_mask(dynamic_mask, bom_id)"/>
                     <field name="product_qty" />
                     <field name="product_uom" />
                 </tree>

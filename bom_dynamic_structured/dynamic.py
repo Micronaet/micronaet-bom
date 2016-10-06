@@ -146,6 +146,24 @@ class MRPBomLine(orm.Model):
     
     _inherit = 'mrp.bom.line'
     
+    def onchange_dynamic_mask(self, cr, uid, ids, dynamic_mask, bom_id,
+            context=None):
+        ''' Check mask if correct
+        '''        
+        bom_pool = self.pool.get('mrp.bom')
+        product_pool = self.pool.get('product.product')
+
+        res = {}
+        if not dynamic_mask or not product_id:
+            return res
+        default_code = dynamic_mask.replace('%', '').replace('_', ' ')
+            
+        bom_proxy = bom_pool.browse(cr, uid, bom_id, context=context)
+                    
+        result = product_pool.get_name_from_default_code(cr, uid, 
+            default_code, bom_proxy.structure_id)
+        import pdb; pdb.set_trace()
+        return res  
     
     _columns = {
         'dynamic_mask': fields.char('Dynamic mask', size=20),

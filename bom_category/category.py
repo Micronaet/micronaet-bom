@@ -58,6 +58,7 @@ class MRPBom(orm.Model):
             ('half', 'Half worked (component)'), # components
             ('parent', 'Parent'), # parent element only
             ('dynamic', 'Dynamic'), # Dynamic BOM with mask
+            ('remove', 'To Remove'), # To be removed!
             ], 'Category')            
         }
     _defaults = {

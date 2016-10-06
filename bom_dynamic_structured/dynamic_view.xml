@@ -1,16 +1,15 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
-        <record model="ir.ui.view" id="view_structure_structure_form">
+        <record model="ir.ui.view" id="view_structure_structure_dynamic_bom_form">
             <field name="name">structure.structure.form</field>
             <field name="model">structure.structure</field>
+            <field name="inherit_id" ref="product_speech_code.view_structure_structure_form"/>
             <field name="arch" type="xml">
-                <form string="Product code structure" version="7.0">        
-                    <field name="name" position="after">
-                        <field name="dynamic_bom_id" invisible="1" />
-                        <button name="create_dynamic_bom" string="Dyamic BOM" type="object" attrs="{'invisible': [('dynamic_bom_id','!=',False)]}"/>
-                    </field>
-                </form>
+                <field name="name" position="after">
+                    <field name="dynamic_bom_id" invisible="1" />
+                    <button name="create_dynamic_bom" string="Dyamic BOM" type="object" />
+                </field>
             </field>             
         </record>
     </data>

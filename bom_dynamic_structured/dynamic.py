@@ -106,10 +106,30 @@ class ProductProduct(orm.Model):
     
     _inherit = 'product.product'
         
+    def check_mask_parameter_structure(self, dynamic_mask, structure):
+        ''' 
+        '''
+        default_code = dynamic_mask.replace('%', '').replace('_', '').rstrip()
+        
+        error = '' 
+        for block in structure:
+            part = default_code[block.from_char -1, block.to_char].strip()
+            if part:
+                not_found = True
+                for v in block.value_ids:
+                    if v.code == part:
+                        not_found = False
+                        break
+                if not_found:
+                    return _('Part %s not found in %s block') % (
+                        part, block.name)
+        return False
+        
     def _get_dynamic_bom_line_ids(self, cr, uid, ids, fields, args, 
             context=None):
         ''' Fields function for calculate BOM lines
         '''
+        _logger.error('Dynamic line calculation! JUST FOR TEST')
         line_pool = self.pool.get('mrp.bom.line')        
         res = {}
         for product in self.browse(cr, uid, ids, context=context):
@@ -153,17 +173,22 @@ class MRPBomLine(orm.Model):
         bom_pool = self.pool.get('mrp.bom')
         product_pool = self.pool.get('product.product')
 
-        res = {}
-        if not dynamic_mask or not product_id:
+        res = {'value'} = {}
+        if not dynamic_mask or not bom_id:
             return res
-        default_code = dynamic_mask.replace('%', '').replace('_', ' ')
             
         bom_proxy = bom_pool.browse(cr, uid, bom_id, context=context)
-                    
-        result = product_pool.get_name_from_default_code(cr, uid, 
-            default_code, bom_proxy.structure_id)
-        import pdb; pdb.set_trace()
-        return res  
+        _logger.warning('Check mask [%s] > [%s]' % (
+            dynamic_mask, default_code))
+
+        error = product_pool.check_mask_parameter_structure(
+            dynamic_mask, bom_proxy.structure_id)
+        if error:
+            res['value']['warning'] = {
+                'title': _('Code error:'), 
+                'message': _('Error parsing code: %s') % error,
+                }
+        return res
     
     _columns = {
         'dynamic_mask': fields.char('Dynamic mask', size=20),

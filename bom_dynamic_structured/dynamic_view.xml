@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+        <!--structure.structure-->
         <record model="ir.ui.view" id="view_structure_structure_dynamic_bom_form">
             <field name="name">structure.structure.form</field>
             <field name="model">structure.structure</field>
@@ -69,10 +70,18 @@
                             <field name="structure_id" />
                             <separator string="Dynamic BOM line" colspan="4"/>
                             <field name="dynamic_bom_line_ids" nolabel="1" colspan="4" readonly="1">
-                                <field name="product_id" />
-                                <field name="dynamic_mask" />
-                                <field name="product_qty" />
-                                <field name="product_uom" />
+                                <tree string="Dynamic BOM:">
+                                    <field name="product_id" />
+                                    <field name="dynamic_mask" />
+                                    <field name="product_qty" />
+                                    <field name="product_uom" />
+                                </tree>
+                                <form string="Dynamic BOM:">
+                                    <field name="product_id" />
+                                    <field name="dynamic_mask" />
+                                    <field name="product_qty" />
+                                    <field name="product_uom" />
+                                </form>                                
                             </field>
                         </group>
                     </sheet>        

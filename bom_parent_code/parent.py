@@ -48,7 +48,7 @@ class MRPBom(orm.Model):
         ''' Migrate bom in dynamic way
         '''
         assert len(ids) == 1, 'Works only with one record a time'
-        
+        import pdb; pdb.set_trace()
         line_pool = self.pool.get('mrp.bom.line')
         
         # Create rule in dynamic:

@@ -109,11 +109,11 @@ class ProductProduct(orm.Model):
     def check_mask_parameter_structure(self, dynamic_mask, structure):
         ''' 
         '''
-        default_code = dynamic_mask.replace('%', '').replace('_', '').rstrip()
+        default_code = dynamic_mask.replace('%', '').replace('_', ' ').rstrip()
         
         error = '' 
-        for block in structure:
-            part = default_code[block.from_char -1, block.to_char].strip()
+        for block in structure.block_ids:
+            part = default_code[block.from_char-1: block.to_char].strip()
             if part:
                 not_found = True
                 for v in block.value_ids:
@@ -173,18 +173,16 @@ class MRPBomLine(orm.Model):
         bom_pool = self.pool.get('mrp.bom')
         product_pool = self.pool.get('product.product')
 
-        res = {'value'} = {}
+        res = {}
         if not dynamic_mask or not bom_id:
             return res
             
         bom_proxy = bom_pool.browse(cr, uid, bom_id, context=context)
-        _logger.warning('Check mask [%s] > [%s]' % (
-            dynamic_mask, default_code))
-
+        
         error = product_pool.check_mask_parameter_structure(
             dynamic_mask, bom_proxy.structure_id)
         if error:
-            res['value']['warning'] = {
+            res['warning'] = {
                 'title': _('Code error:'), 
                 'message': _('Error parsing code: %s') % error,
                 }

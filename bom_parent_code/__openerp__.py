@@ -23,6 +23,7 @@
     'category': 'MRP',
     'description': '''        
         Manage BOM parent element for keep fixed 
+        NOTE: currently is used also for migrate BOM in new dynamic system
         ''',
     'author': 'Micronaet S.r.l. - Nicola Riolini',
     'website': 'http://www.micronaet.it',

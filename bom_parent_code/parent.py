@@ -43,6 +43,9 @@ class MRPBom(orm.Model):
     """    
     _inherit = 'mrp.bom'
 
+    def migrate_assign_parent_bom(self, cr, uid, ids, context=None):
+        return True
+        
     def get_config_parameter_list(self, cr, uid, context=None):
         ''' Read parameter: 
         '''    

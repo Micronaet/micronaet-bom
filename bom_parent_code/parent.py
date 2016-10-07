@@ -78,7 +78,6 @@ class MRPBom(orm.Model):
         product_ids = self.search(cr, uid, [
             ('bom_category', '=', 'product')], context=context)
 
-        import pdb; pdb.set_trace()            
         # LOG operation (TODO remove)
         log_f = open(os.path.expanduser('~/bom.csv'), 'w')
         
@@ -102,7 +101,7 @@ class MRPBom(orm.Model):
         
         bom_proxy = self.browse(cr, uid, ids, context=context)[0]
         
-        log = ''        
+        log = ''
         # ---------------------------------------------------------------------
         # Create dynamic mask from code:
         # ---------------------------------------------------------------------
@@ -115,7 +114,8 @@ class MRPBom(orm.Model):
                     cr, uid, pr_ids, context=context)[0]
         default_code = bom_proxy.product_id.default_code
         if not default_code:
-            log += '|%s|No default_code for BOM' % bom_proxy.name
+            log += '\n???|%s||No codice x BOM\n' % ( 
+                bom_proxy.name, len(bom_proxy.bom_line_ids))
             return log
         
         # Set mask for unique element S and no S are the same
@@ -123,11 +123,11 @@ class MRPBom(orm.Model):
             dynamic_mask = default_code[:12] + '%'
         else:
             dynamic_mask = default_code + '%'
-        log += '\n%s|Mask: %s (%s) # comp: %s|New BOM\n' % (
+        log += '\n%s|%s|%s|%s\n' % (
             default_code, 
-            dynamic_mask, 
-            bom_proxy.name, 
             len(bom_proxy.bom_line_ids),
+            dynamic_mask, 
+            bom_proxy.name or '???', # or bom_proxy.product_tmpl_id.name, 
             )
         
         # TODO Check if dynamic and product are jet present
@@ -138,23 +138,26 @@ class MRPBom(orm.Model):
         for line in bom_proxy.bom_line_ids:
             component_code = line.product_id.default_code
             if not component_code:
-                log += '|%s|No component_code found\n' % bom_proxy.name
+                log += '|||%s||No codice componente\n' % bom_proxy.name
                 return log
                 
             TL_code = 'TL%s%s%s' % (
-                component_code[:3],
-                component_code[3:6],
-                component_code[6:8],
+                default_code[:3],
+                default_code[3:6],
+                default_code[8:12],
                 )
             component_ids = product_pool.search(cr, uid, [
                 ('default_code', '=', TL_code)], context=context)
             if component_ids:
                 if len(component_ids) > 1:
-                    log += '|%s|Component more than one\n' % TL_code
+                    log += '||||%s|%s|Piu componenti|NO\n' % (
+                        component_code, TL_code)
                 else:
-                    log += '|%s|\n' % TL_code
+                    log += '||||%s|%s||SI\n' % (
+                        component_code, TL_code)
             else:        
-                log += '|%s|Component not found in ODOO\n' % TL_code
+                log += '||||%s|%s|Non trovato in ODOO|NO\n' % (
+                    component_code, TL_code)
         print log        
         return log            
 

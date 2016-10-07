@@ -123,8 +123,10 @@
                 <tree string="String" editable="bottom" colors="red:dynamic_mask==False">       
                     <field name="bom_id" invisible="1"/>
                     <field name="product_id" /><!--onchange-->
+                    <button name="component_use_this" string="Rule with this compoment" type="object" icon="gtk-goto-first" />
+                    <button name="component_product_use_this" string="Product that use this component" type="object" icon="STOCK_GOTO_LAST" />
                     <field name="dynamic_mask" on_change="onchange_dynamic_mask(dynamic_mask, bom_id)"/>
-                    <button name="product_use_this_mask" string="Product that use this mask" type="object" />
+                    <button name="product_use_this_mask" string="Product that use this mask" type="object" icon="STOCK_GOTO_LAST" />
                     <field name="product_qty" />
                     <field name="product_uom" />
                 </tree>

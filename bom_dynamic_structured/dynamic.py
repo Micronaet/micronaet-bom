@@ -218,23 +218,75 @@ class MRPBomLine(orm.Model):
     """
     
     _inherit = 'mrp.bom.line'
-    
+
+    def get_this_compoment_line(self, cr, uid, ids, context=None):
+        line_proxy = self.browse(cr, uid, ids, context=context)[0]
+        return = self.search(cr, uid, [
+            ('bom_id', '=', line_proxy.bom_id.id),            
+            ('product_id', '=', line_proxy.product_id.id),
+            ], context=context)        
+            
+        
+    def component_use_this(self, cr, uid, ids, context=None):
+        ''' 
+        '''
+        # TODO test
+        line_ids self.get_this_compoment_line(cr, uid, ids, context=context)
+
+        model_pool = self.pool.get('ir.model.data')
+        form_view_id = model_pool.get_object_reference(cr, uid, 
+            'bom_dynamic_structured', 
+            'view_product_product_dynamic_bom_form',
+            )[1]
+        tree_view_id = model_pool.get_object_reference(cr, uid, 
+            'bom_dynamic_structured', 
+            'view_product_product_dynamic_bom_tree',
+            )[1]
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Dynamic BOM'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_model': 'bom.line.ids',
+            'view_id': tree_view_id,
+            'views': [(tree_view_id, 'tree'),(form_view_id, 'form')],
+            'domain': [('id', 'in', product_ids)],
+            'context': context,
+            'target': 'current',
+            'nodestroy': False,
+            }
+        
+
+    def component_product_use_this(self, cr, uid, ids, context=None):
+        ''' Search this compoment after all product with those masks
+        ''' 
+        line_ids self.get_this_compoment_line(cr, uid, ids, context=context)
+        return self.product_use_this_mask(cr, uid, line_ids, context=context)
+        
     def product_use_this_mask(self, cr, uid, ids, context=None):
         ''' Check product that work with this rule
         '''
-        line_proxy = self.browse(cr, uid, ids, context=context)[0]
-
-        if not line_proxy.dynamic_mask:
-            return {} # nothing
-        
+        # Used for all product search
+        where = ''        
+        for line_proxy in self.browse(cr, uid, ids, context=context):
+            if not line_proxy.dynamic_mask:
+                continue
+            where += '%s%s' % (
+                ' or ' if where else '',
+                'default_code ilike \'%s\'' % line_proxy.dynamic_mask
+                )
+        if not where:
+            return {}
+                    
         cr.execute('''
-            SELECT id 
+            SELECT distinct id 
             FROM product_product 
             WHERE
-                default_code ilike %s
-            ''', (line_proxy.dynamic_mask, ))
+                %s
+            ''' % where)
         product_ids = [item[0] for item in cr.fetchall()]
-        
+
         model_pool = self.pool.get('ir.model.data')
         form_view_id = model_pool.get_object_reference(cr, uid, 
             'bom_dynamic_structured', 

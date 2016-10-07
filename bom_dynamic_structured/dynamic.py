@@ -107,10 +107,30 @@ class StructureStructure(orm.Model):
 
 class ProductProduct(orm.Model):
     """ Model name: Product bom directly 
-    """
-    
+    """    
     _inherit = 'product.product'
         
+    #def open_dynamic_bom(self, cr, uid, ids, context=None):
+    #    ''' Open dynamic structure
+    #    '''    
+    #    product_proxy = self.browse(cr, uid, ids, context=context)[0]
+    #    return self.pool.get('structure.structure').create_dynamic_bom(
+    #        cr, uid, [product_proxy.structure_id.id], context=context)
+    #    return True
+
+    def open_dynamic_bom(self, cr, uid, ids, context=None):
+        ''' Open dynamic structure
+        '''    
+        product_proxy = self.browse(cr, uid, ids, context=context)[0]
+        
+        structure = product_proxy.structure_id
+        if structure.dynamic_bom_id:
+            return self.pool.get('mrp.bom').open_bom_dynamic_lines(
+                cr, uid, [structure.dynamic_bom_id.id], context=context)        
+        else: # First time:
+            return self.pool.get('structure.structure').create_dynamic_bom(
+                cr, uid, [structure_id.id], context=context)
+
     def check_mask_parameter_structure(self, dynamic_mask, structure):
         ''' 
         '''

@@ -109,6 +109,19 @@
         </record>
         
         <!--product.product-->
+        <record model="ir.ui.view" id="view_product_product_dynamic_button_bom_form">
+            <field name="name">product.product.dynamic.bom.button.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_normal_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet" position="before">
+                    <header>
+                        <button name="open_dynamic_bom" string="Dynamic BOM" type="object" attrs="{'invisible': [('structure_id','=',False)]}" class="oe-highlight"/>
+                    </header>
+                </xpath>
+            </field>
+        </record>
+
         <record model="ir.ui.view" id="view_product_product_dynamic_bom_form">
             <field name="name">product.product.dynamic.bom.line.form</field>
             <field name="model">product.product</field>

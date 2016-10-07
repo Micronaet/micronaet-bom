@@ -227,7 +227,6 @@ class MRPBomLine(orm.Model):
         if not line_proxy.dynamic_mask:
             return {} # nothing
         
-        import pdb; pdb.set_trace()
         cr.execute('''
             SELECT id 
             FROM product_product 
@@ -251,11 +250,10 @@ class MRPBomLine(orm.Model):
             'name': _('Dynamic BOM'),
             'view_type': 'form',
             'view_mode': 'tree,form',
-            'res_id': ids[0],
             'res_model': 'product.product',
             'view_id': tree_view_id,
             'views': [(tree_view_id, 'tree'),(form_view_id, 'form')],
-            'domain': [],
+            'domain': [('id', 'in', product_ids)],
             'context': context,
             'target': 'current',
             'nodestroy': False,

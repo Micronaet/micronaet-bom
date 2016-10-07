@@ -120,7 +120,7 @@
             <field name="model">mrp.bom.line</field>
             <field name="priority" eval="50"/>
             <field name="arch" type="xml">
-                <tree string="String" editable="bottom">        
+                <tree string="String" editable="bottom" colors="red:dynamic_mask==False">       
                     <field name="bom_id" invisible="1"/>
                     <field name="product_id" /><!--onchange-->
                     <field name="dynamic_mask" on_change="onchange_dynamic_mask(dynamic_mask, bom_id)"/>
@@ -184,7 +184,7 @@
             <field name="model">product.product</field>
             <field name="priority" eval="50" />
             <field name="arch" type="xml">
-                <tree string="Product dynamic BOM" version="7.0">        
+                <tree string="Product dynamic BOM" colors="red:structure_id==False">        
                     <field name="name" />
                     <field name="default_code" />
                     <field name="structure_id" />

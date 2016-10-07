@@ -116,7 +116,8 @@
             <field name="arch" type="xml">
                 <xpath expr="//sheet" position="before">
                     <header>
-                        <button name="open_dynamic_bom" string="Dynamic BOM" type="object" attrs="{'invisible': [('structure_id','=',False)]}" class="oe-highlight"/>
+                        <button name="open_dynamic_bom" string="Dynamic BOM rule" type="object" attrs="{'invisible': [('structure_id','=',False)]}" />
+                        <button name="open_current_dynamic_bom" string="Dynamic BOM" type="object" attrs="{'invisible': [('structure_id','=',False)]}" class="oe_highlight"/>
                     </header>
                 </xpath>
             </field>

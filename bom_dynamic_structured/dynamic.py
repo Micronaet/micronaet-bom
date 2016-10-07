@@ -143,6 +143,11 @@ class ProductProduct(orm.Model):
            'bom_dynamic_structured', 
            'view_product_product_dynamic_bom_tree',
            )[1]
+       search_view_id = model_pool.get_object_reference(cr, uid, 
+           'bom_dynamic_structured', 
+           'view_mrp_bom_line_search',
+           )[1]
+           
 
        return {
            'type': 'ir.actions.act_window',
@@ -152,6 +157,7 @@ class ProductProduct(orm.Model):
            'res_id': ids[0],
            'res_model': 'product.product',
            'view_id': form_view_id,
+           'search_view_id': search_form_view_id,
            'views': [(form_view_id, 'form'), (tree_view_id, 'tree')],
            'domain': [],
            'context': context,

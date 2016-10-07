@@ -80,15 +80,17 @@ class MRPBom(orm.Model):
 
         # LOG operation (TODO remove)
         log_f = open(os.path.expanduser('~/bom.csv'), 'w')
-        
+
+        dimension_db = {}        
         for item in product_ids:
             message = self.migrate_assign_product_bom_product1(
-                cr, uid, [item], context=context)
+                cr, uid, [item], dimension_db, context=context)
             log_f.write(message)    
         log_f.close()        
         return True    
         
-    def migrate_assign_product_bom_product1(self, cr, uid, ids, context=None):
+    def migrate_assign_product_bom_product1(self, cr, uid, ids, dimension_db, 
+            context=None):
         ''' Migrate bom in dynamic way
             Create half work element
             Create BOM 
@@ -114,8 +116,10 @@ class MRPBom(orm.Model):
                     cr, uid, pr_ids, context=context)[0]
         default_code = bom_proxy.product_id.default_code
         if not default_code:
-            log += '\n???|%s||No codice x BOM\n' % ( 
-                bom_proxy.name, len(bom_proxy.bom_line_ids))
+            log += '\n???|%s||%s|No codice x BOM\n' % ( 
+                len(bom_proxy.bom_line_ids),
+                bom_proxy.name,
+                )
             return log
         
         # Set mask for unique element S and no S are the same
@@ -148,16 +152,26 @@ class MRPBom(orm.Model):
                 )
             component_ids = product_pool.search(cr, uid, [
                 ('default_code', '=', TL_code)], context=context)
+            
+            # check dimemnsion:
+            product_qty = line.product_qty
+            if component_code not in dimension_db:
+               dimension_db[component_code] = product_qty
+            
+            if product_qty != dimension_db[component_code]:
+                comment = 'Differenze di metratura!!!!'
+            else:
+                comment = ''
             if component_ids:
                 if len(component_ids) > 1:
-                    log += '||||%s|%s|Piu componenti|NO\n' % (
-                        component_code, TL_code)
+                    log += '||||%s|%s|%s|Piu componenti|NO|%s\n' % (
+                        component_code, TL_code, product_qty, comment)
                 else:
-                    log += '||||%s|%s||SI\n' % (
-                        component_code, TL_code)
+                    log += '||||%s|%s|%s||SI|%s\n' % (
+                        component_code, TL_code, product_qty, comment)
             else:        
-                log += '||||%s|%s|Non trovato in ODOO|NO\n' % (
-                    component_code, TL_code)
+                log += '||||%s|%s|%s|Non trovato in ODOO|%s|NO\n' % (
+                    component_code, TL_code, product_qty, comment)
         print log        
         return log            
 

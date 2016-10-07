@@ -69,6 +69,92 @@ class MRPBom(orm.Model):
             'bom_category': 'remove',
             }, context=context)
         return True
+        
+    def migrate_assign_product_bom(self, cr, uid, ids, context=None):
+        ''' Migrate bom in dynamic way
+            Create half work element
+            Create BOM 
+            Create move in dynamic
+        '''
+        assert len(ids) == 1, 'Works only with one record a time'
+
+        line_pool = self.pool.get('mrp.bom.line')
+        product_pool = self.pool.get('product.product')
+        
+        # TODO togliere eventuale imballo S nel codice
+
+        bom_proxy = self.browse(cr, uid, ids, context=context)[0]
+
+        # LOG operation (TODO remove)
+        log_f = open(os.path.expanduser('~/bom.csv'), 'w')
+        
+        # ---------------------------------------------------------------------
+        # Create dynamic mask from code:
+        # ---------------------------------------------------------------------
+        default_code = bom_proxy.product_id.default_code
+        if not default_code:
+            log_f.write('No default_code: %s' % bom_proxy.name)
+            return False
+        
+        # Set mask for unique element S and no S are the same
+        if default_code[12:13] == 'S':
+            dynamic_mask = default_code[:12] + '%'
+        else    
+            dynamic_mask = default_code + '%'
+        
+        # check if dynamic and product are jet present
+        
+        # ---------------------------------------------------------------------
+        # Create TL element:
+        # ---------------------------------------------------------------------
+        for line in bom_proxy.bom_line_ids:
+            component_code = line.product_id.default_code
+            if not compoment_code:
+                log_f.write('No component_code: %s' % bom_proxy.name)
+                return False
+                
+            TL_code = 'TL%s%s%s' % (
+                compoment_code[:3],
+                compoment_code[3:6],
+                compoment_code[6:8],
+                )
+            component_ids = product_pool.search(cr, uid, [
+                ('default_code', '=', TL_code)], context=context)
+            if component_ids:
+                if len(component_ids) > 1:
+                    log_f.write('Component more than one: %s' % TL_code
+                else:
+                    log_f.write('Component more than one: %s' % TL_code
+            else:        
+                log_f.write('Component not found: %s' % TL_code
+                    
+            
+                
+
+        # ---------------------------------------------------------------------
+        # Create TL BOM:
+        # ---------------------------------------------------------------------
+        
+        
+        # ---------------------------------------------------------------------
+        # Create rule in dynamic:
+        # ---------------------------------------------------------------------
+        structure = bom_proxy.product_id.structure_id
+                
+        #for line in bom_proxy.bom_line_ids:
+        #    line_pool.create(cr, uid, {
+        #        'bom_id': structure.dynamic_bom_id.id,
+        #        'product_id': line.product_id.id,
+        #        'dynamic_mask': '%s%s' % (bom_proxy.product_id.code, '%'), # TODO remove S finale
+        #        'product_qty': line.product_qty,
+        #        'product_uom': line.product_uom.id,                                
+        #        }, context=context)
+        
+        # Move in to be remove category
+        #self.write(cr, uid, ids, {
+        #    'bom_category': 'remove',
+        #    }, context=context)
+        return True
     # EXTRA BLOCK -------------------------------------------------------------
         
     def get_config_parameter_list(self, cr, uid, context=None):

@@ -74,18 +74,22 @@ class MRPBom(orm.Model):
         ''' Loop button:
         '''
         product_pool = self.pool.get('product.product')
-        product_ids = product_pool.search(cr, uid, [
+        
+        product_ids = self.search(cr, uid, [
             ('bom_category', '=', 'product')], context=context)
-            
+
+        import pdb; pdb.set_trace()            
         # LOG operation (TODO remove)
         log_f = open(os.path.expanduser('~/bom.csv'), 'w')
-
+        
         for item in product_ids:
-            message = self.migrate_assign_product_bom(
+            message = self.migrate_assign_product_bom_product1(
                 cr, uid, [item], context=context)
+            log_f.write(message)    
+        log_f.close()        
         return True    
         
-    def migrate_assign_product_bom(self, cr, uid, ids, context=None):
+    def migrate_assign_product_bom_product1(self, cr, uid, ids, context=None):
         ''' Migrate bom in dynamic way
             Create half work element
             Create BOM 
@@ -102,17 +106,29 @@ class MRPBom(orm.Model):
         # ---------------------------------------------------------------------
         # Create dynamic mask from code:
         # ---------------------------------------------------------------------
+        if not bom_proxy.product_id:
+            pr_ids = product_pool.search(cr, uid, [
+                ('product_tmpl_id', '=', bom_proxy.product_tmpl_id.id),
+                ], context=context)
+            if pr_ids:
+                default_code = product_pool.browse(
+                    cr, uid, pr_ids, context=context)[0]
         default_code = bom_proxy.product_id.default_code
         if not default_code:
-            log += '%s||No default_code' % bom_proxy.name
-            return error
+            log += '|%s|No default_code for BOM' % bom_proxy.name
+            return log
         
         # Set mask for unique element S and no S are the same
         if default_code[12:13] == 'S':
             dynamic_mask = default_code[:12] + '%'
-        else    
+        else:
             dynamic_mask = default_code + '%'
-        log += '|%s|Mask created for code: %s\n' % (dynamic_mask, default_code)
+        log += '\n%s|Mask: %s (%s) # comp: %s|New BOM\n' % (
+            default_code, 
+            dynamic_mask, 
+            bom_proxy.name, 
+            len(bom_proxy.bom_line_ids),
+            )
         
         # TODO Check if dynamic and product are jet present
         
@@ -121,15 +137,14 @@ class MRPBom(orm.Model):
         # ---------------------------------------------------------------------
         for line in bom_proxy.bom_line_ids:
             component_code = line.product_id.default_code
-            if not compoment_code:
+            if not component_code:
                 log += '|%s|No component_code found\n' % bom_proxy.name
                 return log
-                return False
                 
             TL_code = 'TL%s%s%s' % (
-                compoment_code[:3],
-                compoment_code[3:6],
-                compoment_code[6:8],
+                component_code[:3],
+                component_code[3:6],
+                component_code[6:8],
                 )
             component_ids = product_pool.search(cr, uid, [
                 ('default_code', '=', TL_code)], context=context)
@@ -137,7 +152,7 @@ class MRPBom(orm.Model):
                 if len(component_ids) > 1:
                     log += '|%s|Component more than one\n' % TL_code
                 else:
-                    log += '|%s|Component more than one\n' % TL_code
+                    log += '|%s|\n' % TL_code
             else:        
                 log += '|%s|Component not found in ODOO\n' % TL_code
         print log        

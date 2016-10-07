@@ -13,6 +13,7 @@
                         
                         <!--EXTRA BLOCK-->
                         <button name="migrate_assign_parent_bom" string="Migrate BOM" type="object" colspan="1" attrs="{'invisible': [('bom_category','!=','parent'), ]}"/>                        
+                        <button name="migrate_assign_product_bom_product" string="Migrate BOM" type="object" colspan="1" attrs="{'invisible': [('bom_category','!=','product'), ]}"/>                        
                         <!--EXTRA BLOCK-->
                         
                     </group>

@@ -167,7 +167,7 @@ class MRPBom(orm.Model):
                     log += '||||%s|%s|%s|Piu componenti|NO|%s\n' % (
                         component_code, TL_code, product_qty, comment)
                 else:
-                    log += '||||%s|%s|%s||SI|%s\n' % (
+                    log += '||||%s|%s|%s||SI||%s\n' % (
                         component_code, TL_code, product_qty, comment)
             else:        
                 log += '||||%s|%s|%s|Non trovato in ODOO|%s|NO\n' % (

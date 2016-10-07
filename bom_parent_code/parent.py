@@ -155,10 +155,10 @@ class MRPBom(orm.Model):
             
             # check dimemnsion:
             product_qty = line.product_qty
-            if component_code not in dimension_db:
-               dimension_db[component_code] = product_qty
+            if TL_code not in dimension_db:
+               dimension_db[TL_code] = product_qty
             
-            if product_qty != dimension_db[component_code]:
+            if product_qty != dimension_db[TL_code]:
                 comment = 'Differenze di metratura!!!!'
             else:
                 comment = ''

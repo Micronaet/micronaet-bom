@@ -99,17 +99,17 @@
             <field name="priority" eval="10" />
             <field name="arch" type="xml">
                 <search string="BOM line search" version="7.0">        
-                    <field name="bom_id" />
+                    <field name="bom_id" string="BOM"/>
                     <field name="product_id" string="Compoment" />
                     <field name="dynamic_mask" />                    
-                    <field name="dynamic_mask" string="Mask start with" filter_domain="[('dynamic_mask','ilike',self)]"/>
-                    
+                    <!--<field name="dynamic_mask" string="Mask start with" filter_domain="[('dynamic_mask','ilike', self + '\%')]"/>-->
+
                     <filter name="mask_open" string="Open mask" domain="[('dynamic_mask','ilike','\%')]"/>
                     <filter name="mask_fixed" string="Fixed mask" domain="[('dynamic_mask','not ilike','\_'), ('dynamic_mask','not ilike','\%')]"/>
                     <filter name="mask_substitution" string="Substitution mask" domain="[('dynamic_mask','ilike','\_')]"/>
-                    
+
                     <group expand="0" string="Group By...">
-                        <filter name="group_product" string="BOM" context="{'group_by': 'bom_id'}"/>
+                        <filter name="group_bom" string="BOM" context="{'group_by': 'bom_id'}"/>
                         <filter name="group_product" string="Product" context="{'group_by': 'product_id'}"/>
                     </group>                
                 </search>
@@ -124,6 +124,7 @@
                     <field name="bom_id" invisible="1"/>
                     <field name="product_id" /><!--onchange-->
                     <field name="dynamic_mask" on_change="onchange_dynamic_mask(dynamic_mask, bom_id)"/>
+                    <button name="product_use_this_mask" string="Product that use this mask" type="object" />
                     <field name="product_qty" />
                     <field name="product_uom" />
                 </tree>

@@ -132,32 +132,32 @@ class ProductProduct(orm.Model):
                 cr, uid, [structure_id.id], context=context)
 
     def open_current_dynamic_bom(self, cr, uid, ids, context=None):
-       ''' Open current BOM with dynamic rule
-       '''
-       model_pool = self.pool.get('ir.model.data')
-       form_view_id = model_pool.get_object_reference(cr, uid, 
-           'bom_dynamic_structured', 
-           'view_product_product_dynamic_bom_form',
-           )[1]
-       tree_view_id = model_pool.get_object_reference(cr, uid, 
-           'bom_dynamic_structured', 
-           'view_product_product_dynamic_bom_tree',
-           )[1]
-
-       return {
-           'type': 'ir.actions.act_window',
-           'name': _('Dynamic BOM'),
-           'view_type': 'form',
-           'view_mode': 'form,tree',
-           'res_id': ids[0],
-           'res_model': 'product.product',
-           'view_id': form_view_id,
-           'views': [(form_view_id, 'form'), (tree_view_id, 'tree')],
-           'domain': [],
-           'context': context,
-           'target': 'current',
-           'nodestroy': False,
-           }
+        ''' Open current BOM with dynamic rule
+        '''
+        model_pool = self.pool.get('ir.model.data')
+        form_view_id = model_pool.get_object_reference(cr, uid, 
+            'bom_dynamic_structured', 
+            'view_product_product_dynamic_bom_form',
+            )[1]
+        tree_view_id = model_pool.get_object_reference(cr, uid, 
+            'bom_dynamic_structured', 
+            'view_product_product_dynamic_bom_tree',
+            )[1]
+ 
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Dynamic BOM'),
+            'view_type': 'form',
+            'view_mode': 'form,tree',
+            'res_id': ids[0],
+            'res_model': 'product.product',
+            'view_id': form_view_id,
+            'views': [(form_view_id, 'form'), (tree_view_id, 'tree')],
+            'domain': [],
+            'context': context,
+            'target': 'current',
+            'nodestroy': False,
+            }
        
     def check_mask_parameter_structure(self, dynamic_mask, structure):
         ''' 
@@ -219,6 +219,48 @@ class MRPBomLine(orm.Model):
     
     _inherit = 'mrp.bom.line'
     
+    def product_use_this_mask(self, cr, uid, ids, context=None):
+        ''' Check product that work with this rule
+        '''
+        line_proxy = self.browse(cr, uid, ids, context=context)[0]
+
+        if not line_proxy.dynamic_mask:
+            return {} # nothing
+        
+        import pdb; pdb.set_trace()
+        cr.execute('''
+            SELECT id 
+            FROM product_product 
+            WHERE
+                default_code ilike %s
+            ''', (line_proxy.dynamic_mask, ))
+        product_ids = [item[0] for item in cr.fetchall()]
+        
+        model_pool = self.pool.get('ir.model.data')
+        form_view_id = model_pool.get_object_reference(cr, uid, 
+            'bom_dynamic_structured', 
+            'view_product_product_dynamic_bom_form',
+            )[1]
+        tree_view_id = model_pool.get_object_reference(cr, uid, 
+            'bom_dynamic_structured', 
+            'view_product_product_dynamic_bom_tree',
+            )[1]
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Dynamic BOM'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_id': ids[0],
+            'res_model': 'product.product',
+            'view_id': tree_view_id,
+            'views': [(tree_view_id, 'tree'),(form_view_id, 'form')],
+            'domain': [],
+            'context': context,
+            'target': 'current',
+            'nodestroy': False,
+            }
+        
     def onchange_dynamic_mask(self, cr, uid, ids, dynamic_mask, bom_id,
             context=None):
         ''' Check mask if correct

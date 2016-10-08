@@ -107,6 +107,64 @@ class MRPBom(orm.Model):
         # ---------------------------------------------------------------------
         # Create dynamic mask from code:
         # ---------------------------------------------------------------------
+        code_map = {
+            #Parent:Tela
+            '029': '129',
+            
+            '030': '130',
+            
+            '027': '127',
+            '026': '127',
+            '126': '127',
+            
+            '028': '128',
+            
+            '045': '145',
+            '048': '145',
+            '148': '145',
+            '049': '145',
+            '149': '145',
+
+            '121': '021',
+            
+            '023': '123',
+            
+            '124': '024',
+            '014': '024',
+            
+            '005': '205',
+            
+            '035': '135',
+            '036': '135',
+            '136': '135',
+            '034': '135', # parasole
+            '039': '135', # parasole
+            
+            '051': '050',
+            
+            '071': '070', # parasole
+            '170': '070',
+            '171': '070',
+            
+            '031': '131',
+            
+            '032': '132',
+
+            '552': '550',
+            
+            '905': '900',
+
+            '935': '930',
+            
+            '936': '931',
+            
+            '235': '230',
+            }
+            
+        type_map = {
+            
+            }    
+            
         if not bom_proxy.product_id:
             pr_ids = product_pool.search(cr, uid, [
                 ('product_tmpl_id', '=', bom_proxy.product_tmpl_id.id),
@@ -146,9 +204,9 @@ class MRPBom(orm.Model):
                 log += '|||%s||No codice componente\n' % bom_proxy.name
                 return log
             
-            if 
+            parent_code = code_map.get(default_code[:3], default_code[:3])
             TL_code = 'TL%s%s%s' % (
-                default_code[:3],
+                parent_code,
                 default_code[3:5] if default_code[5:6] == 'B' \
                     else default_code[3:6],
                 default_code[8:12],

@@ -140,11 +140,11 @@ class MRPBom(orm.Model):
             '034': '135', # parasole
             '039': '135', # parasole
             
-            '051': '050',
+            '051': '050', # parasole e poggiatesta
             
             '071': '070', # parasole
             '170': '070',
-            '171': '070',
+            '171': '070', # parasole
             
             '031': '131',
             

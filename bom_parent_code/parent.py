@@ -121,7 +121,8 @@ class MRPBom(orm.Model):
                 bom_proxy.name,
                 )
             return log
-        
+            
+        default_code = default_code.upper()
         # Set mask for unique element S and no S are the same
         if default_code[12:13] == 'S':
             dynamic_mask = default_code[:12] + '%'
@@ -144,10 +145,12 @@ class MRPBom(orm.Model):
             if not component_code:
                 log += '|||%s||No codice componente\n' % bom_proxy.name
                 return log
-                
+            
+            if 
             TL_code = 'TL%s%s%s' % (
                 default_code[:3],
-                default_code[3:6],
+                default_code[3:5] if default_code[5:6] == 'B' \
+                    else default_code[3:6],
                 default_code[8:12],
                 )
             component_ids = product_pool.search(cr, uid, [

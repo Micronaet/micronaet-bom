@@ -219,19 +219,20 @@ class MRPBomLine(orm.Model):
     
     _inherit = 'mrp.bom.line'
 
-    def get_this_compoment_line(self, cr, uid, ids, context=None):
+    def get_this_component_line(self, cr, uid, ids, context=None):
+        ''' Utility for search lines with this product on this bom:
+        '''
         line_proxy = self.browse(cr, uid, ids, context=context)[0]
-        return = self.search(cr, uid, [
+        return self.search(cr, uid, [
             ('bom_id', '=', line_proxy.bom_id.id),            
             ('product_id', '=', line_proxy.product_id.id),
             ], context=context)        
             
         
     def component_use_this(self, cr, uid, ids, context=None):
-        ''' 
+        ''' List all line that has this compoment (for check rules)
         '''
-        # TODO test
-        line_ids self.get_this_compoment_line(cr, uid, ids, context=context)
+        line_ids = self.get_this_component_line(cr, uid, ids, context=context)
 
         model_pool = self.pool.get('ir.model.data')
         form_view_id = model_pool.get_object_reference(cr, uid, 
@@ -242,16 +243,21 @@ class MRPBomLine(orm.Model):
             'bom_dynamic_structured', 
             'view_product_product_dynamic_bom_tree',
             )[1]
-
+        if len(line_ids) == 1:
+            raise osv.except_osv(
+                _('Warning'), 
+                _('This is the only rule that use this component'),
+                )
+                
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Dynamic BOM'),
+            'name': _('Dynamic BOM component'),
             'view_type': 'form',
             'view_mode': 'tree,form',
-            'res_model': 'bom.line.ids',
+            'res_model': 'mrp.bom.line',
             'view_id': tree_view_id,
-            'views': [(tree_view_id, 'tree'),(form_view_id, 'form')],
-            'domain': [('id', 'in', product_ids)],
+            'views': [(tree_view_id, 'tree'), (form_view_id, 'form')],
+            'domain': [('id', 'in', line_ids)],
             'context': context,
             'target': 'current',
             'nodestroy': False,
@@ -261,13 +267,15 @@ class MRPBomLine(orm.Model):
     def component_product_use_this(self, cr, uid, ids, context=None):
         ''' Search this compoment after all product with those masks
         ''' 
-        line_ids self.get_this_compoment_line(cr, uid, ids, context=context)
+        # Search rule that use this component:
+        line_ids = self.get_this_component_line(cr, uid, ids, context=context)
+        # Search product that use those masks:
         return self.product_use_this_mask(cr, uid, line_ids, context=context)
         
     def product_use_this_mask(self, cr, uid, ids, context=None):
         ''' Check product that work with this rule
         '''
-        # Used for all product search
+        #XXX  Used also for all product search (not only button event!)
         where = ''        
         for line_proxy in self.browse(cr, uid, ids, context=context):
             if not line_proxy.dynamic_mask:
@@ -277,15 +285,23 @@ class MRPBomLine(orm.Model):
                 'default_code ilike \'%s\'' % line_proxy.dynamic_mask
                 )
         if not where:
-            return {}
+            raise osv.except_osv(
+                _('Error!'), 
+                _('No product with mask selected!'),
+                )
                     
         cr.execute('''
             SELECT distinct id 
             FROM product_product 
-            WHERE
-                %s
+            WHERE %s
             ''' % where)
         product_ids = [item[0] for item in cr.fetchall()]
+
+        if not product_ids:
+            raise osv.except_osv(
+                _('Error!'), 
+                _('No product with mask selected!'),
+                )
 
         model_pool = self.pool.get('ir.model.data')
         form_view_id = model_pool.get_object_reference(cr, uid, 
@@ -304,7 +320,7 @@ class MRPBomLine(orm.Model):
             'view_mode': 'tree,form',
             'res_model': 'product.product',
             'view_id': tree_view_id,
-            'views': [(tree_view_id, 'tree'),(form_view_id, 'form')],
+            'views': [(tree_view_id, 'tree'), (form_view_id, 'form')],
             'domain': [('id', 'in', product_ids)],
             'context': context,
             'target': 'current',

@@ -110,54 +110,36 @@ class MRPBom(orm.Model):
         code_map = {
             #Parent:Tela
             '029': '129',
-            
             '030': '130',
-            
             '027': '127',
             '026': '127',
             '126': '127',
-            
             '028': '128',
-            
             '045': '145',
             '048': '145',
             '148': '145',
             '049': '145',
             '149': '145',
-
             '121': '021',
-            
             '023': '123',
-            
             '124': '024',
             '014': '024',
-            
             '005': '205',
-            
             '035': '135',
             '036': '135',
             '136': '135',
             '034': '135', # parasole
             '039': '135', # parasole
-            
             '051': '050', # parasole e poggiatesta
-            
             '071': '070', # parasole
             '170': '070',
             '171': '070', # parasole
-            
             '031': '131',
-            
             '032': '132',
-
             '552': '550',
-            
             '905': '900',
-
             '935': '930',
-            
             '936': '931',
-            
             '235': '230',
             }
             
@@ -204,35 +186,62 @@ class MRPBom(orm.Model):
                 log += '|||%s||No codice componente\n' % bom_proxy.name
                 return log
             
-            parent_code = code_map.get(default_code[:3], default_code[:3])
-            TL_code = 'TL%s%s%s' % (
+            # Type code:
+            type_code = 'TL'
+            
+            # Parent code:
+            parent = default_code[:3]
+            if parent in ('810', '081', '085'):
+                type_code = 'PVC6LU'
+                parent_code = ''
+            elif parent in ('084', ):
+                type_code = 'PVC6P'
+                parent_code = ''
+            else: 
+                # Default code:    
+                parent_code = code_map.get(parent, parent)
+            
+            #Fabric code:
+            if parent in ('810', '081', '085', '084'):
+                fabric_code = ''
+            else:
+                # Default code:                
+                if default_code[5:6] == 'B':
+                    fabric_code = default_code[3:5]
+                else:    
+                    fabric_code = default_code[3:6],
+            
+            # Color code        
+            color_code = default_code[8:12]
+            
+            HW_code = '%s%s%s%s' % (
+                type_code,
                 parent_code,
-                default_code[3:5] if default_code[5:6] == 'B' \
-                    else default_code[3:6],
-                default_code[8:12],
+                fabric_code, 
+                color_code,
                 )
             component_ids = product_pool.search(cr, uid, [
-                ('default_code', '=', TL_code)], context=context)
+                ('default_code', '=', HW_code)], context=context)
             
             # check dimemnsion:
             product_qty = line.product_qty
-            if TL_code not in dimension_db:
-               dimension_db[TL_code] = product_qty
+            if HW_code not in dimension_db:
+               dimension_db[HW_code] = product_qty
             
-            if product_qty != dimension_db[TL_code]:
+            if product_qty != dimension_db[HW_code]:
                 comment = 'Differenze di metratura!!!!'
             else:
                 comment = ''
             if component_ids:
                 if len(component_ids) > 1:
                     log += '||||%s|%s|%s|Piu componenti|NO|%s\n' % (
-                        component_code, TL_code, product_qty, comment)
+                        component_code, HW_code, product_qty, comment)
                 else:
                     log += '||||%s|%s|%s||SI||%s\n' % (
-                        component_code, TL_code, product_qty, comment)
+                        component_code, HW_code, product_qty, comment)
             else:        
                 log += '||||%s|%s|%s|Non trovato in ODOO|%s|NO\n' % (
-                    component_code, TL_code, product_qty, comment)
+                    component_code, HW_code, product_qty, comment)
         print log        
         return log            
 

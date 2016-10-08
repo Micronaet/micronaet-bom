@@ -237,11 +237,11 @@ class MRPBomLine(orm.Model):
         model_pool = self.pool.get('ir.model.data')
         form_view_id = model_pool.get_object_reference(cr, uid, 
             'bom_dynamic_structured', 
-            'view_product_product_dynamic_bom_form',
+            'view_product_product_dynamic_button_bom_form',
             )[1]
         tree_view_id = model_pool.get_object_reference(cr, uid, 
             'bom_dynamic_structured', 
-            'view_product_product_dynamic_bom_tree',
+            'view_mrp_bom_line_dynamic_tree',
             )[1]
         if len(line_ids) == 1:
             raise osv.except_osv(
@@ -261,8 +261,7 @@ class MRPBomLine(orm.Model):
             'context': context,
             'target': 'current',
             'nodestroy': False,
-            }
-        
+            }        
 
     def component_product_use_this(self, cr, uid, ids, context=None):
         ''' Search this compoment after all product with those masks

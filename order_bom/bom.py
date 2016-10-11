@@ -95,7 +95,7 @@ class SaleOrder(orm.Model):
             # -----------------------------------------------------------------            
             if not structure and product not in data['no_structure']:
                 data['no_structure'].append(product)
-                if all_product:
+                if all_product and product not in data['product']:
                     data['product'].append(product)
                 continue
                 
@@ -104,10 +104,10 @@ class SaleOrder(orm.Model):
             # -----------------------------------------------------------------            
             if product not in data['product']:
                 total = len(product.dynamic_bom_line_ids)
-                
+                                
                 if not total:
                     data['no_component'].append(product)
-                    if all_product:
+                    if all_product and product not in data['product']:
                         data['product'].append(product)
                     continue
 
@@ -116,6 +116,10 @@ class SaleOrder(orm.Model):
                     component = line.product_id # XXX always present
                     if component not in data['component']:
                         data['component'].append(component)
+                        
+                if product not in data['product']:
+                    data['product'].append(product)
+                        
         return data
         
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -48,7 +48,7 @@ class Parser(report_sxw.rml_parse):
 
     # Method
     def get_db(self, name):
-        return self.__getattribute__(name)
+        return self.master.get(name, [])
 
     def load_objects(self, data):
         ''' Master function for generate data
@@ -61,34 +61,23 @@ class Parser(report_sxw.rml_parse):
         context = {}
         
         sale_order = self.pool.get('sale.order')
-        data = sale_order.get_component_in_product_order_open(
+        self.master = sale_order.get_component_in_product_order_open(
             cr, uid, context=context)
         
-        # Save in object:    
-        self.product = data.get('product')    
-        print self.product
-        self.component = data.get('component')
-        
-        # Error
-        self.no_structure = data.get('no_structure')
-        self.no_product = data.get('no_product')
-        self.no_component = data.get('no_component')
-        
-        # Master data:
-        self.table = [] # reset
-        for product in self.product:
-            record = self.product # TODO manage creation
-            # TODO generate:
-            self.table.append([
-                0.0, # INV
-                0.0, # TCAR
-                0.0, # TSCAR
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, record[2]], # MM
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, record[1]], # OC
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], # OF
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], # SAL
-                key, # Browse product
-                ])
+        self.master['table'] = {}
+        #for product in self.product:
+        #    record = self.product # TODO manage creation
+        #    # TODO generate:
+        #    self.table.append([
+        #        0.0, # INV
+        #        0.0, # TCAR
+        #        0.0, # TSCAR
+        #        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, record[2]], # MM
+        #        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, record[1]], # OC
+        #        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], # OF
+        #        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], # SAL
+        #        key, # Browse product
+        #        ])
         return ''
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

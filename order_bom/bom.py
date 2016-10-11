@@ -83,12 +83,13 @@ class SaleOrder(orm.Model):
             if not product:
                 data['no_product'].append(line) # browse line no product
                 continue
+                
             structure = product.structure_id # Readability
                 
             # -----------------------------------------------------------------
             # Check structure:            
             # -----------------------------------------------------------------            
-            if not structure and product.id not in data['no_structure']:
+            if not structure and product not in data['no_structure']:
                 data['no_structure'].append(product)
                 continue
                 

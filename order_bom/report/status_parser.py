@@ -40,6 +40,7 @@ _logger = logging.getLogger(__name__)
 
 class Parser(report_sxw.rml_parse):
     # Property:
+    table = []
     product = {}
     component = {}
     no_structure = {}
@@ -80,6 +81,18 @@ class Parser(report_sxw.rml_parse):
         self.no_structure = data.get('no_structure')
         self.no_product = data.get('no_product')
         self.no_component = data.get('no_component')
+        
+        for key, value in self.product.iteritems():
+            self.table.append([
+                0.0, # INV
+                0.0, # TCAR
+                0.0, # TSCAR
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], # MM
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], # OC
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], # OF
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], # SAL
+                key, # Browse product
+                ])
         return ''
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

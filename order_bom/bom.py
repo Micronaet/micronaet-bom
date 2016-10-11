@@ -59,8 +59,8 @@ class SaleOrder(orm.Model):
         # ---------------------------------------------------------------------
         data = {
             # Data database
-            'product': {}, # database for product
-            'component': {}, # database for compoment
+            'product': [], # database for product
+            'component': [], # database for compoment
             
             # Check error database:
             'no_product': [],
@@ -97,28 +97,17 @@ class SaleOrder(orm.Model):
             # Save for explode:
             # -----------------------------------------------------------------            
             if product not in data['product']:
-                data['product'][product] = [
-                    len(product.dynamic_bom_line_ids), # total component
-                    0.0, # Remain order
-                    0.0, # produced
-                    ]
+                total = len(product.dynamic_bom_line_ids)
                 
-                if not data['product'][product][0]: # check total element
+                if not total:
                     data['no_component'].append(product)
                     continue
 
-                # TODO Save total informations for product:
-                
                 # Read all component
                 for line in product.dynamic_bom_line_ids:
                     component = line.product_id # XXX always present
                     if component not in data['component']:
-                        data['component'][component] = [
-                            0.0, # Remain order
-                            0.0, # Produced
-                            ]
-                    # TODO save total informations for component:
-                    
+                        data['component'].append(component)
         return data
         
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

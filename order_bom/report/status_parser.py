@@ -82,13 +82,17 @@ class Parser(report_sxw.rml_parse):
         self.no_product = data.get('no_product')
         self.no_component = data.get('no_component')
         
-        for key, value in self.product.iteritems():
+        # Master data:
+        self.table = [] # reset
+        for product in self.product:
+            record = self.product # TODO manage creation
+            # TODO generate:
             self.table.append([
                 0.0, # INV
                 0.0, # TCAR
                 0.0, # TSCAR
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], # MM
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], # OC
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, record[2]], # MM
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, record[1]], # OC
                 [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], # OF
                 [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], # SAL
                 key, # Browse product

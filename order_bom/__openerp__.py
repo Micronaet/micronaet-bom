@@ -40,7 +40,7 @@
     'demo': [],
     'data': [
         'bom_view.xml',
-        'report/bom_view.xml',
+        'report/status_report.xml',
         ],
     'active': False,
     'installable': True,

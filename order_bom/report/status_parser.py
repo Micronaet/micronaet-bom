@@ -51,7 +51,7 @@ class Parser(report_sxw.rml_parse):
     def __init__(self, cr, uid, name, context):        
         super(Parser, self).__init__(cr, uid, name, context)
         self.localcontext.update({
-            'get_objects': self.get_objects,
+            'load_objects': self.load_objects,
             'get_db': self.get_db,
             })
 
@@ -59,7 +59,7 @@ class Parser(report_sxw.rml_parse):
     def get_db(self, name):
         return self.__getattribute__(name)
 
-    def get_objects(self, data):
+    def load_objects(self, data):
         ''' Master function for generate data
         '''
         if data is None:

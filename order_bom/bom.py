@@ -62,6 +62,9 @@ class SaleOrder(orm.Model):
             # Data database
             'product': [], # database for product
             'component': [], # database for compoment
+            # TODO 
+            'order': [], # order header
+            'line': [], # order line
             
             # Check error database:
             'no_product': [],

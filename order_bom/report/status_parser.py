@@ -39,14 +39,6 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 _logger = logging.getLogger(__name__)
 
 class Parser(report_sxw.rml_parse):
-    # Property:
-    table = []
-    product = {}
-    component = {}
-    no_structure = {}
-    no_product = {}
-    no_component = {}
-    
     # Constructor:
     def __init__(self, cr, uid, name, context):        
         super(Parser, self).__init__(cr, uid, name, context)

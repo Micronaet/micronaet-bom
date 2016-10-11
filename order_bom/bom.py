@@ -47,10 +47,11 @@ class SaleOrder(orm.Model):
     #                               UTILITY
     # -------------------------------------------------------------------------
     def get_component_in_product_order_open(
-            self, cr, uid, logfile=False, context=None):
+            self, cr, uid, all_product=False, logfile=False, context=None):
         ''' Check open order and return list of product present
             (for line not closed)
-            chose logfile if report need to log operation
+            all_product: True add all product also no structure and no compon.
+            chose logfile if report need to log operation            
         '''
         line_pool = self.pool.get('sale.order.line')        
         
@@ -91,6 +92,8 @@ class SaleOrder(orm.Model):
             # -----------------------------------------------------------------            
             if not structure and product not in data['no_structure']:
                 data['no_structure'].append(product)
+                if all_product:
+                    data['product'].append(product)
                 continue
                 
             # -----------------------------------------------------------------
@@ -101,6 +104,8 @@ class SaleOrder(orm.Model):
                 
                 if not total:
                     data['no_component'].append(product)
+                    if all_product:
+                        data['product'].append(product)
                     continue
 
                 # Read all component

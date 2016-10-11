@@ -66,6 +66,7 @@ class Parser(report_sxw.rml_parse):
         
         # Save in object:    
         self.product = data.get('product')    
+        print self.product
         self.component = data.get('component')
         
         # Error

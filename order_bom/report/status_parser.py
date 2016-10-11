@@ -64,6 +64,11 @@ class Parser(report_sxw.rml_parse):
         self.master = sale_order.get_component_in_product_order_open(
             cr, uid, context=context)
         
+        # Order product:
+        #self.master['product'] = sorted(
+        #    self.master['product'],
+        #    key=lambda *x: x.default_code,
+        #    )
         self.master['table'] = {}
         #for product in self.product:
         #    record = self.product # TODO manage creation

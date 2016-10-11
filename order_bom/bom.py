@@ -73,7 +73,7 @@ class SaleOrder(orm.Model):
             ('order_id.mx_closed', '=', False), # order open
             ('mx_closed', '=', False), # line open 
             ], context=context)
-            
+
         for line in line_pool.browse(cr, uid, line_ids, context=context):            
             product = line.product_id # Readability:
 
@@ -88,20 +88,22 @@ class SaleOrder(orm.Model):
             # -----------------------------------------------------------------
             # Check structure:            
             # -----------------------------------------------------------------            
-            if not structure:
-                data['no_structure'].append(product.id) # ID
+            if not structure and product.id not in data['no_structure']:
+                data['no_structure'].append(product)
                 continue
                 
             # -----------------------------------------------------------------
             # Save for explode:
             # -----------------------------------------------------------------            
             if product not in data['product']:
-                data['product'][product] = [0, 0.0] # Quantity, Total comp.
+                data['product'][product] = [
+                    len(product.dynamic_bom_line_ids), # total component
+                    0.0, # Remain order
+                    0.0, # produced
+                    ]
                 
-                # Save total elements:
-                data['product'][product][0] = len(product.dynamic_bom_line_ids)
-                if not data['product'][product][0]:
-                    data['no_component'].append(product.id) # ID
+                if not data['product'][product][0]: # check total element
+                    data['no_component'].append(product)
                     continue
 
                 # TODO Save total informations for product:
@@ -110,7 +112,10 @@ class SaleOrder(orm.Model):
                 for line in product.dynamic_bom_line_ids:
                     component = line.product_id # XXX always present
                     if component not in data['component']:
-                        data['component'][component] = 0.0 # Create element
+                        data['component'][component] = [
+                            0.0, # Remain order
+                            0.0, # Produced
+                            ]
                     # TODO save total informations for component:
                     
         return data

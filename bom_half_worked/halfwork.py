@@ -40,6 +40,17 @@ _logger = logging.getLogger(__name__)
 
 class MrpBomLine(orm.Model):
     """ Model name: Bom line
+    """    
+    _inherit = 'mrp.bom'
+    
+    # Used for generate default when start from BOM
+    _columns = {
+        'halfwork_id': fields.many2one(
+            'product.product', 'Halfwork product'),
+        }
+
+class MrpBomLine(orm.Model):
+    """ Model name: Bom line
     """
     
     _inherit = 'mrp.bom.line'

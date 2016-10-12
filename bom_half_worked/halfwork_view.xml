@@ -46,6 +46,42 @@
                 </field>
             </field>
         </record>
+        
+        <record model="ir.ui.view" id="view_product_product_half_tree">
+            <field name="name">product.product.halfwork.tree</field>
+            <field name="model">product.product</field>
+            <field name="arch" type="xml">
+                <tree string="Product Variants">
+                    <field name="halfwork" />
+	                <field name="default_code" />
+	                <field name="name" />
+	                <field name="lst_price" />
+	                <field name="price" />
+	                <field name="uom_id" />
+	                <field name="ean13" />
+                    <field name="half_bom_id" />
+	                <field name="product_tmpl_id" invisible="1"/>
+	                <field name="state" invisible="1" />
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_halfwork">
+            <field name="name">Halfworked</field>
+            <field name="res_model">product.product</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_product_product_half_tree"/>
+            <field name="context">{'default_halfwork': True}</field>
+            <field name="domain">[('halfwork', '=', True)]</field>
+        </record>
+        <menuitem 
+            parent="base.menu_product" 
+            id="menu_halfwork_product" 
+            sequence="50"
+            action="action_halfwork"
+            />
+        
     </data>
 </openerp>
 

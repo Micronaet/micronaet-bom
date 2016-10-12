@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ###############################################################################
 #
 #    Copyright (C) 2001-2014 Micronaet SRL (<http://www.micronaet.it>).
@@ -16,37 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+from . import explode_parser
 
-{
-    'name': 'Order BOM explode report',
-    'version': '0.1',
-    'category': 'Report',
-    'description': '''
-        Manage report for order product
-        ''',
-    'author': 'Micronaet S.r.l. - Nicola Riolini',
-    'website': 'http://www.micronaet.it',
-    'license': 'AGPL-3',
-    'depends': [
-        'base',
-        'product',
-        'sale',
-        'mrp',
-        'report_aeroo',
-        'order_bom',
-        ],
-    'init_xml': [],
-    'demo': [],
-    'data': [
-        #'security/xml_groups.xml',
-        #'security/ir.model.access.csv',        
-        
-        'bom_explode_view.xml',
-        'report/explode_report.xml',
-        #'wizard/report_wizard_view.xml',
-        #'scheduler.xml',
-        ],
-    'active': False,
-    'installable': True,
-    'auto_install': False,
-    }
+
+# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

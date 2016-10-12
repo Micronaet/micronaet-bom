@@ -118,8 +118,7 @@ class SaleOrder(orm.Model):
                         data['component'].append(component)
                         
                 if product not in data['product']:
-                    data['product'].append(product)
-                        
+                    data['product'].append(product)                        
         return data
         
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

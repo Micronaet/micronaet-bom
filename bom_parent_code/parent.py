@@ -97,13 +97,26 @@ class MRPBom(orm.Model):
             Create move in dynamic
         '''
         assert len(ids) == 1, 'Works only with one record a time'
-
+        
+        import pdb; pdb.set_trace()
+        # Pool used
         line_pool = self.pool.get('mrp.bom.line')
         product_pool = self.pool.get('product.product')
-        
         bom_proxy = self.browse(cr, uid, ids, context=context)[0]
-        
+
         log = ''
+        
+        try:
+            dynamic_bom_id = \
+                bom_proxy.product_id.structure_id.dynamic_bom_id.id
+            structure_id = bom_proxy.product_id.structure_id.id
+        except:
+            # no dynamic BOM
+            log += '???|||%s|No dynamic bom structure\n' % ( 
+                bom_proxy.name,
+                )
+            return log
+                    
         # ---------------------------------------------------------------------
         # Create dynamic mask from code:
         # ---------------------------------------------------------------------
@@ -166,6 +179,7 @@ class MRPBom(orm.Model):
                 default_code = product_pool.browse(
                     cr, uid, pr_ids, context=context)[0]
         default_code = bom_proxy.product_id.default_code
+        
         if not default_code:
             log += '???|%s||%s|No codice x BOM\n' % ( 
                 len(bom_proxy.bom_line_ids),
@@ -174,11 +188,15 @@ class MRPBom(orm.Model):
             return log
             
         default_code = default_code.upper()
+        
         # Set mask for unique element S and no S are the same
         if default_code[12:13] == 'S':
             dynamic_mask = default_code[:12] + '%'
         else:
             dynamic_mask = default_code + '%'
+            
+        #dynamic_mask = default_code # XXX use code, maybe optimize manually
+        
         log += '%s|%s|%s|%s\n' % (
             default_code, 
             len(bom_proxy.bom_line_ids),
@@ -259,6 +277,66 @@ class MRPBom(orm.Model):
             else:        
                 log += '||||%s|%s|%s|Non trovato in ODOO|%s|NO\n' % (
                     component_code, HW_code, product_qty, comment)
+            
+            # -----------------------------------------------------------------
+            # Create / Update component product and BOM (halfwork)
+            # -----------------------------------------------------------------
+            HW_ids = product_pool.search(cr, uid, [
+                ('default_code', '=', HW_code)], context=context)
+            if HW_ids:
+                if len(HW_ids) > 1:
+                    log += '||||%s|%s|%s||SI||%s\n' % (
+                        component_code, HW_code, product_qty, 'more than one')
+                HW_id = Hw_ids[0]
+                
+                # Update some data:
+                product_pool.write(cr, uid, HW.ids, {
+                    'halfwork': True,       
+                    }, context=context)
+                    
+                # TODO update bom lines?
+            else: 
+                HW_id = product_pool.create(cr, uid, {
+                    'name': HW_code,
+                    'default_code': HW_code,
+                    'halfwork': True,
+                    'structure_id': structure_id,
+                    'uom_id': 1, # XXX NR
+                    'ean13_auto': False, # XXX
+                    }, context=context)
+                    
+                # -------------------------------------------------------------
+                # Create / Update fabric under HW component
+                # -------------------------------------------------------------
+                product_pool.create_product_half_bom(
+                    self, cr, uid, [HW_id], context=context)
+                
+                # Read again product:
+                HW_proxy = product_pool.browse(cr, uid, HW_id, context=context)    
+                line_pool.create(cr, uid, {
+                    # Link:
+                    'bom_id': HW_proxy.helf_bom_id.id, # bom link
+                    'half_bom_id': HW_proxy.id, # product link
+                    
+                    # Fabric data:
+                    'product_id': line.product_id.id, 
+                    'product_uom': line.uom_id.id, 
+                    'type': line.type,
+                    'product_qty': line.product_qty,
+                    }, context=context)
+                    
+                
+            
+            
+            # -----------------------------------------------------------------
+            # Create / Update rule in dynamic:
+            # -----------------------------------------------------------------
+            line_ids = line_pool.search(cr, uid, [
+                ('bom_id', '=', dynamic_bom_id), # dynamic bom for structure
+                ('dynamic_mask', '=', dynamic_mask), # mask
+                ('product_id', '=', ), 
+                ], context=context)
+                        
         print log        
         return log            
 

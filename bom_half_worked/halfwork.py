@@ -55,9 +55,32 @@ class ProductProduct(orm.Model):
     
     _inherit = 'product.product'
     
+    def create_product_half_bom(self, cr, uid, ids, context=None):
+        ''' Create BOM for halfworked         
+        '''        
+        assert len(ids) == 1, 'Works only with one record a time'
+        bom_pool = self.pool.get('mrp.bom')
+        
+        product_proxy = self.browse(cr, uid, ids, context=context)[0]
+        bom_id = bom_pool.create(cr, uid, {
+            'product_tmpl_id': product_proxy.product_tmpl_id.id,
+            'product_id': product_proxy.id,
+            'bom_category': 'half',
+            'product_qty': 1.0,
+            'code': product_proxy.default_code,
+            'type': 'normal',
+            'product_uom': product_proxy.uom_id.id,
+            }, context=context)
+        return self.write(cr, uid, ids, {
+            'half_bom_id': bom_id,
+            }, context=context)
+        
+        
     _columns = {
         'halfwork': fields.boolean('Halworked', 
             help='Manage BOM directly in product'),
+        'half_bom_id': fields.many2one(
+            'mrp.bom', 'Half BOM'),
         'half_bom_ids': fields.one2many(
             'mrp.bom.line', 'halfwork_id', 
             'Halfwork component'),

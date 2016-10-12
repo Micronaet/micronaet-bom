@@ -81,6 +81,7 @@ class ProductProduct(orm.Model):
             'code': product_proxy.default_code,
             'type': 'normal',
             'product_uom': product_proxy.uom_id.id,
+            'halfwork_id': product_proxy.id,
             }, context=context)
         return self.write(cr, uid, ids, {
             'half_bom_id': bom_id,

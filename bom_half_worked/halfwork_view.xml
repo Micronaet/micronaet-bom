@@ -36,13 +36,13 @@
             <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
             <field name="arch" type="xml">
                 <field name="product_tmpl_id" position="after">
-                   <field name="half_bom_id" invisible="1"/>  
+                   <field name="halfwork_id" invisible="1"/>  
                 </field>
                 <xpath expr="//field[@name='bom_line_ids']/tree/field[@name='product_id']" position="after">
                    <field name="halfwork_id" invisible="1"/>                    
                 </xpath>
                 <field name="bom_line_ids" position="attributes">
-                    <attribute name="context">{'default_halfwork_id': half_bom_id}</attribute>
+                    <attribute name="context">{'default_halfwork_id': halfwork_id}</attribute>
                 </field>
             </field>
         </record>

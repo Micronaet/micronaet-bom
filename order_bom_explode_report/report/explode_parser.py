@@ -102,7 +102,7 @@ class Parser(report_sxw.rml_parse):
 
         products = {}
         moved = [] # TODO used?
-        for product in product_data['product']: # browse result
+        for product in product_data['component']: # browse result
             # TODO check component with selection?
             
             products[product.default_code] = [

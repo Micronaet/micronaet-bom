@@ -13,10 +13,12 @@
                 <xpath expr="//page[2]" position="after">
                     <page string="Halfwork BOM" attrs="{'invisible': [('halfwork','=',False)]}"> 
                         <group colspan="4" col="4">
-                            <button name="create_product_half_bom" string="Create halfworked BOM" type="object" attrs="{'invisible': [('half_bom_id','!=',False)]}"/>
                             <field name="half_bom_id" attrs="{'invisible': [('half_bom_id','=',False)]}"/>
-                            <field name="half_bom_ids" attrs="{'invisible': [('half_bom_id','=',False)]}">
-                                <tree string="Half BOM component" editable="bottom" nolabel="1" context="{'default_bom_id': half_bom_id}">
+                            <button name="create_product_half_bom" string="Create halfworked BOM" type="object" attrs="{'invisible': [('half_bom_id','!=',False)]}"/>
+                            
+                            <field name="half_bom_ids" attrs="{'invisible': [('half_bom_id','=',False)]}" colspan="4" context="{'default_bom_id': half_bom_id}">
+                                <tree string="Half BOM component" editable="bottom" nolabel="1">
+                                    <field name="bom_id" invisible="1"/>
                                     <field name="product_id"/>
                                     <field name="product_qty" />
                                 </tree>

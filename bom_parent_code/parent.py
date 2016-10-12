@@ -216,7 +216,7 @@ class MRPBom(orm.Model):
                 if default_code[5:6] == 'B':
                     fabric_code = default_code[3:5]
                 else:    
-                    fabric_code = default_code[3:6],
+                    fabric_code = default_code[3:6]
             
             # Color code        
             color_code = default_code[8:12]

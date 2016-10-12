@@ -101,7 +101,7 @@ class Parser(report_sxw.rml_parse):
         product_ids = sale_pool.get_component_in_product_order_open(
             self, cr, uid, context=context)
         #    product_pool.search(self.cr, self.uid, [
-        #    ('default_code', '=ilike', 'T%'), # TODO change when generic report
+        #    ('default_code', '=ilike', 'T%'),# TODO change when generic report
         #    ('not_in_report', '=', False),
         #    ])
 
@@ -109,7 +109,7 @@ class Parser(report_sxw.rml_parse):
         moved = [] # TODO used?
         for product in product_pool.browse(
                 cr, uid, product_ids):
-            # TODO check fabric with selection?
+            # TODO check component with selection?
             
             products[product.default_code] = [
                 # Reset counter for this product    
@@ -204,7 +204,7 @@ class Parser(report_sxw.rml_parse):
                         block, 'USED', pick.name, pick.origin,
                         pick.date, pos, '', product_code, # Prod is MP
                         '', ('%s' % -qty).replace('.', ','), # MM
-                        0, 0, 'Direct sale of fabric (ADD IN TSCAR)',
+                        0, 0, 'Direct sale of component (ADD IN TSCAR)',
                         ))
                     continue    
                 
@@ -237,7 +237,7 @@ class Parser(report_sxw.rml_parse):
                         debug_mm.write(mask % (
                             block, 'NOT USED', pick.name, pick.origin,
                             pick.date, pos, product_code, default_code,
-                            '', 0, 0, 0, 'Warn. fabric not in BOM',
+                            '', 0, 0, 0, 'Warn. component not in BOM',
                             ))            
                         continue
                                         
@@ -287,7 +287,7 @@ class Parser(report_sxw.rml_parse):
                         block, 'NOT USED', pick.name, pick.origin, pick.date,
                         pos, '', # product_code
                         default_code, '', 0, 0, 0,
-                        'OF / BF Warn. Code not in fabric',
+                        'OF / BF Warn. Code not in component',
                         )) 
                     continue
 
@@ -392,15 +392,15 @@ class Parser(report_sxw.rml_parse):
                         ))                      
                     continue
 
-                # Check for fabric order:
-                if product_code in products: # OC out fabric (no prod.):
+                # Check for component order:
+                if product_code in products: # OC out component (no prod.):
                     products[product_code][4][pos] -= remain # OC block
                     debug_mm.write(mask % (
                         block, 'USED', order.name, '', date, pos, '', # code
                         product_code, # MP
                         '', 0, # +MM
                         ('%s' % remain).replace('.', ','), # -OC
-                        0, 'FABRIC DIRECT',
+                        0, 'COMPONENT DIRECT',
                         ))                      
                     continue
                 
@@ -456,35 +456,26 @@ class Parser(report_sxw.rml_parse):
                                 date, pos, product_code, default_code, # MP
                                 '', 0, # +MM
                                 0, # -OC
-                                0, 'ERROR FABRIC NOT IN DATABASE!',
+                                0, 'ERROR COMPONENT NOT IN DATABASE!',
                                 ))                      
                             continue
                             
                         # XXX Jump closed line?
                             
-                        qty = move_qty * fabric.product_qty
+                        qty = move_qty * component.product_qty
                         products[default_code][4][pos] -= qty # OC block
                         
                         debug_mm.write(mask % (
-                            block,
-                            'USED',
-                            order.name,
-                            '',
-                            date,
-                            pos,
-                            product_code,
-                            default_code,
+                            block, 'USED', order.name, '', date, pos,
+                            product_code, default_code,
                             '%s x %s' % (
                                 move_qty, 
-                                fabric.product_qty,
+                                component.product_qty,
                                 ),
                             0, # +MM
                             ('%s' % qty).replace('.', ','), # +OC
                             0,
-                            '[BOM # %s] REMAIN OC [%s]' % ( 
-                                i,
-                                note,
-                                )
+                            '[BOM # %s] REMAIN OC [%s]' % (i, note)
                             ))                      
                         continue
 
@@ -505,9 +496,9 @@ class Parser(report_sxw.rml_parse):
                     i = 0
                     
                     double_check = []
-                    for fabric in boms[product_code].bom_line_ids:                                                  
+                    for component in product.dynamic_bom_line_ids:                                                  
                         i += 1
-                        default_code = fabric.product_id.default_code # XXX                 
+                        default_code = component.product_id.default_code # XXX                 
                         if default_code in double_check:
                             _logger.error(
                                 'BOM double problem: %s' % product_code)
@@ -517,62 +508,48 @@ class Parser(report_sxw.rml_parse):
                             
                         if default_code not in products:
                             debug_mm.write(mask % (
-                                block,
-                                'NOT USED',
-                                order.name,
-                                '',
-                                date,
-                                pos,
-                                product_code,
-                                default_code, # MP
-                                '',
-                                0, # +MM
+                                block, 'NOT USED', order.name, '', date, pos,
+                                product_code, default_code, # MP
+                                '', 0, # +MM
                                 0, # -OC
-                                0,
-                                'ERROR FABRIC NOT IN DATABASE (REMAIN B)!',
+                                0, 'ERROR COMPON. NOT IN DATABASE (REMAIN B)!',
                                 ))                      
                             continue
                         
-                        qty = move_qty * fabric.product_qty
+                        qty = move_qty * component.product_qty
                         products[default_code][3][pos] -= qty # - MM block
                         products[default_code][2] -= qty # TSCAR
 
                         debug_mm.write(mask % (
-                            block,
-                            'USED',
-                            order.name,
-                            '',
-                            date,
-                            pos,
-                            product_code,
-                            default_code,
+                            block, 'USED', order.name, '', date, pos,
+                            product_code, default_code,
                             '%s x %s' % (
                                 move_qty, 
-                                fabric.product_qty,
+                                component.product_qty,
                                 ),
                             ('%s' % -qty).replace('.', ','), # -MM
                             0, # +OC
                             0,
                             '[BOM #: %s] PROD TO DELIV (B-DEL.) TSCAR %s' % (
-                                i,
-                                note,
-                                )
+                                i, note),
                             ))                      
                         continue
 
-        # Prepare data for report:     
+        # ---------------------------------------------------------------------
+        # Prepare data for report:
+        # ---------------------------------------------------------------------
         res = []
         self.jumped = []
         for key in sorted(products, key=lambda products: '%s%s%s' % (
-                products[0:3] or '   ',
-                products[6:12] or '      ',
-                products[3:6] or '   ',
+                products[0:3] or ' ' * 3,
+                products[6:12] or ' ' * 6,
+                products[3:6] or ' ' * 3,
                 )):
             current = products[key] # readability:
             total = 0.0 # INV 0.0
             
             # NOTE: INV now is 31/12 next put Sept.
-            #inv_pos = 3 # December
+            # inv_pos = 3 # December
             inv_pos = 0 # September
             jumped = False
             for i in range(0, 12):

@@ -53,7 +53,7 @@ class SaleOrder(orm.Model):
             all_product: True add all product also no structure and no compon.
             chose logfile if report need to log operation            
         '''
-        line_pool = self.pool.get('sale.order.line')        
+        line_pool = self.pool.get('sale.order.line')
         
         # ---------------------------------------------------------------------
         # Database:

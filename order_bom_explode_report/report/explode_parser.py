@@ -100,7 +100,7 @@ class Parser(report_sxw.rml_parse):
         
         product_ids = sale_pool.get_component_in_product_order_open(
             self, cr, uid, context=context)
-        #    product_pool.search(self.cr, self.uid, [
+        #    product_pool.search(cr, self.uid, [
         #    ('default_code', '=ilike', 'T%'),# TODO change when generic report
         #    ('not_in_report', '=', False),
         #    ])
@@ -130,9 +130,9 @@ class Parser(report_sxw.rml_parse):
         # Get parameters for search:
         # =====================================================================
         company_pool = self.pool.get('res.company')
-        company_ids = company_pool.search(self.cr, self.uid, [])
+        company_ids = company_pool.search(cr, uid, [])
         company_proxy = company_pool.browse(
-            self.cr, self.uid, company_ids)[0]
+            cr, uid, company_ids)[0]
             
         # Exclude partner list:
         exclude_partner_ids = []
@@ -169,7 +169,7 @@ class Parser(report_sxw.rml_parse):
             #stock_report_unload_ids:
             out_picking_type_ids.append(item.id)
             
-        pick_ids = pick_pool.search(self.cr, self.uid, [     
+        pick_ids = pick_pool.search(cr, uid, [     
             ('picking_type_id', 'in', out_picking_type_ids),
             ('partner_id', 'not in', exclude_partner_ids), # current company
             
@@ -266,7 +266,7 @@ class Parser(report_sxw.rml_parse):
             #stock_report_load_ids:
             in_picking_type_ids.append(item.id)
             
-        pick_ids = pick_pool.search(self.cr, self.uid, [     
+        pick_ids = pick_pool.search(cr, uid, [     
             ('picking_type_id', 'in', in_picking_type_ids),            
             ('partner_id', 'not in', exclude_partner_ids),            
             # check data date (old method
@@ -276,7 +276,7 @@ class Parser(report_sxw.rml_parse):
             # TODO state filter
             ])
             
-        for pick in pick_pool.browse(self.cr, self.uid, pick_ids):
+        for pick in pick_pool.browse(cr, uid, pick_ids):
             pos = get_position_season(pick.date) # for done cols  (min_date?)
             for line in pick.move_lines:
                 default_code = line.product_id.default_code                              
@@ -352,7 +352,7 @@ class Parser(report_sxw.rml_parse):
         #                  UNLOAD ORDER (NON DELIVERED)
         # =====================================================================
         block = 'OC (not delivered)'
-        order_ids = sale_pool.search(self.cr, self.uid, [
+        order_ids = sale_pool.search(cr, self.uid, [
             ('state', 'not in', ('cancel', 'send', 'draft')),
             ('pricelist_order', '=', False),
             ('partner_id', 'not in', exclude_partner_ids),            
@@ -361,7 +361,7 @@ class Parser(report_sxw.rml_parse):
             # TODO no partner exclusion
             ])
             
-        for order in sale_pool.browse(self.cr, self.uid, order_ids):
+        for order in sale_pool.browse(cr, self.uid, order_ids):
             for line in order.order_line:
                 product_code = line.product_id.default_code                              
 
@@ -420,7 +420,7 @@ class Parser(report_sxw.rml_parse):
                 # Check ordered    
                 # XXX mettere il solito test (forse no) ???????????????????????
                 if line.product_uom_maked_sync_qty: # Remain order to produce:
-                    move_qty = line.product_uom_qty - 
+                    move_qty = line.product_uom_qty - \
                         line.product_uom_maked_sync_qty
                     note = 'Remain order with production (OC - B)'
                 else: # No production: # Remain ordered to delivery:

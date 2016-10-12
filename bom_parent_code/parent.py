@@ -147,6 +147,13 @@ class MRPBom(orm.Model):
             'TES': 'TL',
             'TEX': 'TL',
             
+            # Non usati:
+            'TXM': 'TL',
+            'TWH': 'TL',
+            'TXR': 'TL',
+            'TJO': 'TL',
+            'TIO': 'TL',
+            
             'TSK': 'MT',
             'T3D': 'MT',
             }    

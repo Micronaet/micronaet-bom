@@ -82,7 +82,7 @@ class MRPBom(orm.Model):
         log_f = open(os.path.expanduser('~/bom.csv'), 'w')
 
         dimension_db = {}        
-        for item in product_ids:
+        for item in product_ids: #XXX ids:
             message = self.migrate_assign_product_bom_product1(
                 cr, uid, [item], dimension_db, context=context)
             log_f.write(message)    
@@ -98,7 +98,6 @@ class MRPBom(orm.Model):
         '''
         assert len(ids) == 1, 'Works only with one record a time'
         
-        import pdb; pdb.set_trace()
         # Pool used
         line_pool = self.pool.get('mrp.bom.line')
         product_pool = self.pool.get('product.product')
@@ -239,7 +238,7 @@ class MRPBom(orm.Model):
             else:
                 # Default code:                
                 if default_code[5:6] == 'B':
-                    fabric_code = default_code[3:5]
+                    fabric_code = default_code[3:5] + ' '
                 else:    
                     fabric_code = default_code[3:6]
             
@@ -277,24 +276,26 @@ class MRPBom(orm.Model):
             else:        
                 log += '||||%s|%s|%s|Non trovato in ODOO|%s|NO\n' % (
                     component_code, HW_code, product_qty, comment)
-            
-            # -----------------------------------------------------------------
+                    
+        print log        
+        return log     
+        """     # -----------------------------------------------------------------
             # Create / Update component product and BOM (halfwork)
             # -----------------------------------------------------------------
             HW_ids = product_pool.search(cr, uid, [
                 ('default_code', '=', HW_code)], context=context)
+             
             if HW_ids:
                 if len(HW_ids) > 1:
                     log += '||||%s|%s|%s||SI||%s\n' % (
                         component_code, HW_code, product_qty, 'more than one')
-                HW_id = Hw_ids[0]
+                HW_id = HW_ids[0]
                 
                 # Update some data:
                 product_pool.write(cr, uid, HW.ids, {
                     'halfwork': True,       
-                    }, context=context)
-                    
-                # TODO update bom lines?
+                    'half_bom_ids': [(6, False, ())], # XXX remove line
+                    }, context=context)                
             else: 
                 HW_id = product_pool.create(cr, uid, {
                     'name': HW_code,
@@ -305,28 +306,26 @@ class MRPBom(orm.Model):
                     'ean13_auto': False, # XXX
                     }, context=context)
                     
-                # -------------------------------------------------------------
-                # Create / Update fabric under HW component
-                # -------------------------------------------------------------
-                product_pool.create_product_half_bom(
-                    self, cr, uid, [HW_id], context=context)
-                
-                # Read again product:
-                HW_proxy = product_pool.browse(cr, uid, HW_id, context=context)    
-                line_pool.create(cr, uid, {
-                    # Link:
-                    'bom_id': HW_proxy.helf_bom_id.id, # bom link
-                    'half_bom_id': HW_proxy.id, # product link
-                    
-                    # Fabric data:
-                    'product_id': line.product_id.id, 
-                    'product_uom': line.uom_id.id, 
-                    'type': line.type,
-                    'product_qty': line.product_qty,
-                    }, context=context)
-                    
-                
+            # -------------------------------------------------------------
+            # Create / Update fabric under HW component
+            # -------------------------------------------------------------
+            # Launch button:
+            product_pool.create_product_half_bom(
+                self, cr, uid, [HW_id], context=context)
             
+            # Read again product:
+            HW_proxy = product_pool.browse(cr, uid, HW_id, context=context)    
+            line_pool.create(cr, uid, {
+                # Link:
+                'bom_id': HW_proxy.helf_bom_id.id, # bom link
+                'half_bom_id': HW_proxy.id, # product link
+                
+                # Fabric data:
+                'product_id': line.product_id.id, 
+                'product_uom': line.uom_id.id, 
+                'type': line.type,
+                'product_qty': line.product_qty,
+                }, context=context)
             
             # -----------------------------------------------------------------
             # Create / Update rule in dynamic:
@@ -338,32 +337,8 @@ class MRPBom(orm.Model):
                 ], context=context)
                         
         print log        
-        return log            
+        return log"""
 
-        # ---------------------------------------------------------------------
-        # Create TL BOM:
-        # ---------------------------------------------------------------------
-        
-        
-        # ---------------------------------------------------------------------
-        # Create rule in dynamic:
-        # ---------------------------------------------------------------------
-        structure = bom_proxy.product_id.structure_id
-                
-        #for line in bom_proxy.bom_line_ids:
-        #    line_pool.create(cr, uid, {
-        #        'bom_id': structure.dynamic_bom_id.id,
-        #        'product_id': line.product_id.id,
-        #        'dynamic_mask': '%s%s' % (bom_proxy.product_id.code, '%'), # TODO remove S finale
-        #        'product_qty': line.product_qty,
-        #        'product_uom': line.product_uom.id,                                
-        #        }, context=context)
-        
-        # Move in to be remove category
-        #self.write(cr, uid, ids, {
-        #    'bom_category': 'remove',
-        #    }, context=context)
-        return True
     # EXTRA BLOCK -------------------------------------------------------------
         
     def get_config_parameter_list(self, cr, uid, context=None):

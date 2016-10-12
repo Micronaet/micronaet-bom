@@ -81,7 +81,6 @@ class Parser(report_sxw.rml_parse):
                 return month - 9
             # january = 4    
             return month + 3    
-            
         cr = self.cr
         uid = self.uid
         context = {}    
@@ -98,22 +97,17 @@ class Parser(report_sxw.rml_parse):
         sale_pool = self.pool.get('sale.order')
         bom_pool = self.pool.get('mrp.bom')
         
-        product_ids = sale_pool.get_component_in_product_order_open(
-            self, cr, uid, context=context)
-        #    product_pool.search(cr, self.uid, [
-        #    ('default_code', '=ilike', 'T%'),# TODO change when generic report
-        #    ('not_in_report', '=', False),
-        #    ])
+        product_data = sale_pool.get_component_in_product_order_open(
+            cr, uid, context=context)
 
         products = {}
         moved = [] # TODO used?
-        for product in product_pool.browse(
-                cr, uid, product_ids):
+        for product in product_data['product']: # browse result
             # TODO check component with selection?
             
             products[product.default_code] = [
                 # Reset counter for this product    
-                product.inventory_start, # inv
+                product.inventory_start or 0.0, # inv
                 0.0, # tcar
                 0.0, # tscar
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # MM

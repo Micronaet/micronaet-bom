@@ -165,6 +165,8 @@ class MRPBom(orm.Model):
             'TXR': 'TL',
             'TJO': 'TL',
             'TIO': 'TL',
+            'TWL': 'TL',
+            'TGT': 'TL',           
             
             'TSK': 'MT',
             'T3D': 'MT',

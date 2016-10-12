@@ -144,7 +144,11 @@ class MRPBom(orm.Model):
             }
             
         type_map = {
+            'TES': 'TL',
+            'TEX': 'TL',
             
+            'TSK': 'MT',
+            'T3D': 'MT',
             }    
             
         if not bom_proxy.product_id:
@@ -185,9 +189,10 @@ class MRPBom(orm.Model):
             if not component_code:
                 log += '|||%s||No codice componente\n' % bom_proxy.name
                 return log
+            component_code = component_code.upper()
             
             # Type code:
-            type_code = 'TL'
+            #type_code = 'TL'
             
             # Parent code:
             parent = default_code[:3]
@@ -200,6 +205,8 @@ class MRPBom(orm.Model):
             else: 
                 # Default code:    
                 parent_code = code_map.get(parent, parent)
+                type_code = type_map.get(component_code[:3], False)
+                
             
             #Fabric code:
             if parent in ('810', '081', '085', '084'):
@@ -215,7 +222,7 @@ class MRPBom(orm.Model):
             color_code = default_code[8:12]
             
             HW_code = '%s%s%s%s' % (
-                type_code,
+                type_code or '??',
                 parent_code,
                 fabric_code, 
                 color_code,
@@ -228,10 +235,13 @@ class MRPBom(orm.Model):
             if HW_code not in dimension_db:
                dimension_db[HW_code] = product_qty
             
+            comment = ''
             if product_qty != dimension_db[HW_code]:
-                comment = 'Differenze di metratura!!!!'
-            else:
-                comment = ''
+                comment += 'Differenze di metratura!!!!'
+                
+            if not type_code:
+                comment += 'Non trovato il tipo MT o TL?'
+
             if component_ids:
                 if len(component_ids) > 1:
                     log += '||||%s|%s|%s|Piu componenti|NO|%s\n' % (

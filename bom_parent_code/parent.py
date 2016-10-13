@@ -200,8 +200,6 @@ class MRPBom(orm.Model):
             dynamic_mask = default_code[:12] + '%'
         else:
             dynamic_mask = default_code + '%'
-            
-        #dynamic_mask = default_code # XXX use code, maybe optimize manually
         
         log += '\n%s|%s|%s|%s\n' % (
             default_code, 
@@ -218,7 +216,7 @@ class MRPBom(orm.Model):
         for line in bom_proxy.bom_line_ids:
             component_code = line.product_id.default_code
             if not component_code:
-                log += '|%s||%s||No codice componente\n' % (
+                log += '%s|||%s||No codice componente\n' % (
                     default_code, bom_proxy.name)
                 return log
             component_code = component_code.upper()
@@ -253,7 +251,9 @@ class MRPBom(orm.Model):
                     fabric_code = default_code[3:6]
             
             # Color code        
-            color_code = default_code[8:12]
+            color_code = default_code[8:12].strip()
+            if len(color_code) == 1:
+                comment += 'Codice colore 1 carattere'
             
             HW_code = '%s%s%s%s' % (
                 type_code or '??',
@@ -277,15 +277,15 @@ class MRPBom(orm.Model):
 
             if component_ids:
                 if len(component_ids) > 1:
-                    log += '|%s|||%s|%s|%s|Piu componenti|NO|%s\n' % (
+                    log += '%s||||%s|%s|%s|Piu componenti|NO|%s\n' % (
                         default_code,
                         component_code, HW_code, product_qty, comment)
                 else:
-                    log += '|%s|||%s|%s|%s||SI||%s\n' % (
+                    log += '%s||||%s|%s|%s||SI||%s\n' % (
                         default_code,
                         component_code, HW_code, product_qty, comment)
             else:        
-                log += '|%s|||%s|%s|%s|Non trovato in ODOO|%s|NO\n' % (
+                log += '%s||||%s|%s|%s|Non trovato in ODOO|%s|NO\n' % (
                     default_code,
                     component_code, HW_code, product_qty, comment)
             

@@ -82,7 +82,7 @@ class MRPBom(orm.Model):
         log_f = open(os.path.expanduser('~/bom.csv'), 'w')
 
         dimension_db = {}        
-        for item in ids:# product_ids: #XXX ids:
+        for item in product_ids: #XXX ids:
             message = self.migrate_assign_product_bom_product1(
                 cr, uid, [item], dimension_db, context=context)
             log_f.write(message)    
@@ -170,7 +170,12 @@ class MRPBom(orm.Model):
             
             'TSK': 'MT',
             'T3D': 'MT',
-            }    
+            }
+             
+        code6_map = {
+            # TODO 
+            #'TL127S': 'TL127PO'
+            }
             
         if not bom_proxy.product_id:
             pr_ids = product_pool.search(cr, uid, [
@@ -182,7 +187,7 @@ class MRPBom(orm.Model):
         default_code = bom_proxy.product_id.default_code
         
         if not default_code:
-            log += '???|%s||%s|No codice x BOM\n' % ( 
+            log += '\n???|%s||%s|No codice x BOM\n' % ( 
                 len(bom_proxy.bom_line_ids),
                 bom_proxy.name,
                 )
@@ -198,7 +203,7 @@ class MRPBom(orm.Model):
             
         #dynamic_mask = default_code # XXX use code, maybe optimize manually
         
-        log += '%s|%s|%s|%s\n' % (
+        log += '\n%s|%s|%s|%s\n' % (
             default_code, 
             len(bom_proxy.bom_line_ids),
             dynamic_mask, 
@@ -213,10 +218,13 @@ class MRPBom(orm.Model):
         for line in bom_proxy.bom_line_ids:
             component_code = line.product_id.default_code
             if not component_code:
-                log += '|||%s||No codice componente\n' % bom_proxy.name
+                log += '|%s||%s||No codice componente\n' % (
+                    default_code, bom_proxy.name)
                 return log
             component_code = component_code.upper()
             
+            comment = ''
+
             # Type code:
             #type_code = 'TL'
             
@@ -226,7 +234,7 @@ class MRPBom(orm.Model):
                 type_code = 'PVC6LU'
                 parent_code = ''
             elif parent in ('084', ):
-                type_code = 'PVC6P'
+                type_code = 'PVC6OP'
                 parent_code = ''
             else: 
                 # Default code:    
@@ -239,8 +247,8 @@ class MRPBom(orm.Model):
                 fabric_code = ''
             else:
                 # Default code:                
-                if default_code[5:6] == 'B':
-                    fabric_code = default_code[3:5] + ' '
+                if default_code[4:5] == 'B' or default_code[5:6] == 'B':
+                    fabric_code = default_code.replace('B', ' ')
                 else:    
                     fabric_code = default_code[3:6]
             
@@ -261,7 +269,6 @@ class MRPBom(orm.Model):
             if HW_code not in dimension_db:
                dimension_db[HW_code] = product_qty
             
-            comment = ''
             if product_qty != dimension_db[HW_code]:
                 comment += 'Differenze di metratura!!!!'
                 
@@ -270,17 +277,20 @@ class MRPBom(orm.Model):
 
             if component_ids:
                 if len(component_ids) > 1:
-                    log += '||||%s|%s|%s|Piu componenti|NO|%s\n' % (
+                    log += '|%s|||%s|%s|%s|Piu componenti|NO|%s\n' % (
+                        default_code,
                         component_code, HW_code, product_qty, comment)
                 else:
-                    log += '||||%s|%s|%s||SI||%s\n' % (
+                    log += '|%s|||%s|%s|%s||SI||%s\n' % (
+                        default_code,
                         component_code, HW_code, product_qty, comment)
             else:        
-                log += '||||%s|%s|%s|Non trovato in ODOO|%s|NO\n' % (
+                log += '|%s|||%s|%s|%s|Non trovato in ODOO|%s|NO\n' % (
+                    default_code,
                     component_code, HW_code, product_qty, comment)
             
-            # TODO print log; return log        
-            
+        print log; return log        
+        """    
             # -----------------------------------------------------------------
             # Create / Update component product and BOM (halfwork)
             # -----------------------------------------------------------------
@@ -289,7 +299,8 @@ class MRPBom(orm.Model):
              
             if HW_ids: # Update halfcomponent product (and delete line)
                 if len(HW_ids) > 1:
-                    log += '||||%s|%s|%s||SI||%s\n' % (
+                    log += '|%s|||%s|%s|%s||SI||%s\n' % (
+                        default_code,
                         component_code, HW_code, product_qty, 'more than one')
                         
                 HW_id = HW_ids[0]
@@ -354,7 +365,7 @@ class MRPBom(orm.Model):
                     }, context=context)
                             
         print log        
-        return log
+        return log"""
 
     # EXTRA BLOCK -------------------------------------------------------------
         

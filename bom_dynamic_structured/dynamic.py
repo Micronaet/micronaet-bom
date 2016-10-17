@@ -77,8 +77,13 @@ class MrpBomCategoryLine(orm.Model):
         'sequence': fields.integer('Sequence', required=True),
         'category_id': fields.many2one(
             'mr.bom.structure.category', 'Category', required=False),
-        'total': fields.integer('Total', required=True),    
         'structure_id': fields.many2one('mrp.bom.structure', 'Structure'),
+        'product_id': fields.many2one(
+            'product.product', 'Default product', required=False),
+        'quantity': fields.integer('Q.ty', required=True),
+        'uom_id': fields.related(
+            'product_id', 'uom_id', type='many2one', relation='product.uom', 
+            string='UOM', readonly=True),        
         }
         
     _defaults = {

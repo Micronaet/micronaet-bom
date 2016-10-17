@@ -82,7 +82,7 @@ class MRPBom(orm.Model):
         log_f = open(os.path.expanduser('~/bom.csv'), 'w')
 
         dimension_db = {}        
-        for item in product_ids: #XXX ids:
+        for item in ids: #product_ids: #XXX ids:
             message = self.migrate_assign_product_bom_product1(
                 cr, uid, [item], dimension_db, context=context)
             log_f.write(message)    
@@ -97,7 +97,7 @@ class MRPBom(orm.Model):
             Create move in dynamic
         '''
         assert len(ids) == 1, 'Works only with one record a time'
-        
+
         # Pool used
         line_pool = self.pool.get('mrp.bom.line')
         product_pool = self.pool.get('product.product')
@@ -245,11 +245,11 @@ class MRPBom(orm.Model):
                 fabric_code = ''
             else:
                 # Default code:                
-                if default_code[4:5] == 'B' or default_code[5:6] == 'B':
-                    fabric_code = default_code.replace('B', ' ')
+                if 'B' in default_code[4:6]:
+                    fabric_code = default_code[3:6].replace('B', ' ')
                 else:    
                     fabric_code = default_code[3:6]
-            
+
             # Color code        
             color_code = default_code[8:12].strip()
             if len(color_code) == 1:
@@ -289,8 +289,7 @@ class MRPBom(orm.Model):
                     default_code,
                     component_code, HW_code, product_qty, comment)
             
-        print log; return log        
-        """    
+        #print log; return log        
             # -----------------------------------------------------------------
             # Create / Update component product and BOM (halfwork)
             # -----------------------------------------------------------------
@@ -299,7 +298,7 @@ class MRPBom(orm.Model):
              
             if HW_ids: # Update halfcomponent product (and delete line)
                 if len(HW_ids) > 1:
-                    log += '|%s|||%s|%s|%s||SI||%s\n' % (
+                    log += '%s||||%s|%s|%s||SI||%s\n' % (
                         default_code,
                         component_code, HW_code, product_qty, 'more than one')
                         
@@ -365,7 +364,7 @@ class MRPBom(orm.Model):
                     }, context=context)
                             
         print log        
-        return log"""
+        return log
 
     # EXTRA BLOCK -------------------------------------------------------------
         

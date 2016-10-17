@@ -48,8 +48,6 @@ class MrpBomCategoryStructureCategory(orm.Model):
     _columns = {
         'name': fields.char('Category element', size=40, required=True,
             help='Category element (for BOM structure)'),
-        'speech_structure_id': fields.many2one(
-            'structure.structure', 'Default speech code', required=False),
         'note': fields.text('Note'),        
         }
     
@@ -63,6 +61,8 @@ class MrpBomCategory(orm.Model):
     
     _columns = {
         'name': fields.char('Code', size=10, required=True),
+        'speech_structure_id': fields.many2one(
+            'structure.structure', 'Default speech code', required=True),
         'note': fields.text('Note'),
         }
 
@@ -274,10 +274,13 @@ class ProductProduct(orm.Model):
         return res
 
     _columns = {
+        'bom_speech_id': fields.many2one(
+            'mrp.bom.structure', 'BOM speech structure', 
+            help='For speech code is the paret BOM category strcuture'),
         'dynamic_bom_line_ids': fields.function(
             _get_dynamic_bom_line_ids, method=True, 
             type='one2many', relation='mrp.bom.line', 
-            string='Dynamic BOM line', readonly=True, store=False),                        
+            string='Dynamic BOM line', readonly=True, store=False),                                    
         }
 
 class MRPBomLine(orm.Model):

@@ -48,7 +48,9 @@ class MrpBomCategoryStructureCategory(orm.Model):
     _columns = {
         'name': fields.char('Category element', size=40, required=True,
             help='Category element (for BOM structure)'),
-        'note': fields.text('Note'),            
+        'speech_structure_id': fields.many2one(
+            'structure.structure', 'Default speech code', required=False),
+        'note': fields.text('Note'),        
         }
     
     
@@ -76,7 +78,7 @@ class MrpBomCategoryLine(orm.Model):
     _columns = {
         'sequence': fields.integer('Sequence', required=True),
         'category_id': fields.many2one(
-            'mr.bom.structure.category', 'Category', required=False),
+            'mrp.bom.structure.category', 'Category', required=False),
         'structure_id': fields.many2one('mrp.bom.structure', 'Structure'),
         'product_id': fields.many2one(
             'product.product', 'Default product', required=False),

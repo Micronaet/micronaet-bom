@@ -109,6 +109,7 @@
                     <filter name="mask_substitution" string="Substitution mask" domain="[('dynamic_mask','ilike','\_')]"/>
 
                     <group expand="0" string="Group By...">
+                        <filter name="group_mask" string="Mask" context="{'group_by': 'dynamic_mask'}"/>
                         <filter name="group_bom" string="BOM" context="{'group_by': 'bom_id'}"/>
                         <filter name="group_product" string="Product" context="{'group_by': 'product_id'}"/>
                     </group>                

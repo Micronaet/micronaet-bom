@@ -252,12 +252,22 @@
             parent="mrp.menu_mrp_product_form" 
             id="menu_product_product_bom_line_dynamic" 
             action="action_product_product_bom_line_dynamic"
+            sequence="10"
             />
+
         <menuitem 
             parent="mrp.menu_mrp_product_form" 
-            id="menu_action_mrp_bom_structure_category" 
-            action="action_mrp_bom_structure_category"
+            id="menu_action_mrp_bom_structure_category_root" 
+            name="Category management"            
+            sequence="20"
             />
+            
+            <menuitem 
+                parent="menu_action_mrp_bom_structure_category_root" 
+                id="menu_action_mrp_bom_structure_category" 
+                action="action_mrp_bom_structure_category"
+                sequence="10"
+                />
         
     </data>
 </openerp>

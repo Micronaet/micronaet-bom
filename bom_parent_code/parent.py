@@ -82,7 +82,7 @@ class MRPBom(orm.Model):
         log_f = open(os.path.expanduser('~/bom.csv'), 'w')
 
         dimension_db = {}        
-        for item in ids: #product_ids: #XXX ids:
+        for item in product_ids: #XXX ids:
             message = self.migrate_assign_product_bom_product1(
                 cr, uid, [item], dimension_db, context=context)
             log_f.write(message)    
@@ -289,7 +289,8 @@ class MRPBom(orm.Model):
                     default_code,
                     component_code, HW_code, product_qty, comment)
             
-        #print log; return log        
+        print log; return log
+        """        
             # -----------------------------------------------------------------
             # Create / Update component product and BOM (halfwork)
             # -----------------------------------------------------------------
@@ -364,7 +365,7 @@ class MRPBom(orm.Model):
                     }, context=context)
                             
         print log        
-        return log
+        return log"""
 
     # EXTRA BLOCK -------------------------------------------------------------
         

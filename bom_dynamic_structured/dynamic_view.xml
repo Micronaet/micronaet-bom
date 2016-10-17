@@ -251,10 +251,22 @@
                     <header>
                         <button name="open_dynamic_bom" string="Dynamic BOM rule" type="object" attrs="{'invisible': [('structure_id','=',False)]}" />
                         <button name="open_current_dynamic_bom" string="Dynamic BOM" type="object" attrs="{'invisible': [('structure_id','=',False)]}" class="oe_highlight"/>
-                    </header>
-                </xpath>
+                    </header>                    
+                </xpath>                
             </field>
         </record>
+        <record model="ir.ui.view" id="view_product_product_add_structure_bom_form">
+            <field name="name">product.product.add.structure.bom.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product_speech_code.view_product_product_add_structure_form"/>
+            <field name="arch" type="xml">
+                <field name="structure_id" position="before">
+                    <field name="bom_speech_id" domain="[('speech_structure_id','=',structure_id)]" attrs="{'required': [('structure_id','!=',False)], 'invisible': [('structure_id','=',False)]}"/> 
+                    <newline/>
+                </field>
+            </field>
+        </record>
+        
 
         <record model="ir.ui.view" id="view_product_product_dynamic_bom_form">
             <field name="name">product.product.dynamic.bom.line.form</field>
@@ -267,7 +279,7 @@
                             <field name="name" />
                             <field name="default_code" />
                             <field name="structure_id" />
-                            <field name="bom_speech_id" />
+                            <field name="bom_speech_id" domain="[('speech_structure_id','=',structure_id)]" attrs="{'required': [('structure_id','!=',False)], 'invisible': [('structure_id','=',False)]}"/> 
                             <separator string="Dynamic BOM line" colspan="4"/>
                             <field name="dynamic_bom_line_ids" nolabel="1" colspan="4" readonly="1">
                                 <tree string="Dynamic BOM:" class="dynamic_mask_css">

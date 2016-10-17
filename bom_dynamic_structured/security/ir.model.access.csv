@@ -1,5 +1,4 @@
 "id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
-access_model_name_user,model.name,model_model_name,base.group_user,1,1,1,1
 access_mrp_bom_structure_category_user,mrp.bom.structure.category,model_mrp_bom_structure_category,base.group_user,1,1,1,1
 access_mrp_bom_structure_user,mrp.bom.structure,model_mrp_bom_structure,base.group_user,1,1,1,1
 access_mrp_bom_structure_line_user,mrp.bom.structure.line,model_mrp_bom_structure_line,base.group_user,1,1,1,1

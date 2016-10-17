@@ -37,6 +37,8 @@
     'init_xml': [],
     'demo': [],
     'data': [
+        'security/ir.model.access.csv',
+        
         'dynamic_view.xml',
         'template_css.xml',
         ],

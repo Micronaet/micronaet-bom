@@ -48,7 +48,9 @@ class Parser(report_sxw.rml_parse):
 
     # Method
     def get_db(self, name):
-        return self.master.get(name, [])
+        res = self.master.get(name, [])
+        res.sort(key=lambda x: (x.default_code, x.name))
+        return res
 
     def load_objects(self, data):
         ''' Master function for generate data
@@ -64,25 +66,7 @@ class Parser(report_sxw.rml_parse):
         self.master = sale_order.get_component_in_product_order_open(
             cr, uid, context=context)
         
-        # Order product:
-        #self.master['product'] = sorted(
-        #    self.master['product'],
-        #    key=lambda *x: x.default_code,
-        #    )
         self.master['table'] = {}
-        #for product in self.product:
-        #    record = self.product # TODO manage creation
-        #    # TODO generate:
-        #    self.table.append([
-        #        0.0, # INV
-        #        0.0, # TCAR
-        #        0.0, # TSCAR
-        #        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, record[2]], # MM
-        #        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, record[1]], # OC
-        #        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], # OF
-        #        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], # SAL
-        #        key, # Browse product
-        #        ])
         return ''
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

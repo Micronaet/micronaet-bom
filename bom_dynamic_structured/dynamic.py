@@ -76,7 +76,7 @@ class MrpBomCategoryLine(orm.Model):
     _order = 'sequence,category_id'
     
     _columns = {
-        'sequence': fields.integer('Sequence', required=True),
+        'sequence': fields.integer('Seq.', required=True),
         'category_id': fields.many2one(
             'mrp.bom.structure.category', 'Category', required=True),
         'structure_id': fields.many2one('mrp.bom.structure', 'Structure'),
@@ -420,6 +420,8 @@ class MRPBomLine(orm.Model):
     
     _columns = {
         'dynamic_mask': fields.char('Dynamic mask', size=20),
+        'category_id': fields.many2one(
+            'mrp.bom.structure.category', 'Category', required=True),            
         }
 
 class MRPBom(orm.Model):

@@ -207,7 +207,8 @@
             <field name="arch" type="xml">
                 <search string="BOM line search" version="7.0">        
                     <field name="bom_id" string="BOM"/>
-                    <field name="product_id" string="Compoment" />
+                    <field name="product_id" string="Component" />
+                    <field name="category_id" />
                     <field name="dynamic_mask" />                    
                     <!--<field name="dynamic_mask" string="Mask start with" filter_domain="[('dynamic_mask','ilike', self + '\%')]"/>-->
 
@@ -218,6 +219,7 @@
                     <group expand="0" string="Group By...">
                         <filter name="group_mask" string="Mask" context="{'group_by': 'dynamic_mask'}"/>
                         <filter name="group_bom" string="BOM" context="{'group_by': 'bom_id'}"/>
+                        <filter name="group_category" string="Category" context="{'group_by': 'category_id'}"/>
                         <filter name="group_product" string="Product" context="{'group_by': 'product_id'}"/>
                     </group>                
                 </search>
@@ -231,6 +233,7 @@
                 <tree string="String" editable="bottom" colors="red:dynamic_mask==False">       
                     <field name="bom_id" invisible="1"/>
                     <field name="product_id" /><!--onchange-->
+                    <field name="category_id" />
                     <button name="component_use_this" string="Rule with this compoment" type="object" icon="gtk-goto-first" />
                     <button name="component_product_use_this" string="Product that use this component" type="object" icon="STOCK_GOTO_LAST" />
                     <field name="dynamic_mask" on_change="onchange_dynamic_mask(dynamic_mask, bom_id)"/>
@@ -284,6 +287,7 @@
                             <field name="dynamic_bom_line_ids" nolabel="1" colspan="4" readonly="1">
                                 <tree string="Dynamic BOM:" class="dynamic_mask_css">
                                     <field name="product_id" />
+                                    <field name="category_id" />
                                     <field name="dynamic_mask" />
                                     <field name="product_qty" />
                                     <field name="product_uom" />
@@ -291,6 +295,7 @@
                                 <form string="Dynamic BOM:">
                                     <group colspan="4" col="4">
                                         <field name="product_id" />
+                                        <field name="category_id" />
                                         <field name="dynamic_mask" />
                                         <field name="product_qty" />
                                         <field name="product_uom" />

@@ -38,6 +38,66 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+class MrpBomCategoryStructureCategory(orm.Model):
+    """ Model name: Mrp Bom Category structure
+    """
+    
+    _name = 'mrp.bom.structure.category'
+    _description = 'BOM structure category'
+    
+    _columns = {
+        'name': fields.char('Category element', size=40, required=True,
+            help='Category element (for BOM structure)'),
+        'note': fields.text('Note'),            
+        }
+    
+    
+class MrpBomCategory(orm.Model):
+    """ Model name: Mrp Bom Category
+    """
+    
+    _name = 'mrp.bom.structure'
+    _description = 'BOM Structure'
+    
+    _columns = {
+        'name': fields.char('Code', size=10, required=True),
+        'note': fields.text('Note'),
+        }
+
+class MrpBomCategoryLine(orm.Model):
+    """ Model name: Mrp Bom Category Items
+    """
+    
+    _name = 'mrp.bom.structure.line'
+    _description = 'BOM category line'
+    _rec_name = 'category_id'
+    _order = 'sequence,category_id'
+    
+    _columns = {
+        'sequence': fields.integer('Sequence', required=True),
+        'category_id': fields.many2one(
+            'mr.bom.structure.category', 'Category', required=False),
+        'total': fields.integer('Total', required=True),    
+        'structure_id': fields.many2one('mrp.bom.structure', 'Structure'),
+        }
+        
+    _defaults = {
+        'sequence': lambda *x: 10,
+        'total': lambda *x: 1,        
+        }    
+
+class MrpBomCategory(orm.Model):
+    """ Model name: Mrp Bom Category
+    """
+    
+    _inherit = 'mrp.bom.structure'
+    
+    _columns = {
+        'category_ids': fields.one2many(
+            'mrp.bom.structure.line', 'structure_id', 
+            'Category'),
+        }
+    
 class StructureStructure(orm.Model):
     """ Model name: StructureStructure
     """

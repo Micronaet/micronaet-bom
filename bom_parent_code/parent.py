@@ -181,9 +181,49 @@ class MRPBom(orm.Model):
         PO_parent = [
             '046', '146', '149']
         
-        Double_component = [
+        double_component = [
             '024', '025', '230', '014',
-            ]        
+            ]   
+            
+        # TODO vedere come gestire o dividere nei 2 precedenti    
+        tessuto_con_doppione = [
+            '014',
+            '024',
+            '025',
+            #'027',
+            #'029',
+            '034',
+            '035',
+            '036',
+            '039',
+            '046',
+            #'048',
+            '049',
+            '050',
+            '051',
+            '071',
+            '090',
+            '121',
+            '127',
+            '128',
+            '129',
+            '130',
+            '131',
+            '132',
+            '135',
+            '145',
+            #'148',
+            '149',
+            '150',
+            '190',
+            '205',
+            '206',
+            '230',
+            '552',
+            '810',
+            '900',
+            '905',
+            ]         
             
         if not bom_proxy.product_id:
             pr_ids = product_pool.search(cr, uid, [
@@ -246,8 +286,7 @@ class MRPBom(orm.Model):
                 # Default code:    
                 parent_code = code_map.get(parent, parent)
                 type_code = type_map.get(component_code[:3], False)
-                
-            
+                            
             #Fabric code:
             if parent in ('810', '081', '085', '084'):
                 fabric_code = ''
@@ -313,14 +352,14 @@ class MRPBom(orm.Model):
                         
                 HW_id = HW_ids[0]
                 product_pool.write(cr, uid, HW_ids, {
-                    'halfwork': True,       
+                    'relative_type': 'half',       
                     'half_bom_ids': [(5, False, False)], # XXX remove line
                     }, context=context)                
             else: # Create half component product 
                 HW_id = product_pool.create(cr, uid, {
                     'name': HW_code,
                     'default_code': HW_code,
-                    'halfwork': True,
+                    'relative_type': 'half',       
                     'structure_id': structure_id,
                     'uom_id': 1, # XXX NR
                     'ean13_auto': False, # XXX

@@ -187,35 +187,48 @@ class ProductProduct(orm.Model):
             context=None):
         ''' Fields function for calculate BOM lines
         '''
-        _logger.error('Dynamic line calculation! JUST FOR TEST')
+        _logger.warning('Dynamic line calculation! JUST FOR TEST')
+
         line_pool = self.pool.get('mrp.bom.line')        
         res = {}
         for product in self.browse(cr, uid, ids, context=context):
+            product_record = {} # used for generate category structure
+
+            # -----------------------------------------------------------------            
+            # Populate with default value:
+            # -----------------------------------------------------------------            
+            for default in product.parent_bom_id.bom_line_ids:
+                product_record[default.category_id.id] = default.id
+            
+            # -----------------------------------------------------------------            
+            # Search dynamic rules:
+            # -----------------------------------------------------------------            
             structure = product.structure_id
             default_code = product.default_code
-            
-            if not structure or not structure.dynamic_bom_id or not \
-                    default_code:
-                res[product.id] = []
-            else:                
+            if structure and structure.dynamic_bom_id and default_code:
                 dynamic_bom_id = structure.dynamic_bom_id.id
                 
                 # Search dynamic element in BOM
                 cr.execute('''
-                    SELECT id 
+                    SELECT id, category_id 
                     FROM mrp_bom_line 
                     WHERE 
                         bom_id = %s AND 
-                        %s ilike dynamic_mask;                    
+                        %s ilike dynamic_mask
+                    ORDER BY len(dynamic_mask);
                     ''', (dynamic_bom_id, default_code))
-                res[product.id] = [item[0] for item in cr.fetchall()]
+
+                # Update category element priority order len mask
+                for item in cr.fetchall()
+                    product_record[item[1]] = item[0]
+            
+            # -----------------------------------------------------------------            
+            # Return only values:        
+            # -----------------------------------------------------------------            
+            res[product.id] = product_record.values()
         return res
 
     _columns = {
-        # TODO remove
-        #'bom_speech_id': fields.many2one(
-        #    'mrp.bom.structure', 'BOM speech structure', 
-        #    help='For speech code is the paret BOM category strcuture'),
         'dynamic_bom_line_ids': fields.function(
             _get_dynamic_bom_line_ids, method=True, 
             type='one2many', relation='mrp.bom.line', 
@@ -302,7 +315,7 @@ class MRPBomLine(orm.Model):
             FROM product_product 
             WHERE %s
             ''' % where)
-        product_ids = [item[0] for item in cr.fetchall()]
+        product_ids = [item[0] for item in cr.fetchall()]        
 
         if not product_ids:
             raise osv.except_osv(
@@ -360,6 +373,11 @@ class MRPBomLine(orm.Model):
         'dynamic_mask': fields.char('Dynamic mask', size=20),
         'category_id': fields.many2one(
             'mrp.bom.structure.category', 'Category'), # required=True
+        'line_from': fields.selection([
+            ('default', 'Default parent'),
+            ('rule', 'Dynamic rule'),
+            ], 'From', readonly=True)
+            
         }
 
 class MRPBom(orm.Model):
@@ -400,6 +418,5 @@ class MRPBom(orm.Model):
         'structure_id': fields.many2one('structure.structure', 'Structure', 
             help='Structure reference'),
         }
-
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

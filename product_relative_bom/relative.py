@@ -95,9 +95,9 @@ class ProductProduct(orm.Model):
     _columns = {
         'relative_type': fields.selection([
             ('none', 'None'),
-            ('child', 'Halfworked'),
+            ('half', 'Halfworked'),
             ('parent', 'Parent'),
-            ], 'Relative type')
+            ], 'Relative type'),
             
         'relative_bom_id': fields.many2one(
             'mrp.bom', 'Relative BOM', readonly=True),

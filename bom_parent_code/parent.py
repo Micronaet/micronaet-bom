@@ -187,7 +187,7 @@ class MRPBom(orm.Model):
         default_code = bom_proxy.product_id.default_code
         
         if not default_code:
-            log += '\n???|%s||%s|No codice x BOM\n' % ( 
+            log += '???|%s||%s|No codice x BOM\n' % ( 
                 len(bom_proxy.bom_line_ids),
                 bom_proxy.name,
                 )
@@ -201,7 +201,7 @@ class MRPBom(orm.Model):
         else:
             dynamic_mask = default_code + '%'
         
-        log += '\n%s|%s|%s|%s\n' % (
+        log += '%s|%s|%s|%s\n' % (
             default_code, 
             len(bom_proxy.bom_line_ids),
             dynamic_mask, 

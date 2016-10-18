@@ -180,17 +180,17 @@
             <field name="priority" eval="50" />
             <field name="arch" type="xml">
                 <form string="Product dynamic BOM" version="7.0">        
+                    <header>
+                    </header>
                     <sheet>
                         <group col="4" colspan="4">
                             <field name="name" />
                             <field name="default_code" />
                             <field name="structure_id" />
-                            <newline/>
-                            
                             <field name="relative_type" />
-                            <field name="parent_bom_id" attrs="{'required': [('relative_type','=','parent')]}"/>
 
                             <separator string="Parent BOM default" colspan="4"/>
+                            <field name="parent_bom_id" attrs="{'required': [('relative_type','=','parent')]}"/>
                             <field name="parent_bom_line_ids" colspan="4" nolabel="1" readonly="1">
                                 <tree string="Default parent BOM component" editable="bottom">
                                     <field name="bom_id" invisible="1"/>
@@ -202,6 +202,8 @@
                             </field>
                             
                             <separator string="Dynamic BOM line" colspan="4"/>
+                            <button name="open_dynamic_bom" string="Dynamic BOM rule" type="object" attrs="{'invisible': [('structure_id','=',False)]}" />
+                            <newline/>
                             <field name="dynamic_bom_line_ids" nolabel="1" colspan="4" readonly="1">
                                 <tree string="Dynamic BOM:" class="dynamic_mask_css">
                                     <field name="product_id" />

@@ -51,6 +51,7 @@ class MRPBom(orm.Model):
             }, context=context)
     _columns = {
         'bom_category': fields.selection([
+            ('todo', 'TODO'), # temporary waiting
             ('empty', 'Empty'), # for production purposes
             ('cost', 'Cost'), # for generate cost
             ('product', 'Product'), # Normal product (final)

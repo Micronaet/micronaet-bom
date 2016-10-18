@@ -46,7 +46,7 @@
             <field name="domain">[]</field>
         </record>
         
-        <!--mrp.bom.structure-->
+        <!--mrp.bom.structure
         <record model="ir.ui.view" id="view_mrp_bom_structure_tree">
             <field name="name">mrp.bom.structure.tree</field>
             <field name="model">mrp.bom.structure</field>
@@ -106,9 +106,9 @@
             <field name="view_id" ref="view_mrp_bom_structure_tree"/>
             <field name="context">{}</field>
             <field name="domain">[]</field>
-        </record>
+        </record>-->
     
-        <!--structure.structure-->
+        <!--structure.structure
         <record model="ir.ui.view" id="view_structure_structure_dynamic_bom_form">
             <field name="name">structure.structure.form</field>
             <field name="model">structure.structure</field>
@@ -119,7 +119,7 @@
                     <field name="dynamic_bom_id" invisible="1" />
                 </field>
             </field>             
-        </record>
+        </record>-->
         
         <!--mrp.bom-->
         <record model="ir.ui.view" id="view_mrp_bom_dynamic_new_form">
@@ -258,7 +258,7 @@
                 </xpath>                
             </field>
         </record>
-        <record model="ir.ui.view" id="view_product_product_add_structure_bom_form">
+        <!--<record model="ir.ui.view" id="view_product_product_add_structure_bom_form">
             <field name="name">product.product.add.structure.bom.form</field>
             <field name="model">product.product</field>
             <field name="inherit_id" ref="product_speech_code.view_product_product_add_structure_form"/>
@@ -268,7 +268,7 @@
                     <newline/>
                 </field>
             </field>
-        </record>
+        </record>-->
         
 
         <record model="ir.ui.view" id="view_product_product_dynamic_bom_form">
@@ -282,7 +282,7 @@
                             <field name="name" />
                             <field name="default_code" />
                             <field name="structure_id" />
-                            <field name="bom_speech_id" domain="[('speech_structure_id','=',structure_id)]" attrs="{'required': [('structure_id','!=',False)], 'invisible': [('structure_id','=',False)]}" context="{'default_speech_structure_id': structure_id}"/> 
+                            <!--<field name="bom_speech_id" domain="[('speech_structure_id','=',structure_id)]" attrs="{'required': [('structure_id','!=',False)], 'invisible': [('structure_id','=',False)]}" context="{'default_speech_structure_id': structure_id}"/> -->
                             <separator string="Dynamic BOM line" colspan="4"/>
                             <field name="dynamic_bom_line_ids" nolabel="1" colspan="4" readonly="1">
                                 <tree string="Dynamic BOM:" class="dynamic_mask_css">

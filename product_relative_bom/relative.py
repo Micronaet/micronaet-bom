@@ -95,7 +95,7 @@ class ProductProduct(orm.Model):
     _columns = {
         'relative_type': fields.selection([
             ('none', 'None'),
-            ('half', 'Halfworked'),
+            ('child', 'Halfworked'),
             ('parent', 'Parent'),
             ], 'Relative type')
             

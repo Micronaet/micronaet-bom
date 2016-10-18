@@ -52,6 +52,7 @@ class MrpBomCategoryStructureCategory(orm.Model):
         }
     
     
+'''
 class MrpBomCategory(orm.Model):
     """ Model name: Mrp Bom Category
     """
@@ -104,7 +105,7 @@ class MrpBomCategory(orm.Model):
             'mrp.bom.structure.line', 'structure_id', 
             'Category'),
         }
-    
+'''    
 class StructureStructure(orm.Model):
     """ Model name: StructureStructure
     """
@@ -274,9 +275,10 @@ class ProductProduct(orm.Model):
         return res
 
     _columns = {
-        'bom_speech_id': fields.many2one(
-            'mrp.bom.structure', 'BOM speech structure', 
-            help='For speech code is the paret BOM category strcuture'),
+        # TODO remove
+        #'bom_speech_id': fields.many2one(
+        #    'mrp.bom.structure', 'BOM speech structure', 
+        #    help='For speech code is the paret BOM category strcuture'),
         'dynamic_bom_line_ids': fields.function(
             _get_dynamic_bom_line_ids, method=True, 
             type='one2many', relation='mrp.bom.line', 
@@ -296,8 +298,7 @@ class MRPBomLine(orm.Model):
         return self.search(cr, uid, [
             ('bom_id', '=', line_proxy.bom_id.id),            
             ('product_id', '=', line_proxy.product_id.id),
-            ], context=context)        
-            
+            ], context=context)                    
         
     def component_use_this(self, cr, uid, ids, context=None):
         ''' List all line that has this compoment (for check rules)

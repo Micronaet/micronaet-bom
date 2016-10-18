@@ -40,7 +40,6 @@
         'security/ir.model.access.csv',
         
         'dynamic_view.xml',
-        'template_css.xml',
         ],
     'active': False,
     'installable': True,

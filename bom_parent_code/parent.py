@@ -82,6 +82,7 @@ class MRPBom(orm.Model):
         log_f = open(os.path.expanduser('~/bom.csv'), 'w')
 
         dimension_db = {}        
+        import pdb; pdb.set_trace()
         for item in product_ids: #XXX ids:
             message = self.migrate_assign_product_bom_product1(
                 cr, uid, [item], dimension_db, context=context)
@@ -176,6 +177,13 @@ class MRPBom(orm.Model):
             # TODO 
             #'TL127S': 'TL127PO'
             }
+            
+        PO_parent = [
+            '046', '146', '149']
+        
+        Double_component = [
+            '024', '025', '230', '014',
+            ]        
             
         if not bom_proxy.product_id:
             pr_ids = product_pool.search(cr, uid, [

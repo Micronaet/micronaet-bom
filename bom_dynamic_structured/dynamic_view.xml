@@ -205,16 +205,16 @@
                             <field name="dynamic_bom_line_ids" nolabel="1" colspan="4" readonly="1">
                                 <tree string="Dynamic BOM:" class="dynamic_mask_css">
                                     <field name="product_id" />
-                                    <field name="category_id" />
                                     <field name="dynamic_mask" />
+                                    <field name="category_id" />
                                     <field name="product_qty" />
                                     <field name="product_uom" />
                                 </tree>
                                 <form string="Dynamic BOM:">
                                     <group colspan="4" col="4">
                                         <field name="product_id" />
-                                        <field name="category_id" />
                                         <field name="dynamic_mask" />
+                                        <field name="category_id" />
                                         <field name="product_qty" />
                                         <field name="product_uom" />
                                     </group>    

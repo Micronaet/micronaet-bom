@@ -50,61 +50,7 @@ class MrpBomCategoryStructureCategory(orm.Model):
             help='Category element (for BOM structure)'),
         'note': fields.text('Note'),        
         }
-    
-'''
-class MrpBomCategory(orm.Model):
-    """ Model name: Mrp Bom Category
-    """
-    
-    _name = 'mrp.bom.structure'
-    _description = 'BOM Structure'
-    
-    _columns = {
-        'name': fields.char('Code', size=10, required=True),
-        'speech_structure_id': fields.many2one(
-            'structure.structure', 'Default speech code', required=True),
-        'note': fields.text('Note'),
-        }
 
-class MrpBomCategoryLine(orm.Model):
-    """ Model name: Mrp Bom Category Items
-    """
-    
-    _name = 'mrp.bom.structure.line'
-    _description = 'BOM category line'
-    _rec_name = 'category_id'
-    _order = 'sequence,category_id'
-    
-    _columns = {
-        'sequence': fields.integer('Seq.', required=True),
-        'category_id': fields.many2one(
-            'mrp.bom.structure.category', 'Category', required=True),
-        'structure_id': fields.many2one('mrp.bom.structure', 'Structure'),
-        'product_id': fields.many2one(
-            'product.product', 'Default product', required=True),
-        'quantity': fields.integer('Q.ty', required=True),
-        'uom_id': fields.related(
-            'product_id', 'uom_id', type='many2one', relation='product.uom', 
-            string='UOM', readonly=True),        
-        }
-        
-    _defaults = {
-        'sequence': lambda *x: 10,
-        'total': lambda *x: 1,        
-        }    
-
-class MrpBomCategory(orm.Model):
-    """ Model name: Mrp Bom Category
-    """
-    
-    _inherit = 'mrp.bom.structure'
-    
-    _columns = {
-        'category_ids': fields.one2many(
-            'mrp.bom.structure.line', 'structure_id', 
-            'Category'),
-        }
-'''    
 class StructureStructure(orm.Model):
     """ Model name: StructureStructure
     """
@@ -177,14 +123,6 @@ class ProductProduct(orm.Model):
     """    
     _inherit = 'product.product'
         
-    #def open_dynamic_bom(self, cr, uid, ids, context=None):
-    #    ''' Open dynamic structure
-    #    '''    
-    #    product_proxy = self.browse(cr, uid, ids, context=context)[0]
-    #    return self.pool.get('structure.structure').create_dynamic_bom(
-    #        cr, uid, [product_proxy.structure_id.id], context=context)
-    #    return True
-
     def open_dynamic_bom(self, cr, uid, ids, context=None):
         ''' Open dynamic structure
         '''    

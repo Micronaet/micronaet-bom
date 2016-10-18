@@ -8,13 +8,13 @@
             <field name="arch" type="xml">
                 <xpath expr="//notebook" position="before">
                     <group colspan="4" col="4">
-                        <field name="relative_type" />
+                        <field name="relative_type" colspan="2"/>
                     </group>    
                 </xpath>
                 <xpath expr="//page[2]" position="after">
                     <page string="Relative BOM" attrs="{'invisible': [('relative_type','=','none')]}"> 
                         <group colspan="4" col="4">
-                            <field name="relative_bom_id" attrs="{'invisible': [('relative_type','=','half')]}"/>
+                            <field name="relative_bom_id" attrs="{'invisible': [('relative_type','=','half'),('relative_bom_id','=',False)]}"/>
                             <button name="create_product_relative_bom" string="Create relative BOM" type="object" attrs="{'invisible': ['|',('relative_type','!=','half'),('relative_bom_id','!=',False)]}"/>
                             
                             <separator string="Component" colspan="4"/>

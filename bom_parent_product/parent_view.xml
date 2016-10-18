@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
-        <record model="ir.ui.view" id="view_product_product_BOM_relative_type_half_form">
+        <record model="ir.ui.view" id="view_product_product_BOM_relative_type_parent_form">
             <field name="name">product.product.relative_type.form</field>
             <field name="model">product.product</field>
             <field name="inherit_id" ref="bom_type.view_product_product_BOM_relative_type_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//page[@string='Related BOM']/group/separator[1]" position="after">
-                    <group colspan="4" col="4" attrs="{'invisible': [('relative_type','!=','half')]}">
+                    <group colspan="4" col="4" attrs="{'invisible': [('relative_type','!=','parent')]}">
                         <field name="parent_bom_id" />
                         
                         <separator string="Default component" colspan="4"/>

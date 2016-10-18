@@ -16,13 +16,15 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-# XXX Note: replaced with bom_half_worked
+
 {
-    'name': 'Manage halfworked',
+    'name': 'Manage relative BOM',
     'version': '0.1',
     'category': 'MRP',
     'description': '''        
-        Manage half worked direct on product
+        Replace bom_half_worked module
+        Manage link to bom for parent (reference) or child (halfworked) in 
+        the same way linking the BOM to product
         ''',
     'author': 'Micronaet S.r.l. - Nicola Riolini',
     'website': 'http://www.micronaet.it',
@@ -36,8 +38,7 @@
     'init_xml': [],
     'demo': [],
     'data': [
-        #'security/ir.model.access.csv',    
-        #'halfwork_view.xml',
+        'relative_view.xml',
         ],
     'active': False,
     'installable': True,

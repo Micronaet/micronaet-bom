@@ -215,11 +215,11 @@ class ProductProduct(orm.Model):
                     WHERE 
                         bom_id = %s AND 
                         %s ilike dynamic_mask
-                    ORDER BY len(dynamic_mask);
+                    ORDER BY length(dynamic_mask);
                     ''', (dynamic_bom_id, default_code))
 
                 # Update category element priority order len mask
-                for item in cr.fetchall()
+                for item in cr.fetchall():
                     product_record[item[1]] = item[0]
             
             # -----------------------------------------------------------------            
@@ -373,11 +373,10 @@ class MRPBomLine(orm.Model):
         'dynamic_mask': fields.char('Dynamic mask', size=20),
         'category_id': fields.many2one(
             'mrp.bom.structure.category', 'Category'), # required=True
-        'line_from': fields.selection([
-            ('default', 'Default parent'),
-            ('rule', 'Dynamic rule'),
-            ], 'From', readonly=True)
-            
+        #'line_from': fields.selection([
+        #    ('default', 'Default parent'),
+        #    ('rule', 'Dynamic rule'),
+        #    ], 'From', readonly=True)            
         }
 
 class MRPBom(orm.Model):

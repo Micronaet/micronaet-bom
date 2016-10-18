@@ -189,39 +189,43 @@
                             <field name="structure_id" />
                             <field name="relative_type" />
 
-                            <separator string="Parent BOM default" colspan="4"/>
-                            <field name="parent_bom_id" attrs="{'required': [('relative_type','=','parent')]}"/>
-                            <field name="parent_bom_line_ids" colspan="4" nolabel="1" readonly="1">
-                                <tree string="Default parent BOM component" editable="bottom" colors="red:category_id==False">
-                                    <field name="bom_id" invisible="1"/>
-                                    <field name="product_id"/>
-                                    <field name="category_id" />
-                                    <field name="product_qty" />
-                                    <field name="product_uom" />
-                                </tree>
-                            </field>
-                            
-                            <separator string="Dynamic BOM line" colspan="4"/>
-                            <button name="open_dynamic_bom" string="Dynamic BOM rule" type="object" attrs="{'invisible': [('structure_id','=',False)]}" />
-                            <newline/>
-                            <field name="dynamic_bom_line_ids" nolabel="1" colspan="4" readonly="1">
-                                <tree string="Dynamic BOM:" colors="red:category_id==False">
-                                    <field name="product_id" />
-                                    <field name="dynamic_mask" />
-                                    <field name="category_id" />
-                                    <field name="product_qty" />
-                                    <field name="product_uom" />
-                                </tree>
-                                <form string="Dynamic BOM:">
-                                    <group colspan="4" col="4">
+                            <group col="4" colspan="2">
+                                <separator string="Result BOM" colspan="4"/>
+                                <button name="open_dynamic_bom" string="Dynamic BOM rule" type="object" attrs="{'invisible': [('structure_id','=',False)]}" class="oe_highlight"/>
+                                <newline/>
+                                <field name="dynamic_bom_line_ids" nolabel="1" colspan="4" readonly="1">
+                                    <tree string="Dynamic BOM:" colors="red:category_id==False;blue:dynamic_mask!=False">
+                                        <field name="category_id" />
                                         <field name="product_id" />
                                         <field name="dynamic_mask" />
-                                        <field name="category_id" />
                                         <field name="product_qty" />
-                                        <field name="product_uom" />
-                                    </group>    
-                                </form>                                
-                            </field>
+                                        <field name="product_uom" string="UOM" />
+                                    </tree>
+                                    <form string="Dynamic BOM:">
+                                        <group colspan="4" col="4">
+                                            <field name="category_id" />
+                                            <field name="product_id" />
+                                            <field name="dynamic_mask" />
+                                            <field name="product_qty" />
+                                            <field name="product_uom" string="UOM" />
+                                        </group>    
+                                    </form>                                
+                                </field>
+                            </group>    
+                            
+                            <group col="4" colspan="2">
+                                <separator string="Parent BOM default" colspan="4"/>
+                                <field name="parent_bom_id" attrs="{'required': [('relative_type','=','parent')]}"/>
+                                <field name="parent_bom_line_ids" colspan="4" nolabel="1" readonly="1">
+                                    <tree string="Default parent BOM component" editable="bottom" colors="red:category_id==False">
+                                        <field name="bom_id" invisible="1"/>
+                                        <field name="category_id" />
+                                        <field name="product_id"/>
+                                        <field name="product_qty" />
+                                        <field name="product_uom" string="UOM"/>
+                                    </tree>
+                                </field>
+                            </group>    
                         </group>
                     </sheet>        
                 </form>

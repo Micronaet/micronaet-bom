@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_product_product_BOM_relative_type_form">
+            <field name="name">product.product.relative_type.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_normal_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook" position="before">
+                    <group colspan="4" col="8">
+                        <field name="relative_type" colspan="2"/>
+                    </group>    
+                </xpath>
+            </field>
+        </record>
+        
+    </data>
+</openerp>
+

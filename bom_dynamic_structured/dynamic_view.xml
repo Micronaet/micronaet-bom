@@ -45,7 +45,7 @@
             <field name="context">{}</field>
             <field name="domain">[]</field>
         </record>
-
+        <!--INHERIT for category_id-->
         <record model="ir.ui.view" id="view_product_product_BOM_relative_type_parent_inherit_form">
             <field name="name">product.product.relative_type.form</field>
             <field name="model">product.product</field>
@@ -56,6 +56,16 @@
                 </xpath>
             </field>
         </record>    
+        <record model="ir.ui.view" id="view_mrp_bom_category_parent_form">
+            <field name="name">mrp.bom.category.parent.form</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='bom_line_ids']/tree/field[@name='product_id']" position="after">
+                   <field name="category_id" />
+                </xpath>
+            </field>
+        </record>
         
         <!--mrp.bom-->
         <record model="ir.ui.view" id="view_mrp_bom_dynamic_new_form">
@@ -175,6 +185,22 @@
                             <field name="name" />
                             <field name="default_code" />
                             <field name="structure_id" />
+                            <newline/>
+                            
+                            <field name="relative_type" />
+                            <field name="parent_bom_id" attrs="{'required': [('relative_type','=','parent')]}"/>
+
+                            <separator string="Parent BOM default" colspan="4"/>
+                            <field name="parent_bom_line_ids" colspan="4" nolabel="1" readonly="1">
+                                <tree string="Default parent BOM component" editable="bottom">
+                                    <field name="bom_id" invisible="1"/>
+                                    <field name="product_id"/>
+                                    <field name="category_id" />
+                                    <field name="product_qty" />
+                                    <field name="product_uom" />
+                                </tree>
+                            </field>
+                            
                             <separator string="Dynamic BOM line" colspan="4"/>
                             <field name="dynamic_bom_line_ids" nolabel="1" colspan="4" readonly="1">
                                 <tree string="Dynamic BOM:" class="dynamic_mask_css">

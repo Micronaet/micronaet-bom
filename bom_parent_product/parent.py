@@ -53,7 +53,7 @@ class ProductProduct(orm.Model):
         res = {}
         try:
             res[ids[0]] = [
-                item.id for self.browse(
+                item.id for item in self.browse(
                     cr, uid, ids, context=context)[
                         0].parent_bom_id.bom_line_ids]
         except:

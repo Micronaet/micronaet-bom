@@ -46,7 +46,7 @@
             <field name="model">product.product</field>
             <field name="arch" type="xml">
                 <tree string="Product Variants">
-                    <field name="halfwork" />
+                    <field name="relative_type" />
 	                <field name="default_code" />
 	                <field name="name" />
 	                <field name="lst_price" />

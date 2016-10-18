@@ -8,14 +8,14 @@
             <field name="arch" type="xml">
                 <xpath expr="//page[@string='Related BOM']/group/separator[1]" position="after">
                     <group colspan="4" col="4" attrs="{'invisible': [('relative_type','!=','half')]}">
-                        <field name="half_bom_id" attrs="{'invisible': [('half_bom_id','=',False)]}" readonly="1"/>
-                        <button name="create_product_half_bom" string="Create halfworked BOM" type="object" attrs="{'invisible': [('half_bom_id','!=',False)]}"/>
+                        <field name="parent_bom_id" />
                         
-                        <separator string="Component" colspan="4"/>
-                        <field name="half_bom_ids" attrs="{'invisible': [('half_bom_id','=',False)]}" colspan="4" context="{'default_bom_id': half_bom_id}" nolabel="1">
-                            <tree string="Half BOM component" editable="bottom">
+                        <separator string="Default component" colspan="4"/>
+                        <field name="parent_bom_line_ids" colspan="4" nolabel="1" readonly="1">
+                            <tree string="Default parent BOM component">
                                 <field name="bom_id" invisible="1"/>
                                 <field name="product_id"/>
+                                <field name="category_id" />
                                 <field name="product_qty" />
                             </tree>
                         </field>
@@ -24,56 +24,39 @@
             </field>
         </record>    
         
-        <record model="ir.ui.view" id="view_mrp_bom_halfwork_form">
-            <field name="name">mrp.bom.form</field>
-            <field name="model">mrp.bom</field>
-            <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
-            <field name="arch" type="xml">
-                <field name="product_tmpl_id" position="after">
-                   <field name="halfwork_id" invisible="1"/>  
-                </field>
-                <xpath expr="//field[@name='bom_line_ids']/tree/field[@name='product_id']" position="after">
-                   <field name="halfwork_id" invisible="1"/>                    
-                </xpath>
-                <field name="bom_line_ids" position="attributes">
-                    <attribute name="context">{'default_halfwork_id': halfwork_id}</attribute>
-                </field>
-            </field>
-        </record>
-        
-        <record model="ir.ui.view" id="view_product_product_half_tree">
-            <field name="name">product.product.halfwork.tree</field>
+        <record model="ir.ui.view" id="view_product_product_parent_tree">
+            <field name="name">product.product.parent.tree</field>
             <field name="model">product.product</field>
             <field name="arch" type="xml">
-                <tree string="Product Variants">
-                    <field name="halfwork" />
+                <tree string="Product Variants" colors="blue:relative_type=='parent'">
+                    <field name="relative_type" />
 	                <field name="default_code" />
 	                <field name="name" />
 	                <field name="lst_price" />
 	                <field name="price" />
 	                <field name="uom_id" />
 	                <field name="ean13" />
-                    <field name="half_bom_id" />
+                    <field name="parent_bom_id" />
 	                <field name="product_tmpl_id" invisible="1"/>
 	                <field name="state" invisible="1" />
                 </tree>
             </field>
         </record>
         
-        <record model="ir.actions.act_window" id="action_halfwork">
-            <field name="name">Halfworked</field>
+        <record model="ir.actions.act_window" id="action_parent">
+            <field name="name">Product parent relation</field>
             <field name="res_model">product.product</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="view_id" ref="view_product_product_half_tree"/>
-            <field name="context">{'default_relative_type': 'half'}</field>
-            <field name="domain">[('relative_type', '=', 'half')]</field>
+            <field name="view_id" ref="view_product_product_parent_tree"/>
+            <field name="context">{'default_relative_type': 'parent'}</field>
+            <field name="domain">[]</field><!--('relative_type', '=', 'parent') TODO use filter on-->
         </record>
         <menuitem 
             parent="base.menu_product" 
-            id="menu_halfwork_product" 
+            id="menu_parent_product" 
             sequence="50"
-            action="action_halfwork"
+            action="action_parent"
             />
         
     </data>

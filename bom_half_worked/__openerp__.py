@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-# XXX Note: replaced with bom_half_worked
+
 {
     'name': 'Manage halfworked',
     'version': '0.1',
@@ -37,7 +37,7 @@
     'demo': [],
     'data': [
         #'security/ir.model.access.csv',    
-        #'halfwork_view.xml',
+        'halfwork_view.xml',
         ],
     'active': False,
     'installable': True,

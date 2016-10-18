@@ -16,6 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+# XXX Note: try to replaced with bom_half_worked!!! DO NOT USE!!!
 
 {
     'name': 'Manage relative BOM',

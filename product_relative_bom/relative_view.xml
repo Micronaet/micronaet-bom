@@ -14,7 +14,7 @@
                 <xpath expr="//page[2]" position="after">
                     <page string="Relative BOM" attrs="{'invisible': [('relative_type','=','none')]}"> 
                         <group colspan="4" col="4">
-                            <field name="relative_bom_id" attrs="{'invisible': [('relative_type','=','half'),('relative_bom_id','=',False)]}"/>
+                            <field name="relative_bom_id" attrs="{'invisible': [('relative_type','=','half'),('relative_bom_id','=',False)],'readonly':[('relative_type','!=','parent')],'required':[('relative_type','=','parent')]}" domain="[('bom_category','=','parent')]"/>
                             <button name="create_product_relative_bom" string="Create relative BOM" type="object" attrs="{'invisible': ['|',('relative_type','!=','half'),('relative_bom_id','!=',False)]}"/>
                             
                             <separator string="Component" colspan="4"/>

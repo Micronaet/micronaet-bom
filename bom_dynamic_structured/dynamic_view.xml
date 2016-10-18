@@ -342,12 +342,12 @@
             sequence="20"
             />
             
-            <menuitem 
+            <!--<menuitem 
                 parent="menu_action_mrp_bom_structure_category_root" 
                 id="menu_action_mrp_bom_structure" 
                 action="action_mrp_bom_structure"
                 sequence="10"
-                />
+                />-->
             <menuitem 
                 parent="menu_action_mrp_bom_structure_category_root" 
                 id="menu_action_mrp_bom_structure_category" 

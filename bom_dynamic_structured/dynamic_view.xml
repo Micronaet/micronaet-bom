@@ -88,41 +88,10 @@
                                 </group>
 	                        </page>
                         </notebook>
-	                    <!--<div class="oe_chatter">
-		                    <field name="message_follower_ids" widget="mail_followers" modifiers="{}"/>
-		                    <field name="message_ids" colspan="4" widget="mail_thread" nolabel="1" modifiers="{}" options="{'display_log_button': true}"/>
-	                    </div>-->
                    </sheet>
                 </form>
             </field>
         </record>
-
-        <!--<record model="ir.ui.view" id="view_mrp_bom_dynamic_form">
-            <field name="name">mrp.bom.dynamic.bom.form</field>
-            <field name="model">mrp.bom</field>
-            <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>            
-            <field name="arch" type="xml">
-                <field name="bom_line_ids" position="after">
-                    <group colspan="4" col="4" attrs="{'invisible': [('bom_category','!=','dynamic')]}">
-                        <field name="structure_id" readonly="1" colspan="2"/>
-                        <button name="open_bom_dynamic_lines" string="Manage dynamic lines" type="object" icon="gtk-justify-fill"/>
-                        <separator string="Dynamic BOM" colspan="4"/>
-                        <field name="bom_line_ids" context="{'default_type': 'normal'}" nolabel="1" colspan="4">
-                            <tree string="Dynamic BOM" editable="bottom">
-                                <field name="bom_id" invisible="1"/>
-                                <field name="product_id" />
-                                <field name="dynamic_mask" on_change="onchange_dynamic_mask(dynamic_mask, bom_id)"/>
-                                <field name="product_qty" />
-                                <field name="product_uom" />
-                            </tree>
-                        </field>
-                    </group>    
-                </field>
-                <field name="bom_line_ids" position="attributes">
-                    <attribute name="attrs">{'invisible': [('bom_category','=','dynamic')]}</attribute>
-                </field>                
-            </field>
-        </record>-->
         
         <!--mrp.bom.line-->
         <record model="ir.ui.view" id="view_mrp_bom_line_search">
@@ -182,19 +151,7 @@
                     </header>                    
                 </xpath>                
             </field>
-        </record>
-        <!--<record model="ir.ui.view" id="view_product_product_add_structure_bom_form">
-            <field name="name">product.product.add.structure.bom.form</field>
-            <field name="model">product.product</field>
-            <field name="inherit_id" ref="product_speech_code.view_product_product_add_structure_form"/>
-            <field name="arch" type="xml">
-                <field name="structure_id" position="before">
-                    <field name="bom_speech_id" domain="[('speech_structure_id','=',structure_id)]" attrs="{'required': [('structure_id','!=',False)], 'invisible': [('structure_id','=',False)]}" context="{'default_speech_structure_id': structure_id}"/> 
-                    <newline/>
-                </field>
-            </field>
-        </record>-->
-        
+        </record>        
 
         <record model="ir.ui.view" id="view_product_product_dynamic_bom_form">
             <field name="name">product.product.dynamic.bom.line.form</field>
@@ -207,7 +164,6 @@
                             <field name="name" />
                             <field name="default_code" />
                             <field name="structure_id" />
-                            <!--<field name="bom_speech_id" domain="[('speech_structure_id','=',structure_id)]" attrs="{'required': [('structure_id','!=',False)], 'invisible': [('structure_id','=',False)]}" context="{'default_speech_structure_id': structure_id}"/> -->
                             <separator string="Dynamic BOM line" colspan="4"/>
                             <field name="dynamic_bom_line_ids" nolabel="1" colspan="4" readonly="1">
                                 <tree string="Dynamic BOM:" class="dynamic_mask_css">
@@ -265,14 +221,7 @@
             id="menu_action_mrp_bom_structure_category_root" 
             name="Category management"            
             sequence="20"
-            />
-            
-            <!--<menuitem 
-                parent="menu_action_mrp_bom_structure_category_root" 
-                id="menu_action_mrp_bom_structure" 
-                action="action_mrp_bom_structure"
-                sequence="10"
-                />-->
+            />           
             <menuitem 
                 parent="menu_action_mrp_bom_structure_category_root" 
                 id="menu_action_mrp_bom_structure_category" 

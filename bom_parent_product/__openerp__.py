@@ -18,11 +18,11 @@
 ###############################################################################
 
 {
-    'name': 'Manage halfworked',
+    'name': 'Manage parent',
     'version': '0.1',
     'category': 'MRP',
     'description': '''        
-        Manage half worked direct on product
+        Manage parent bom default on product
         ''',
     'author': 'Micronaet S.r.l. - Nicola Riolini',
     'website': 'http://www.micronaet.it',
@@ -31,14 +31,13 @@
         'base',
         'mrp',
         'product',
-        'bom_category', 
+        'bom_category',
         'bom_type', # for relative_type and view
         ],
     'init_xml': [],
     'demo': [],
     'data': [
-        #'security/ir.model.access.csv',    
-        'halfwork_view.xml',        
+        'parent_view.xml',        
         ],
     'active': False,
     'installable': True,

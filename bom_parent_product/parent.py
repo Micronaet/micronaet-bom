@@ -38,66 +38,36 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
-class MrpBomLine(orm.Model):
-    """ Model name: Bom line
-    """    
-    _inherit = 'mrp.bom'
-    
-    # Used for generate default when start from BOM
-    _columns = {
-        'halfwork_id': fields.many2one(
-            'product.product', 'Halfwork product'),
-        }
-
-class MrpBomLine(orm.Model):
-    """ Model name: Bom line
-    """
-    
-    _inherit = 'mrp.bom.line'
-    
-    _columns = {
-        'halfwork_id': fields.many2one(
-            'product.product', 'Halfwork product'),
-        }
-
 class ProductProduct(orm.Model):
     """ Model name: ProductProduct
     """
     
     _inherit = 'product.product'
-    
-    def create_product_half_bom(self, cr, uid, ids, context=None):
-        ''' Create BOM for halfworked         
-        '''        
+
+    def _get_parent_bom_line_ids(self, cr, uid, ids, fields, args, 
+            context=None):
+        ''' Fields function for calculate BOM lines
+        '''
         assert len(ids) == 1, 'Works only with one record a time'
-        bom_pool = self.pool.get('mrp.bom')
-        
-        product_proxy = self.browse(cr, uid, ids, context=context)[0]
-        bom_id = bom_pool.create(cr, uid, {
-            'product_tmpl_id': product_proxy.product_tmpl_id.id,
-            'product_id': product_proxy.id,
-            'bom_category': 'half',
-            'product_qty': 1.0,
-            'code': product_proxy.default_code,
-            'type': 'normal',
-            'product_uom': product_proxy.uom_id.id,
-            'halfwork_id': product_proxy.id,
-            }, context=context)
-        return self.write(cr, uid, ids, {
-            'half_bom_id': bom_id,
-            }, context=context)
-        
-        
+
+        res = {}
+        try:
+            res[ids[0]] = [
+                item.id for self.browse(
+                    cr, uid, ids, context=context)[
+                        0].parent_bom_id.bom_line_ids]
+        except:
+            res[ids[0]] = []
+        return res
+    
     _columns = {
-        # TODO remove:
-        'halfwork': fields.boolean('Halworked', 
-            help='Manage BOM directly in product'),
-            
-        'half_bom_id': fields.many2one(
+        'parent_bom_id': fields.many2one(
             'mrp.bom', 'Half BOM'),
-        'half_bom_ids': fields.one2many(
-            'mrp.bom.line', 'halfwork_id', 
-            'Halfwork component'),
+            
+        'parent_bom_line_ids': fields.function(        
+            _get_parent_bom_line_ids, method=True, 
+            type='one2many', relation='mrp.bom.line', 
+            string='Parent BOM line', readonly=True, store=False),
         }
         
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

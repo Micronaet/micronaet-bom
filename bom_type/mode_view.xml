@@ -11,9 +11,15 @@
                         <field name="relative_type" colspan="2"/>
                     </group>    
                 </xpath>
+                <xpath expr="//page[2]" position="after">
+                    <page string="Related BOM" attrs="{'invisible': [('relative_type','=','none')]}"> 
+                        <group colspan="4" col="4" name="relative_bom_group">
+                            <separator string="Relative BOM:" colspan="4"/>                            
+                        </group>
+                    </page>
+                </xpath>
             </field>
-        </record>
-        
+        </record>        
     </data>
 </openerp>
 

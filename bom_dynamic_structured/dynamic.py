@@ -359,7 +359,7 @@ class MRPBomLine(orm.Model):
     _columns = {
         'dynamic_mask': fields.char('Dynamic mask', size=20),
         'category_id': fields.many2one(
-            'mrp.bom.structure.category', 'Category', required=True),            
+            'mrp.bom.structure.category', 'Category'), # required=True
         }
 
 class MRPBom(orm.Model):

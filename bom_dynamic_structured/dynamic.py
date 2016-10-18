@@ -51,7 +51,6 @@ class MrpBomCategoryStructureCategory(orm.Model):
         'note': fields.text('Note'),        
         }
     
-    
 '''
 class MrpBomCategory(orm.Model):
     """ Model name: Mrp Bom Category

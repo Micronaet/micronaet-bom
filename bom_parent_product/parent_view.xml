@@ -10,9 +10,9 @@
                     <group colspan="4" col="4" attrs="{'invisible': [('relative_type','!=','parent')]}">
                         <field name="parent_bom_id" />
                         
-                        <separator string="Default component" colspan="4"/>
+                        <separator string="Default component:" colspan="4"/>
                         <field name="parent_bom_line_ids" colspan="4" nolabel="1" readonly="1">
-                            <tree string="Default parent BOM component">
+                            <tree string="Default parent BOM component" editable="bottom">
                                 <field name="bom_id" invisible="1"/>
                                 <field name="product_id"/>
                                 <field name="category_id" />

@@ -33,6 +33,7 @@
         'product',
         'bom_category',
         'product_speech_code',
+        'bom_parent_code', # for parent default value
         ],
     'init_xml': [],
     'demo': [],

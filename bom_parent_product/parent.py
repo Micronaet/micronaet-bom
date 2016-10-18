@@ -62,7 +62,8 @@ class ProductProduct(orm.Model):
     
     _columns = {
         'parent_bom_id': fields.many2one(
-            'mrp.bom', 'Half BOM'),
+            'mrp.bom', 'Parent default BOM', 
+            help='Use for get list of categorized element for default'),
             
         'parent_bom_line_ids': fields.function(        
             _get_parent_bom_line_ids, method=True, 

@@ -39,7 +39,7 @@
     'init_xml': [],
     'demo': [],
     'data': [
-        'relative_view.xml',
+        #'relative_view.xml',
         ],
     'active': False,
     'installable': True,

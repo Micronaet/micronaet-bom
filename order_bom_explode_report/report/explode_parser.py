@@ -167,6 +167,100 @@ class Parser(report_sxw.rml_parse):
         mask = '%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n'    
 
         # =====================================================================
+        # 1. LOAD PICKING (CUSTOMER ORDER AND PICK IN )
+        # =====================================================================
+        block = 'OF and BF'
+        # XXX Note: first for creation of new elements if not present in OC
+        
+        in_picking_type_ids = []
+        for item in company_proxy.stock_report_tx_load_in_ids:
+            #stock_report_load_ids:
+            in_picking_type_ids.append(item.id)
+            
+        pick_ids = pick_pool.search(cr, uid, [     
+            ('picking_type_id', 'in', in_picking_type_ids),            
+            ('partner_id', 'not in', exclude_partner_ids),            
+            # check data date (old method
+            #('date', '>=', from_date), # XXX correct for virtual?
+            #('date', '<=', to_date),    
+
+            # TODO state filter
+            ])
+            
+        for pick in pick_pool.browse(cr, uid, pick_ids):
+            pos = get_position_season(pick.date) # for done cols  (min_date?)
+            for line in pick.move_lines:
+                default_code = line.product_id.default_code                              
+                qty = line.product_uom_qty
+                
+                if default_code not in products:
+                    debug_mm.write(mask % (
+                        block, 'NOT USED', pick.name, pick.origin, pick.date,
+                        pos, '', # product_code
+                        default_code, '', 0, 0, 0,
+                        'OF / BF Warn. Code not in component',
+                        )) 
+                    # TODO create record if component or halfwork!!!!!!!!!!!!!!
+                    continue
+
+                # Order not current delivered
+                # -------------------------------------------------------------
+                #          OF document
+                # -------------------------------------------------------------
+                if line.state == 'assigned': # virtual
+                    # USE deadline data:
+                    # Before check date:
+                    if line.date_expected > period_to or \
+                            line.date_expected < period_from: # extra range
+                        debug_mm.write(mask % (
+                            block, 'NOT USED', pick.name, pick.origin,
+                            line.date_expected, '', # POS
+                            '', # product_code                                
+                            default_code, '', 0, 0, 0,
+                            'OF date expected extra range!: Q.: %s' % qty,
+                            )) 
+                        continue
+
+                    pos = get_position_season(line.date_expected)
+                    products[default_code][5][pos] += qty # OF block
+                    debug_mm.write(mask % (
+                        block, 'USED', pick.name, pick.origin, line.date_expected,
+                        pos, '', # product_code                                
+                        default_code, '', 0, 0,
+                        ('%s' % qty).replace('.', ','), 'OF',
+                        ))                      
+                    continue
+
+                # Order delivered so picking
+                # -------------------------------------------------------------
+                #          BF document
+                # -------------------------------------------------------------
+                elif line.state == 'done':
+                    date = pick.date_done or pick.min_date or pick.date
+                    pos = get_position_season(date)
+                
+                    # USE order data:
+                    if date > period_to or date < period_from: # extra range
+                        debug_mm.write(mask % (
+                            block, 'NOT USED', pick.name, pick.origin,
+                            date, pos, '', # product_code                                
+                            default_code, '', 0, 0, 0,
+                            'BF date doc extra range!!: Q.: %s' % qty,
+                            )) 
+                        continue
+                    
+                    products[default_code][3][pos] += qty # MM block
+                    products[default_code][1] += qty # TCAR                    
+                    debug_mm.write(mask % (
+                        block, 'USED', pick.name, pick.origin, date,
+                        pos, '', # product_code                                
+                        default_code, '',
+                        ('%s' % qty).replace('.', ','), # +MM
+                        0, 0, 'BF ADD IN TCAR',
+                        ))                      
+                    continue
+
+        # =====================================================================
         # UNLOAD PICKING (CUSTOMER ORDER PICK OUT) DIRECT SALE OF COMPONENT
         # =====================================================================
         block = 'BC PICK OUT' # Direct sale of halfwork
@@ -266,162 +360,87 @@ class Parser(report_sxw.rml_parse):
                 #    continue
 
         # =====================================================================
-        # LOAD PICKING (CUSTOMER ORDER AND PICK IN )
-        # =====================================================================
-        block = 'OF and BF'
-        in_picking_type_ids = []
-        for item in company_proxy.stock_report_tx_load_in_ids:
-            #stock_report_load_ids:
-            in_picking_type_ids.append(item.id)
-            
-        pick_ids = pick_pool.search(cr, uid, [     
-            ('picking_type_id', 'in', in_picking_type_ids),            
-            ('partner_id', 'not in', exclude_partner_ids),            
-            # check data date (old method
-            #('date', '>=', from_date), # XXX correct for virtual?
-            #('date', '<=', to_date),    
-
-            # TODO state filter
-            ])
-            
-        for pick in pick_pool.browse(cr, uid, pick_ids):
-            pos = get_position_season(pick.date) # for done cols  (min_date?)
-            for line in pick.move_lines:
-                default_code = line.product_id.default_code                              
-                qty = line.product_uom_qty
-                
-                if default_code not in products:
-                    debug_mm.write(mask % (
-                        block, 'NOT USED', pick.name, pick.origin, pick.date,
-                        pos, '', # product_code
-                        default_code, '', 0, 0, 0,
-                        'OF / BF Warn. Code not in component',
-                        )) 
-                    continue
-
-                # Order not current delivered
-                # -------------------------------------------------------------
-                #          OF document
-                # -------------------------------------------------------------
-                if line.state == 'assigned': # virtual
-                    # USE deadline data:
-                    # Before check date:
-                    if line.date_expected > period_to or \
-                            line.date_expected < period_from: # extra range
-                        debug_mm.write(mask % (
-                            block, 'NOT USED', pick.name, pick.origin,
-                            line.date_expected, '', # POS
-                            '', # product_code                                
-                            default_code, '', 0, 0, 0,
-                            'OF date expected extra range!: Q.: %s' % qty,
-                            )) 
-                        continue
-
-                    pos = get_position_season(line.date_expected)
-                    products[default_code][5][pos] += qty # OF block
-                    debug_mm.write(mask % (
-                        block, 'USED', pick.name, pick.origin, line.date_expected,
-                        pos, '', # product_code                                
-                        default_code, '', 0, 0,
-                        ('%s' % qty).replace('.', ','), 'OF',
-                        ))                      
-                    continue
-
-                # Order delivered so picking
-                # -------------------------------------------------------------
-                #          BF document
-                # -------------------------------------------------------------
-                elif line.state == 'done':
-                    date = pick.date_done or pick.min_date or pick.date
-                    pos = get_position_season(date)
-                
-                    # USE order data:
-                    if date > period_to or date < period_from: # extra range
-                        debug_mm.write(mask % (
-                            block, 'NOT USED', pick.name, pick.origin,
-                            date, pos, '', # product_code                                
-                            default_code, '', 0, 0, 0,
-                            'BF date doc extra range!!: Q.: %s' % qty,
-                            )) 
-                        continue
-                    
-                    products[default_code][3][pos] += qty # MM block
-                    products[default_code][1] += qty # TCAR                    
-                    debug_mm.write(mask % (
-                        block, 'USED', pick.name, pick.origin, date,
-                        pos, '', # product_code                                
-                        default_code, '',
-                        ('%s' % qty).replace('.', ','), # +MM
-                        0, 0, 'BF ADD IN TCAR',
-                        ))                      
-                    continue
-
-        # =====================================================================
         #                  UNLOAD ORDER (NON DELIVERED)
         # =====================================================================
         block = 'OC (not delivered)'
-        order_ids = sale_pool.search(cr, self.uid, [
+        # XXX Note: used only for manage OC remain: 
+        #    OC - B if B > Del.
+        #    OC - Del if B < Del.
+        
+        order_ids = sale_pool.search(cr, uid, [
             ('state', 'not in', ('cancel', 'send', 'draft')),
             ('pricelist_order', '=', False),
-            ('partner_id', 'not in', exclude_partner_ids),            
+            ('partner_id', 'not in', exclude_partner_ids),
+            ('mx_closed', '=', False), # Only open orders (not all MRP after)
             # Also forecasted order
             # TODO filter date?            
             # TODO no partner exclusion
+            # TODO filter products?
             ])
             
-        for order in sale_pool.browse(cr, self.uid, order_ids):
+        for order in sale_pool.browse(cr, uid, order_ids):
+            # Search in order line:
             for line in order.order_line:
-                product_code = line.product_id.default_code                              
-
                 # FC order no deadline (use date)
+                product_code = line.product_id.default_code
                 date = line.date_deadline or order.date_order
                 pos = get_position_season(date)
                 #datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)) 
-                    
-                # TODO manage forecast order ...     
-                remain = line.product_uom_qty - line.delivered_qty
-                # TODO error for negative?
-                if remain <= 0:
-                    debug_mm.write(mask % (
-                        block, 'NOT USED', order.name, '', date, pos,
-                        product_code, '', # MP
-                        '', 0, # +MM
-                        0, 0, 'ALL DELIVERED',
-                        ))  
-                    continue
-            
-                # USE order data:
-                if date > period_to or date < period_from: # extra range
-                    debug_mm.write(mask % (
-                        block, 'NOT USED', order.name, '', date, pos,
-                        product_code, '', # MP
-                        '', 0, # +MM
-                        0, 0, 'EXTRA RANGE, qty: %s' % remain,
-                        ))                      
-                    continue
-
-                # Check for component order:
-                if product_code in products: # OC out component (no prod.):
-                    products[product_code][4][pos] -= remain # OC block
-                    debug_mm.write(mask % (
-                        block, 'USED', order.name, '', date, pos, '', # code
-                        product_code, # MP
-                        '', 0, # +MM
-                        ('%s' % remain).replace('.', ','), # -OC
-                        0, 'COMPONENT DIRECT',
-                        ))                      
-                    continue
                 
+                # TODO manage forecast order ...     
+                # Check remain to produce
+                if product_uom_maked_sync_qty >= line.delivered_qty:
+                    remaing = line.product_uom_qty - product_uom_maked_sync_qty
+                else:    
+                    remain = line.product_uom_qty - line.delivered_qty
+
                 if not len(product.dynamic_bom_line_ids): # no bom
                     debug_mm.write(mask % (
                         block, 'NOT USED', order.name, '', date, pos,
-                        product_code, '', #MP
+                        product_code, '', # Original product
                         '', 0, # +MM
                         0, # -OC
                         0, 'PRODUCT WITHOUT BOM, Q.: %s' % remain,
                         ))                      
                     continue
+                    
+                # Search in component:
+                for comp in line.dynamic_bom_line_ids:
+                    comp_code = comp.product_id.default_code
+                        
+                    # TODO error for negative?
+                    if remain <= 0:
+                        debug_mm.write(mask % (
+                            block, 'NOT USED', order.name, '', date, pos,
+                            comp_code, '', # MP
+                            '', 0, # +MM
+                            0, 0, 'ALL DELIVERED',
+                            ))  
+                        continue
                 
+                    # USE order data:
+                    if date > period_to or date < period_from: # extra range
+                        debug_mm.write(mask % (
+                            block, 'NOT USED', order.name, '', date, pos,
+                            comp_code, '', # MP
+                            '', 0, # +MM
+                            0, 0, 'EXTRA RANGE, qty: %s' % remain,
+                            ))                      
+                        continue
+
+                    # Check for component order:
+                    if comp_code in products: # OC out component (no prod.):
+                        products[comp_code][4][pos] -= remain # OC block
+                        debug_mm.write(mask % (
+                            block, 'USED', order.name, '', date, pos, '', # code
+                            comp_code, # MP
+                            '', 0, # +MM
+                            ('%s' % remain).replace('.', ','), # -OC
+                            0, 'COMPONENT DIRECT',
+                            ))                      
+                        continue
+                    
+                    
                 # -------------------------------------------------------------
                 #                  REMAIN ORDER TO PRODUCE:
                 # -------------------------------------------------------------
@@ -453,7 +472,7 @@ class Parser(report_sxw.rml_parse):
                         # Check bom problem:                
                         if default_code in double_check:
                             _logger.error(
-                                'BOM double problem: %s' % product_code)
+                                'BOM double problem: %s' % comp_code)
                             # TODO remove ID?
                             continue    
                         double_check.append(default_code)
@@ -461,7 +480,7 @@ class Parser(report_sxw.rml_parse):
                         if default_code not in products:
                             debug_mm.write(mask % (
                                 block, 'NOT USED', order.name, '',
-                                date, pos, product_code, default_code, # MP
+                                date, pos, comp_code, default_code, # MP
                                 '', 0, # +MM
                                 0, # -OC
                                 0, 'ERROR COMPONENT NOT IN DATABASE!',
@@ -475,7 +494,7 @@ class Parser(report_sxw.rml_parse):
                         
                         debug_mm.write(mask % (
                             block, 'USED', order.name, '', date, pos,
-                            product_code, default_code,
+                            comp_code, default_code,
                             '%s x %s' % (
                                 move_qty, 
                                 component.product_qty,
@@ -542,6 +561,11 @@ class Parser(report_sxw.rml_parse):
                                 i, note),
                             ))                      
                         continue
+
+        # =====================================================================
+        #                  UNLOAD FOR PRODUCTION MRP ORDER
+        # =====================================================================
+        
 
         # ---------------------------------------------------------------------
         # Prepare data for report:

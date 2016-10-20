@@ -47,10 +47,9 @@ class SaleOrder(orm.Model):
     #                               UTILITY
     # -------------------------------------------------------------------------
     def get_component_in_product_order_open(
-            self, cr, uid, all_product=False, logfile=False, context=None):
+            self, cr, uid, logfile=False, context=None):
         ''' Check open order and return list of product present
             (for line not closed)
-            all_product: True add all product also no structure and no compon.
             chose logfile if report need to log operation            
         '''
         line_pool = self.pool.get('sale.order.line')
@@ -61,15 +60,16 @@ class SaleOrder(orm.Model):
         data = {
             # Data database
             'product': [], # database for product
-            'component': [], # database for compoment
+            #'component': [], # database for compoment
+            
             # TODO 
-            'order': [], # order header
-            'line': [], # order line
+            #'order': [], # order header
+            #'line': [], # order line
             
             # Check error database:
             'no_product': [],
             'no_structure': [],
-            'no_component': [],
+            #'no_component': [],
             }
         
         # Search open order:
@@ -91,34 +91,17 @@ class SaleOrder(orm.Model):
             structure = product.structure_id # Readability
                 
             # -----------------------------------------------------------------
+            # Save for explode in report:
+            # -----------------------------------------------------------------            
+            if product not in data['product']:
+                data['product'].append(product)                        
+
+            # -----------------------------------------------------------------
             # Check structure:            
             # -----------------------------------------------------------------            
             if not structure and product not in data['no_structure']:
                 data['no_structure'].append(product)
-                if all_product and product not in data['product']:
-                    data['product'].append(product)
-                continue
                 
-            # -----------------------------------------------------------------
-            # Save for explode:
-            # -----------------------------------------------------------------            
-            if product not in data['product']:
-                total = len(product.dynamic_bom_line_ids)
-                                
-                if not total:
-                    data['no_component'].append(product)
-                    if all_product and product not in data['product']:
-                        data['product'].append(product)
-                    continue
-
-                # Read all component
-                for line in product.dynamic_bom_line_ids:
-                    component = line.product_id # XXX always present
-                    if component not in data['component']:
-                        data['component'].append(component)
-                        
-                if product not in data['product']:
-                    data['product'].append(product)                        
         return data
         
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -81,20 +81,23 @@ class MRPBom(orm.Model):
         # LOG operation (TODO remove)
         log_f = open(os.path.expanduser('~/bom.csv'), 'w')
 
-        riprendi_hw = []  
+        empty_hw = []  
         mt_new = []
 
-        for item in product_ids: # XXX ids:
-            message = self.migrate_assign_product_bom_product1(
-                cr, uid, [item], riprendi_hw, mt_new, context=context)
-            log_f.write(message)    
-        log_f.write('%s' % (riprendi_hw,))    
+        for item in ids: #product_ids: # XXX ids:
+            log = self.migrate_assign_product_bom_product1(
+                cr, uid, [item], empty_hw, mt_new, context=context)
+            self.write(cr, uid, item, {
+                'bom_category': 'done',
+                }, context=context) 
+            log_f.write(log)    
+        log_f.write('%s' % (empty_hw,))    
         log_f.write('%s' % (mt_new,))    
         log_f.close()        
         return True    
         
     def migrate_assign_product_bom_product1(self, cr, uid, ids, 
-            riprendi_hw, mt_new, context=None):
+            empty_hw, mt_new, context=None):
         ''' Migrate bom in dynamic way
             Create half work element
             Create BOM 
@@ -127,7 +130,8 @@ class MRPBom(orm.Model):
             'TL': 26, # Tela
             'PO': 27, # Poggiatesta
             'PA': 19, # Parasole #XXX non correct
-            #'CO': 28, # Cuscino
+            'PV': 28, # Tondino
+            'MT': 29, # Materassino
             }
         code_map = {
             #Parent:Tela
@@ -234,45 +238,38 @@ class MRPBom(orm.Model):
             # 'G241', # ??? TLG420, PA600
             ]         
             
-        default_code = bom_proxy.product_id.default_code
+        # Default code:    
+        default_code = bom_proxy.product_id.default_code        
+        if not default_code:
+            _logger.error('ID %s. No product code' % bom_proxy.id)
+            return ''
         default_code = default_code.upper()
         
-        # Set mask for unique element S and no S are the same
+        # Mask for S or not S (same)
         if default_code[12:13] == 'S':
             dynamic_mask = default_code[:12] + '%'
         else:
             dynamic_mask = default_code + '%'
-        
-        log += '%s|%s|%s|%s\n' % (
-            default_code, 
-            len(bom_proxy.bom_line_ids),
-            dynamic_mask, 
-            bom_proxy.name or '???', # or bom_proxy.product_tmpl_id.name, 
-            )
-        
-        # TODO Check if dynamic and product are jet present
-        
+
         # ---------------------------------------------------------------------
         # Create TL element:
         # ---------------------------------------------------------------------        
         for line in bom_proxy.bom_line_ids:
             if default_code.startswith('MT'):
-                log += '%s|||%s||Saltato materassino\n' % (
-                    default_code, bom_proxy.name)
+                _logger.warning('Code %s. Jump MT' % (
+                    default_code)
                 if default_code not in mt_new:
                     mt_new.append(default_code)    
-                return log
+                return ''
         
+            # Component code:
             component_code = line.product_id.default_code
             if not component_code:
-                log += '%s|||%s||No codice componente\n' % (
-                    default_code, bom_proxy.name)
-                return log
-                
+                _logger.error('Code %s.%s Empty component code' % (
+                    default_code, line.id)
+                return ''                
             component_code = component_code.upper()
             
-            comment = ''
-
             # Type code:
             #type_code = 'TL'
             
@@ -288,6 +285,11 @@ class MRPBom(orm.Model):
                 # Default code:    
                 parent_code = code_map.get(parent, parent)
                 type_code = type_map.get(component_code[:3], False)
+
+            if not type_code:
+                _logger.error('Code %s.%s Non MT TL PO PA' % (
+                    default_code, line.id))
+                return ''
                             
             #Fabric code:
             if parent in ('810', '081', '085', '084'):
@@ -302,111 +304,84 @@ class MRPBom(orm.Model):
             # Color code        
             color_code = default_code[8:12].strip()
             if len(color_code) == 1:
-                log += 'Codice colore 1 carattere'
-                return log
+                _logger.error('Code %s.%s Colore 1 carattere %s' % (
+                    default_code, line.id, component_code)
+                return ''
+
             
             # TODO Decidere se creare il solo semilavorato oppure continuare
+            HW_codes = []
             if parent in crea_hw:
                 for hw in crea_hw[parent]:
-                    HW_code = '%s%s%s' % (
-                        hw, fabric_code, color_code)
+                    HW_code = '%s%s%s' % (hw, fabric_code, color_code)
+                    HW_codes.append((HW_code, 0))
 
-                    if HW_code not in riprendi_hw:
-                        riprendi_hw.append(HW_code)  
+                    if HW_code not in empty_hw:
+                        empty_hw.append(HW_code)                        
+            else:                
+                # Normal creation:
+                HW_codes = [
+                    ('%s%s%s%s' % (
+                        type_code or '??',
+                        parent_code,
+                        fabric_code, 
+                        color_code,
+                        ), 
+                    line.product_qty,
+                    )]
                         
-                    component_ids = product_pool.search(cr, uid, [
-                        ('default_code', '=', HW_code),
-                        ('relative_type', '=', 'half'),
-                        ], context=context)
-                    if component_ids: # XXX non interessa se multipli
-                        log += '%s||||%s|%s|%s|Automatica vuota!|SI|%s\n' % (
-                            default_code,
-                            component_code, HW_code, '///', comment)
-                    else:        
-                        log += '%s||||%s|%s|%s|Automatica vuota (crea)!|NO|%s\n' % (
-                            default_code,
-                            component_code, HW_code, '///', comment)
-                            
-                return log
-
-            # Normal creation:
-            HW_code = '%s%s%s%s' % (
-                type_code or '??',
-                parent_code,
-                fabric_code, 
-                color_code,
-                )
+            for HW_code, product_qty in HW_codes:
+                bom_category = categ_id.get(HW_code[:2], False)
+                if not bom_category:
+                    _logger.error('Code %s.%s No BOM categ. : %s' % (
+                        default_code, line.id, HW_code)
+                    import pdb; pdb.set_trace()
+                    return ''                
             
-            component_ids = product_pool.search(cr, uid, [
-                ('default_code', '=', HW_code),
-                ('relative_type', '=', 'half'),
-                ], context=context)
-            
-            # check dimemnsion:
-            product_qty = line.product_qty
-                
-            if not type_code:
-                comment += 'Non trovato il tipo MT o TL?'
-                
+                component_ids = product_pool.search(cr, uid, [
+                    ('default_code', '=', HW_code),
+                    ('relative_type', '=', 'half'),
+                    ], context=context)
 
-            if component_ids:
-                if len(component_ids) > 1:
-                    log += '%s||||%s|%s|%s|Piu componenti|NO|%s\n' % (
-                        default_code,
-                        component_code, HW_code, product_qty, comment)
+                if component_ids:
+                    if len(component_ids) > 1:
+                        _logger.error += 'Code %s.%s More product HW %s' % (
+                            default_code, line.id, component_code)
+                    HW_id = component_ids[0]
+                    create = False
                 else:
-                    log += '%s||||%s|%s|%s||SI||%s\n' % (
-                        default_code,
-                        component_code, HW_code, product_qty, comment)
-            else:        
-                log += '%s||||%s|%s|%s|Non trovato in ODOO|%s|NO\n' % (
-                    default_code,
-                    component_code, HW_code, product_qty, comment)
-        #print log; return log
-                
-            # -----------------------------------------------------------------
-            # Create / Update component product and BOM (halfwork)
-            # -----------------------------------------------------------------
-            HW_ids = product_pool.search(cr, uid, [
-                ('default_code', '=', HW_code),
-                ('relative_type', '=', 'half'),
-                ], context=context)
+                    create = True
+                    HW_id = product_pool.create(cr, uid, {
+                        'name': HW_code,
+                        'default_code': HW_code,
+                        'relative_type': 'half',       
+                        'structure_id': structure_id,
+                        'uom_id': 1, # XXX NR
+                        'ean13_auto': False, # XXX
+                        }, context=context)
              
-            if not HW_ids: # Only create:                
-                HW_id = product_pool.create(cr, uid, {
-                    'name': HW_code,
-                    'default_code': HW_code,
-                    'relative_type': 'half',       
-                    'structure_id': structure_id,
-                    'uom_id': 1, # XXX NR
-                    'ean13_auto': False, # XXX
-                    }, context=context)
 
-            # -------------------------------------------------------------
-            # Create / Update fabric under HW component
-            # -------------------------------------------------------------
-            # Read record:
-            HW_proxy = product_pool.browse(cr, uid, HW_id, context=context)    
-            
-            # Launch button:
-            if not HW_proxy.half_bom_id: 
-                product_pool.create_product_half_bom(
-                    cr, uid, [HW_id], context=context)
-
-            # Read again product:
-            HW_proxy = product_pool.browse(cr, uid, HW_id, context=context)    
-            
-            line_pool.create(cr, uid, {
-                # Link:
-                'bom_id': HW_proxy.half_bom_id.id, # bom link
-                'halfwork_id': HW_proxy.id, # product link
-                
-                # Fabric data:
-                'product_id': line.product_id.id, 
-                'product_uom': line.product_uom.id, 
-                'type': line.type,
-                'product_qty': line.product_qty,
-                }, context=context)
+                # -------------------------------------------------------------
+                # Create / Update fabric under HW component
+                # -------------------------------------------------------------
+                HW_proxy = product_pool.browse(cr, uid, HW_id, context=context)
+                if not HW_proxy.half_bom_id: # Button and reload data
+                    # Only first element
+                    product_pool.create_product_half_bom(
+                        cr, uid, [HW_id], context=context)
+                    HW_proxy = product_pool.browse(
+                        cr, uid, HW_id, context=context)                
+                    line_pool.create(cr, uid, {
+                        # Link:
+                        'bom_id': HW_proxy.half_bom_id.id, # bom link
+                        'halfwork_id': HW_proxy.id, # product link
+                        
+                        # Fabric data:
+                        'product_id': line.product_id.id, 
+                        'product_uom': line.product_uom.id, 
+                        'type': line.type,
+                        'product_qty': line.product_qty,
+                        }, context=context)
 
             # -----------------------------------------------------------------
             # Create / Update rule in dynamic:
@@ -414,24 +389,20 @@ class MRPBom(orm.Model):
             line_ids = line_pool.search(cr, uid, [
                 ('bom_id', '=', dynamic_bom_id), # dynamic bom for structure
                 ('dynamic_mask', '=', dynamic_mask), # mask
-                ('bom_category_id', '=', categ_id.get('type_code', False))
-                ('product_id', '=', HW_proxy.id), 
+                ('bom_category', '=', bom_category),
+                ('product_id', '=', HW_proxy.id),
                 ], context=context)
-            if line_ids: # Update or check
-                pass
-            else: # Create
+            if not line_ids: # Update or check
                 line_pool.create(cr, uid, {
                     'bom_id': dynamic_bom_id,
                     'dynamic_mask': dynamic_mask,
-                    'bom_category_id': categ_id.get('type_code', False),
+                    'bom_category': bom_category,
                     'product_id': HW_proxy.id, 
                     'product_uom': HW_proxy.uom_id.id, 
                     'product_qty': 1, # always!
                     'type': 'normal',
                     }, context=context)
-                            
-        print log        
-        return log
+        return ''
 
     # EXTRA BLOCK -------------------------------------------------------------
         

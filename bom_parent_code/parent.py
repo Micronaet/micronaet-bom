@@ -86,14 +86,15 @@ class MRPBom(orm.Model):
 
         for item in product_ids: # XXX ids:
             message = self.migrate_assign_product_bom_product1(
-                cr, uid, [item], dimension_db, riprendi_hw, context=context)
+                cr, uid, [item], dimension_db, riprendi_hw, mt_new, context=context)
             log_f.write(message)    
-        log_f.write('%s' % (riprendi,))    
+        log_f.write('%s' % (riprendi_hw,))    
+        log_f.write('%s' % (mt_new,))    
         log_f.close()        
         return True    
         
     def migrate_assign_product_bom_product1(self, cr, uid, ids, dimension_db,  
-            riprendi_hw, context=None):
+            riprendi_hw, mt_new, context=None):
         ''' Migrate bom in dynamic way
             Create half work element
             Create BOM 
@@ -291,6 +292,8 @@ class MRPBom(orm.Model):
             if default_code.startswith('MT'):
                 log += '%s|||%s||Saltato materassino\n' % (
                     default_code, bom_proxy.name)
+                if default_code not in mt_new:
+                    mt_new.append(default_code)    
                 return log
         
             component_code = line.product_id.default_code

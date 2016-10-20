@@ -253,7 +253,6 @@ class MRPBom(orm.Model):
         # ---------------------------------------------------------------------
         # Create TL element:
         # ---------------------------------------------------------------------        
-        import pdb; pdb.set_trace()
         for line in bom_proxy.bom_line_ids:
             if default_code.startswith('MT'):
                 _logger.warning('Code %s. Jump MT' % (
@@ -320,11 +319,19 @@ class MRPBom(orm.Model):
                     fabric_ids = product_pool.search(cr, uid, [
                         ('default_code', '=', fabric_code)], context=context)    
                     if fabric_ids:
-                        fabric_proxy = product_pool.browse(
-                            cr, uid, fabric_ids, context=context)[0]
+                        fabric_id = fabric_ids[0]
                     else:
-                        _logger.error('No fabric code')
-                        import pdb; pdb.set_trace()
+                        fabric_id = product_pool.create(cr, uid, {
+                            'name': fabric_code,
+                            'default_code': fabric_code,
+                            'uom_id': 8, # mt
+                            'uos_id': 8, # mt
+                            'uom_po_id': 8, # mt                            
+                            }, context=context)
+                        _logger.warning('Create fabric: %s' % fabric_code)
+
+                    fabric_proxy = product_pool.browse(
+                        cr, uid, fabric_id, context=context)
                             
                     HW_codes.append((
                         HW_code, 
@@ -354,7 +361,6 @@ class MRPBom(orm.Model):
                 if not category_id:
                     _logger.error('Code %s.%s No BOM categ. : %s' % (
                         default_code, line.id, HW_code))
-                    import pdb; pdb.set_trace()
                     return            
             
                 component_ids = product_pool.search(cr, uid, [
@@ -402,25 +408,25 @@ class MRPBom(orm.Model):
                         'product_qty': product_qty,
                         }, context=context)
 
-            # -----------------------------------------------------------------
-            # Create / Update rule in dynamic:
-            # -----------------------------------------------------------------
-            line_ids = line_pool.search(cr, uid, [
-                ('bom_id', '=', dynamic_bom_id), # dynamic bom for structure
-                ('dynamic_mask', '=', dynamic_mask), # mask
-                ('category_id', '=', category_id),
-                ('product_id', '=', HW_proxy.id),
-                ], context=context)
-            if not line_ids: # Update or check
-                line_pool.create(cr, uid, {
-                    'bom_id': dynamic_bom_id,
-                    'dynamic_mask': dynamic_mask,
-                    'category_id': category_id,
-                    'product_id': HW_proxy.id, 
-                    'product_uom': HW_proxy.uom_id.id, 
-                    'product_qty': 1, # always!
-                    'type': 'normal',
-                    }, context=context)
+                # -------------------------------------------------------------
+                # Create / Update rule in dynamic:
+                # -------------------------------------------------------------
+                line_ids = line_pool.search(cr, uid, [
+                    ('bom_id', '=', dynamic_bom_id), # dynamic bom for structure
+                    ('dynamic_mask', '=', dynamic_mask), # mask
+                    ('category_id', '=', category_id),
+                    ('product_id', '=', HW_proxy.id),
+                    ], context=context)
+                if not line_ids: # Update or check
+                    line_pool.create(cr, uid, {
+                        'bom_id': dynamic_bom_id,
+                        'dynamic_mask': dynamic_mask,
+                        'category_id': category_id,
+                        'product_id': HW_proxy.id, 
+                        'product_uom': HW_proxy.uom_id.id, 
+                        'product_qty': 1, # always!
+                        'type': 'normal',
+                        }, context=context)
         return
 
     # EXTRA BLOCK -------------------------------------------------------------

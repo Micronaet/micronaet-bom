@@ -404,18 +404,7 @@ class MRPBom(orm.Model):
                 ('relative_type', '=', 'half'),
                 ], context=context)
              
-            if HW_ids: # Update halfcomponent product (and delete line)
-                if len(HW_ids) > 1:
-                    log += '%s||||%s|%s|%s||SI||%s\n' % (
-                        default_code,
-                        component_code, HW_code, product_qty, 'more than one')
-                        
-                HW_id = HW_ids[0]
-                product_pool.write(cr, uid, HW_ids, {
-                    'relative_type': 'half', 
-                    'half_bom_ids': [(5, False, False)], # XXX remove line
-                    }, context=context)                
-            else: # Create half component product 
+            if not HW_ids: # Only create:
                 HW_id = product_pool.create(cr, uid, {
                     'name': HW_code,
                     'default_code': HW_code,

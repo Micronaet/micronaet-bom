@@ -123,6 +123,12 @@ class MRPBom(orm.Model):
         # ---------------------------------------------------------------------
         # Create dynamic mask from code:
         # ---------------------------------------------------------------------
+        categ_id = {
+            'TL': 26, # Tela
+            'PO': 27, # Poggiatesta
+            'PA': 19, # Parasole #XXX non correct
+            #'CO': 28, # Cuscino
+            }
         code_map = {
             #Parent:Tela
             '005': '205',            
@@ -163,8 +169,7 @@ class MRPBom(orm.Model):
             
         type_map = {
             'TES': 'TL',
-            'TEX': 'TL',
-            
+            'TEX': 'TL',            
             # Non usati:
             'TXM': 'TL',
             'TWH': 'TL',
@@ -173,7 +178,7 @@ class MRPBom(orm.Model):
             'TIO': 'TL',
             'TWL': 'TL',
             'TGT': 'TL',           
-            
+            # Materassino: 
             'TSK': 'MT',
             'T3D': 'MT',
             }
@@ -188,21 +193,15 @@ class MRPBom(orm.Model):
             # '230'
             '046': ['TL145', 'PO650'],
             '049': ['TL145', 'PO650'],
-            '149': ['TL145', 'PO650'],
-            
-            '050': ['TL038', 'PA601'],
-            
-            '051': ['TL038', 'PA601', 'PO651'],
-            
+            '149': ['TL145', 'PO650'],            
+            '050': ['TL038', 'PA601'],            
+            '051': ['TL038', 'PA601', 'PO651'],            
             '034': ['TL135', 'PA600'],
             '039': ['TL135', 'PA600'],
-
             # 700
-            # 701
-            
+            # 701            
             # 550 
-            # 552
-            
+            # 552            
             # 'G421': ['TLG420', 'PA600']
             }
             
@@ -211,11 +210,9 @@ class MRPBom(orm.Model):
             '014', # unire
             '024', # unire
             '025', # unire
-            '027',
-            '029',
+            '027', '029',
             '034', # TL135 >, PA600 <
-            '035',
-            '036',
+            '035', '036',
             '039', # TL135 >, PA600 <
             '046', # TL145 >, PO650 <
             '048',
@@ -225,39 +222,18 @@ class MRPBom(orm.Model):
             '052', #
             #'070', # Non più come 071
             #'071', # Non più come 070
-            '090',
-            '121',
+            '090', '121',
             '124', # unire
-            '127',
-            '128',
-            '129',
-            '130',
-            '131',
-            '132',
-            '135',
-            '145',
-            '148',
+            '127', '128', '129', '130', '131', '132', '135', '145', '148',
             '149', # TL145 >, PO650 <
-            '150',
-            '190',
-            '205',
-            '206',
+            '150', '190', '205', '206',
             '230', # unire
             '550', # Non più come 552
             '552', # Non più come 550
-            '810',
-            '900',
-            '905',
+            '810', '900', '905',
             # 'G241', # ??? TLG420, PA600
             ]         
             
-        if not bom_proxy.product_id:
-            pr_ids = product_pool.search(cr, uid, [
-                ('product_tmpl_id', '=', bom_proxy.product_tmpl_id.id),
-                ], context=context)
-            if pr_ids:
-                default_code = product_pool.browse(
-                    cr, uid, pr_ids, context=context)[0]
         default_code = bom_proxy.product_id.default_code
         
         if not default_code:
@@ -286,8 +262,7 @@ class MRPBom(orm.Model):
         
         # ---------------------------------------------------------------------
         # Create TL element:
-        # ---------------------------------------------------------------------
-        
+        # ---------------------------------------------------------------------        
         for line in bom_proxy.bom_line_ids:
             if default_code.startswith('MT'):
                 log += '%s|||%s||Saltato materassino\n' % (
@@ -335,7 +310,8 @@ class MRPBom(orm.Model):
             # Color code        
             color_code = default_code[8:12].strip()
             if len(color_code) == 1:
-                comment += 'Codice colore 1 carattere'
+                log += 'Codice colore 1 carattere'
+                return log
             
             # TODO Decidere se creare il solo semilavorato oppure continuare
             if parent in crea_hw:
@@ -404,7 +380,7 @@ class MRPBom(orm.Model):
                 ('relative_type', '=', 'half'),
                 ], context=context)
              
-            if not HW_ids: # Only create:
+            if not HW_ids: # Only create:                
                 HW_id = product_pool.create(cr, uid, {
                     'name': HW_code,
                     'default_code': HW_code,
@@ -446,6 +422,7 @@ class MRPBom(orm.Model):
             line_ids = line_pool.search(cr, uid, [
                 ('bom_id', '=', dynamic_bom_id), # dynamic bom for structure
                 ('dynamic_mask', '=', dynamic_mask), # mask
+                ('bom_category_id', '=', categ_id.get('type_code', False))
                 ('product_id', '=', HW_proxy.id), 
                 ], context=context)
             if line_ids: # Update or check
@@ -454,6 +431,7 @@ class MRPBom(orm.Model):
                 line_pool.create(cr, uid, {
                     'bom_id': dynamic_bom_id,
                     'dynamic_mask': dynamic_mask,
+                    'bom_category_id': categ_id.get('type_code', False),
                     'product_id': HW_proxy.id, 
                     'product_uom': HW_proxy.uom_id.id, 
                     'product_qty': 1, # always!

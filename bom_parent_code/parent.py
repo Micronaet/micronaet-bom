@@ -235,14 +235,6 @@ class MRPBom(orm.Model):
             ]         
             
         default_code = bom_proxy.product_id.default_code
-        
-        if not default_code:
-            log += '???|%s||%s|No codice x BOM\n' % ( 
-                len(bom_proxy.bom_line_ids),
-                bom_proxy.name,
-                )
-            return log
-            
         default_code = default_code.upper()
         
         # Set mask for unique element S and no S are the same

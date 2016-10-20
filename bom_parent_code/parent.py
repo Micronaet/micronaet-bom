@@ -285,11 +285,17 @@ class MRPBom(orm.Model):
         # Create TL element:
         # ---------------------------------------------------------------------
         for line in bom_proxy.bom_line_ids:
+            if default_code.startswith('MT'):
+                log += '%s|||%s||Saltato materassino\n' % (
+                    default_code, bom_proxy.name)
+                continue
+        
             component_code = line.product_id.default_code
             if not component_code:
                 log += '%s|||%s||No codice componente\n' % (
                     default_code, bom_proxy.name)
-                return log
+                continue
+                
             component_code = component_code.upper()
             
             comment = ''

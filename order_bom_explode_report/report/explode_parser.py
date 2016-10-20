@@ -360,7 +360,7 @@ class Parser(report_sxw.rml_parse):
                 #    continue
 
         # =====================================================================
-        #                  UNLOAD ORDER (NON DELIVERED)
+        #                  UNLOAD ORDER TO PRODUCE (NON DELIVERED)
         # =====================================================================
         block = 'OC (not delivered)'
         # XXX Note: used only for manage OC remain: 
@@ -379,7 +379,9 @@ class Parser(report_sxw.rml_parse):
             ])
             
         for order in sale_pool.browse(cr, uid, order_ids):
+            # ---------------------
             # Search in order line:
+            # ---------------------
             for line in order.order_line:
                 # FC order no deadline (use date)
                 product_code = line.product_id.default_code
@@ -403,32 +405,32 @@ class Parser(report_sxw.rml_parse):
                         0, 'PRODUCT WITHOUT BOM, Q.: %s' % remain,
                         ))                      
                     continue
-                    
+
+                # TODO error for negative?
+                if remain <= 0:
+                    debug_mm.write(mask % (
+                        block, 'NOT USED', order.name, '', date, pos,
+                        product_code, '', # MP
+                        '', 0, # +MM
+                        0, 0, 'ALL DELIVERED',
+                        ))  
+                    continue
+                
+                # USE order data:
+                if date > period_to or date < period_from: # extra range
+                    debug_mm.write(mask % (
+                        block, 'NOT USED', order.name, '', date, pos,
+                        product_code, '', # MP
+                        '', 0, # +MM
+                        0, 0, 'EXTRA RANGE, qty: %s' % remain,
+                        ))                      
+                    continue
+
+                # --------------------
                 # Search in component:
+                # --------------------
                 for comp in line.dynamic_bom_line_ids:
                     comp_code = comp.product_id.default_code
-                        
-                    # TODO error for negative?
-                    if remain <= 0:
-                        debug_mm.write(mask % (
-                            block, 'NOT USED', order.name, '', date, pos,
-                            comp_code, '', # MP
-                            '', 0, # +MM
-                            0, 0, 'ALL DELIVERED',
-                            ))  
-                        continue
-                
-                    # USE order data:
-                    if date > period_to or date < period_from: # extra range
-                        debug_mm.write(mask % (
-                            block, 'NOT USED', order.name, '', date, pos,
-                            comp_code, '', # MP
-                            '', 0, # +MM
-                            0, 0, 'EXTRA RANGE, qty: %s' % remain,
-                            ))                      
-                        continue
-
-                    # Check for component order:
                     if comp_code in products: # OC out component (no prod.):
                         products[comp_code][4][pos] -= remain # OC block
                         debug_mm.write(mask % (
@@ -436,132 +438,10 @@ class Parser(report_sxw.rml_parse):
                             comp_code, # MP
                             '', 0, # +MM
                             ('%s' % remain).replace('.', ','), # -OC
-                            0, 'COMPONENT DIRECT',
+                            0, 'UNLOAD COMPONENT',
                             ))                      
-                        continue
+                        continue                    
                     
-                    
-                # -------------------------------------------------------------
-                #                  REMAIN ORDER TO PRODUCE:
-                # -------------------------------------------------------------
-                # Check ordered    
-                # XXX mettere il solito test (forse no) ???????????????????????
-                if line.product_uom_maked_sync_qty: # Remain order to produce:
-                    move_qty = line.product_uom_qty - \
-                        line.product_uom_maked_sync_qty
-                    note = 'Remain order with production (OC - B)'
-                else: # No production: # Remain ordered to delivery:
-                    move_qty = line.product_uom_qty - \
-                        line.delivered_qty    
-                    note = 'Remain order without production (OC - Delivered)'
-                    
-                # -----------------------------------------
-                # Compute theorical unload bom materials:
-                # -----------------------------------------
-                # same as previous    
-                # date = line.date_deadline or order.date_order
-                # pos = get_position_season(date) 
-                if move_qty: # Remain order >> =C
-                    # Loop on all elements:
-                    i = 0        
-                    double_check = []            
-                    for component in product.dynamic_bom_line_ids:                                                  
-                        i += 1
-                        default_code = component.product_id.default_code # XXX 
-
-                        # Check bom problem:                
-                        if default_code in double_check:
-                            _logger.error(
-                                'BOM double problem: %s' % comp_code)
-                            # TODO remove ID?
-                            continue    
-                        double_check.append(default_code)
-                            
-                        if default_code not in products:
-                            debug_mm.write(mask % (
-                                block, 'NOT USED', order.name, '',
-                                date, pos, comp_code, default_code, # MP
-                                '', 0, # +MM
-                                0, # -OC
-                                0, 'ERROR COMPONENT NOT IN DATABASE!',
-                                ))                      
-                            continue
-                            
-                        # XXX Jump closed line?
-                            
-                        qty = move_qty * component.product_qty
-                        products[default_code][4][pos] -= qty # OC block
-                        
-                        debug_mm.write(mask % (
-                            block, 'USED', order.name, '', date, pos,
-                            comp_code, default_code,
-                            '%s x %s' % (
-                                move_qty, 
-                                component.product_qty,
-                                ),
-                            0, # +MM
-                            ('%s' % qty).replace('.', ','), # +OC
-                            0,
-                            '[BOM # %s] REMAIN OC [%s]' % (i, note)
-                            ))                      
-                        continue
-
-                # Check production: >> MM
-                # -------------------------------------------------------------
-                #                  PRODUCED TO DELIVERY:
-                # -------------------------------------------------------------
-                if line.product_uom_maked_sync_qty:
-                    move_qty = line.product_uom_maked_sync_qty - \
-                        line.delivered_qty                  
-                    # TODO add other date when unlink order      
-                    # TODO log this change!!
-                    date = line.mrp_id.date_planned or datetime.now().strftime(
-                        DEFAULT_SERVER_DATE_FORMAT)
-                    pos = get_position_season(date)
-                
-                    # Loop on all elements:
-                    i = 0
-                    
-                    double_check = []
-                    for component in product.dynamic_bom_line_ids:                                                  
-                        i += 1
-                        default_code = component.product_id.default_code # XXX                 
-                        if default_code in double_check:
-                            _logger.error(
-                                'BOM double problem: %s' % product_code)
-                            # TODO remove ID?
-                            continue    
-                        double_check.append(default_code)
-                            
-                        if default_code not in products:
-                            debug_mm.write(mask % (
-                                block, 'NOT USED', order.name, '', date, pos,
-                                product_code, default_code, # MP
-                                '', 0, # +MM
-                                0, # -OC
-                                0, 'ERROR COMPON. NOT IN DATABASE (REMAIN B)!',
-                                ))                      
-                            continue
-                        
-                        qty = move_qty * component.product_qty
-                        products[default_code][3][pos] -= qty # - MM block
-                        products[default_code][2] -= qty # TSCAR
-
-                        debug_mm.write(mask % (
-                            block, 'USED', order.name, '', date, pos,
-                            product_code, default_code,
-                            '%s x %s' % (
-                                move_qty, 
-                                component.product_qty,
-                                ),
-                            ('%s' % -qty).replace('.', ','), # -MM
-                            0, # +OC
-                            0,
-                            '[BOM #: %s] PROD TO DELIV (B-DEL.) TSCAR %s' % (
-                                i, note),
-                            ))                      
-                        continue
-
         # =====================================================================
         #                  UNLOAD FOR PRODUCTION MRP ORDER
         # =====================================================================

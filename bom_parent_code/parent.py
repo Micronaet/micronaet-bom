@@ -81,20 +81,19 @@ class MRPBom(orm.Model):
         # LOG operation (TODO remove)
         log_f = open(os.path.expanduser('~/bom.csv'), 'w')
 
-        dimension_db = {}
         riprendi_hw = []  
         mt_new = []
 
         for item in product_ids: # XXX ids:
             message = self.migrate_assign_product_bom_product1(
-                cr, uid, [item], dimension_db, riprendi_hw, mt_new, context=context)
+                cr, uid, [item], riprendi_hw, mt_new, context=context)
             log_f.write(message)    
         log_f.write('%s' % (riprendi_hw,))    
         log_f.write('%s' % (mt_new,))    
         log_f.close()        
         return True    
         
-    def migrate_assign_product_bom_product1(self, cr, uid, ids, dimension_db,  
+    def migrate_assign_product_bom_product1(self, cr, uid, ids, 
             riprendi_hw, mt_new, context=None):
         ''' Migrate bom in dynamic way
             Create half work element
@@ -360,7 +359,7 @@ class MRPBom(orm.Model):
                             default_code,
                             component_code, HW_code, '///', comment)
                             
-                continue
+                return log
 
             # Normal creation:
             HW_code = '%s%s%s%s' % (
@@ -377,14 +376,10 @@ class MRPBom(orm.Model):
             
             # check dimemnsion:
             product_qty = line.product_qty
-            if HW_code not in dimension_db:
-               dimension_db[HW_code] = product_qty
-            
-            if product_qty != dimension_db[HW_code]:
-                comment += 'Differenze di metratura!!!!'
                 
             if not type_code:
                 comment += 'Non trovato il tipo MT o TL?'
+                
 
             if component_ids:
                 if len(component_ids) > 1:
@@ -399,8 +394,8 @@ class MRPBom(orm.Model):
                 log += '%s||||%s|%s|%s|Non trovato in ODOO|%s|NO\n' % (
                     default_code,
                     component_code, HW_code, product_qty, comment)
-        print log; return log
-        """        
+        #print log; return log
+                
             # -----------------------------------------------------------------
             # Create / Update component product and BOM (halfwork)
             # -----------------------------------------------------------------
@@ -477,7 +472,7 @@ class MRPBom(orm.Model):
                     }, context=context)
                             
         print log        
-        return log"""
+        return log
 
     # EXTRA BLOCK -------------------------------------------------------------
         

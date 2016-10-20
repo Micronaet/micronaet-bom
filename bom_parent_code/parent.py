@@ -284,6 +284,7 @@ class MRPBom(orm.Model):
         # ---------------------------------------------------------------------
         # Create TL element:
         # ---------------------------------------------------------------------
+        new_hw = []
         for line in bom_proxy.bom_line_ids:
             if default_code.startswith('MT'):
                 log += '%s|||%s||Saltato materassino\n' % (
@@ -336,6 +337,8 @@ class MRPBom(orm.Model):
                 for hw in crea_hw[parent]:
                     HW_code = '%s%s%s' % (
                         hw, fabric_code, color_code)
+                    if HW_code not in new_hw:
+                        new_hw.append(HW_code)    
                     component_ids = product_pool.search(cr, uid, [
                         ('default_code', '=', HW_code),
                         ('relative_type', '=', 'half'),
@@ -388,7 +391,7 @@ class MRPBom(orm.Model):
                 log += '%s||||%s|%s|%s|Non trovato in ODOO|%s|NO\n' % (
                     default_code,
                     component_code, HW_code, product_qty, comment)
-            
+        log += '%s' % (new_hw, )    
         print log; return log
         """        
             # -----------------------------------------------------------------

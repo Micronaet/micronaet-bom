@@ -85,12 +85,12 @@ class MRPBom(orm.Model):
         mt_new = []
 
         for item in ids: #product_ids: # XXX ids:
-            log = self.migrate_assign_product_bom_product1(
+            import pdb; pdb.set_trace()
+            self.migrate_assign_product_bom_product1(
                 cr, uid, [item], empty_hw, mt_new, context=context)
             self.write(cr, uid, item, {
                 'bom_category': 'done',
                 }, context=context) 
-            log_f.write(log)    
         log_f.write('%s' % (empty_hw,))    
         log_f.write('%s' % (mt_new,))    
         log_f.close()        
@@ -118,10 +118,10 @@ class MRPBom(orm.Model):
             structure_id = bom_proxy.product_id.structure_id.id
         except:
             # no dynamic BOM
-            log += '???|||%s|No dynamic bom structure\n' % ( 
-                bom_proxy.name,
-                )
-            return log
+            _logger.error('%s. No dynamic bom structure' % ( 
+                bom_proxy.id,
+                ))
+            return
                     
         # ---------------------------------------------------------------------
         # Create dynamic mask from code:
@@ -242,7 +242,7 @@ class MRPBom(orm.Model):
         default_code = bom_proxy.product_id.default_code        
         if not default_code:
             _logger.error('ID %s. No product code' % bom_proxy.id)
-            return ''
+            return 
         default_code = default_code.upper()
         
         # Mask for S or not S (same)
@@ -257,17 +257,17 @@ class MRPBom(orm.Model):
         for line in bom_proxy.bom_line_ids:
             if default_code.startswith('MT'):
                 _logger.warning('Code %s. Jump MT' % (
-                    default_code)
+                    default_code))
                 if default_code not in mt_new:
                     mt_new.append(default_code)    
-                return ''
+                return 
         
             # Component code:
             component_code = line.product_id.default_code
             if not component_code:
                 _logger.error('Code %s.%s Empty component code' % (
-                    default_code, line.id)
-                return ''                
+                    default_code, line.id))
+                return
             component_code = component_code.upper()
             
             # Type code:
@@ -289,7 +289,7 @@ class MRPBom(orm.Model):
             if not type_code:
                 _logger.error('Code %s.%s Non MT TL PO PA' % (
                     default_code, line.id))
-                return ''
+                return
                             
             #Fabric code:
             if parent in ('810', '081', '085', '084'):
@@ -305,8 +305,8 @@ class MRPBom(orm.Model):
             color_code = default_code[8:12].strip()
             if len(color_code) == 1:
                 _logger.error('Code %s.%s Colore 1 carattere %s' % (
-                    default_code, line.id, component_code)
-                return ''
+                    default_code, line.id, component_code))
+                return
 
             
             # TODO Decidere se creare il solo semilavorato oppure continuare
@@ -331,12 +331,12 @@ class MRPBom(orm.Model):
                     )]
                         
             for HW_code, product_qty in HW_codes:
-                bom_category = categ_id.get(HW_code[:2], False)
-                if not bom_category:
+                category_id = categ_id.get(HW_code[:2], False)
+                if not category_id:
                     _logger.error('Code %s.%s No BOM categ. : %s' % (
-                        default_code, line.id, HW_code)
+                        default_code, line.id, HW_code))
                     import pdb; pdb.set_trace()
-                    return ''                
+                    return            
             
                 component_ids = product_pool.search(cr, uid, [
                     ('default_code', '=', HW_code),
@@ -389,20 +389,20 @@ class MRPBom(orm.Model):
             line_ids = line_pool.search(cr, uid, [
                 ('bom_id', '=', dynamic_bom_id), # dynamic bom for structure
                 ('dynamic_mask', '=', dynamic_mask), # mask
-                ('bom_category', '=', bom_category),
+                ('category_id', '=', category_id),
                 ('product_id', '=', HW_proxy.id),
                 ], context=context)
             if not line_ids: # Update or check
                 line_pool.create(cr, uid, {
                     'bom_id': dynamic_bom_id,
                     'dynamic_mask': dynamic_mask,
-                    'bom_category': bom_category,
+                    'category_id': category_id,
                     'product_id': HW_proxy.id, 
                     'product_uom': HW_proxy.uom_id.id, 
                     'product_qty': 1, # always!
                     'type': 'normal',
                     }, context=context)
-        return ''
+        return
 
     # EXTRA BLOCK -------------------------------------------------------------
         

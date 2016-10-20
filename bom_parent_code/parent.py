@@ -81,17 +81,19 @@ class MRPBom(orm.Model):
         # LOG operation (TODO remove)
         log_f = open(os.path.expanduser('~/bom.csv'), 'w')
 
-        dimension_db = {}        
+        dimension_db = {}
+        riprendi_hw = []  
 
-        for item in product_ids: #XXX ids:
+        for item in product_ids: # XXX ids:
             message = self.migrate_assign_product_bom_product1(
-                cr, uid, [item], dimension_db, context=context)
+                cr, uid, [item], dimension_db, riprendi_hw, context=context)
             log_f.write(message)    
+        log_f.write('%s' % (riprendi,))    
         log_f.close()        
         return True    
         
-    def migrate_assign_product_bom_product1(self, cr, uid, ids, dimension_db, 
-            context=None):
+    def migrate_assign_product_bom_product1(self, cr, uid, ids, dimension_db,  
+            riprendi_hw, context=None):
         ''' Migrate bom in dynamic way
             Create half work element
             Create BOM 
@@ -284,18 +286,18 @@ class MRPBom(orm.Model):
         # ---------------------------------------------------------------------
         # Create TL element:
         # ---------------------------------------------------------------------
-        new_hw = []
+        
         for line in bom_proxy.bom_line_ids:
             if default_code.startswith('MT'):
                 log += '%s|||%s||Saltato materassino\n' % (
                     default_code, bom_proxy.name)
-                continue
+                return log
         
             component_code = line.product_id.default_code
             if not component_code:
                 log += '%s|||%s||No codice componente\n' % (
                     default_code, bom_proxy.name)
-                continue
+                return log
                 
             component_code = component_code.upper()
             
@@ -337,8 +339,10 @@ class MRPBom(orm.Model):
                 for hw in crea_hw[parent]:
                     HW_code = '%s%s%s' % (
                         hw, fabric_code, color_code)
-                    if HW_code not in new_hw:
-                        new_hw.append(HW_code)    
+
+                    if HW_code not in riprendi_hw:
+                        riprendi_hw.append(HW_code)  
+                        
                     component_ids = product_pool.search(cr, uid, [
                         ('default_code', '=', HW_code),
                         ('relative_type', '=', 'half'),
@@ -391,7 +395,6 @@ class MRPBom(orm.Model):
                 log += '%s||||%s|%s|%s|Non trovato in ODOO|%s|NO\n' % (
                     default_code,
                     component_code, HW_code, product_qty, comment)
-        log += '%s' % (new_hw, )    
         print log; return log
         """        
             # -----------------------------------------------------------------

@@ -199,12 +199,16 @@ class MRPBom(orm.Model):
             '149': [('TL145', 'TEX150', 1.12), ('PO650', 'TEX165', 0.21)],            
             '050': [('TL038', 'TEX165', 2.3), ('PA601', 'TEX150', 0.4)],
             '051': [('TL038', 'TEX165', 2.3), ('PA601', 'TEX150', 0.4), ('PO651', 'TEX165', 0.22)],
-            '034': [('TL135', 'TESPOL150', 1.05), ('PA600', 'TESPOL165', 0.22)],
-            '039': [('TL135', 'TEX150', 1.05), ('PA600', 'TEX165', 0.22)],
+            # TX o PE
+            # VEDERE XXX '034': [('TL135', 'TESPOL150', 1.05), ('PA600', 'TESPOL165', 0.22)],
+            # VEDERE '039': [('TL135', 'TEX150', 1.05), ('PA600', 'TEX165', 0.22)],
+            
             # 700
             # 701            
+            
             # 550 
             # 552            
+            
             # 'G421': ['TLG420', 'PA600']
             }
             
@@ -253,6 +257,7 @@ class MRPBom(orm.Model):
         # ---------------------------------------------------------------------
         # Create TL element:
         # ---------------------------------------------------------------------        
+        import pdb; pdb.set_trace()
         for line in bom_proxy.bom_line_ids:
             if default_code.startswith('MT'):
                 _logger.warning('Code %s. Jump MT' % (

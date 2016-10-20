@@ -44,6 +44,7 @@ class MrpBomCategoryStructureCategory(orm.Model):
     
     _name = 'mrp.bom.structure.category'
     _description = 'BOM structure category'
+    _order = 'name'
     
     _columns = {
         'name': fields.char('Category element', size=40, required=True,

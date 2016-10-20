@@ -83,6 +83,7 @@ class MRPBom(orm.Model):
 
         dimension_db = {}
         riprendi_hw = []  
+        mt_new = []
 
         for item in product_ids: # XXX ids:
             message = self.migrate_assign_product_bom_product1(

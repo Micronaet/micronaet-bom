@@ -35,6 +35,7 @@
         'report_aeroo',
         'order_bom',
         'textilene_status', # TODO remove when moved company parameters
+        'production_accounting_external',
         ],
     'init_xml': [],
     'demo': [],

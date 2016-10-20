@@ -77,16 +77,17 @@ class Parser(report_sxw.rml_parse):
                 products: list of records
                 component: browse obj
             '''
-            products[component.default_code] = [
+            product = component.product_id
+            products[product.default_code] = [
                 # Reset counter for this product    
-                component.inventory_start or 0.0, # inv
+                product.inventory_start or 0.0, # inv
                 0.0, # tcar
                 0.0, # tscar
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # MM
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # OC
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # OF
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # SAL
-                component,
+                product,
                 ]
             return    
 
@@ -126,15 +127,16 @@ class Parser(report_sxw.rml_parse):
         products = {}
         # moved = [] # component list (for filter movement) # TODO not used now
 
-        for component in product_data['product'].dynamic_bom_line_ids:
-            #move.append(component.id) # for component filter
-            
-            # TODO check component with selection?
-            add_product_component(products, component)
+        for product in product_data['product']:
+            for component in product.dynamic_bom_line_ids:
+                #move.append(component.id) # for component filter
+                
+                # TODO check component with selection?
+                add_product_component(products, component)
 
         debug_file.write('\n\nComponent selected:\n%s\n\n'% (
-            component.keys()))
-
+            products.keys()))
+        
         # =====================================================================
         # Get parameters for search:
         # =====================================================================
@@ -391,8 +393,9 @@ class Parser(report_sxw.rml_parse):
                 
                 # TODO manage forecast order ...     
                 # Check remain to produce
-                if product_uom_maked_sync_qty >= line.delivered_qty:
-                    remaing = line.product_uom_qty - product_uom_maked_sync_qty
+                if line.product_uom_maked_sync_qty >= line.delivered_qty:
+                    remain = \
+                        line.product_uom_qty - line.product_uom_maked_sync_qty
                 else:    
                     remain = line.product_uom_qty - line.delivered_qty
 

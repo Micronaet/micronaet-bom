@@ -82,7 +82,7 @@ class MRPBom(orm.Model):
         log_f = open(os.path.expanduser('~/bom.csv'), 'w')
 
         dimension_db = {}        
-        import pdb; pdb.set_trace()
+
         for item in product_ids: #XXX ids:
             message = self.migrate_assign_product_bom_product1(
                 cr, uid, [item], dimension_db, context=context)
@@ -125,6 +125,7 @@ class MRPBom(orm.Model):
             '005': '205',            
             '014': '024',
             '023': '123',
+            '025': '024', # Aggiunto oggi
             '026': '127',
             '027': '127',
             '028': '128',
@@ -178,15 +179,31 @@ class MRPBom(orm.Model):
             # TODO 
             #'TL127S': 'TL127PO'
             }
+
+        crea_hw = {
+            #'014', '024', '025', '124', 
+            # '230'
+            '046': ['TL145', 'PO650'],
+            '049': ['TL145', 'PO650'],
+            '149': ['TL145', 'PO650'],
             
-        PO_parent = [
-            '046', '146', '149']
-        
-        double_component = [
-            '024', '025', '230', '014',
-            ]   
+            '050': ['TL038', 'PA601'],
             
-        # TODO vedere come gestire o dividere nei 2 precedenti    
+            '051': ['TL038', 'PA601', 'PO651'],
+            
+            '034': ['TL135', 'PA600'],
+            '039': ['TL135', 'PA600'],
+
+            # 700
+            # 701
+            
+            # 550 
+            # 552
+            
+            # 'G421': ['TLG420', 'PA600']
+            }
+            
+        # XXX SOLO INDICATIVO PER FORMALIZZARE LE REGOLE:
         tessuto_con_doppione = [
             '014', # unire
             '024', # unire
@@ -200,8 +217,8 @@ class MRPBom(orm.Model):
             '046', # TL145 >, PO650 <
             '048',
             '049', # TL145 >, PO650 <
-            '050', # TL030 >, PA601 < 
-            '051', # TL030 >, PA601 < (è 050) + PO651 0.22
+            '050', # TL038 >, PA601 < 
+            '051', # TL038 >, PA601 < (è 050) + PO651 0.22
             '052', #
             #'070', # Non più come 071
             #'071', # Non più come 070
@@ -228,7 +245,7 @@ class MRPBom(orm.Model):
             '810',
             '900',
             '905',
-            # 'G241', # ???
+            # 'G241', # ??? TLG420, PA600
             ]         
             
         if not bom_proxy.product_id:
@@ -308,14 +325,32 @@ class MRPBom(orm.Model):
             if len(color_code) == 1:
                 comment += 'Codice colore 1 carattere'
             
+            # TODO Decidere se creare il solo semilavorato oppure continuare
+            if parent in crea_hw:
+                for hw in crea_hw[parent]:
+                    HW_code = '%s%s' % (hw, color_code)
+                    component_ids = product_pool.search(cr, uid, [
+                        ('default_code', '=', HW_code),
+                        ('relative_type', '=', 'half'),
+                        ], context=context)
+                    if component_ids: # XXX non interessa se multipli
+                        log += '%s||||%s|%s|%s|Automatica vuota!|NO|%s\n' % (
+                            default_code,
+                            component_code, HW_code, product_qty, comment)
+                continue
+
+            # Normal creation:
             HW_code = '%s%s%s%s' % (
                 type_code or '??',
                 parent_code,
                 fabric_code, 
                 color_code,
                 )
+            
             component_ids = product_pool.search(cr, uid, [
-                ('default_code', '=', HW_code)], context=context)
+                ('default_code', '=', HW_code),
+                ('relative_type', '=', 'half'),
+                ], context=context)
             
             # check dimemnsion:
             product_qty = line.product_qty
@@ -348,7 +383,9 @@ class MRPBom(orm.Model):
             # Create / Update component product and BOM (halfwork)
             # -----------------------------------------------------------------
             HW_ids = product_pool.search(cr, uid, [
-                ('default_code', '=', HW_code)], context=context)
+                ('default_code', '=', HW_code),
+                ('relative_type', '=', 'half'),
+                ], context=context)
              
             if HW_ids: # Update halfcomponent product (and delete line)
                 if len(HW_ids) > 1:
@@ -358,7 +395,7 @@ class MRPBom(orm.Model):
                         
                 HW_id = HW_ids[0]
                 product_pool.write(cr, uid, HW_ids, {
-                    'relative_type': 'half',       
+                    'relative_type': 'half', 
                     'half_bom_ids': [(5, False, False)], # XXX remove line
                     }, context=context)                
             else: # Create half component product 

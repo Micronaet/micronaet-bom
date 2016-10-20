@@ -70,7 +70,27 @@ class Parser(report_sxw.rml_parse):
     def get_object(self, data):
         ''' Search all product elements
         '''
+        
         # Utility function embedded:
+        def add_product_component(products, component):
+            ''' Add new component to record
+                products: list of records
+                component: browse obj
+            '''
+            products[component.default_code] = [
+                # Reset counter for this product    
+                component.inventory_start or 0.0, # inv
+                0.0, # tcar
+                0.0, # tscar
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # MM
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # OC
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # OF
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # SAL
+                component,
+                ]
+            return    
+
+            
         def get_position_season(date):
             ''' Return position in array for correct season month:
             '''
@@ -103,27 +123,16 @@ class Parser(report_sxw.rml_parse):
         product_data = sale_pool.get_component_in_product_order_open(
             cr, uid, context=context)
 
-        components = {}
-        moved = [] # component list (for filter movement)
+        products = {}
+        # moved = [] # component list (for filter movement) # TODO not used now
 
-        for component in product_data['product'].dynamic_bom_line_ids: # browse result
-            move.append(component.id) # for component filter
+        for component in product_data['product'].dynamic_bom_line_ids:
+            #move.append(component.id) # for component filter
             
             # TODO check component with selection?
-            
-            components[component.default_code] = [
-                # Reset counter for this product    
-                component.inventory_start or 0.0, # inv
-                0.0, # tcar
-                0.0, # tscar
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # MM
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # OC
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # OF
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # SAL
-                component,
-                ]
+            add_product_component(products, component)
 
-        debug_file.write('\n\nProduct selected:\n%s\n\n'% (
+        debug_file.write('\n\nComponent selected:\n%s\n\n'% (
             component.keys()))
 
         # =====================================================================
@@ -131,8 +140,7 @@ class Parser(report_sxw.rml_parse):
         # =====================================================================
         company_pool = self.pool.get('res.company')
         company_ids = company_pool.search(cr, uid, [])
-        company_proxy = company_pool.browse(
-            cr, uid, company_ids)[0]
+        company_proxy = company_pool.browse(cr, uid, company_ids)[0]
             
         # Exclude partner list:
         exclude_partner_ids = []
@@ -152,7 +160,7 @@ class Parser(report_sxw.rml_parse):
             period_to = '%s-08-31' % year
             
         debug_file.write('\n\nExclude partner list:\n%s\n\n'% (
-            exclude_partner_ids,))
+            exclude_partner_ids, ))
 
         debug_mm.write(
             'Block|State|Doc.|Origin|Date|Pos.|Prod.|MP|Calc.|MM|OC|OF|Note\n')
@@ -162,8 +170,8 @@ class Parser(report_sxw.rml_parse):
         # UNLOAD PICKING (CUSTOMER ORDER PICK OUT) DIRECT SALE OF COMPONENT
         # =====================================================================
         block = 'BC PICK OUT' # Direct sale of halfwork
+        # XXX Note: no unload MM during BC (only production)
             
-        # Better with OC?
         out_picking_type_ids = []
         for item in company_proxy.stock_report_tx_load_out_ids: 
             #stock_report_unload_ids:
@@ -196,10 +204,10 @@ class Parser(report_sxw.rml_parse):
                 # ------------------
                 # check direct sale:
                 # ------------------
-                if product_code in components: # Component direct:
+                if product_code in products: # Component direct:
                     qty = line.product_uom_qty # for direct sale            
-                    components[product_code][3][pos] -= qty # MM block  
-                    components[product_code][2] -= qty # TSCAR
+                    products[product_code][3][pos] -= qty # MM block  
+                    products[product_code][2] -= qty # TSCAR
                     debug_mm.write(mask % (
                         block, 'USED', pick.name, pick.origin,
                         pick.date, pos, '', product_code, # Prod is MP
@@ -233,7 +241,7 @@ class Parser(report_sxw.rml_parse):
                 #        continue    
                 #    double_check.append(default_code)
                 #    
-                #    if default_code not in components:
+                #    if default_code not in products:
                 #        debug_mm.write(mask % (
                 #            block, 'NOT USED', pick.name, pick.origin,
                 #            pick.date, pos, product_code, default_code,
@@ -242,8 +250,8 @@ class Parser(report_sxw.rml_parse):
                 #        continue
                 #                        
                 #    qty = line.product_uom_qty * component.product_qty
-                #    components[default_code][3][pos] -= qty # MM block
-                #    components[default_code][2] -= qty # TSCAR
+                #    products[default_code][3][pos] -= qty # MM block
+                #    products[default_code][2] -= qty # TSCAR
                 #
                 #    debug_mm.write(mask % (
                 #        block, 'USED', pick.name, pick.origin,
@@ -282,7 +290,7 @@ class Parser(report_sxw.rml_parse):
                 default_code = line.product_id.default_code                              
                 qty = line.product_uom_qty
                 
-                if default_code not in components:
+                if default_code not in products:
                     debug_mm.write(mask % (
                         block, 'NOT USED', pick.name, pick.origin, pick.date,
                         pos, '', # product_code
@@ -310,7 +318,7 @@ class Parser(report_sxw.rml_parse):
                         continue
 
                     pos = get_position_season(line.date_expected)
-                    components[default_code][5][pos] += qty # OF block
+                    products[default_code][5][pos] += qty # OF block
                     debug_mm.write(mask % (
                         block, 'USED', pick.name, pick.origin, line.date_expected,
                         pos, '', # product_code                                
@@ -337,8 +345,8 @@ class Parser(report_sxw.rml_parse):
                             )) 
                         continue
                     
-                    components[default_code][3][pos] += qty # MM block
-                    components[default_code][1] += qty # TCAR                    
+                    products[default_code][3][pos] += qty # MM block
+                    products[default_code][1] += qty # TCAR                    
                     debug_mm.write(mask % (
                         block, 'USED', pick.name, pick.origin, date,
                         pos, '', # product_code                                
@@ -393,8 +401,8 @@ class Parser(report_sxw.rml_parse):
                     continue
 
                 # Check for component order:
-                if product_code in components: # OC out component (no prod.):
-                    components[product_code][4][pos] -= remain # OC block
+                if product_code in products: # OC out component (no prod.):
+                    products[product_code][4][pos] -= remain # OC block
                     debug_mm.write(mask % (
                         block, 'USED', order.name, '', date, pos, '', # code
                         product_code, # MP
@@ -450,7 +458,7 @@ class Parser(report_sxw.rml_parse):
                             continue    
                         double_check.append(default_code)
                             
-                        if default_code not in components:
+                        if default_code not in products:
                             debug_mm.write(mask % (
                                 block, 'NOT USED', order.name, '',
                                 date, pos, product_code, default_code, # MP
@@ -463,7 +471,7 @@ class Parser(report_sxw.rml_parse):
                         # XXX Jump closed line?
                             
                         qty = move_qty * component.product_qty
-                        components[default_code][4][pos] -= qty # OC block
+                        products[default_code][4][pos] -= qty # OC block
                         
                         debug_mm.write(mask % (
                             block, 'USED', order.name, '', date, pos,
@@ -506,7 +514,7 @@ class Parser(report_sxw.rml_parse):
                             continue    
                         double_check.append(default_code)
                             
-                        if default_code not in components:
+                        if default_code not in products:
                             debug_mm.write(mask % (
                                 block, 'NOT USED', order.name, '', date, pos,
                                 product_code, default_code, # MP
@@ -517,8 +525,8 @@ class Parser(report_sxw.rml_parse):
                             continue
                         
                         qty = move_qty * component.product_qty
-                        components[default_code][3][pos] -= qty # - MM block
-                        components[default_code][2] -= qty # TSCAR
+                        products[default_code][3][pos] -= qty # - MM block
+                        products[default_code][2] -= qty # TSCAR
 
                         debug_mm.write(mask % (
                             block, 'USED', order.name, '', date, pos,
@@ -540,12 +548,12 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         res = []
         self.jumped = []
-        for key in sorted(components, key=lambda components: '%s%s%s' % (
-                components[0:3] or ' ' * 3,
-                components[6:12] or ' ' * 6,
-                components[3:6] or ' ' * 3,
+        for key in sorted(products, key=lambda products: '%s%s%s' % (
+                products[0:3] or ' ' * 3,
+                products[6:12] or ' ' * 6,
+                products[3:6] or ' ' * 3,
                 )):
-            current = components[key] # readability:
+            current = products[key] # readability:
             total = 0.0 # INV 0.0
             
             # NOTE: INV now is 31/12 next put Sept.

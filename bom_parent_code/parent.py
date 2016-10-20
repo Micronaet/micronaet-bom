@@ -188,12 +188,12 @@ class MRPBom(orm.Model):
             
         # TODO vedere come gestire o dividere nei 2 precedenti    
         tessuto_con_doppione = [
-            '014',
+            '014', # unire
             '024', # unire
             '025', # unire
             '027',
             '029',
-            '034', # TL135 > , PA600 <
+            '034', # TL135 >, PA600 <
             '035',
             '036',
             '039', # TL135 >, PA600 <
@@ -203,8 +203,8 @@ class MRPBom(orm.Model):
             '050', # TL030 >, PA601 < 
             '051', # TL030 >, PA601 < (è 050) + PO651 0.22
             '052', #
-            '070', #
-            '071', #
+            #'070', # Non più come 071
+            #'071', # Non più come 070
             '090',
             '121',
             '124', # unire
@@ -223,8 +223,8 @@ class MRPBom(orm.Model):
             '205',
             '206',
             '230', # unire
-            '550', # 
-            '552',
+            '550', # Non più come 552
+            '552', # Non più come 550
             '810',
             '900',
             '905',

@@ -70,6 +70,7 @@ class Parser(report_sxw.rml_parse):
     def get_object(self, data):
         ''' Search all product elements
         '''
+        # Utility function embedded:
         def get_position_season(date):
             ''' Return position in array for correct season month:
             '''
@@ -81,6 +82,8 @@ class Parser(report_sxw.rml_parse):
                 return month - 9
             # january = 4    
             return month + 3    
+            
+        # Readability:    
         cr = self.cr
         uid = self.uid
         context = {}    
@@ -102,6 +105,7 @@ class Parser(report_sxw.rml_parse):
 
         products = {}
         moved = [] # TODO used?
+        import pdb; pdb.set_trace()
         for product in product_data['component']: # browse result
             # TODO check component with selection?
             

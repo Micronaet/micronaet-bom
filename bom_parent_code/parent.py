@@ -199,7 +199,7 @@ class MRPBom(orm.Model):
             '149': [('TL145', 'TEX150', 1.12), ('PO650', 'TEX165', 0.21)],            
             '050': [('TL038', 'TEX165', 2.3), ('PA601', 'TEX150', 0.4)],
             '051': [('TL038', 'TEX165', 2.3), ('PA601', 'TEX150', 0.4), ('PO651', 'TEX165', 0.22)],
-            # TX o PE
+            # TODO TX o PE
             # VEDERE XXX '034': [('TL135', 'TESPOL150', 1.05), ('PA600', 'TESPOL165', 0.22)],
             # VEDERE '039': [('TL135', 'TEX150', 1.05), ('PA600', 'TEX165', 0.22)],
             
@@ -311,29 +311,30 @@ class MRPBom(orm.Model):
                 _logger.error('Code %s.%s Colore 1 carattere %s' % (
                     default_code, line.id, component_code))
                 return
-
             
             # TODO Decidere se creare il solo semilavorato oppure continuare
             HW_codes = []
             if parent in crea_hw:
                 for hw, component, qty in crea_hw[parent]:
-                    HW_code = '%s%s%s' % (hw, fabric_code, color_code)
-                    fabric_code = '%s%s%s' % (
-                        component, fabric_code, color_code)
+                    import pdb; pdb.set_trace()
+                    HW_code = '%s%s%s' % (
+                        hw, fabric_code, color_code)
+                    fabric_product = '%s%s' % (
+                        component, color_code)
                     # Search fabric:
                     fabric_ids = product_pool.search(cr, uid, [
-                        ('default_code', '=', fabric_code)], context=context)    
+                        ('default_code', '=', fabric_product)], context=context)    
                     if fabric_ids:
                         fabric_id = fabric_ids[0]
                     else:
                         fabric_id = product_pool.create(cr, uid, {
-                            'name': fabric_code,
-                            'default_code': fabric_code,
+                            'name': fabric_product,
+                            'default_code': fabric_product,
                             'uom_id': 8, # mt
                             'uos_id': 8, # mt
                             'uom_po_id': 8, # mt                            
                             }, context=context)
-                        _logger.warning('Create fabric: %s' % fabric_code)
+                        _logger.warning('Create fabric: %s' % fabric_product)
 
                     fabric_proxy = product_pool.browse(
                         cr, uid, fabric_id, context=context)

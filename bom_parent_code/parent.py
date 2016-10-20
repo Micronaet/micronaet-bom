@@ -85,7 +85,6 @@ class MRPBom(orm.Model):
         mt_new = []
 
         for item in ids: #product_ids: # XXX ids:
-            import pdb; pdb.set_trace()
             self.migrate_assign_product_bom_product1(
                 cr, uid, [item], empty_hw, mt_new, context=context)
             self.write(cr, uid, item, {
@@ -195,13 +194,13 @@ class MRPBom(orm.Model):
         crea_hw = {
             #'014', '024', '025', '124', 
             # '230'
-            '046': ['TL145', 'PO650'],
-            '049': ['TL145', 'PO650'],
-            '149': ['TL145', 'PO650'],            
-            '050': ['TL038', 'PA601'],            
-            '051': ['TL038', 'PA601', 'PO651'],            
-            '034': ['TL135', 'PA600'],
-            '039': ['TL135', 'PA600'],
+            '046': [('TL145', 'TEX150', 1.08), ('PO650', 'TEX165', 0.21)],
+            '049': [('TL145', 'TEX150', 1.12), ('PO650', 'TEX165', 0.21)],
+            '149': [('TL145', 'TEX150', 1.12), ('PO650', 'TEX165', 0.21)],            
+            '050': [('TL038', 'TEX165', 2.3), ('PA601', 'TEX150', 0.4)],
+            '051': [('TL038', 'TEX165', 2.3), ('PA601', 'TEX150', 0.4), ('PO651', 'TEX165', 0.22)],
+            '034': [('TL135', 'TESPOL150', 1.05), ('PA600', 'TESPOL165', 0.22)],
+            '039': [('TL135', 'TEX150', 1.05), ('PA600', 'TEX165', 0.22)],
             # 700
             # 701            
             # 550 
@@ -254,6 +253,7 @@ class MRPBom(orm.Model):
         # ---------------------------------------------------------------------
         # Create TL element:
         # ---------------------------------------------------------------------        
+        import pdb; pdb.set_trace()
         for line in bom_proxy.bom_line_ids:
             if default_code.startswith('MT'):
                 _logger.warning('Code %s. Jump MT' % (
@@ -312,9 +312,26 @@ class MRPBom(orm.Model):
             # TODO Decidere se creare il solo semilavorato oppure continuare
             HW_codes = []
             if parent in crea_hw:
-                for hw in crea_hw[parent]:
+                for hw, component, qty in crea_hw[parent]:
                     HW_code = '%s%s%s' % (hw, fabric_code, color_code)
-                    HW_codes.append((HW_code, 0))
+                    fabric_code = '%s%s%s' % (
+                        component, fabric_code, color_code)
+                    # Search fabric:
+                    fabric_ids = product_pool.search(cr, uid, [
+                        ('default_code', '=', fabric_code)], context=context)    
+                    if fabric_ids:
+                        fabric_proxy = product_pool.browse(
+                            cr, uid, fabric_ids, context=context)[0]
+                    else:
+                        _logger.error('No fabric code')
+                        import pdb; pdb.set_trace()
+                            
+                    HW_codes.append((
+                        HW_code, 
+                        fabric_proxy.id,
+                        fabric_proxy.uom_id.id,
+                        qty,
+                        ))
 
                     if HW_code not in empty_hw:
                         empty_hw.append(HW_code)                        
@@ -327,10 +344,12 @@ class MRPBom(orm.Model):
                         fabric_code, 
                         color_code,
                         ), 
+                    line.product_id.id, # fabric_id    
+                    line.product_uom.id, # fabric_uom
                     line.product_qty,
                     )]
                         
-            for HW_code, product_qty in HW_codes:
+            for HW_code, fabric_id, fabric_uom, product_qty in HW_codes:
                 category_id = categ_id.get(HW_code[:2], False)
                 if not category_id:
                     _logger.error('Code %s.%s No BOM categ. : %s' % (
@@ -377,10 +396,10 @@ class MRPBom(orm.Model):
                         'halfwork_id': HW_proxy.id, # product link
                         
                         # Fabric data:
-                        'product_id': line.product_id.id, 
-                        'product_uom': line.product_uom.id, 
+                        'product_id': fabric_id, 
+                        'product_uom': fabric_uom, 
                         'type': line.type,
-                        'product_qty': line.product_qty,
+                        'product_qty': product_qty,
                         }, context=context)
 
             # -----------------------------------------------------------------

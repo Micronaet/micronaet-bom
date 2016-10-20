@@ -328,15 +328,21 @@ class MRPBom(orm.Model):
             # TODO Decidere se creare il solo semilavorato oppure continuare
             if parent in crea_hw:
                 for hw in crea_hw[parent]:
-                    HW_code = '%s%s' % (hw, color_code)
+                    HW_code = '%s%s%s' % (
+                        hw, fabric_code, color_code)
                     component_ids = product_pool.search(cr, uid, [
                         ('default_code', '=', HW_code),
                         ('relative_type', '=', 'half'),
                         ], context=context)
                     if component_ids: # XXX non interessa se multipli
-                        log += '%s||||%s|%s|%s|Automatica vuota!|NO|%s\n' % (
+                        log += '%s||||%s|%s|%s|Automatica vuota!|SI|%s\n' % (
                             default_code,
-                            component_code, HW_code, product_qty, comment)
+                            component_code, HW_code, '///', comment)
+                    else:        
+                        log += '%s||||%s|%s|%s|Automatica vuota (crea)!|NO|%s\n' % (
+                            default_code,
+                            component_code, HW_code, '///', comment)
+                            
                 continue
 
             # Normal creation:

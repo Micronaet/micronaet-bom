@@ -401,7 +401,7 @@ class Parser(report_sxw.rml_parse):
                             comp_code, # MP
                             '', 0, # +MM
                             ('%s' % comp_remain).replace('.', ','), # -OC
-                            0, 'OC COMPONENT REMAIN',
+                            0, 'OC COMPONENT REMAIN %s' % product_code,
                             ))                      
                         continue                    
                     
@@ -411,13 +411,13 @@ class Parser(report_sxw.rml_parse):
         block = 'MRP (unload component prod.)'
         # XXX Note: used only for manage OC remain: 
         
-        mrp_ids = sale_pool.search(cr, uid, [
+        mrp_ids = mrp_pool.search(cr, uid, [
             # State filter:
             ('state', '!=', 'cancel'),
             
             # Period filter:
-            ('date', '>=', period_from), 
-            ('date', '<=', period_to), 
+            ('date_planned', '>=', period_from), 
+            ('date_planned', '<=', period_to), 
             ])
             
         for order in mrp_pool.browse(cr, uid, mrp_ids, context=context):
@@ -450,14 +450,16 @@ class Parser(report_sxw.rml_parse):
                     if comp_code in products: # OC out component (no prod.):
                         comp_qty = qty * comp.product_qty 
                         products[comp_code][3][pos] -= comp_qty # MM block
-                        products[product_code][2] -= comp_qty #TSCAR XXX also mrp?
+                        products[comp_code][2] -= comp_qty #TSCAR XXX also mrp?
                         debug_mm.write(mask % (
                             block, 'USED', order.name, '', date, pos, '',
                             comp_code, # MP
                             '', ('%s' % -comp_qty).replace('.', ','), # -MM
-                            0, 'MRP COMPONENT B',
-                            ))                      
-                        continue                    
+                            0, 0, 'MRP COMPONENT B %s' % product_code,
+                            ))                       
+                        continue
+                    else:
+                        pass # log not presence?                   
 
         # ---------------------------------------------------------------------
         # Prepare data for report:

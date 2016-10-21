@@ -413,13 +413,15 @@ class Parser(report_sxw.rml_parse):
         block = 'MRP (unload component prod.)'
         # XXX Note: used only for manage OC remain: 
         
-        mrp_ids = mrp_pool.search(cr, uid, [
+        mrp_ids = mrp_pool.search(cr, uid, [        
             # State filter:
             ('state', '!=', 'cancel'),
             
             # Period filter:
             ('date_planned', '>=', period_from), 
             ('date_planned', '<=', period_to), 
+            
+            # No customer excklude filter
             ])
             
         for order in mrp_pool.browse(cr, uid, mrp_ids, context=context):

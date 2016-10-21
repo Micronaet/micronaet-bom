@@ -76,10 +76,12 @@ class SaleOrder(orm.Model):
         line_ids = line_pool.search(cr, uid, [
             ('order_id.state', 'not in', ('cancel', 'send', 'draft')),
             ('order_id.pricelist_order', '=', False),
+            ('product_id.exclude_parcels', '=', False), # remove no parcels product
             
             ('order_id.mx_closed', '=', False), # order open
             ('mx_closed', '=', False), # line open 
             #('product_id.default_code', '=', '004'), # TODO remove!!!!!!!
+            # Remove product without col!
             ], context=context)
 
         forecasted_ids = line_pool.search(cr, uid, [

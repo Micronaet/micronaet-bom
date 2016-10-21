@@ -37,6 +37,7 @@
         'textilene_status', # TODO remove when moved company parameters
         'production_accounting_external',
         'production_forecast_order', # for forecast check
+        'no_parcels_count', # exclude no parcels product        
         ],
     'init_xml': [],
     'demo': [],

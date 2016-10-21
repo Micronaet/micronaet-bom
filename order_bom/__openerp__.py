@@ -35,6 +35,8 @@
         'product',
         'mx_close_order',
         'product_speech_code',
+        'production_forecast_order', # for forecast check
+        'no_parcels_count', # exclude no parcels product
         ],
     'init_xml': [],
     'demo': [],

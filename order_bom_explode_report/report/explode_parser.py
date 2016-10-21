@@ -345,7 +345,17 @@ class Parser(report_sxw.rml_parse):
                 date = line.date_deadline or order.date_order
                 pos = get_position_season(date)
                 
-                # TODO manage forecast order ...
+                # OC exclude no parcels prodcut:
+                if product_code in products:
+                    debug_mm.write(mask % (
+                        block, 'NOT USED', order.name, '', date, pos, '', # code
+                        product_code, # Direct component
+                        '', 0, # +MM
+                        0, # XXX keep 0 (-OC)
+                        0, 'OC NO PARCELS PRODUCT',
+                        ))                      
+                    continue                    
+
                 # Check remain to produce
                 if line.product_uom_maked_sync_qty >= line.delivered_qty:
                     remain = \

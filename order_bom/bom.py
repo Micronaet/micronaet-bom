@@ -73,7 +73,6 @@ class SaleOrder(orm.Model):
             }
         
         # Search open order:
-        import pdb; pdb.set_trace()
         line_ids = line_pool.search(cr, uid, [
             ('order_id.state', 'not in', ('cancel', 'send', 'draft')),
             ('order_id.pricelist_order', '=', False),

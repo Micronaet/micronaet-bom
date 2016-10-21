@@ -79,7 +79,7 @@ class SaleOrder(orm.Model):
             
             ('order_id.mx_closed', '=', False), # order open
             ('mx_closed', '=', False), # line open 
-            ('product_id.default_code', '=', '004'), # TODO remove!!!!!!!
+            #('product_id.default_code', '=', '004'), # TODO remove!!!!!!!
             ], context=context)
 
         forecasted_ids = line_pool.search(cr, uid, [

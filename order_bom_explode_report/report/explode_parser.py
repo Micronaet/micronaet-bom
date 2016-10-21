@@ -392,7 +392,7 @@ class Parser(report_sxw.rml_parse):
                 # --------------------
                 # Search in component:
                 # --------------------
-                for comp in line.dynamic_bom_line_ids:
+                for comp in product.dynamic_bom_line_ids:
                     comp_code = comp.product_id.default_code
                     if comp_code in products: # OC out component (no prod.):
                         comp_remain = remain * comp.product_qty

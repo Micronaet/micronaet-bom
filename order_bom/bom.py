@@ -73,11 +73,21 @@ class SaleOrder(orm.Model):
             }
         
         # Search open order:
+        import pdb; pdb.set_trace()
         line_ids = line_pool.search(cr, uid, [
+            ('order_id.state', 'not in', ('cancel', 'send', 'draft')),
+            ('order_id.pricelist_order', '=', False),
+            
             ('order_id.mx_closed', '=', False), # order open
             ('mx_closed', '=', False), # line open 
             ('product_id.default_code', '=', '004'), # TODO remove!!!!!!!
             ], context=context)
+
+        forecasted_ids = line_pool.search(cr, uid, [
+            ('order_id.forecasted_production_id', '!=', False),
+            ('order_id.forecasted_production_id.state', 'not in', ('done', 'cancel')),
+            ])
+        line_ids.extend(forecasted_ids) # no double FC is draft mode
 
         for line in line_pool.browse(cr, uid, line_ids, context=context):            
             product = line.product_id # Readability:

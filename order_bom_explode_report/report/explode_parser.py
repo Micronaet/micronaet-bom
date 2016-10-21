@@ -312,13 +312,14 @@ class Parser(report_sxw.rml_parse):
                     continue    
                 
         # =====================================================================
-        #                  UNLOAD ORDER TO PRODUCE (NON DELIVERED)
+        #                  CUSTMER ORDER TO PRODUCE (NOT DELIVERED)
         # =====================================================================
         block = 'OC (not delivered)'
         # XXX Note: used only for manage OC remain: 
         #    OC - B if B > Del.
         #    OC - Del if B < Del.
         
+        import pdb; pdb.set_trace()
         order_ids = sale_pool.search(cr, uid, [
             ('state', 'not in', ('cancel', 'send', 'draft')),
             ('pricelist_order', '=', False),
@@ -328,7 +329,13 @@ class Parser(report_sxw.rml_parse):
             # No filter date TODO use over data for reporting
             # TODO filter products for optimize!
             ])
-
+        import pdb; pdb.set_trace()
+        forecasted_ids = sale_pool.search(cr, uid, [
+            ('forecasted_production_id', '!=', False),
+            ('forecasted_production_id.state', '!=', ('done', 'cancel')),
+            ])
+        order_ids.extend(forecasted_ids) # no double FC is draft mode
+            
         for order in sale_pool.browse(cr, uid, order_ids, context=context):
             # Search in order line:
             for line in order.order_line:                

@@ -36,6 +36,7 @@
         'order_bom',
         'textilene_status', # TODO remove when moved company parameters
         'production_accounting_external',
+        'production_forecast_order', # for forecast check
         ],
     'init_xml': [],
     'demo': [],

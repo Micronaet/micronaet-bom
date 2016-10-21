@@ -447,8 +447,8 @@ class Parser(report_sxw.rml_parse):
                 # --------------------
                 for comp in product.dynamic_bom_line_ids:
                     comp_code = comp.product_id.default_code
+                    comp_qty = qty * comp.product_qty 
                     if comp_code in products: # OC out component (no prod.):
-                        comp_qty = qty * comp.product_qty 
                         products[comp_code][3][pos] -= comp_qty # MM block
                         products[comp_code][2] -= comp_qty #TSCAR XXX also mrp?
                         debug_mm.write(mask % (
@@ -459,7 +459,13 @@ class Parser(report_sxw.rml_parse):
                             ))                       
                         continue
                     else:
-                        pass # log not presence?                   
+                        debug_mm.write(mask % (
+                            block, 'NOT USED', order.name, '', date, pos, '',
+                            comp_code, # MP
+                            '', ('%s' % -comp_qty).replace('.', ','), # -MM
+                            0, 0, 'MRP COMPONENT B %s' % product_code,
+                            ))  
+                        continue                         
 
         # ---------------------------------------------------------------------
         # Prepare data for report:

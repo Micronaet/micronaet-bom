@@ -229,8 +229,8 @@ class Parser(report_sxw.rml_parse):
                     pos = get_position_season(line.date_expected)
                     products[default_code][5][pos] += qty # OF block
                     debug_mm.write(mask % (
-                        block, 'USED', pick.name, pick.origin, line.date_expected,
-                        pos, '', # product_code                                
+                        block, 'USED', pick.name, pick.origin, 
+                        line.date_expected, pos, '', # product_code                                
                         default_code, '', 0, 0,
                         ('%s' % qty).replace('.', ','), 'OF',
                         ))                      

@@ -397,11 +397,12 @@ class Parser(report_sxw.rml_parse):
                         comp_remain = remain * comp.product_qty
                         products[comp_code][4][pos] -= comp_remain # OC block
                         debug_mm.write(mask % (
-                            block, 'USED', order.name, '', date, pos, '', # code
+                            block, 'USED', order.name, '', date, pos, 
+                            product_code, # code
                             comp_code, # MP
                             '', 0, # +MM
                             ('%s' % comp_remain).replace('.', ','), # -OC
-                            0, 'OC COMPONENT REMAIN %s' % product_code,
+                            0, 'OC COMPONENT REMAIN',
                             ))                      
                         continue                    
                     
@@ -452,18 +453,20 @@ class Parser(report_sxw.rml_parse):
                         products[comp_code][3][pos] -= comp_qty # MM block
                         products[comp_code][2] -= comp_qty #TSCAR XXX also mrp?
                         debug_mm.write(mask % (
-                            block, 'USED', order.name, '', date, pos, '',
+                            block, 'USED', order.name, '', date, pos, 
+                            product_code,
                             comp_code, # MP
                             '', ('%s' % -comp_qty).replace('.', ','), # -MM
-                            0, 0, 'MRP COMPONENT B %s' % product_code,
+                            0, 0, 'MRP COMPONENT B',
                             ))                       
                         continue
                     else:
                         debug_mm.write(mask % (
-                            block, 'NOT USED', order.name, '', date, pos, '',
+                            block, 'NOT USED', order.name, '', date, pos, 
+                            product_code,
                             comp_code, # MP
                             '', ('%s' % -comp_qty).replace('.', ','), # -MM
-                            0, 0, 'MRP COMPONENT B %s' % product_code,
+                            0, 0, 'MRP COMPONENT B',
                             ))  
                         continue                         
 

@@ -294,7 +294,7 @@ class Parser(report_sxw.rml_parse):
                     debug_mm.write(mask % (
                         block, 'NOT USED', pick.name, pick.origin, pick.date, 
                         pos, product_code, '', '', 0, 0, 0,
-                        'State not in done (jumped)',
+                        'BC MOVE State not in done (jumped)',
                         ))
                     continue    
                     
@@ -307,7 +307,7 @@ class Parser(report_sxw.rml_parse):
                         block, 'USED', pick.name, pick.origin,
                         pick.date, pos, '', product_code, # Prod is MP
                         '', ('%s' % -qty).replace('.', ','), # MM
-                        0, 0, 'Direct sale of component (ADD IN TSCAR)',
+                        0, 0, 'BC MOVE Direct sale of component (ADD IN TSCAR)',
                         ))
                     continue    
                 
@@ -371,7 +371,7 @@ class Parser(report_sxw.rml_parse):
                         product_code, '', # Original product
                         '', 0, # +MM
                         0, # -OC
-                        0, 'PRODUCT WITHOUT BOM, Q.: %s' % remain,
+                        0, 'OC PRODUCT WITHOUT BOM, Q.: %s' % remain,
                         ))                      
                     continue
 
@@ -381,7 +381,7 @@ class Parser(report_sxw.rml_parse):
                         block, 'NOT USED', order.name, '', date, pos,
                         product_code, '', # MP
                         '', 0, # +MM
-                        0, 0, 'ALL DELIVERED',
+                        0, 0, 'OC ALL DELIVERED',
                         ))  
                     continue
                 
@@ -391,7 +391,7 @@ class Parser(report_sxw.rml_parse):
                         block, 'NOT USED', order.name, '', date, pos,
                         product_code, '', # MP
                         '', 0, # +MM
-                        0, 0, 'EXTRA RANGE, qty: %s' % remain,
+                        0, 0, 'OC EXTRA RANGE, qty: %s' % remain,
                         ))                      
                     continue
 
@@ -475,7 +475,7 @@ class Parser(report_sxw.rml_parse):
                             product_code,
                             comp_code, # MP
                             '', ('%s' % -comp_qty).replace('.', ','), # -MM
-                            0, 0, 'MRP COMPONENT B',
+                            0, 0, 'MRP COMPONENT NOT IN LIST',
                             ))  
                         continue                         
 

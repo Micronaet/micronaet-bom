@@ -325,20 +325,21 @@ class Parser(report_sxw.rml_parse):
             ('partner_id', 'not in', exclude_partner_ids),
             ('mx_closed', '=', False), # Only open orders (not all MRP after)
             # Also forecasted order
-            # TODO filter date?            
-            # TODO filter products?
+            # No filter date TODO use over data for reporting
+            # TODO filter products for optimize!
             ])
-            
+
         for order in sale_pool.browse(cr, uid, order_ids, context=context):
             # Search in order line:
             for line in order.order_line:                
                 # FC order no deadline (use date)
                 #datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)) 
+                product = line.product_id # readability
                 product_code = line.product_id.default_code
                 date = line.date_deadline or order.date_order
                 pos = get_position_season(date)
                 
-                # TODO manage forecast order ...     
+                # TODO manage forecast order ...
                 # Check remain to produce
                 if line.product_uom_maked_sync_qty >= line.delivered_qty:
                     remain = \

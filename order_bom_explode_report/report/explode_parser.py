@@ -69,10 +69,24 @@ class Parser(report_sxw.rml_parse):
     
     def get_object(self, data):
         ''' Search all product elements
+            data: 
+                mode: use (product), component, subcomponent for choose row
+                elements
+                # TODO:
+                period: period type week, month
+                period: number of period for columns, max 12
         '''
+        # Readability:    
+        cr = self.cr
+        uid = self.uid
+        context = {}
+        if data is None:
+            data = {}
         
+        # ---------------------------------------------------------------------
         # Utility function embedded:
-        def add_product_component(products, component):
+        # ---------------------------------------------------------------------
+        def add_product_component(products, component, data=None):
             ''' Add new component to record
                 products: list of records
                 component: browse obj
@@ -90,7 +104,6 @@ class Parser(report_sxw.rml_parse):
                 product,
                 ]
             return    
-
             
         def get_position_season(date):
             ''' Return position in array for correct season month:
@@ -103,11 +116,6 @@ class Parser(report_sxw.rml_parse):
                 return month - 9
             # january = 4    
             return month + 3    
-            
-        # Readability:    
-        cr = self.cr
-        uid = self.uid
-        context = {}    
         
         # Debug files:
         debug_f = '/home/administrator/photo/log/explode_status.txt'
@@ -125,13 +133,9 @@ class Parser(report_sxw.rml_parse):
             cr, uid, context=context)
 
         products = {}
-        # moved = [] # component list (for filter movement) # TODO not used now
 
         for product in product_data['product']:
             for component in product.dynamic_bom_line_ids:
-                #move.append(component.id) # for component filter
-                
-                # TODO check component with selection?
                 add_product_component(products, component)
 
         debug_file.write('\n\nComponent selected:\n%s\n\n'% (
@@ -175,8 +179,8 @@ class Parser(report_sxw.rml_parse):
         # XXX Note: first for creation of new elements if not present in OC
         
         in_picking_type_ids = []
+        # XXX Note: use textilene data:
         for item in company_proxy.stock_report_tx_load_in_ids:
-            #stock_report_load_ids:
             in_picking_type_ids.append(item.id)
             
         pick_ids = pick_pool.search(cr, uid, [     
@@ -184,12 +188,11 @@ class Parser(report_sxw.rml_parse):
             ('partner_id', 'not in', exclude_partner_ids),            
             # check data date (old method
             #('date', '>=', from_date), # XXX correct for virtual?
-            #('date', '<=', to_date),    
-
+            #('date', '<=', to_date),
             # TODO state filter
             ])
             
-        for pick in pick_pool.browse(cr, uid, pick_ids):
+        for pick in pick_pool.browse(cr, uid, pick_ids, context=context):
             pos = get_position_season(pick.date) # for done cols  (min_date?)
             for line in pick.move_lines:
                 default_code = line.product_id.default_code                              
@@ -205,13 +208,12 @@ class Parser(report_sxw.rml_parse):
                     # TODO create record if component or halfwork!!!!!!!!!!!!!!
                     continue
 
-                # Order not current delivered
                 # -------------------------------------------------------------
                 #          OF document
                 # -------------------------------------------------------------
+                # Order not current delivered:
                 if line.state == 'assigned': # virtual
-                    # USE deadline data:
-                    # Before check date:
+                    # USE deadline data in the period:
                     if line.date_expected > period_to or \
                             line.date_expected < period_from: # extra range
                         debug_mm.write(mask % (
@@ -233,10 +235,10 @@ class Parser(report_sxw.rml_parse):
                         ))                      
                     continue
 
-                # Order delivered so picking
                 # -------------------------------------------------------------
                 #          BF document
                 # -------------------------------------------------------------
+                # Order delivered so picking in movement
                 elif line.state == 'done':
                     date = pick.date_done or pick.min_date or pick.date
                     pos = get_position_season(date)
@@ -270,7 +272,6 @@ class Parser(report_sxw.rml_parse):
             
         out_picking_type_ids = []
         for item in company_proxy.stock_report_tx_load_out_ids: 
-            #stock_report_unload_ids:
             out_picking_type_ids.append(item.id)
             
         pick_ids = pick_pool.search(cr, uid, [     
@@ -287,8 +288,7 @@ class Parser(report_sxw.rml_parse):
             # TODO no check for period range
             for line in pick.move_lines:               
                 product_code = line.product_id.default_code
-                product = line.product_id
-                
+                product = line.product_id                
                 if line.state != 'done':
                     debug_mm.write(mask % (
                         block, 'NOT USED', pick.name, pick.origin, pick.date, 
@@ -297,9 +297,7 @@ class Parser(report_sxw.rml_parse):
                         ))
                     continue    
                     
-                # ------------------
                 # check direct sale:
-                # ------------------
                 if product_code in products: # Component direct:
                     qty = line.product_uom_qty # for direct sale            
                     products[product_code][3][pos] -= qty # MM block  
@@ -312,55 +310,6 @@ class Parser(report_sxw.rml_parse):
                         ))
                     continue    
                 
-                # ------------------
-                # check bom product:
-                # ------------------
-                #if not len(product.dynamic_bom_line_ids): # Product
-                #    debug_mm.write(mask % (
-                #        block, 'NOT USED', pick.name, pick.origin,
-                #        pick.date, pos, product_code, '', '', 0, 0, 0,
-                #        'Warn. product without BOM (jumped)',
-                #        ))
-                #    continue
-                
-                # =============================================================
-                #                      BOMS PART:
-                # =============================================================
-                # Loop on all elements:
-                #double_check = [] # check double code
-                #for component in product.dynamic_bom_line_ids:                                                  
-                #    default_code = component.product_id.default_code                
-                #    if default_code in double_check:
-                #        _logger.error(
-                #            'BOM double problem: %s' % product_code)
-                #        # TODO remove ID?
-                #        continue    
-                #    double_check.append(default_code)
-                #    
-                #    if default_code not in products:
-                #        debug_mm.write(mask % (
-                #            block, 'NOT USED', pick.name, pick.origin,
-                #            pick.date, pos, product_code, default_code,
-                #            '', 0, 0, 0, 'Warn. component not in BOM',
-                #            ))            
-                #        continue
-                #                        
-                #    qty = line.product_uom_qty * component.product_qty
-                #    products[default_code][3][pos] -= qty # MM block
-                #    products[default_code][2] -= qty # TSCAR
-                #
-                #    debug_mm.write(mask % (
-                #        block, 'USED', pick.name, pick.origin,
-                #        pick.date, pos, product_code, default_code,
-                #        '%s X %s' % (
-                #            line.product_uom_qty,
-                #            component.product_qty,
-                #            ),
-                #        ('%s' % -qty).replace('.', ','),
-                #        0, 0, 'BOM component (ADD IN TSCAR)',
-                #        ))                      
-                #    continue
-
         # =====================================================================
         #                  UNLOAD ORDER TO PRODUCE (NON DELIVERED)
         # =====================================================================
@@ -376,20 +325,17 @@ class Parser(report_sxw.rml_parse):
             ('mx_closed', '=', False), # Only open orders (not all MRP after)
             # Also forecasted order
             # TODO filter date?            
-            # TODO no partner exclusion
             # TODO filter products?
             ])
             
-        for order in sale_pool.browse(cr, uid, order_ids):
-            # ---------------------
+        for order in sale_pool.browse(cr, uid, order_ids, context=context):
             # Search in order line:
-            # ---------------------
-            for line in order.order_line:
+            for line in order.order_line:                
                 # FC order no deadline (use date)
+                #datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)) 
                 product_code = line.product_id.default_code
                 date = line.date_deadline or order.date_order
                 pos = get_position_season(date)
-                #datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)) 
                 
                 # TODO manage forecast order ...     
                 # Check remain to produce
@@ -398,6 +344,18 @@ class Parser(report_sxw.rml_parse):
                         line.product_uom_qty - line.product_uom_maked_sync_qty
                 else:    
                     remain = line.product_uom_qty - line.delivered_qty
+
+                # OC direct component:
+                if product_code in products:
+                    products[product_code][4][pos] -= remain # OC block
+                    debug_mm.write(mask % (
+                        block, 'USED', order.name, '', date, pos, '', # code
+                        product_code, # Direct component
+                        '', 0, # +MM
+                        ('%s' % remain).replace('.', ','), # -OC
+                        0, 'OC DIRECT COMPONENT AS PRODUCT',
+                        ))                      
+                    continue                    
 
                 if not len(product.dynamic_bom_line_ids): # no bom
                     debug_mm.write(mask % (
@@ -441,13 +399,102 @@ class Parser(report_sxw.rml_parse):
                             comp_code, # MP
                             '', 0, # +MM
                             ('%s' % remain).replace('.', ','), # -OC
-                            0, 'UNLOAD COMPONENT',
+                            0, 'OC COMPONENT REMAIN',
                             ))                      
                         continue                    
                     
         # =====================================================================
         #                  UNLOAD FOR PRODUCTION MRP ORDER
         # =====================================================================
+        block = 'MRP (unload component for product)'
+        # XXX Note: used only for manage OC remain: 
+        #    OC - B if B > Del.
+        #    OC - Del if B < Del.
+        
+        order_ids = sale_pool.search(cr, uid, [
+            ('state', 'not in', ('cancel', 'send', 'draft')),
+            ('pricelist_order', '=', False),
+            ('partner_id', 'not in', exclude_partner_ids),
+            ('mx_closed', '=', False), # Only open orders (not all MRP after)
+            # Also forecasted order
+            # TODO filter date?            
+            # TODO filter products?
+            ])
+            
+        for order in sale_pool.browse(cr, uid, order_ids, context=context):
+            # Search in order line:
+            for line in order.order_line:                
+                # FC order no deadline (use date)
+                #datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)) 
+                product_code = line.product_id.default_code
+                date = line.date_deadline or order.date_order
+                pos = get_position_season(date)
+                
+                # TODO manage forecast order ...     
+                # Check remain to produce
+                if line.product_uom_maked_sync_qty >= line.delivered_qty:
+                    remain = \
+                        line.product_uom_qty - line.product_uom_maked_sync_qty
+                else:    
+                    remain = line.product_uom_qty - line.delivered_qty
+
+                # OC direct component:
+                if product_code in products:
+                    products[product_code][4][pos] -= remain # OC block
+                    debug_mm.write(mask % (
+                        block, 'USED', order.name, '', date, pos, '', # code
+                        product_code, # Direct component
+                        '', 0, # +MM
+                        ('%s' % remain).replace('.', ','), # -OC
+                        0, 'OC DIRECT COMPONENT AS PRODUCT',
+                        ))                      
+                    continue                    
+
+                if not len(product.dynamic_bom_line_ids): # no bom
+                    debug_mm.write(mask % (
+                        block, 'NOT USED', order.name, '', date, pos,
+                        product_code, '', # Original product
+                        '', 0, # +MM
+                        0, # -OC
+                        0, 'PRODUCT WITHOUT BOM, Q.: %s' % remain,
+                        ))                      
+                    continue
+
+                # TODO error for negative?
+                if remain <= 0:
+                    debug_mm.write(mask % (
+                        block, 'NOT USED', order.name, '', date, pos,
+                        product_code, '', # MP
+                        '', 0, # +MM
+                        0, 0, 'ALL DELIVERED',
+                        ))  
+                    continue
+                
+                # USE order data:
+                if date > period_to or date < period_from: # extra range
+                    debug_mm.write(mask % (
+                        block, 'NOT USED', order.name, '', date, pos,
+                        product_code, '', # MP
+                        '', 0, # +MM
+                        0, 0, 'EXTRA RANGE, qty: %s' % remain,
+                        ))                      
+                    continue
+
+                # --------------------
+                # Search in component:
+                # --------------------
+                for comp in line.dynamic_bom_line_ids:
+                    comp_code = comp.product_id.default_code
+                    if comp_code in products: # OC out component (no prod.):
+                        products[comp_code][4][pos] -= remain # OC block
+                        debug_mm.write(mask % (
+                            block, 'USED', order.name, '', date, pos, '', # code
+                            comp_code, # MP
+                            '', 0, # +MM
+                            ('%s' % remain).replace('.', ','), # -OC
+                            0, 'OC COMPONENT REMAIN',
+                            ))                      
+                        continue                    
         
 
         # ---------------------------------------------------------------------

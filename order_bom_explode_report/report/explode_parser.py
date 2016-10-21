@@ -466,7 +466,7 @@ class Parser(report_sxw.rml_parse):
                             product_code,
                             comp_code, # MP
                             '', ('%s' % -comp_qty).replace('.', ','), # -MM
-                            0, 0, 'MRP COMPONENT B',
+                            0, 0, 'MRP COMPONENT UNLOAD (ADD in TSCAR)',
                             ))                       
                         continue
                     else:

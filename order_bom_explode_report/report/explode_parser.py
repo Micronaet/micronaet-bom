@@ -128,6 +128,7 @@ class Parser(report_sxw.rml_parse):
         pick_pool = self.pool.get('stock.picking')
         sale_pool = self.pool.get('sale.order')
         bom_pool = self.pool.get('mrp.bom')
+        mrp_pool = self.pool.get('mrp.production')
         
         product_data = sale_pool.get_component_in_product_order_open(
             cr, uid, context=context)
@@ -393,12 +394,13 @@ class Parser(report_sxw.rml_parse):
                 for comp in line.dynamic_bom_line_ids:
                     comp_code = comp.product_id.default_code
                     if comp_code in products: # OC out component (no prod.):
-                        products[comp_code][4][pos] -= remain # OC block
+                        comp_remain = remain * comp.product_qty
+                        products[comp_code][4][pos] -= comp_remain # OC block
                         debug_mm.write(mask % (
                             block, 'USED', order.name, '', date, pos, '', # code
                             comp_code, # MP
                             '', 0, # +MM
-                            ('%s' % remain).replace('.', ','), # -OC
+                            ('%s' % comp_remain).replace('.', ','), # -OC
                             0, 'OC COMPONENT REMAIN',
                             ))                      
                         continue                    
@@ -406,96 +408,56 @@ class Parser(report_sxw.rml_parse):
         # =====================================================================
         #                  UNLOAD FOR PRODUCTION MRP ORDER
         # =====================================================================
-        block = 'MRP (unload component for product)'
+        block = 'MRP (unload component prod.)'
         # XXX Note: used only for manage OC remain: 
-        #    OC - B if B > Del.
-        #    OC - Del if B < Del.
         
-        order_ids = sale_pool.search(cr, uid, [
-            ('state', 'not in', ('cancel', 'send', 'draft')),
-            ('pricelist_order', '=', False),
-            ('partner_id', 'not in', exclude_partner_ids),
-            ('mx_closed', '=', False), # Only open orders (not all MRP after)
-            # Also forecasted order
-            # TODO filter date?            
-            # TODO filter products?
+        mrp_ids = sale_pool.search(cr, uid, [
+            # State filter:
+            ('state', '!=', 'cancel'),
+            
+            # Period filter:
+            ('date', '>=', period_from), 
+            ('date', '<=', period_to), 
             ])
             
-        for order in sale_pool.browse(cr, uid, order_ids, context=context):
+        for order in mrp_pool.browse(cr, uid, mrp_ids, context=context):
+            date = order.date_planned
+            
             # Search in order line:
-            for line in order.order_line:                
-                # FC order no deadline (use date)
-                #datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)) 
+            for line in order.order_line_ids:                
+                product = line.product_id # readability
                 product_code = line.product_id.default_code
-                date = line.date_deadline or order.date_order
-                pos = get_position_season(date)
+                pos = get_position_season(date)                                
+                qty = line.product_uom_maked_sync_qty
+
+                # XXX No direct production:
                 
-                # TODO manage forecast order ...     
-                # Check remain to produce
-                if line.product_uom_maked_sync_qty >= line.delivered_qty:
-                    remain = \
-                        line.product_uom_qty - line.product_uom_maked_sync_qty
-                else:    
-                    remain = line.product_uom_qty - line.delivered_qty
-
-                # OC direct component:
-                if product_code in products:
-                    products[product_code][4][pos] -= remain # OC block
-                    debug_mm.write(mask % (
-                        block, 'USED', order.name, '', date, pos, '', # code
-                        product_code, # Direct component
-                        '', 0, # +MM
-                        ('%s' % remain).replace('.', ','), # -OC
-                        0, 'OC DIRECT COMPONENT AS PRODUCT',
-                        ))                      
-                    continue                    
-
                 if not len(product.dynamic_bom_line_ids): # no bom
                     debug_mm.write(mask % (
                         block, 'NOT USED', order.name, '', date, pos,
                         product_code, '', # Original product
                         '', 0, # +MM
                         0, # -OC
-                        0, 'PRODUCT WITHOUT BOM, Q.: %s' % remain,
-                        ))                      
-                    continue
-
-                # TODO error for negative?
-                if remain <= 0:
-                    debug_mm.write(mask % (
-                        block, 'NOT USED', order.name, '', date, pos,
-                        product_code, '', # MP
-                        '', 0, # +MM
-                        0, 0, 'ALL DELIVERED',
-                        ))  
-                    continue
-                
-                # USE order data:
-                if date > period_to or date < period_from: # extra range
-                    debug_mm.write(mask % (
-                        block, 'NOT USED', order.name, '', date, pos,
-                        product_code, '', # MP
-                        '', 0, # +MM
-                        0, 0, 'EXTRA RANGE, qty: %s' % remain,
+                        0, 'MRP PRODUCT WITHOUT BOM, Q.: %s' % qty,
                         ))                      
                     continue
 
                 # --------------------
                 # Search in component:
                 # --------------------
-                for comp in line.dynamic_bom_line_ids:
+                for comp in product.dynamic_bom_line_ids:
                     comp_code = comp.product_id.default_code
                     if comp_code in products: # OC out component (no prod.):
-                        products[comp_code][4][pos] -= remain # OC block
+                        comp_qty = qty * comp.product_qty 
+                        products[comp_code][3][pos] -= comp_qty # MM block
+                        products[product_code][2] -= comp_qty #TSCAR XXX also mrp?
                         debug_mm.write(mask % (
-                            block, 'USED', order.name, '', date, pos, '', # code
+                            block, 'USED', order.name, '', date, pos, '',
                             comp_code, # MP
-                            '', 0, # +MM
-                            ('%s' % remain).replace('.', ','), # -OC
-                            0, 'OC COMPONENT REMAIN',
+                            '', ('%s' % -comp_qty).replace('.', ','), # -MM
+                            0, 'MRP COMPONENT B',
                             ))                      
                         continue                    
-        
 
         # ---------------------------------------------------------------------
         # Prepare data for report:

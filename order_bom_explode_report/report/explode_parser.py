@@ -506,7 +506,7 @@ class Parser(report_sxw.rml_parse):
                     continue    
                 
                 if i == inv_pos:
-                #    TODO remove from TCAR inventory!!!
+                    # TODO remove from TCAR inventory!!!
                     #current[1] -= round(current[0], 0) # TCAR                
                     total += round(current[0], 0) # Add inv.
 

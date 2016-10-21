@@ -76,7 +76,7 @@ class SaleOrder(orm.Model):
         line_ids = line_pool.search(cr, uid, [
             ('order_id.mx_closed', '=', False), # order open
             ('mx_closed', '=', False), # line open 
-            ('product_id.default_code', '=', '004'), # TODO remove!!!!!!!
+            #('product_id.default_code', '=', '004'), # TODO remove!!!!!!!
             ], context=context)
 
         for line in line_pool.browse(cr, uid, line_ids, context=context):            

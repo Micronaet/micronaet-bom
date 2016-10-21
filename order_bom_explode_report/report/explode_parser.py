@@ -322,7 +322,7 @@ class Parser(report_sxw.rml_parse):
         order_ids = sale_pool.search(cr, uid, [
             ('state', 'not in', ('cancel', 'send', 'draft')),
             ('pricelist_order', '=', False),
-            ('partner_id', 'not in', exclude_partner_ids),
+            #('partner_id', 'not in', exclude_partner_ids), # XXX include FC
             ('mx_closed', '=', False), # Only open orders (not all MRP after)
             # Also forecasted order
             # No filter date TODO use over data for reporting

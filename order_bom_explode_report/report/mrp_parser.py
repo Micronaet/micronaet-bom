@@ -128,7 +128,7 @@ class Parser(report_sxw.rml_parse):
                         
                     # Total todo product    
                     if product not in mrp_db[mrp]: 
-                        mrp_db[mrp][product] = [0.0, 0.0]
+                        mrp_db[mrp][product] = [0.0, 0.0] # this, previous MRP
                     if component.id not in previous_order:
                         previous_order[component.id] = 0.0
                         
@@ -190,20 +190,20 @@ class Parser(report_sxw.rml_parse):
             res[mrp] = []
             for component, qty in record.iteritems():
                 this_qty = qty[0]
-                oc_qty = qty[1]
+                prev_qty = qty[1]
                 
                 stock = component.mx_net_qty + \
                     mrp_unload.get(component.id, 0.0) + \
-                    oc_qty
+                    prev_qty
                     
-                # componentpyt  , need, stock, OF, status
+                # component , need, stock, OC period, OF, status
                 res[mrp].append((
                     component, # Component
                     this_qty, # MRP net q.
                     #Stock-MRP:
-                    stock,
+                    stock, # net stock with this order
                     mrp_order.get(component.id, 0.0), # MRP OC period
                     component.mx_of_in,
                     '?'))
-        return res#sorted(res, key=lambda x: x.date_planned)
+        return res #sorted(res, key=lambda x: x.date_planned)
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

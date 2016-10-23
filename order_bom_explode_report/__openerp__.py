@@ -38,6 +38,7 @@
         'production_accounting_external',
         'production_forecast_order', # for forecast check
         'no_parcels_count', # exclude no parcels product        
+        'wizard/report_component_status.xml',
         ],
     'init_xml': [],
     'demo': [],

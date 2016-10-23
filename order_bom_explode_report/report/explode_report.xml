@@ -27,7 +27,7 @@
         <record id="aeroo_mrp_explode_status_report_id" model="ir.actions.report.xml">
             <field name="name">Status explode MRP</field>
             <field name="type">ir.actions.report.xml</field>
-            <field name="model">product.product</field>
+            <field name="model">mrp.production</field>
             <field name="report_name">mrp_status_explode_report</field>
             <field name="report_type">aeroo</field>
             <field name="in_format">oo-odt</field>

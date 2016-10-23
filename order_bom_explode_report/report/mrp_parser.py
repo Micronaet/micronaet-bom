@@ -63,7 +63,7 @@ class Parser(report_sxw.rml_parse):
             data = {}
         return '' # TODO
 
-    def get_object(self, data):
+    def get_object(self, objects, data):
         ''' Search all mpr elements                
         '''
         # Readability:    
@@ -74,21 +74,31 @@ class Parser(report_sxw.rml_parse):
         if data is None:
             data = {}
         total = {}
-        
+
         # Generate MRP total componet report with totals:
         for mrp in objects:
             total[mrp] = {}
+            
             for sol in mrp.order_line_ids:
                 qty = sol.product_uom_qty
                 qty_maked = sol.product_uom_maked_sync_qty # TODO
-                for component in total.product_id.dynamic_bom_line_ids:
-                    if component not in total[mrp]:
-                        total[mrp][component] = qty * component.product_qty
+                
+                for component in sol.product_id.dynamic_bom_line_ids:
+                    product = component.product_id
+                    if product not in total[mrp]:
+                        total[mrp][product] = qty * component.product_qty
+
         res = {}
         for key, total in total.iteritems():
             res[key] = []
             for component, qty in total.iteritems():
                 # component, need, stock, OF, status
-                res[key].append((component, qty, 0, 0, 0, 'ok'))
+                res[key].append((
+                    component, 
+                    qty, 
+                    component.mx_net_qty, 
+                    component.mx_of_in, 
+                    'ok'))
+
         return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

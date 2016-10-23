@@ -42,7 +42,7 @@ _logger = logging.getLogger(__name__)
 
 
 class CcomponentStatusReportWizard(orm.TransientModel):
-    ''' Wizard for
+    ''' Wizard for print status
     '''
     _name = 'component.status.report.wizard'
 

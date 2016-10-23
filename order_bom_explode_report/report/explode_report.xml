@@ -8,7 +8,6 @@
             <field name="report_name">stock_status_explode_report</field>
             <field name="report_type">aeroo</field>
             <field name="in_format">oo-odt</field>
-            <!--<field name="out_format" eval="ref('report_aeroo_ooo.report_mimetypes_pdf_odt')" />-->
             <field name="parser_loc">order_bom_explode_report/report/explode_parser.py</field>
             <field name="report_rml">order_bom_explode_report/report/explode_report.odt</field>
             <field name="parser_state">loc</field>
@@ -21,6 +20,29 @@
             <field eval="['product.product']" name="models"/>
             <field name="name">action_stock_status_explode_report</field>
             <field eval="'ir.actions.report.xml,'+str(aeroo_stock_explode_status_report_id)" name="value"/>
+            <field eval="True" name="isobject"/>
+            <field eval="True" name="replace"/>
+        </ir_set>
+
+        <record id="aeroo_mrp_explode_status_report_id" model="ir.actions.report.xml">
+            <field name="name">Status explode MRP</field>
+            <field name="type">ir.actions.report.xml</field>
+            <field name="model">product.product</field>
+            <field name="report_name">mrp_status_explode_report</field>
+            <field name="report_type">aeroo</field>
+            <field name="in_format">oo-odt</field>
+            <field name="parser_loc">order_bom_explode_report/report/mrp_parser.py</field>
+            <field name="report_rml">order_bom_explode_report/report/mrp_report.odt</field>
+            <field name="parser_state">loc</field>
+            <field name="tml_source">file</field>
+        </record>
+
+        <ir_set>
+            <field eval="'action'" name="key"/>
+            <field eval="'client_print_multi'" name="key2"/>
+            <field eval="['mrp.production']" name="models"/>
+            <field name="name">action_mrp_status_explode_report</field>
+            <field eval="'ir.actions.report.xml,'+str(aeroo_mrp_explode_status_report_id)" name="value"/>
             <field eval="True" name="isobject"/>
             <field eval="True" name="replace"/>
         </ir_set>

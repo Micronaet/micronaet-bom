@@ -70,11 +70,13 @@ class Parser(report_sxw.rml_parse):
     def get_object(self, data):
         ''' Search all product elements
             data: 
-                mode: use (product), component, subcomponent for choose row
+                mode: use (product), halfwork, component for choose row
                 elements
+                
                 # TODO:
                 period: period type week, month
                 period: number of period for columns, max 12
+                
         '''
         # Readability:    
         cr = self.cr
@@ -82,15 +84,17 @@ class Parser(report_sxw.rml_parse):
         context = {}
         if data is None:
             data = {}
+        mode = data.get('mode', 'halfwork')
         
         # ---------------------------------------------------------------------
         # Utility function embedded:
         # ---------------------------------------------------------------------
-        def add_product_component(products, component, data=None):
+        def add_product_component(products, component, mode):
             ''' Add new component to record
                 products: list of records
                 component: browse obj
             '''
+            # TODO manage component mode
             product = component.product_id
             products[product.default_code] = [
                 # Reset counter for this product    
@@ -137,7 +141,7 @@ class Parser(report_sxw.rml_parse):
 
         for product in product_data['product']:
             for component in product.dynamic_bom_line_ids:
-                add_product_component(products, component)
+                add_product_component(products, component, mode)
 
         debug_file.write('\n\nComponent selected:\n%s\n\n'% (
             products.keys()))

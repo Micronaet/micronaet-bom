@@ -38,7 +38,6 @@
         'production_accounting_external',
         'production_forecast_order', # for forecast check
         'no_parcels_count', # exclude no parcels product        
-        'wizard/report_component_status.xml',
         ],
     'init_xml': [],
     'demo': [],
@@ -48,7 +47,7 @@
         
         'bom_explode_view.xml',
         'report/explode_report.xml',
-        #'wizard/report_wizard_view.xml',
+        'wizard/report_component_status.xml',
         #'scheduler.xml',
         ],
     'active': False,

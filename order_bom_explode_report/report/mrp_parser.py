@@ -63,7 +63,7 @@ class Parser(report_sxw.rml_parse):
             data = {}
         return '' # TODO
 
-    def get_object(self, objects, data):
+    def get_object(self, data):
         ''' Search all mpr elements                
         '''
         # Readability:    
@@ -73,32 +73,137 @@ class Parser(report_sxw.rml_parse):
         
         if data is None:
             data = {}
-        total = {}
-
+        days = data.get('days', 30)
+        
+        mrp_db = {}
+        
+        # pool used:
+        sol_pool = self.pool.get('sale.order.line') 
+        mrp_pool = self.pool.get('mrp.production')
+        
+        reference_date = '2016-10-15 00:00:00' # TODO change used for now!!!!!!
+        limit_date = '%s 23:59:59' % (
+            datetime.now() + timedelta(days=days)).strftime(
+                DEFAULT_SERVER_DATE_FORMAT)
+        _logger.warning('Range period: MRP from %s, Max open MRP <= %s' % (
+            reference_date, limit_date))
+        
+        mrp_unload = {} # Stock unload from MRP
+        mrp_order = {} # Order opened
+        previous_order = {} # Order opened incremental on date_planned
+        
+        # ---------------------------------------------------------------------
+        #                      PRODUCTION OPEN IN RANGE:
+        # ---------------------------------------------------------------------
+        # Prepare data for remain production component
+        # Update mrp stock with used halfword in productions
+        
+        mrp_ids = mrp_pool.search(cr, uid, [
+            # State filter:
+            ('state', 'not in', ('done', 'cancel')),
+            
+            # Period filter (only up not down limit)
+            ('date_planned', '<=', limit_date),
+            ], order='date_planned, id', context=context)
+            
         # Generate MRP total componet report with totals:
-        for mrp in objects:
-            total[mrp] = {}
+        product_ids = [] # list of product depend on mrp selected
+        for mrp in mrp_pool.browse(cr, uid, mrp_ids, context=context):
+            # TODO Check active state?
+            mrp_db[mrp] = {}
             
             for sol in mrp.order_line_ids:
+                # Total elements:
                 qty = sol.product_uom_qty
-                qty_maked = sol.product_uom_maked_sync_qty # TODO
+                qty_maked = sol.product_uom_maked_sync_qty 
+                todo = qty - qty_maked
                 
-                for component in sol.product_id.dynamic_bom_line_ids:
+                # Product selected in productions:
+                if sol.product_id.id not in product_ids:
+                    product_ids.append(sol.product_id.id)
+                
+                # Explode component:
+                for component in sol.product_id.dynamic_bom_line_ids:                    
                     product = component.product_id
-                    if product not in total[mrp]:
-                        total[mrp][product] = qty * component.product_qty
+                        
+                    # Total todo product    
+                    if product not in mrp_db[mrp]: 
+                        mrp_db[mrp][product] = [0.0, 0.0]
+                    if component.id not in previous_order:
+                        previous_order[component.id] = 0.0
+                        
+                    # This order:
+                    this_qty = todo * component.product_qty
+                    mrp_db[mrp][product][0] += this_qty
+                    
+                    # Previous ordered:
+                    mrp_db[mrp][product][1] = previous_order[component.id]
+                    
+                    # Update previous ordered with this:
+                    previous_order[component.id] -= this_qty
 
+        # ---------------------------------------------------------------------
+        #                           ALL PRODUCTION:
+        # ---------------------------------------------------------------------
+        # Search in all production from reference date:
+        # 1. get produced element for unload stock
+        # 2. get order remain in open mrp for total needed
+        
+        sol_ids = sol_pool.search(cr, uid, [
+            # Linked to production # TODO remove?
+            ('mrp_id', '!=', False),
+            
+            # Product used:
+            #('mrp_id.state', 'in', ('done', 'cancel')), # also cancel
+            ('product_id', 'in', product_ids), # only component used in report
+            
+            # Date range production:
+            ('mrp_id.date_planned', '>=', reference_date),
+            ('mrp_id.date_planned', '<=', limit_date),
+            ], context=context)
+            
+        sol_proxy = sol_pool.browse(cr, uid, sol_ids, context=context)
+        for sol in sol_proxy:
+            qty = sol.product_uom_qty
+            qty_maked = sol.product_uom_maked_sync_qty
+            todo = qty - qty_maked
+            
+            for component in sol.product_id.dynamic_bom_line_ids:                    
+                product = component.product_id
+                
+                # no error yet present:
+                if product.id not in mrp_unload:
+                    mrp_unload[product.id] = 0.0                    
+                mrp_unload[product.id] -= qty_maked * component.product_qty
+                
+                if product.id not in mrp_order:
+                    mrp_order[product.id] = 0.0                
+                if sol.mrp_id.state not in ('done', 'cancel'): # only active
+                    mrp_order[product.id] -= todo * component.product_qty
+
+        # ---------------------------------------------------------------------
+        #                           PREPARE FOR REPORT:
+        # ---------------------------------------------------------------------
         res = {}
-        for key, total in total.iteritems():
-            res[key] = []
-            for component, qty in total.iteritems():
-                # component, need, stock, OF, status
-                res[key].append((
-                    component, 
-                    qty, 
-                    component.mx_net_qty, 
-                    component.mx_of_in, 
-                    'ok'))
-
-        return res
+        for mrp in mrp_db.keys():
+            record = mrp_db[mrp]
+            res[mrp] = []
+            for component, qty in record.iteritems():
+                this_qty = qty[0]
+                oc_qty = qty[1]
+                
+                stock = component.mx_net_qty + \
+                    mrp_unload.get(component.id, 0.0) + \
+                    oc_qty
+                    
+                # componentpyt  , need, stock, OF, status
+                res[mrp].append((
+                    component, # Component
+                    this_qty, # MRP net q.
+                    #Stock-MRP:
+                    stock,
+                    mrp_order.get(component.id, 0.0), # MRP OC period
+                    component.mx_of_in,
+                    '?'))
+        return res#sorted(res, key=lambda x: x.date_planned)
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

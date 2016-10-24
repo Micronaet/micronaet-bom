@@ -171,11 +171,12 @@ class Parser(report_sxw.rml_parse):
             for component in sol.product_id.dynamic_bom_line_ids:                    
                 product = component.product_id
                 
-                # no error yet present:
+                # Maked (unload stock)
                 if product.id not in mrp_unload:
                     mrp_unload[product.id] = 0.0                    
                 mrp_unload[product.id] -= qty_maked * component.product_qty
                 
+                # Remain (todo order)
                 if product.id not in mrp_order:
                     mrp_order[product.id] = 0.0                
                 if sol.mrp_id.state not in ('done', 'cancel'): # only active
@@ -192,11 +193,10 @@ class Parser(report_sxw.rml_parse):
                 this_qty = qty[0]
                 prev_qty = qty[1]
                 
-                stock = component.mx_net_qty + \
-                    mrp_unload.get(component.id, 0.0) + \
-                    prev_qty
+                stock = component.mx_net_qty + 
+                    mrp_unload.get(component.id, 0.0)# + prev_qty
                     
-                # component , need, stock, OC period, OF, status
+                # component, need, stock, OC period, OF, status
                 res[mrp].append((
                     component, # Component
                     this_qty, # MRP net q.

@@ -193,7 +193,7 @@ class Parser(report_sxw.rml_parse):
                 this_qty = qty[0]
                 prev_qty = qty[1]
                 
-                stock = component.mx_net_qty + 
+                stock = component.mx_net_qty + \
                     mrp_unload.get(component.id, 0.0)# + prev_qty
                     
                 # component, need, stock, OC period, OF, status

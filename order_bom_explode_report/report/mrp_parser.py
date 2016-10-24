@@ -107,9 +107,7 @@ class Parser(report_sxw.rml_parse):
             ], order='date_planned, id', context=context)
             
         # Generate MRP total componet report with totals:
-        #product_ids = [] # list of product depend on mrp selected
         for mrp in mrp_pool.browse(cr, uid, mrp_ids, context=context):
-            # TODO Check active state?
             mrp_db[mrp] = {}
             
             for sol in mrp.order_line_ids:
@@ -118,11 +116,6 @@ class Parser(report_sxw.rml_parse):
                 qty_maked = sol.product_uom_maked_sync_qty 
                 todo = qty - qty_maked
                 
-                # Product selected in productions:
-                #if sol.product_id.id not in product_ids:
-                #    product_ids.append(sol.product_id.id)
-                
-                # Explode component:
                 for component in sol.product_id.dynamic_bom_line_ids:                    
                     product = component.product_id
                         
@@ -152,10 +145,6 @@ class Parser(report_sxw.rml_parse):
         sol_ids = sol_pool.search(cr, uid, [
             # Linked to production # TODO remove?
             ('mrp_id', '!=', False),
-            
-            # Product used:
-            #('mrp_id.state', 'in', ('done', 'cancel')), # also cancel
-            #('product_id', 'in', product_ids), # only component used in report
             
             # Date range production:
             ('mrp_id.date_planned', '>=', reference_date),

@@ -89,7 +89,8 @@ class Parser(report_sxw.rml_parse):
         if data is None:
             data = {}
         days = data.get('days', self.default_days)
-        
+        first_supplier_id = data.get('first_supplier_id')
+
         mrp_db = {}
         
         # pool used:

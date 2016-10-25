@@ -94,7 +94,7 @@ class Parser(report_sxw.rml_parse):
         
         mrp_unload = {} # Stock unload from MRP
         mrp_order = {} # Order opened
-        delta_stock = {} # Consumed component in stock (assume is 0)
+        delta_stock = {} # Consumed component in stock (assume start is 0)
         
         # ---------------------------------------------------------------------
         #                      PRODUCTION OPEN IN RANGE:
@@ -208,8 +208,7 @@ class Parser(report_sxw.rml_parse):
                 components.append((
                     component, # Component
                     this_qty, # MRP net q.                    
-                    #Stock-MRP:
-                    stock, # net stock with this order
+                    stock, # net stock after this order
                     oc_period,
                     of,
                     status,

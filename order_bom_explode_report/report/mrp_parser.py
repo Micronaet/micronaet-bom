@@ -223,6 +223,10 @@ class Parser(report_sxw.rml_parse):
                     status,
                     of_move,             
                     ))
-            res.append((mrp, components, mrp_status))        
+            res.append((
+                mrp, 
+                sorted(components, key=lambda x: x[5]), 
+                mrp_status),
+                )        
         return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

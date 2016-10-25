@@ -225,7 +225,7 @@ class Parser(report_sxw.rml_parse):
                     ))
             res.append((
                 mrp, 
-                sorted(components, key=lambda x: x[5]), 
+                sorted(components, key=lambda x: x[5], x[0].default_code), 
                 mrp_status),
                 )        
         return res

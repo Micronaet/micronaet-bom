@@ -44,10 +44,20 @@ class MrpBom(orm.Model):
     _inherit = 'mrp.bom'
     
     def onchange_setup_product_template_id(
-            self, cr, uid, ids, setup_template_id, context=None):
+            self, cr, uid, ids, setup_product_template_id, context=None):
         ''' Generate product template and product in BOM header
         '''    
         res = {}
+        if not setup_product_template_id:
+            return res
+        pool_product = self.pool.get('product.product')
+        product_proxy = pool_product.browse(
+            cr, uid, setup_product_template_id, context=context)
+        res['value'] = {
+            'setup_product_template_id': False, # reset
+            'product_tmpl_id': product_proxy.product_tmpl_id.id,
+            'product_id': setup_product_template_id,
+            }
         return res
         
     _columns = {

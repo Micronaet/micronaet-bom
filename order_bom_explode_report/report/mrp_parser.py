@@ -192,6 +192,15 @@ class Parser(report_sxw.rml_parse):
                     component.id, 0.0) + delta_stock_qty
                 oc_period = mrp_order.get(component.id, 0.0)   
                 of = component.mx_of_in
+                of_move = ''
+                for move in component.mx_of_ids:
+                    of_move += '%s (%s)\n' % (
+                        int(move.product_uom_qty or 0.0), 
+                        '%s-%s' % (
+                            move.date_expected[8:10],
+                             move.date_expected[5:7],
+                             ) if move.date_expected else '?',
+                        )
                 
                 if stock >= 0.0:
                     status = 'green'
@@ -212,6 +221,7 @@ class Parser(report_sxw.rml_parse):
                     oc_period,
                     of,
                     status,
+                    of_move,             
                     ))
             res.append((mrp, components, mrp_status))        
         return res

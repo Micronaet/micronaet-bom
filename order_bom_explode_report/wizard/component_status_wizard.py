@@ -57,10 +57,15 @@ class CcomponentStatusReportWizard(orm.TransientModel):
         
         wiz_browse = self.browse(cr, uid, ids, context=context)[0]
         
-        report_name = 'stock_status_explode_report'
         datas = {
             'mode': wiz_browse.mode,
             }
+
+        if wiz_browse.mode == 'mrp':
+            report_name = 'mrp_status_explode_report'            
+            datas['days'] = wiz_browse.days
+        else:
+            report_name = 'stock_status_explode_report'
             
         return {
             'type': 'ir.actions.report.xml',
@@ -72,11 +77,14 @@ class CcomponentStatusReportWizard(orm.TransientModel):
         'mode': fields.selection([
             ('halfwork', 'Halfwork'),
             ('component', 'Final component'),
+            ('mrp', 'Scheduled production'),
             ], 'Report mode', required=True),
+        'days': fields.integer('Days', help='Production scheduled now + days'),
         }
         
     _defaults = {
         'mode': lambda *x: 'halfwork',
+        'days': lambda *x: 30,
         }    
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

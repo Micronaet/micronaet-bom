@@ -43,6 +43,7 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 _logger = logging.getLogger(__name__)
 
 class Parser(report_sxw.rml_parse):
+    default_days = 30
     def __init__(self, cr, uid, name, context):        
         super(Parser, self).__init__(cr, uid, name, context)
         self.localcontext.update({
@@ -61,7 +62,10 @@ class Parser(report_sxw.rml_parse):
         '''
         if data is None:
             data = {}
-        return '' # TODO
+            
+        days = data.get('days', self.default_days)
+            
+        return _('Active production for %s days') % days
 
     def get_object(self, data):
         ''' Search all mpr elements                
@@ -73,7 +77,7 @@ class Parser(report_sxw.rml_parse):
         
         if data is None:
             data = {}
-        days = data.get('days', 30)
+        days = data.get('days', self.default_days)
         
         mrp_db = {}
         
@@ -134,9 +138,6 @@ class Parser(report_sxw.rml_parse):
                     
                     # Current delta stock saved in order component:
                     mrp_db[mrp][product][1] = delta_stock[component.id]
-
-                    if product.default_code == 'ELA100NE':
-                        print mrp.name, mrp.date_planned, todo, '>>', this_qty, mrp_db[mrp][product], 'prev.:', delta_stock[component.id]
 
         # ---------------------------------------------------------------------
         #                           ALL PRODUCTION:
@@ -206,8 +207,7 @@ class Parser(report_sxw.rml_parse):
                 # component, need, stock, OC period, OF, status
                 components.append((
                     component, # Component
-                    this_qty, # MRP net q.
-                    
+                    this_qty, # MRP net q.                    
                     #Stock-MRP:
                     stock, # net stock with this order
                     oc_period,

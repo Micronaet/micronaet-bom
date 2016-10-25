@@ -1,0 +1,110 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* order_bom_explode_report
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-10-25 11:44+0000\n"
+"PO-Revision-Date: 2016-10-25 13:45+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: it\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#. module: order_bom_explode_report
+#: code:addons/order_bom_explode_report/report/mrp_parser.py:68
+#, python-format
+msgid "Active production for %s days"
+msgstr "Produzione attive (finestra di %s giorni)"
+
+#. module: order_bom_explode_report
+#: view:component.status.report.wizard:order_bom_explode_report.component_status_report_wizard_view
+msgid "Cancel"
+msgstr "Annulla"
+
+#. module: order_bom_explode_report
+#: field:component.status.report.wizard,create_uid:0
+msgid "Created by"
+msgstr "Creato da"
+
+#. module: order_bom_explode_report
+#: field:component.status.report.wizard,create_date:0
+msgid "Created on"
+msgstr "Creato il"
+
+#. module: order_bom_explode_report
+#: field:component.status.report.wizard,days:0
+msgid "Days"
+msgstr "Giorni"
+
+#. module: order_bom_explode_report
+#: selection:component.status.report.wizard,mode:0
+msgid "Final component"
+msgstr "Componenti finali"
+
+#. module: order_bom_explode_report
+#: selection:component.status.report.wizard,mode:0
+msgid "Halfwork"
+msgstr "Semilavorati"
+
+#. module: order_bom_explode_report
+#: field:component.status.report.wizard,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: order_bom_explode_report
+#: field:component.status.report.wizard,write_uid:0
+msgid "Last Updated by"
+msgstr "Ultimo aggiornamento da"
+
+#. module: order_bom_explode_report
+#: field:component.status.report.wizard,write_date:0
+msgid "Last Updated on"
+msgstr "Ultimo aggiornamento il"
+
+#. module: order_bom_explode_report
+#: view:component.status.report.wizard:order_bom_explode_report.component_status_report_wizard_view
+msgid "Print"
+msgstr "Stampa"
+
+#. module: order_bom_explode_report
+#: model:ir.actions.act_window,name:order_bom_explode_report.action_component_status_report_wizard_view
+#: model:ir.ui.menu,name:order_bom_explode_report.menu_component_status_report_wizard_view
+msgid "Print component status"
+msgstr "Stampa stato componenti"
+
+#. module: order_bom_explode_report
+#: help:component.status.report.wizard,days:0
+msgid "Production scheduled now + days"
+msgstr "Produzioni schedulata da oggi a X giorni"
+
+#. module: order_bom_explode_report
+#: field:component.status.report.wizard,mode:0
+msgid "Report mode"
+msgstr "Modalità report"
+
+#. module: order_bom_explode_report
+#: selection:component.status.report.wizard,mode:0
+msgid "Scheduled production"
+msgstr "Produzioni schedulate"
+
+#. module: order_bom_explode_report
+#: model:ir.actions.report.xml,name:order_bom_explode_report.aeroo_mrp_explode_status_report_id
+msgid "Status explode MRP"
+msgstr "Stato componenti produzioni attive"
+
+#. module: order_bom_explode_report
+#: model:ir.actions.report.xml,name:order_bom_explode_report.aeroo_stock_explode_status_report_id
+msgid "Status explode component"
+msgstr "Stato componenti esplosi"
+
+#. module: order_bom_explode_report
+#: view:component.status.report.wizard:order_bom_explode_report.component_status_report_wizard_view
+msgid "Wizard"
+msgstr "Wizard"

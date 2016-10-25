@@ -177,9 +177,11 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         #                           PREPARE FOR REPORT:
         # ---------------------------------------------------------------------
-        res = {}
-        for mrp, record in mrp_db.iteritems():
-            res[mrp] = []
+        res = []
+        for mrp in sorted(mrp_db, key=lambda x: (x.date_planned, x.id)):
+            record = mrp_db[mrp]
+            components = []
+            mrp_status = 'green'
             for component, qty in record.iteritems():
                 this_qty = qty[0]
                 delta_stock_qty = qty[1]
@@ -187,17 +189,31 @@ class Parser(report_sxw.rml_parse):
                 # Current stock = stock - mrp (previous unload) - delta TODO
                 stock = component.mx_net_qty + mrp_unload.get(
                     component.id, 0.0) + delta_stock_qty
+                oc_period = mrp_order.get(component.id, 0.0)   
+                of = component.mx_of_in
+                
+                if stock >= 0.0:
+                    status = 'green'
+                elif stock + of >= 0.0:
+                    status = 'yellow'
+                    if mrp_status == 'green':
+                        mrp_status = 'yellow'
+                else:    
+                    status = 'red'
+                    if mrp_status != 'red':
+                        mrp_status = 'red'
                     
                 # component, need, stock, OC period, OF, status
-                res[mrp].append((
+                components.append((
                     component, # Component
                     this_qty, # MRP net q.
+                    
                     #Stock-MRP:
                     stock, # net stock with this order
-                    mrp_order.get(component.id, 0.0), # MRP OC period
-                    component.mx_of_in,
-                    '?',
-                    delta_stock_qty, # TODO remove
+                    oc_period,
+                    of,
+                    status,
                     ))
+            res.append((mrp, components, mrp_status))        
         return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

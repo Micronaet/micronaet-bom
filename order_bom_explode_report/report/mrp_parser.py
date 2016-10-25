@@ -75,6 +75,17 @@ class Parser(report_sxw.rml_parse):
         uid = self.uid
         context = {}
         
+        # Utility function:
+        def report_order_component(x):
+            ''' Order for component in reporting
+            ''' 
+            if x[5] == 'green':
+                return (1, x[0].default_code)
+            elif x[5] == 'yellow':
+                return (2, x[0].default_code)
+            else: # red
+                return (3, x[0].default_code)
+                
         if data is None:
             data = {}
         days = data.get('days', self.default_days)
@@ -225,7 +236,7 @@ class Parser(report_sxw.rml_parse):
                     ))
             res.append((
                 mrp, 
-                sorted(components, key=lambda x: (x[5], x[0].default_code)), 
+                sorted(components, key=lambda x: report_order_component(x)), 
                 mrp_status),
                 )        
         return res

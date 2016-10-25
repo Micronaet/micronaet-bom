@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_setup_template_in_bom_form">
+            <field name="name">mrp.bom.form</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+            <field name="arch" type="xml">
+                <field name="product_tmpl_id" position="after">
+                    <field name="setup_product_template_id" on_change="onchange_setup_product_template_id" attrs="{'invisible': [('product_tmpl_id','=',False)]}"/>
+                </field>
+            </field>
+        </record>
+    </data>
+</openerp>
+

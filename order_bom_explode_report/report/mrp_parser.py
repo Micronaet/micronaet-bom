@@ -90,7 +90,7 @@ class Parser(report_sxw.rml_parse):
         
         mrp_unload = {} # Stock unload from MRP
         mrp_order = {} # Order opened
-        previous_order = {} # Order opened incremental on date_planned
+        delta_stock = {} # Consumed component in stock (assume is 0)
         
         # ---------------------------------------------------------------------
         #                      PRODUCTION OPEN IN RANGE:
@@ -122,18 +122,21 @@ class Parser(report_sxw.rml_parse):
                     # Total todo product    
                     if product not in mrp_db[mrp]: 
                         mrp_db[mrp][product] = [0.0, 0.0] # this, previous MRP
-                    if component.id not in previous_order:
-                        previous_order[component.id] = 0.0
+                    if component.id not in delta_stock:
+                        delta_stock[component.id] = 0.0
                         
                     # This order:
                     this_qty = todo * component.product_qty
                     mrp_db[mrp][product][0] += this_qty
                     
-                    # Previous ordered:
-                    mrp_db[mrp][product][1] = previous_order[component.id]
+                    # Update delta with this unload
+                    delta_stock[component.id] -= this_qty
                     
-                    # Update previous ordered with this:
-                    previous_order[component.id] -= this_qty
+                    # Current delta stock saved in order component:
+                    mrp_db[mrp][product][1] = delta_stock[component.id]
+
+                    if product.default_code == 'ELA100NE':
+                        print mrp.name, mrp.date_planned, todo, '>>', this_qty, mrp_db[mrp][product], 'prev.:', delta_stock[component.id]
 
         # ---------------------------------------------------------------------
         #                           ALL PRODUCTION:
@@ -165,7 +168,7 @@ class Parser(report_sxw.rml_parse):
                     mrp_unload[product.id] = 0.0                    
                 mrp_unload[product.id] -= qty_maked * component.product_qty
                 
-                # Remain (todo order)
+                # Remain (todo order total)
                 if product.id not in mrp_order:
                     mrp_order[product.id] = 0.0                
                 if sol.mrp_id.state not in ('done', 'cancel'): # only active
@@ -175,15 +178,15 @@ class Parser(report_sxw.rml_parse):
         #                           PREPARE FOR REPORT:
         # ---------------------------------------------------------------------
         res = {}
-        for mrp in mrp_db.keys():
-            record = mrp_db[mrp]
+        for mrp, record in mrp_db.iteritems():
             res[mrp] = []
             for component, qty in record.iteritems():
                 this_qty = qty[0]
-                prev_qty = qty[1]
+                delta_stock_qty = qty[1]
                 
-                stock = component.mx_net_qty + \
-                    mrp_unload.get(component.id, 0.0)# + prev_qty
+                # Current stock = stock - mrp (previous unload) - delta TODO
+                stock = component.mx_net_qty + mrp_unload.get(
+                    component.id, 0.0) + delta_stock_qty
                     
                 # component, need, stock, OC period, OF, status
                 res[mrp].append((
@@ -193,6 +196,8 @@ class Parser(report_sxw.rml_parse):
                     stock, # net stock with this order
                     mrp_order.get(component.id, 0.0), # MRP OC period
                     component.mx_of_in,
-                    '?'))
+                    '?',
+                    delta_stock_qty, # TODO remove
+                    ))
         return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

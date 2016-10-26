@@ -1,0 +1,141 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* purchase_explode_from_bom
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-10-26 13:21+0000\n"
+"PO-Revision-Date: 2016-10-26 15:23+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: it\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#. module: purchase_explode_from_bom
+#: code:addons/purchase_explode_from_bom/explode.py:154
+#, python-format
+msgid "%s No data to write"
+msgstr "%s Nessun dato da scrivere"
+
+#. module: purchase_explode_from_bom
+#: code:addons/purchase_explode_from_bom/explode.py:110
+#, python-format
+msgid "%s multi BOM\n"
+msgstr "%s multi Distinta base\n"
+
+#. module: purchase_explode_from_bom
+#: code:addons/purchase_explode_from_bom/explode.py:104
+#, python-format
+msgid "%s not exploded\n"
+msgstr "%s Non espandibile\n"
+
+#. module: purchase_explode_from_bom
+#: code:addons/purchase_explode_from_bom/explode.py:144
+#, python-format
+msgid "%s: %s x %s x %s = %s  [%s]\n"
+msgstr "%s: %s x %s x %s = %s  [%s]\n"
+
+#. module: purchase_explode_from_bom
+#: field:purchase.order.bom,bom_id:0
+msgid "BOM"
+msgstr "DB"
+
+#. module: purchase_explode_from_bom
+#: view:purchase.order:purchase_explode_from_bom.view_purchase_order_from_bom_form
+msgid "BOM explode"
+msgstr "Esplodi distinta base"
+
+#. module: purchase_explode_from_bom
+#: field:purchase.order.bom,create_uid:0
+msgid "Created by"
+msgstr "Creato da"
+
+#. module: purchase_explode_from_bom
+#: field:purchase.order.bom,create_date:0
+msgid "Created on"
+msgstr "Creato il"
+
+#. module: purchase_explode_from_bom
+#: view:purchase.order:purchase_explode_from_bom.view_purchase_order_from_bom_form
+#: field:purchase.order,explode_bom_ids:0
+#: field:purchase.order.line,explode_bom_id:0
+msgid "Explode BOM"
+msgstr "Esplodi distinta base"
+
+#. module: purchase_explode_from_bom
+#: field:purchase.order.bom,explode_bom_calc:0
+msgid "Explode calc"
+msgstr "Calcolo esplosione DB"
+
+#. module: purchase_explode_from_bom
+#: field:purchase.order.bom,explode_bom_error:0
+msgid "Explode error"
+msgstr "Errore esplosione"
+
+#. module: purchase_explode_from_bom
+#: field:purchase.order,explode_bom:0
+msgid "Explode from BOM"
+msgstr "Esplodi da DB"
+
+#. module: purchase_explode_from_bom
+#: field:purchase.order.bom,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: purchase_explode_from_bom
+#: field:purchase.order.bom,write_uid:0
+msgid "Last Updated by"
+msgstr "Ultimo aggiornamento da"
+
+#. module: purchase_explode_from_bom
+#: field:purchase.order.bom,write_date:0
+msgid "Last Updated on"
+msgstr "Ultimo aggiornamento il"
+
+#. module: purchase_explode_from_bom
+#: code:addons/purchase_explode_from_bom/explode.py:107
+#, python-format
+msgid "Multi BOM for component %s\n"
+msgstr "DB multipla per il componente %s\n"
+
+#. module: purchase_explode_from_bom
+#: code:addons/purchase_explode_from_bom/explode.py:101
+#, python-format
+msgid "No BOM for component %s\n"
+msgstr "Nessuna DB per il componente %s\n"
+
+#. module: purchase_explode_from_bom
+#: field:purchase.order.bom,note:0
+msgid "Note"
+msgstr "Note"
+
+#. module: purchase_explode_from_bom
+#: field:purchase.order.bom,purchase_id:0
+msgid "Order"
+msgstr "Ordine"
+
+#. module: purchase_explode_from_bom
+#: model:ir.model,name:purchase_explode_from_bom.model_purchase_order
+msgid "Purchase Order"
+msgstr "Ordine Acquisto"
+
+#. module: purchase_explode_from_bom
+#: model:ir.model,name:purchase_explode_from_bom.model_purchase_order_line
+msgid "Purchase Order Line"
+msgstr "Riga Ordine d'Acquisto"
+
+#. module: purchase_explode_from_bom
+#: model:ir.model,name:purchase_explode_from_bom.model_purchase_order_bom
+msgid "Purchase from BOM"
+msgstr "Acquisto da distinta base"
+
+#. module: purchase_explode_from_bom
+#: field:purchase.order.bom,quantity:0
+msgid "Total"
+msgstr "Totale"

@@ -1,0 +1,109 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* bom_check_problem_wizard
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-10-26 15:45+0000\n"
+"PO-Revision-Date: 2016-10-26 17:45+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: it\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#. module: bom_check_problem_wizard
+#: view:mrp.bom.check.problem.wizard:bom_check_problem_wizard.mrp_bom_check_problem_wizard_view
+msgid "Cancel"
+msgstr "Annulla"
+
+#. module: bom_check_problem_wizard
+#: model:ir.actions.act_window,name:bom_check_problem_wizard.action_mrp_bom_check_problem_wizard
+#: model:ir.ui.menu,name:bom_check_problem_wizard.menu_mrp_bom_check_problem_wizard
+msgid "Check BOM problem wizard"
+msgstr "Wizard controllo DB"
+
+#. module: bom_check_problem_wizard
+#: field:mrp.bom.check.problem.wizard,create_uid:0
+msgid "Created by"
+msgstr "Creato da"
+
+#. module: bom_check_problem_wizard
+#: field:mrp.bom.check.problem.wizard,create_date:0
+msgid "Created on"
+msgstr "Creato il"
+
+#. module: bom_check_problem_wizard
+#: help:mrp.bom.check.problem.wizard,to_date:0
+msgid "Date <"
+msgstr "Data <"
+
+#. module: bom_check_problem_wizard
+#: help:mrp.bom.check.problem.wizard,from_date:0
+msgid "Date >="
+msgstr "Data >="
+
+#. module: bom_check_problem_wizard
+#: field:mrp.bom.check.problem.wizard,from_date:0
+msgid "From"
+msgstr "Da"
+
+#. module: bom_check_problem_wizard
+#: selection:mrp.bom.check.problem.wizard,mode:0
+msgid "Halfworked BOM"
+msgstr "DB semilavorati"
+
+#. module: bom_check_problem_wizard
+#: field:mrp.bom.check.problem.wizard,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: bom_check_problem_wizard
+#: field:mrp.bom.check.problem.wizard,write_uid:0
+msgid "Last Updated by"
+msgstr "Ultimo aggiornamento di"
+
+#. module: bom_check_problem_wizard
+#: field:mrp.bom.check.problem.wizard,write_date:0
+msgid "Last Updated on"
+msgstr "Ultimo aggiornamento il"
+
+#. module: bom_check_problem_wizard
+#: selection:mrp.bom.check.problem.wizard,mode:0
+msgid "Parent BOM"
+msgstr "DB padre"
+
+#. module: bom_check_problem_wizard
+#: view:mrp.bom.check.problem.wizard:bom_check_problem_wizard.mrp_bom_check_problem_wizard_view
+msgid "Print"
+msgstr "Stampa"
+
+#. module: bom_check_problem_wizard
+#: selection:mrp.bom.check.problem.wizard,mode:0
+msgid "Product BOM"
+msgstr "DB prodotto"
+
+#. module: bom_check_problem_wizard
+#: selection:mrp.bom.check.problem.wizard,mode:0
+msgid "Product BOM from order"
+msgstr "DB prodotto da ordinato"
+
+#. module: bom_check_problem_wizard
+#: field:mrp.bom.check.problem.wizard,mode:0
+msgid "Report mode"
+msgstr "Modalità report"
+
+#. module: bom_check_problem_wizard
+#: field:mrp.bom.check.problem.wizard,to_date:0
+msgid "To"
+msgstr "A"
+
+#. module: bom_check_problem_wizard
+#: view:mrp.bom.check.problem.wizard:bom_check_problem_wizard.mrp_bom_check_problem_wizard_view
+msgid "Wizard"
+msgstr "Wizard"

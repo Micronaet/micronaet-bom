@@ -57,8 +57,27 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
         
+        datas = {
+            'from_wizard': True,
+            'from_date': wiz_proxy.from_date or False,
+            'to_date': wiz_proxy.to_date or False,
+            }
+            
+        if wiz_proxy.mode == 'order':
+            report_name = 'order_bom_component_check_report'        
+        elif wiz_proxy.mode == 'parent':
+            return False
+        elif wiz_proxy.mode == 'product':
+            return False
+        elif wiz_proxy.mode == 'half':
+            return False
+        else:
+            _logger.error('No report mode %s!') % wiz_proxy.mode            
+
         return {
-            'type': 'ir.actions.act_window_close'
+            'type': 'ir.actions.report.xml',
+            'report_name': report_name,
+            'datas': datas,
             }
 
     _columns = {
@@ -67,7 +86,10 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ('parent', 'Parent BOM'),
             ('product', 'Product BOM'),
             ('half', 'Halfworked BOM'),            
-            ], 'mode'),            
+            ], 'Report mode', required=True),            
+
+        'from_date': fields.date('From', help='Date >='),
+        'to_date': fields.date('To', help='Date <'),
         }
 
     _defaults = {

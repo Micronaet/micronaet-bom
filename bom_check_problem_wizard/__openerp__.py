@@ -30,6 +30,7 @@
     'depends': [
         'base',
         'mrp',
+        'order_bom', # BOM check on product order
         ],
     'init_xml': [],
     'demo': [],

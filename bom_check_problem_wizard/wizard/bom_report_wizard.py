@@ -62,11 +62,11 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             'from_date': wiz_proxy.from_date or False,
             'to_date': wiz_proxy.to_date or False,
             }
-            
+        
         if wiz_proxy.mode == 'order':
             report_name = 'order_bom_component_check_report'        
         elif wiz_proxy.mode == 'parent':
-            return False
+            report_name = 'aeroo_parent_final_component_check_report'
         elif wiz_proxy.mode == 'product':
             return False
         elif wiz_proxy.mode == 'half':

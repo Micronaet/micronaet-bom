@@ -24,6 +24,29 @@
             <field eval="True" name="replace"/>
         </ir_set>
 
+        <record id="aeroo_final_component_bom_product_component_check_report_id" model="ir.actions.report.xml">
+            <field name="name">Order bom component check</field>
+            <field name="type">ir.actions.report.xml</field>
+            <field name="model">mrp.bom</field>
+            <field name="report_name">aeroo_parent_final_component_check_report</field>
+            <field name="report_type">aeroo</field>
+            <field name="in_format">oo-odt</field>
+            <field name="parser_loc">order_bom/report/status_parser.py</field>
+            <field name="report_rml">order_bom/report/parent_final_component.odt</field>
+            <field name="parser_state">loc</field>
+            <field name="tml_source">file</field>
+        </record>
+
+        <ir_set>
+            <field eval="'action'" name="key"/>
+            <field eval="'client_print_multi'" name="key2"/>
+            <field eval="['mrp.bom']" name="models"/>
+            <field name="name">action_aeroo_parent_final_component_check_report</field>
+            <field eval="'ir.actions.report.xml,'+str(aeroo_final_component_bom_product_component_check_report_id)" name="value"/>
+            <field eval="True" name="isobject"/>
+            <field eval="True" name="replace"/>
+        </ir_set>
+
         <!--<record id="aeroo_order_bom_product_component_report_id" model="ir.actions.report.xml">
             <field name="name">Order bom component</field>
             <field name="type">ir.actions.report.xml</field>

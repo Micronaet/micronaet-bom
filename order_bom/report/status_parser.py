@@ -43,6 +43,7 @@ class Parser(report_sxw.rml_parse):
         super(Parser, self).__init__(cr, uid, name, context)
         self.localcontext.update({
             'load_objects': self.load_objects,
+            'load_parent_objects': self.load_parent_objects,
             'get_db': self.get_db,
             })
 
@@ -68,5 +69,21 @@ class Parser(report_sxw.rml_parse):
         
         self.master['table'] = {}
         return ''
+
+    def load_parent_objects(self, data):
+        ''' Master function for generate data parent report
+        '''
+        if data is None:
+            data = {}
+        
+        cr = self.cr
+        uid = self.uid
+        context = {}
+        
+        bom_pool = self.pool.get('mrp.bom')
+        bom_ids = bom_pool.search(cr, uid, [
+            ('bom_category', '=', 'parent')], order='code', context=context)
+            
+        return bom_pool.browse(cr, uid, bom_ids, context=context)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

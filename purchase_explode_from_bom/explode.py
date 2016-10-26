@@ -101,14 +101,14 @@ class PurchaseOrder(orm.Model):
                     bom_data[bom.id][1] += _(
                         'No BOM for component %s\n') % \
                             half.product_id.default_code
-                    bom_data[bom.id][0] += _(
-                        '%s not exploded\n') % half.product_id.name
+                    #bom_data[bom.id][0] += _(
+                    #    '%s not exploded\n') % half.product_id.name
                 elif len(bom_ids) > 1: # XXX warning?
                     bom_data[bom.id][1] += _(
                         'Multi BOM for component %s\n') % \
                             half.product_id.default_code
-                    bom_data[bom.id][0] += _(
-                        '%s multi BOM\n') % bom.product_id.name
+                    #bom_data[bom.id][0] += _(
+                    #    '%s multi BOM\n') % bom.product_id.name
                 else:
                     bom_proxy = bom_pool.browse(
                         cr, uid, bom_ids, context=context)[0]

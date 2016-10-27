@@ -185,6 +185,7 @@ class PurchaseOrder(orm.Model):
                 #'note': False,
                 }, context=context)
             
+            name = half.product_id.default_code or '??'
             for item in half.product_id.half_bom_ids:
                 # Create purchase order line:
                 item_quantity = half_quantity * item.product_qty
@@ -215,6 +216,7 @@ class PurchaseOrder(orm.Model):
                         'order_id': order_id,
                         'explode_bom_id': half_id,
                         'product_id': item.product_id.id,
+                        'name': '[%s] %s' % (name, item_data.get('name', '')),
                         })
                     line_pool.create(cr, uid, item_data, context=context)
                     
@@ -255,14 +257,15 @@ class PurchaseOrder(orm.Model):
         'component_note': fields.char('Component note', size=80),    
         }
 
-class PurchaseOrder(orm.Model):
+class PurchaseOrderLine(orm.Model):
     """ Model name: PurchaseOrder
     """
     
     _inherit = 'purchase.order.line'
-        
+
     _columns = {
         'explode_bom_id': fields.many2one(
             'purchase.order.bom', 'Explode BOM', ondelete='cascade'),            
         }
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

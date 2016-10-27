@@ -67,7 +67,9 @@ class PurchaseOrderBOM(orm.Model):
         partner = half_proxy.purchase_id.partner_id
         
         half_quantity = half_proxy.quantity_order        
+        name = half_proxy.product_id.default_code or '??'
         for item in half_proxy.product_id.half_bom_ids:
+            # TODO inglobe in a function: (repeat twice!!!)
             # Create purchase order line:
             item_quantity = half_quantity * item.product_qty
             
@@ -97,10 +99,9 @@ class PurchaseOrderBOM(orm.Model):
                     'order_id': order_id,
                     'explode_bom_id': half_id,
                     'product_id': item.product_id.id,
+                    'name': '[%s] %s' % (name, item_data.get('name', '')),
                     })
                 line_pool.create(cr, uid, item_data, context=context)
-                
-        
         return True
     
     _columns = {
@@ -219,34 +220,60 @@ class PurchaseOrder(orm.Model):
                         'name': '[%s] %s' % (name, item_data.get('name', '')),
                         })
                     line_pool.create(cr, uid, item_data, context=context)
-                    
-                    #bom_data[bom.id][0] += _(
-                    #    '%s: %s x %s x %s = %s  [%s]\n') % (
-                    #        half.product_id.default_code or 'cod. ?',
-                    #        bom.quantity,
-                    #        half.product_qty,
-                    #        item.product_qty,
-                    #        qty,
-                    #        item.product_id.default_code or 'cod. ?',
-                    #        )
-                #else:    
-                #    bom_data[bom.id][0] += _(
-                #        '%s No data to write') % bom.product_id.name
-                
-                               
-        # Write error for bom load: # XXX no more fields delete!!
-        #for bom_id, data in bom_data.iteritems():
-        #    bom_line_pool.write(cr, uid, bom_id, {
-        #        'explode_bom_calc': data[0],
-        #        'explode_bom_error': data[1] or False,
-        #        }, context=context)
         return True
+        
+    """def _get_explode_bom_result(
+            self, cr, uid, ids, fields, args, context=None):
+        ''' Fields function for calculate bom esit and error
+        '''
+        res = {}
+        
+        # Pool used:
+        line_pool = self.pool.get('purchase.order.line')
+        
+        if not ids: 
+            return res
+            
+        self.browse(cr, uid, ids, context=context)
+        
+        line_ids = line_pool.search(cr, uid, [
+            ('explode_bom_id', '!=', False),
+            ('order_id', '=', 
+            ], context=context)
+        
+        # Create DB for link bom with purchase line
+        db_link = {}
+        for line in line_pool.browse(cr, uid, line_ids, context=context):
+            if line.explode_bom_id.id not in db_link:
+                db_link[line.explode_bom_id.id] = []
+            db_link[line.explode_bom_id.id].append(line.id)
+        
+        for line in :
+            res[line.id] = ''
+            
+                    #bom_data[bom.id][0] += _(
+            #    '%s: %s x %s x %s = %s  [%s]\n') % (
+            #        half.product_id.default_code or 'cod. ?',
+            #        bom.quantity,
+            #        half.product_qty,
+            #        item.product_qty,
+            #        qty,
+            #        item.product_id.default_code or 'cod. ?',
+            #        )
+        #else:    
+        #    bom_data[bom.id][0] += _(
+        #        '%s No data to write') % bom.product_id.name
+    """  
     
     _columns = {
         # Data for explode wizard:
         'load_bom_id': fields.many2one(
             'mrp.bom', 'Load BOM'),
         'quantity': fields.integer('Total'),
+        #'explode_bom_calc': fields.function(
+        #    _get_explode_bom_result, method=True, type='text', 
+        #    string='Explode calc.', store=False),# TODO multi 
+                        
         'explode_bom_calc': fields.text('Explode calc.', readonly=True), 
         'explode_bom_error': fields.text('Explode error', readonly=True), 
 

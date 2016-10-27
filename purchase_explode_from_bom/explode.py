@@ -38,7 +38,7 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
-    
+
 class PurchaseOrderBOM(orm.Model):
     """ Model name: PurchaseOrderBOM
     """    
@@ -47,14 +47,27 @@ class PurchaseOrderBOM(orm.Model):
     _description = 'Purchase from BOM'
     _rec_name = 'bom_id'
     
+    def explore_hw_purchase_line(self, cr, uid, ids, context=None):
+        ''' Recal single component
+        '''
+        line_proxy = self.browse(cr, uid, ids, context=context)[0]
+        # TODO 
+        return True
+    
     _columns = {
+        # Link:
         'purchase_id': fields.many2one('purchase.order', 'Order'),
-        'bom_id': fields.many2one('mrp.bom', 'BOM', required=True),
+        'bom_id': fields.many2one('mrp.bom', 'BOM', readonly=True),
+
+        'product_id': fields.many2one('product.product', 'Halfworked', 
+            required=True),        
         'quantity': fields.integer('Total', required=True),        
-        # XXX always explode half worked
-        'note': fields.text('Note'),
+        'quantity_order': fields.integer('Order'),
+        
         'explode_bom_calc': fields.text('Explode calc', readonly=True), 
         'explode_bom_error': fields.text('Explode error', readonly=True), 
+
+        'note': fields.text('Note'),
         }
 
 class PurchaseOrder(orm.Model):
@@ -72,11 +85,12 @@ class PurchaseOrder(orm.Model):
             ('bom_category', '=', 'half'),
             ], context=context)
                     
-
     def explode_bom_purchase_line(self, cr, uid, ids, context=None):
         ''' Generate order depend on final component for bom selected
         '''
         assert len(ids) == 1, 'Works only with one record a time'
+        
+        # Pool used:
         line_pool = self.pool.get('purchase.order.line')
         bom_line_pool = self.pool.get('purchase.order.bom')
         bom_pool = self.pool.get('mrp.bom')
@@ -133,11 +147,14 @@ class PurchaseOrder(orm.Model):
                             context=context,
                             ).get('value', {})
 
+                        # TODO VAT not loaded!!!!
+
                         if data:                      
                             # TODO log event
                             data.update({
                                 'order_id': ids[0],
                                 'explode_bom_id': bom.id,
+                                # TODO link to component exploded
                                 'product_id': item.product_id.id,
                                 })
                             line_pool.create(cr, uid, data, context=context)
@@ -154,17 +171,23 @@ class PurchaseOrder(orm.Model):
                             bom_data[bom.id][0] += _(
                                 '%s No data to write') % bom.product_id.name
                                
-        # Write error for bom load:
-        for bom_id, data in bom_data.iteritems():
-            bom_line_pool.write(cr, uid, bom_id, {
-                'explode_bom_calc': data[0],
-                'explode_bom_error': data[1] or False,
-                }, context=context)
+        # Write error for bom load: # XXX no more fields delete!!
+        #for bom_id, data in bom_data.iteritems():
+        #    bom_line_pool.write(cr, uid, bom_id, {
+        #        'explode_bom_calc': data[0],
+        #        'explode_bom_error': data[1] or False,
+        #        }, context=context)
         return True
     
     _columns = {
+        # Data for explode wizard:
+        'load_bom_id': fields.many2one(
+            'purchase.order.bom', 'Explode BOM'),
+        'quantity': fields.integer('Total'),
+        'explode_bom_calc': fields.text('Explode calc.', readonly=True), 
+        'explode_bom_error': fields.text('Explode error', readonly=True), 
+
         'explode_bom': fields.boolean('Explode from BOM'),
-        
         'explode_bom_ids': fields.one2many(
             'purchase.order.bom', 'purchase_id', 
             'Explode BOM'),

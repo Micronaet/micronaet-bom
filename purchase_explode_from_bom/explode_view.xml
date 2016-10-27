@@ -11,15 +11,32 @@
                 </field>
                 <xpath expr="//page[1]" position="after">
                     <page string="BOM explode" attrs="{'invisible': [('explode_bom','=',False)]}">
-                        <button name="explode_bom_purchase_line" string="Explode BOM" type="object" />
-                        <field name="explode_bom_ids">
-                            <tree editable="bottom" string="Explode BOM" colors="red:explode_bom_error!=False">
-                                <field name="bom_id" domain="[('bom_category','=','parent')]"/>
-                                <field name="quantity" />
-                                <field name="explode_bom_calc" />
-                                <field name="explode_bom_error" />
-                            </tree>
-                        </field>
+                        <group colspan="4" col="4">
+                            <field name="load_bom_id" domain="[('bom_category','=','parent')]" />
+                            <field name="quantity" />                        
+                            <button name="explode_bom_purchase_line" string="Explode BOM" type="object" />
+                            
+                            <separator string="Calculation:" colspan="2"/>
+                            <separator string="Error:" colspan="2" />
+                            <field name="explode_bom_calc" nolabel="1" />
+                            <field name="explode_bom_error" nolabel="1" />
+                            
+                            <separator string="Halfworked component:" colspan="4"/>
+                            <field name="explode_bom_ids" editable="bottom" nolabel="1">
+                                <tree string="Explode BOM" editable="bottom">
+                                    <field name="bom_id" readonly="1"/>
+                                    <field name="product_id" readonly="1" />                                    
+                                    <field name="quantity" readonly="1"/>
+                                    
+                                    <field name="quantity_order" />
+                                    <button name="explore_hw_purchase_line" string="Recalc." type="object" />
+                                    <field name="explode_bom_calc" widget="html" readonly="1" />
+                                    <field name="explode_bom_error" widget="html" readonly="1" />
+                                    <field name="note" />
+                                </tree>
+                            </field>
+                        </group>    
+                        
                     </page>
                 </xpath>
             </field>

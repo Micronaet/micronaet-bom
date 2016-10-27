@@ -222,7 +222,8 @@ class PurchaseOrder(orm.Model):
                     line_pool.create(cr, uid, item_data, context=context)
         return True
         
-    """def _get_explode_bom_result(
+    """TODO 
+    def _get_explode_bom_result(
             self, cr, uid, ids, fields, args, context=None):
         ''' Fields function for calculate bom esit and error
         '''

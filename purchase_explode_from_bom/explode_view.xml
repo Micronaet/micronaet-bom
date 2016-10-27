@@ -16,14 +16,14 @@
                             <field name="quantity" />                        
                             <button name="explode_bom_purchase_line" string="Explode BOM" type="object" class="oe_highlight" colspan="1"/>                            
                         </group>    
-                        <group colspan="4" col="5">
+                        <group colspan="4" col="4">
                             <separator string="Calculation:" colspan="2"/>
                             <separator string="Error:" colspan="2" />
                             <field name="explode_bom_calc" nolabel="1" />
                             <field name="explode_bom_error" nolabel="1" />
                             
                             <separator string="Halfworked component:" colspan="4"/>
-                            <field name="explode_bom_ids" editable="bottom" nolabel="1">
+                            <field name="explode_bom_ids" editable="bottom" nolabel="1" colspan="4">
                                 <tree string="Explode BOM" editable="bottom">
                                     <field name="bom_id" readonly="1"/>
                                     <field name="product_id" readonly="1" />                                    

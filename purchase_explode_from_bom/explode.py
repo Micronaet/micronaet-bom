@@ -77,15 +77,6 @@ class PurchaseOrder(orm.Model):
     
     _inherit = 'purchase.order'
     
-    def get_bom_for_half_worked(self, cr, uid, product_id, context=None):
-        ''' Search bom for product passed
-        '''
-        bom_pool = self.pool.get('mrp.bom')
-        return bom_pool.search(cr, uid, [
-            ('product_id', '=', product_id),
-            ('bom_category', '=', 'half'),
-            ], context=context)
-                    
     def explode_bom_purchase_line(self, cr, uid, ids, context=None):
         ''' Generate order depend on final component for bom selected
         '''
@@ -97,80 +88,91 @@ class PurchaseOrder(orm.Model):
         bom_pool = self.pool.get('mrp.bom')
         
         order_proxy = self.browse(cr, uid, ids, context=context)[0]
+        import pdb; pdb.set_trace()
+        
+        # Field used:
+        order_id = order_proxy.id
+        total = order_proxy.quantity
+        partner = order_proxy.partner_id        
+        load_bom_id = order_proxy.load_bom_id.id
         
         # Remove previous line (only generated line):
-        remove_ids = [
-            line.id for line in order_proxy.order_line if line.explode_bom_id]
+        remove_ids = bom_line_pool.search(cr, uid, [
+            ('purchase_id', '=', order_id), # this purchase order
+            ('bom_id', '=', load_bom_id), # this load bom child
+            ], context=context)        
         line_pool.unlink(cr, uid, remove_ids, context=context)
+        # XXX Note: this remove also purchase.order.line as cascade
             
         # Generate current lines:
-        bom_data = {} # key = ID: Value = [calc, error]
+        #bom_data = {} # {ID: [calc, error]}
         
-        for bom in order_proxy.explode_bom_ids:
-            bom_data[bom.id] = ['', '']
-            for half in bom.bom_id.bom_line_ids:
-                bom_ids = self.get_bom_for_half_worked(
-                    cr, uid, half.product_id.id, context=context)
+        # Search hw in bom selected
+        for half in order_proxy.load_bom_id.bom_line_ids:
+            if not half.half_bom_ids:
+                # No subcomponent, jump this HW
+                # TODO log error
+                continue
+                
+            # Create record in purchase.order.bom
+            half_quantity = total * half.product_qty
+            half_id = bom_line_pool.create(cr, uid, {
+                # Link:
+                'purchase_id': order_id,
+                'bom_id': order_proxy.load_bom_id.id,
+                'parent_quantity': order_proxy.quantity, 
+                
+                # Data:
+                'product_id': half.product_id.id,
+                'quantity': half_quantity,
+                'quantity_order': half_quantity, # init setup
+                
+                #'explode_bom_calc': False, 
+                #'explode_bom_error': False,
+                #'note': False,
+                }, context=context)
+            
+            for item in half.half_bom_ids:
+                # Create purchase order line:
+                item_quantity = half_quantity * item.product_qty
+                
+                item_data = line_pool.onchange_product_id(
+                    cr, uid, ids, order_proxy.pricelist_id.id, 
+                    item.product_id.id, qty, 
+                    item.product_id.uom_id.id, partner.id, 
+                    order_proxy.date_order, 
+                    partner.property_account_position.id,
+                    # Line property:
+                    #order_proxy.date_planned, 
+                    #name, 
+                    #price_unit=False, 
+                    #state='draft', 
+                    context=context,
+                    ).get('value', {})
 
-                if not bom_ids:
-                    bom_data[bom.id][1] += _(
-                        'No BOM for component %s\n') % \
-                            half.product_id.default_code
+                # TODO VAT not loaded!!!!
+
+                if item_data:                      
+                    item_data.update({
+                        'order_id': order_id,
+                        'explode_bom_id': half_if,
+                        'product_id': item.product_id.id,
+                        })
+                    line_pool.create(cr, uid, item_data, context=context)
+                    
                     #bom_data[bom.id][0] += _(
-                    #    '%s not exploded\n') % half.product_id.name
-                elif len(bom_ids) > 1: # XXX warning?
-                    bom_data[bom.id][1] += _(
-                        'Multi BOM for component %s\n') % \
-                            half.product_id.default_code
-                    #bom_data[bom.id][0] += _(
-                    #    '%s multi BOM\n') % bom.product_id.name
-                else:
-                    bom_proxy = bom_pool.browse(
-                        cr, uid, bom_ids, context=context)[0]
-                        
-                    # Generate final product from half worked bom:
-                    for item in bom_proxy.bom_line_ids:
-                        # Product Q X Component Q X Final element Q.
-                        qty = bom.quantity * half.product_qty * \
-                            item.product_qty
-                        partner = order_proxy.partner_id
-                        data = line_pool.onchange_product_id(
-                            cr, uid, ids, order_proxy.pricelist_id.id, 
-                            item.product_id.id, qty, 
-                            item.product_id.uom_id.id, partner.id, 
-                            order_proxy.date_order, 
-                            partner.property_account_position.id,
-                            # Line property:
-                            #order_proxy.date_planned, 
-                            #name, 
-                            #price_unit=False, 
-                            #state='draft', 
-                            context=context,
-                            ).get('value', {})
-
-                        # TODO VAT not loaded!!!!
-
-                        if data:                      
-                            # TODO log event
-                            data.update({
-                                'order_id': ids[0],
-                                'explode_bom_id': bom.id,
-                                # TODO link to component exploded
-                                'product_id': item.product_id.id,
-                                })
-                            line_pool.create(cr, uid, data, context=context)
-                            bom_data[bom.id][0] += _(
-                                '%s: %s x %s x %s = %s  [%s]\n') % (
-                                    half.product_id.default_code or 'cod. ?',
-                                    bom.quantity,
-                                    half.product_qty,
-                                    item.product_qty,
-                                    qty,
-                                    item.product_id.default_code or 'cod. ?',
-                                    )
-                        else:    
-                            bom_data[bom.id][0] += _(
-                                '%s No data to write') % bom.product_id.name
+                    #    '%s: %s x %s x %s = %s  [%s]\n') % (
+                    #        half.product_id.default_code or 'cod. ?',
+                    #        bom.quantity,
+                    #        half.product_qty,
+                    #        item.product_qty,
+                    #        qty,
+                    #        item.product_id.default_code or 'cod. ?',
+                    #        )
+                #else:    
+                #    bom_data[bom.id][0] += _(
+                #        '%s No data to write') % bom.product_id.name
+                
                                
         # Write error for bom load: # XXX no more fields delete!!
         #for bom_id, data in bom_data.iteritems():
@@ -201,6 +203,7 @@ class PurchaseOrder(orm.Model):
     _inherit = 'purchase.order.line'
         
     _columns = {
-        'explode_bom_id': fields.many2one('purchase.order.bom', 'Explode BOM'),
+        'explode_bom_id': fields.many2one(
+            'purchase.order.bom', 'Explode BOM', ondelete='cascade'),            
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

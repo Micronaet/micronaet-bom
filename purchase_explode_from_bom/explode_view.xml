@@ -30,7 +30,7 @@
                                     <field name="quantity" readonly="1"/>
                                     
                                     <field name="quantity_order" />
-                                    <button name="explore_hw_purchase_line" string="Recalc." type="object" />
+                                    <button name="explode_hw_purchase_line" string="Recalc." type="object" />
                                     <field name="explode_bom_calc" widget="html" readonly="1" />
                                     <field name="explode_bom_error" widget="html" readonly="1" />
                                     <field name="note" />

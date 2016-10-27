@@ -47,11 +47,58 @@ class PurchaseOrderBOM(orm.Model):
     _description = 'Purchase from BOM'
     _rec_name = 'bom_id'
     
-    def explore_hw_purchase_line(self, cr, uid, ids, context=None):
+    def explode_hw_purchase_line(self, cr, uid, ids, context=None):
         ''' Recal single component
         '''
-        line_proxy = self.browse(cr, uid, ids, context=context)[0]
+        assert len(ids) == 1, 'Works only with one record a time'
+        half_id = ids[0]
+        
+        half_proxy = self.browse(cr, uid, half_id, context=context)
         # TODO 
+        line_ids = line_pool.search(cr, uid, [
+            ('explode_bom_id', '=', half_id),
+            ], context=context)
+        line_pool.unlink(cr, uid, line_ids, context=context)
+
+        order_proxy = half_proxy.purchase_id
+        order_id = half_proxy.purchase_id.id
+        partner = half_proxy.purchase_id.partner_id
+        
+        half_quantity = half_proxy.quantity_order        
+        for item in half_proxy.product_id.half_bom_ids:
+            # Create purchase order line:
+            item_quantity = half_quantity * item.product_qty
+            
+            item_data = line_pool.onchange_product_id(
+                cr, uid, ids, 
+                order_proxy.pricelist_id.id, 
+                item.product_id.id, 
+                item_quantity, 
+                item.product_id.uom_id.id, 
+                partner.id, 
+                order_proxy.date_order, 
+                partner.property_account_position.id,
+                # Line property:
+                #order_proxy.date_planned, 
+                #name, 
+                #price_unit=False, 
+                #state='draft', 
+                context=context,
+                ).get('value', {})
+
+            # TODO VAT not loaded!!!!
+            if 'taxes_id' in item_data:
+                item_data['taxes_id'] = [(6, 0, item_data['taxes_id'])]
+
+            if item_data:                      
+                item_data.update({
+                    'order_id': order_id,
+                    'explode_bom_id': half_id,
+                    'product_id': item.product_id.id,
+                    })
+                line_pool.create(cr, uid, item_data, context=context)
+                
+        
         return True
     
     _columns = {
@@ -88,7 +135,6 @@ class PurchaseOrder(orm.Model):
         bom_pool = self.pool.get('mrp.bom')
         
         order_proxy = self.browse(cr, uid, ids, context=context)[0]
-        import pdb; pdb.set_trace()
         
         # Field used:
         order_id = order_proxy.id
@@ -101,15 +147,20 @@ class PurchaseOrder(orm.Model):
             ('purchase_id', '=', order_id), # this purchase order
             ('bom_id', '=', load_bom_id), # this load bom child
             ], context=context)        
-        line_pool.unlink(cr, uid, remove_ids, context=context)
-        # XXX Note: this remove also purchase.order.line as cascade
+        if remove_ids:
+            remove_line_ids = line_pool.search(cr, uid, [
+                ('order_id', '=', order_id), # this purchase order
+                ('explode_bom_id', 'in', remove_ids),
+                ], context=context)    
+            line_pool.unlink(cr, uid, remove_line_ids, context=context)              
+            bom_line_pool.unlink(cr, uid, remove_ids, context=context)
             
         # Generate current lines:
         #bom_data = {} # {ID: [calc, error]}
         
         # Search hw in bom selected
         for half in order_proxy.load_bom_id.bom_line_ids:
-            if not half.half_bom_ids:
+            if not half.product_id.half_bom_ids:
                 # No subcomponent, jump this HW
                 # TODO log error
                 continue
@@ -119,8 +170,8 @@ class PurchaseOrder(orm.Model):
             half_id = bom_line_pool.create(cr, uid, {
                 # Link:
                 'purchase_id': order_id,
-                'bom_id': order_proxy.load_bom_id.id,
-                'parent_quantity': order_proxy.quantity, 
+                'bom_id': load_bom_id,
+                'parent_quantity': total, 
                 
                 # Data:
                 'product_id': half.product_id.id,
@@ -132,14 +183,17 @@ class PurchaseOrder(orm.Model):
                 #'note': False,
                 }, context=context)
             
-            for item in half.half_bom_ids:
+            for item in half.product_id.half_bom_ids:
                 # Create purchase order line:
                 item_quantity = half_quantity * item.product_qty
                 
                 item_data = line_pool.onchange_product_id(
-                    cr, uid, ids, order_proxy.pricelist_id.id, 
-                    item.product_id.id, qty, 
-                    item.product_id.uom_id.id, partner.id, 
+                    cr, uid, ids, 
+                    order_proxy.pricelist_id.id, 
+                    item.product_id.id, 
+                    item_quantity, 
+                    item.product_id.uom_id.id, 
+                    partner.id, 
                     order_proxy.date_order, 
                     partner.property_account_position.id,
                     # Line property:
@@ -151,11 +205,13 @@ class PurchaseOrder(orm.Model):
                     ).get('value', {})
 
                 # TODO VAT not loaded!!!!
+                if 'taxes_id' in item_data:
+                    item_data['taxes_id'] = [(6, 0, item_data['taxes_id'])]
 
                 if item_data:                      
                     item_data.update({
                         'order_id': order_id,
-                        'explode_bom_id': half_if,
+                        'explode_bom_id': half_id,
                         'product_id': item.product_id.id,
                         })
                     line_pool.create(cr, uid, item_data, context=context)

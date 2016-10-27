@@ -142,7 +142,7 @@ class PurchaseOrder(orm.Model):
                 
         bom_ids = bom_pool.search(cr, uid, [
             ('bom_category', '=', 'parent'),
-            ('product_id.default_code', '=', order_proxy.
+            ('product_id.default_code', '=', code),
             ], context=context)
 
         if len(bom_ids) > 1:

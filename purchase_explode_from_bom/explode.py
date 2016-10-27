@@ -58,10 +58,11 @@ class PurchaseOrderBOM(orm.Model):
         # Link:
         'purchase_id': fields.many2one('purchase.order', 'Order'),
         'bom_id': fields.many2one('mrp.bom', 'BOM', readonly=True),
+        'parent_quantity': fields.integer('Parent total', readonly=True), 
 
         'product_id': fields.many2one('product.product', 'Halfworked', 
-            required=True),        
-        'quantity': fields.integer('Total', required=True),        
+            readonly=True),
+        'quantity': fields.integer('Total', readonly=True),        
         'quantity_order': fields.integer('Order'),
         
         'explode_bom_calc': fields.text('Explode calc', readonly=True), 
@@ -182,7 +183,7 @@ class PurchaseOrder(orm.Model):
     _columns = {
         # Data for explode wizard:
         'load_bom_id': fields.many2one(
-            'purchase.order.bom', 'Explode BOM'),
+            'mrp.bom', 'Load BOM'),
         'quantity': fields.integer('Total'),
         'explode_bom_calc': fields.text('Explode calc.', readonly=True), 
         'explode_bom_error': fields.text('Explode error', readonly=True), 

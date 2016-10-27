@@ -252,6 +252,7 @@ class PurchaseOrder(orm.Model):
         'explode_bom_ids': fields.one2many(
             'purchase.order.bom', 'purchase_id', 
             'Explode BOM'),
+        'component_note': fields.char('Component note', size=80),    
         }
 
 class PurchaseOrder(orm.Model):

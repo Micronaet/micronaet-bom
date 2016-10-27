@@ -11,9 +11,10 @@
                 </field>
                 <xpath expr="//page[1]" position="after">
                     <page string="BOM explode" attrs="{'invisible': [('explode_bom','=',False)]}">
-                        <group colspan="4" col="5">
+                        <group colspan="4" col="7">
                             <field name="load_bom_id" domain="[('bom_category','=','parent')]" />
                             <field name="quantity" />                        
+                            <field name="component_note" />
                             <button name="explode_bom_purchase_line" string="Explode BOM" type="object" class="oe_highlight" colspan="1"/>                            
                         </group>    
                         <group colspan="4" col="4">
@@ -40,6 +41,16 @@
                         
                     </page>
                 </xpath>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_purchase_add_component_note_tree">
+            <field name="name">purchase.order.tree</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_tree"/>
+            <field name="arch" type="xml">
+                <field name="state" position="before">
+                    <field name="component_note" />
+                </field>
             </field>
         </record>
     </data>

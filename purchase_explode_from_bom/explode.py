@@ -126,7 +126,36 @@ class PurchaseOrder(orm.Model):
     """
     
     _inherit = 'purchase.order'
-    
+
+    def explode_bom_code_line(self, cr, uid, ids, context=None):
+        ''' Problem in name_search
+        '''   
+        order_proxy = self.browse(cr, uid, ids, context=context)[0]
+        bom_pool = self.pool.get('mrp.bom')
+        
+        code = order_proxy.load_bom_code
+        if not code:
+            raise osv.except_osv(
+                _('No code'), 
+                _('Cannot find bom code'),
+                )
+                
+        bom_ids = bom_pool.search(cr, uid, [
+            ('bom_category', '=', 'parent'),
+            ('product_id.default_code', '=', order_proxy.
+            ], context=context)
+
+        if len(bom_ids) > 1:
+            raise osv.except_osv(
+                _('More BOM'), 
+                _('More parent bom with code %s') % code,
+                )
+        
+        self.write(cr, uid, ids, {
+            'load_bom_id': bom_ids[0]}, context=context)
+            
+        return self.explode_bom_purchase_line(cr, uid, ids, context=context)
+                
     def explode_bom_purchase_line(self, cr, uid, ids, context=None):
         ''' Generate order depend on final component for bom selected
         '''
@@ -268,6 +297,7 @@ class PurchaseOrder(orm.Model):
     
     _columns = {
         # Data for explode wizard:
+        'load_bom_code': fields.char('Load BOM Code', size=20),
         'load_bom_id': fields.many2one(
             'mrp.bom', 'Load BOM'),
         'quantity': fields.integer('Total'),

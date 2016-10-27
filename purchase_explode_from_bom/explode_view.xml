@@ -11,7 +11,9 @@
                 </field>
                 <xpath expr="//page[1]" position="after">
                     <page string="BOM explode" attrs="{'invisible': [('explode_bom','=',False)]}">
-                        <group colspan="4" col="7">
+                        <group colspan="4" col="10">
+                            <field name="load_bom_code" />
+                            <button name="explode_bom_code_line" string=">>" type="object" class="oe_highlight" colspan="1"/>                            
                             <field name="load_bom_id" domain="[('bom_category','=','parent')]" />
                             <field name="quantity" />                        
                             <field name="component_note" />

@@ -53,6 +53,8 @@ class PurchaseOrderBOM(orm.Model):
         assert len(ids) == 1, 'Works only with one record a time'
         half_id = ids[0]
         
+        line_pool = self.pool.get('purchase.order.line')
+        
         half_proxy = self.browse(cr, uid, half_id, context=context)
         # TODO 
         line_ids = line_pool.search(cr, uid, [

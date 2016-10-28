@@ -30,8 +30,8 @@
             <field name="arch" type="xml">
                 <form string="String" version="7.0">        
                     <header>
-                        <button name="force_done" string="Done" type="object" attrs="{'invisible': [('state','!=','draft')]}" class="oe_highlight" />
-                        <button name="force_draft" string="Unlock" type="object" attrs="{'invisible': [('state','!=','done')]}"/>
+                        <button name="force_done" string="Done" type="object" attrs="{'invisible': [('state','!=','done')]}" class="oe_highlight" />
+                        <button name="force_draft" string="Unlock" type="object" attrs="{'invisible': [('state','!=','draft')]}"/>
                         <field name="state" widget="statusbar" readonly="1" statusbar_visible="draft,done" />
                     </header>
                     <sheet>

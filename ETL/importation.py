@@ -108,8 +108,9 @@ for line in lines:
            ('default_code', '=', default_code)])
     if item_ids:
         pipes[ID] = item_ids[0]
-        sock.execute( # Search new code (if yet created)
-            dbname, uid, pwd, 'product.product', 'write', item_ids, data)
+        # XXX no write for now
+        #sock.execute( # Search new code (if yet created)
+        #    dbname, uid, pwd, 'product.product', 'write', item_ids, data)
     else:
         pipes[ID] = sock.execute( # Search new code (if yet created)
             dbname, uid, pwd, 'product.product', 'create', data)
@@ -120,6 +121,7 @@ print filename, 'row:', i
 # -----------------------------------------------------------------------------
 #                        READ PRODUCT USED (PARENT):
 # -----------------------------------------------------------------------------
+import pdb; pdb.set_trace()
 filename = os.path.join(path, 'elenco_articoli.csv')
 products = {}
 parents = {}
@@ -259,8 +261,9 @@ for line in lines:
     try:
         length_cut = eval(line[3])
     except:
+        lenght_cut = 0.0
         print i, 'Length error or 0, jump'
-        continue    
+        #continue    
     #waste_cut = eval(line[3])
     try:
         pipe_id = int(line[4])

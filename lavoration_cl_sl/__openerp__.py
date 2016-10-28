@@ -32,6 +32,7 @@
     'depends': [
         'base',
         'mrp', 
+        'stock', # for pick type
         'bom_half_worked', # for unload purposes
         ],
     'init_xml': [],

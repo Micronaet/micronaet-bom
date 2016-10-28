@@ -1,7 +1,64 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
-
+        <record model="ir.ui.view" id="view_stock_picking_cl_form">
+            <field name="name">stock.picking.cl.mrp.lavoration.form</field>
+            <field name="model">stock.picking</field>
+            <field name="priority" eval="50" />
+            <field name="arch" type="xml">
+                <form string="String" version="7.0">        
+                    <header>
+                        <field name="state" widget="status_bar" readonly="1" />
+                    </header>
+                    <sheet>
+                        <group col="4" colspan="4">
+                            <field name="name" />
+                            <field name="date" />
+                            <field name="is_mrp_lavoration" />
+                            <field name="name" />
+                            <field name="move_lines" />
+                            <field name="picking_type_id" />
+		                    <notebook>
+			                    <page string="Halfwork">
+				                    <separator string="Movimenti di Magazzino" attrs="{'invisible': [('pack_operation_exist', '=', False)]}" modifiers="{'invisible': [['pack_operation_exist', '=', false]]}"/>
+				                    <field name="move_lines" context="{'default_picking_type_id': picking_type_id}" >
+				                        <tree string="Movement" editable="bottom">
+				                            <field name="product_id" onchange="onchange_product_id(product_id, location_id, location_dest_id, parent.partner_id)" />
+				                            <field name="product_uom_qty" />
+				                            <field name="product_uom" />
+				                            <field name="name" />
+				                            <field name="date" />				                            
+				                            <field name="location_id" />
+				                            <field name="location_dest_id" />
+				                            <field name="invoice_state" />
+				                            <field name="date_expected" />				                            
+				                        </tree>
+				                    </field>
+			                    </page>
+			                    <page string="Note">
+				                    <field name="note" placeholder="Add an internal note..." class="oe_inline" />
+			                    </page>                        
+			                </notebook>    
+			            </group>
+                    </sheet>        
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_stock_picking_cl">
+            <field name="name">Lavoration document</field>
+            <field name="res_model">stock.picking</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_stock_picking_cl_form"/>
+            <field name="context">{'open_mrp_lavoration': True}</field>
+            <field name="domain">[]</field>
+        </record>
+        <menuitem 
+            parent="mrp.menu_mrp_manufacturing" 
+            id="menu_stock_picking_cl" 
+            action="action_stock_picking_cl"
+            sequence="40"/>
+        
     </data>
 </openerp>
 

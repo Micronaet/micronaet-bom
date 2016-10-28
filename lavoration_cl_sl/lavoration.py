@@ -45,6 +45,7 @@ class ResCompany(orm.Model):
     _inherit = 'res.company'
     
     _columns = {
+        'enable_mrp_lavoration': fields.boolean('Enable lavoration'),
         'sl_mrp_lavoration_id': fields.many2one(
             'stock.picking.type', 'SL Lavoration'),
         'cl_mrp_lavoration_id': fields.many2one(

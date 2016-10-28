@@ -30,7 +30,9 @@
             <field name="arch" type="xml">
                 <form string="String" version="7.0">        
                     <header>
-                        <field name="state" widget="statusbar" readonly="1" />
+                        <button name="force_done" string="Done" type="object" attrs="{'invisible': [('state','!=','draft')]}" class="oe_highlight" />
+                        <button name="force_draft" string="Unlock" type="object" attrs="{'invisible': [('state','!=','done')]}"/>
+                        <field name="state" widget="statusbar" readonly="1" statusbar_visible="draft,done" />
                     </header>
                     <sheet>
                         <group col="4" colspan="4">
@@ -38,8 +40,8 @@
                             <field name="date" />
                             <field name="is_mrp_lavoration" invisible="1"/>
                             <field name="picking_type_id" />
-		                    <separator string="Movimenti di Magazzino" />
-		                    <field name="move_lines" context="{'default_picking_type_id': picking_type_id, 'default_state': 'done'}" >
+		                    <separator string="Movimenti di Magazzino" colspan="4"/>
+		                    <field name="move_lines" context="{'default_picking_type_id': picking_type_id, 'default_state': 'done'}" colspan="4" nolabel="1">
 		                        <tree string="Movement" editable="bottom">
 		                            <field name="product_id" onchange="onchange_product_id(product_id, location_id, location_dest_id, parent.partner_id)" domain="[('relative_type', '=', 'half')]"/>
 		                            <field name="product_uom_qty" />
@@ -53,7 +55,7 @@
 		                            <field name="state" invisible="1" />				                            
 		                        </tree>
 		                    </field>
-		                    <field name="note" placeholder="Add an internal note..." class="oe_inline" colspan="4"/>
+		                    <field name="note" placeholder="Add lavoration internal note..." colspan="4" nolabel="1"/>
 			            </group>
                     </sheet>        
                 </form>
@@ -64,7 +66,7 @@
             <field name="res_model">stock.picking</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="context">{'open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form', 'default_state': 'done'}</field>
+            <field name="context">{'open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form'}</field>
             <field name="domain">[('is_mrp_lavoration', '=', True)]</field>
         </record>
         <!--<record model="ir.actions.act_window" id="action_stock_picking_cl">

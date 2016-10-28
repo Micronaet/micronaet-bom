@@ -57,7 +57,23 @@ class MRPLavoration(orm.Model):
     """ Manage lavoration as a new object
     """
     _inherit = 'stock.picking'
-           
+    
+    def force_done(self, cr, uid, ids, context=None):
+        ''' Confirm lavoration
+        '''
+        # TODO manage SL and confirm line
+        return self.write(cr, uid, ids, {
+            'state': 'done'
+            }, context=context)
+
+    def force_draft(self, cr, uid, ids, context=None):
+        ''' Confirm lavoration
+        '''
+        # TODO manage SL and confirm line
+        return self.write(cr, uid, ids, {
+            'state': 'draft'
+            }, context=context)
+            
     def _get_is_mrp_lavoration(self, cr, uid, context=None):
         ''' Check value from startup method in context
         '''       

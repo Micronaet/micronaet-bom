@@ -262,7 +262,7 @@ for line in lines:
         length_cut = eval(line[3])
     except:
         lenght_cut = 0.0
-        print i, 'Length error or 0, jump'
+        #print i, 'Length error or 0, jump'
         #continue    
     #waste_cut = eval(line[3])
     try:

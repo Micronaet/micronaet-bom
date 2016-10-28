@@ -68,10 +68,10 @@ class MRPLavoration(orm.Model):
         'is_mrp_lavoration': fields.boolean('Is Lavoration'),
         }       
     
-    _defaults = {
-        'is_mrp_lavoration': lambda s, cr, uid, ctx: s._get_is_mrp_lavoration(
-            cr, uid, ctx),
-        }
+    #_defaults = {
+    #    'is_mrp_lavoration': lambda s, cr, uid, ctx: s._get_is_mrp_lavoration(
+    #        cr, uid, ctx),
+    #    }
             
     '''def mrp_generate_sl_cl_movement(self, cr, uid, sol_ids, context=None):
         """ Generic function used for create / update stock move,

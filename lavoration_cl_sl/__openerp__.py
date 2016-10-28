@@ -33,6 +33,7 @@
         'base',
         'mrp', 
         'stock', # for pick type
+        'mx_sale', # for error in stock sale_id
         'bom_half_worked', # for unload purposes
         ],
     'init_xml': [],

@@ -35,6 +35,8 @@
         'stock', # for pick type
         'mx_sale', # for error in stock sale_id
         'bom_half_worked', # for unload purposes
+        # try to remove!!
+        'mx_stock_status_multicompany', # TODO for 2 fields in company
         ],
     'init_xml': [],
     'demo': [],

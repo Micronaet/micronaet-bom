@@ -61,13 +61,50 @@ class MRPLavoration(orm.Model):
     def force_done(self, cr, uid, ids, context=None):
         ''' Confirm lavoration
         '''
-        # Move:
-        stock_pool = self.pool.get('stock.move')
-        stock_ids = stock_pool.search(cr, uid, [
+        # Pool used:
+        move_pool = self.pool.get('stock.move')
+
+        pick_proxy = self.browse(cr, uid, ids, context=context)[0]
+
+        # ---------------------------------------------------------------------
+        # Create / Update SL picking:
+        # ---------------------------------------------------------------------
+        if pick_proxy.linked_sl_id:
+            # Delete previous line:
+            sl_id = pick_proxy.linked_sl_id.id
+            line_ids = move_pool.search(cr, uid, [
+                ('picking_id', '=', sl_id),
+                ], context=context)
+            # Set draft before?
+            # Delete quants before?
+            move_pool.unlink(cr, uid, line_ids, context=context)
+        else:
+            sl_id = self.create(cr, uid, ids, {
+                #TODO
+                }, context=context)
+                
+        # ---------------------------------------------------------------------
+        # (Re) create movement for SL depend on CL:
+        # ---------------------------------------------------------------------
+        for unload in pick_proxy.move_lines:
+            product = unload.product_id
+            for component in product.half_bom_ids:
+                move_pool.create(cr, uid, {
+                    'picking_id': sl_id,
+                    # TODO
+                    }, context=context)
+        
+        # ---------------------------------------------------------------------
+        # Udate CL move status:
+        # ---------------------------------------------------------------------
+        move_ids = move_pool.search(cr, uid, [
             ('picking_id', '=', ids[0]], context=None)
-        stock_pool.write(cr, uid, stock_ids, {
+        move_pool.write(cr, uid, move_ids, {
             'state': 'done'}, context=context)
-        # Header:
+            
+        # ---------------------------------------------------------------------
+        # Update header status:
+        # ---------------------------------------------------------------------
         return self.write(cr, uid, ids, {
             'state': 'done',
             }, context=context)
@@ -76,10 +113,10 @@ class MRPLavoration(orm.Model):
         ''' Confirm lavoration
         '''
         # Move:
-        stock_pool = self.pool.get('stock.move')
-        stock_ids = stock_pool.search(cr, uid, [
+        move_pool = self.pool.get('stock.move')
+        stock_ids = move_pool.search(cr, uid, [
             ('picking_id', '=', ids[0]], context=None)
-        stock_pool.write(cr, uid, stock_ids, {
+        move_pool.write(cr, uid, stock_ids, {
             'state': 'draft'}, context=context)
         # Header:        
         return self.write(cr, uid, ids, {
@@ -116,6 +153,7 @@ class MRPLavoration(orm.Model):
                 'done': [('readonly', True)], 
                 'cancel': [('readonly', True)],
                 }, required=True),
+        'linked_sl_id': fields.many2one('stock.picking', 'SL lined'),        
         }       
     
     _defaults = {

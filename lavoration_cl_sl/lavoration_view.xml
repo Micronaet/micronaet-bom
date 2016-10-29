@@ -39,9 +39,9 @@
                             <field name="name" />
                             <field name="date" />
                             <field name="is_mrp_lavoration" invisible="1"/>
-                            <field name="picking_type_id" />
+                            <field name="picking_type_id" invisible="1" />
 		                    <separator string="Movimenti di Magazzino" colspan="4"/>
-		                    <field name="move_lines" context="{'default_picking_type_id': picking_type_id, 'default_state': 'done'}" colspan="4" nolabel="1">
+		                    <field name="move_lines" context="{'default_picking_type_id': picking_type_id}" colspan="4" nolabel="1">
 		                        <tree string="Movement" editable="bottom">
 		                            <field name="product_id" onchange="onchange_product_id(product_id, location_id, location_dest_id, parent.partner_id)" domain="[('relative_type', '=', 'half')]"/>
 		                            <field name="product_uom_qty" />

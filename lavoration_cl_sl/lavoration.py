@@ -61,17 +61,29 @@ class MRPLavoration(orm.Model):
     def force_done(self, cr, uid, ids, context=None):
         ''' Confirm lavoration
         '''
-        # TODO manage SL and confirm line
+        # Move:
+        stock_pool = self.pool.get('stock.move')
+        stock_ids = stock_pool.search(cr, uid, [
+            ('picking_id', '=', ids[0]], context=None)
+        stock_pool.write(cr, uid, stock_ids, {
+            'state': 'done'}, context=context)
+        # Header:
         return self.write(cr, uid, ids, {
-            'state': 'done'
+            'state': 'done',
             }, context=context)
 
     def force_draft(self, cr, uid, ids, context=None):
         ''' Confirm lavoration
         '''
-        # TODO manage SL and confirm line
+        # Move:
+        stock_pool = self.pool.get('stock.move')
+        stock_ids = stock_pool.search(cr, uid, [
+            ('picking_id', '=', ids[0]], context=None)
+        stock_pool.write(cr, uid, stock_ids, {
+            'state': 'draft'}, context=context)
+        # Header:        
         return self.write(cr, uid, ids, {
-            'state': 'draft'
+            'state': 'draft',
             }, context=context)
             
     def _get_is_mrp_lavoration(self, cr, uid, context=None):
@@ -81,14 +93,37 @@ class MRPLavoration(orm.Model):
             context = {}
         return context.get('open_mrp_lavoration', False)
 
+    def _get_picking_type_id(self, cr, uid, context=None):
+        ''' Check value from startup method in context
+        '''       
+        if context is None:
+            context = {}
+        if not context.get('open_mrp_lavoration', False):   
+            return False
+                
+        company_pool = self.pool.get('res.company')
+        company_ids = company_pool.search(cr, uid, [], context=context)
+        company_browse = company_pool.browse(cr, uid, company_ids, context=context)[0]
+        return company_browse.cl_mrp_lavoration_id.id or False
+        # TODO check error on false
+
     _columns = {
         'is_mrp_lavoration': fields.boolean('Is Lavoration'),
+        # Override:
+        'picking_type_id': fields.many2one(
+            'stock.picking.type', 'Picking Type', 
+            states={
+                'done': [('readonly', True)], 
+                'cancel': [('readonly', True)],
+                }, required=True),
         }       
     
-    #_defaults = {
-    #    'is_mrp_lavoration': lambda s, cr, uid, ctx: s._get_is_mrp_lavoration(
-    #        cr, uid, ctx),
-    #    }
+    _defaults = {
+        #'is_mrp_lavoration': lambda s, cr, uid, ctx: s._get_is_mrp_lavoration(
+        #    cr, uid, ctx),
+        'picking_type_id': lambda s, cr, uid, ctx: s._get_picking_type_id(
+            cr, uid, ctx),
+        }
             
     '''def mrp_generate_sl_cl_movement(self, cr, uid, sol_ids, context=None):
         """ Generic function used for create / update stock move,

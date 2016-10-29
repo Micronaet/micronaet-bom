@@ -44,7 +44,7 @@ class ResCompany(orm.Model):
     
     _inherit = 'res.company'
     
-    def _get_company_browse(self, cr, uid, ids, context=None):
+    def _get_company_browse(self, cr, uid, context=None):
         ''' Browse first company for parameter read
         '''
         company_ids = self.search(cr, uid, [], context=context)
@@ -114,7 +114,7 @@ class MRPLavoration(orm.Model):
 
         # Read paremeters:
         company_proxy = self.pool.get('res.comapany')._get_company_browse(
-            cr, uid, ids, context=context)        
+            cr, uid, context=context)        
             
         sl_type = company_proxy.sl_mrp_lavoration_id
         sl_type_id = sl_type.id or False
@@ -254,7 +254,7 @@ class MRPLavoration(orm.Model):
         if not context.get('open_mrp_lavoration', False):   
             return False
         company_proxy = self.pool.get('res.company')._get_company_browse(
-            cr, uid, ids, context=context)        
+            cr, uid, context=context)        
         return company_proxy.cl_mrp_lavoration_id.id or False
         # TODO check error on false
 

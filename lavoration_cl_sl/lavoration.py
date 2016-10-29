@@ -52,6 +52,27 @@ class ResCompany(orm.Model):
             'stock.picking.type', 'CL Lavoration'),
         }
 
+class StockMove(orm.Model):
+    """ Model name: StockMove
+    """    
+    _inherit = 'stock.move'
+    
+    _columns = {
+        'linked_cl_stock_move_id': fields.many2one(
+            'stock.move', 'Link CL linked move', ondelete='set null'),
+        }
+        
+class StockMove(orm.Model):
+    """ Model name: StockMove
+    """
+    
+    _inherit = 'stock.move'
+    
+    _columns = {
+        'linked_sl_stock_move_ids': fields.one2many(
+            'stock.move', 'linked_cl_stock_move_id', 
+            'Link SL move'),
+        }
 
 class MRPLavoration(orm.Model):  
     """ Manage lavoration as a new object
@@ -70,14 +91,7 @@ class MRPLavoration(orm.Model):
         # Create / Update SL picking:
         # ---------------------------------------------------------------------
         if pick_proxy.linked_sl_id:
-            # Delete previous line:
             sl_id = pick_proxy.linked_sl_id.id
-            line_ids = move_pool.search(cr, uid, [
-                ('picking_id', '=', sl_id),
-                ], context=context)
-            # Set draft before?
-            # Delete quants before?
-            move_pool.unlink(cr, uid, line_ids, context=context)
         else:
             sl_id = self.create(cr, uid, ids, {
                 #TODO
@@ -91,6 +105,7 @@ class MRPLavoration(orm.Model):
             for component in product.half_bom_ids:
                 move_pool.create(cr, uid, {
                     'picking_id': sl_id,
+                    'linked_cl_stock_move_id': component.id,
                     # TODO
                     }, context=context)
         
@@ -98,7 +113,7 @@ class MRPLavoration(orm.Model):
         # Udate CL move status:
         # ---------------------------------------------------------------------
         move_ids = move_pool.search(cr, uid, [
-            ('picking_id', '=', ids[0]], context=None)
+            ('picking_id', '=', ids[0])], context=None)
         move_pool.write(cr, uid, move_ids, {
             'state': 'done'}, context=context)
             
@@ -112,10 +127,22 @@ class MRPLavoration(orm.Model):
     def force_draft(self, cr, uid, ids, context=None):
         ''' Confirm lavoration
         '''
+        # Delete load movements:
+        
         # Move:
         move_pool = self.pool.get('stock.move')
+
+        # Delete previous SL movements:
+        sl_id = pick_proxy.linked_sl_id.id
+        line_ids = move_pool.search(cr, uid, [
+            ('picking_id', '=', sl_id),
+            ], context=context)
+        # Set draft before?
+        # Delete quants before?
+        move_pool.unlink(cr, uid, line_ids, context=context)
+
         stock_ids = move_pool.search(cr, uid, [
-            ('picking_id', '=', ids[0]], context=None)
+            ('picking_id', '=', ids[0])], context=None)
         move_pool.write(cr, uid, stock_ids, {
             'state': 'draft'}, context=context)
         # Header:        
@@ -130,6 +157,7 @@ class MRPLavoration(orm.Model):
             context = {}
         return context.get('open_mrp_lavoration', False)
 
+    # Default function:
     def _get_picking_type_id(self, cr, uid, context=None):
         ''' Check value from startup method in context
         '''       
@@ -144,6 +172,20 @@ class MRPLavoration(orm.Model):
         return company_browse.cl_mrp_lavoration_id.id or False
         # TODO check error on false
 
+    # Fields function:
+    def _get_linked_sl_status(self, cr, uid, ids, fields, args, context=None):
+        ''' Fields function for calculate 
+        '''
+        res = {}
+        for item in ids:
+            res[item] = ''
+            for sl in item.linked_sl_stock_move_ids:
+                res[item] += '%s: %s\n' % (
+                    sl.product_id.default_code or '??',
+                    sl.product_qty,
+                    )
+        return res
+
     _columns = {
         'is_mrp_lavoration': fields.boolean('Is Lavoration'),
         # Override:
@@ -153,7 +195,11 @@ class MRPLavoration(orm.Model):
                 'done': [('readonly', True)], 
                 'cancel': [('readonly', True)],
                 }, required=True),
-        'linked_sl_id': fields.many2one('stock.picking', 'SL lined'),        
+        'linked_sl_id': fields.many2one('stock.picking', 'SL lined'),
+        'linked_sl_status': fields.function(
+            _get_linked_sl_status, method=True, 
+            type='text', string='SL movement', 
+            store=False),                         
         }       
     
     _defaults = {

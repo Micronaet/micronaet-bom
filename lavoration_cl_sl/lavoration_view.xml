@@ -39,7 +39,7 @@
                         <group col="4" colspan="4">
                             <field name="name" />
                             <field name="date" />
-                            <field name="linked_sl_id" /> <!--TODO invisible="1"-->
+                            <field name="linked_sl_id" invisible="1" />
                             <field name="is_mrp_lavoration" invisible="1"/>
                             <field name="picking_type_id" invisible="1" />
 		                    <separator string="Movimenti di Magazzino" colspan="4"/>
@@ -69,18 +69,9 @@
             <field name="res_model">stock.picking</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="context">{'open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form'}</field>
+            <field name="context">{'open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form', 'default_is_mrp_lavoration': True}</field>
             <field name="domain">[('is_mrp_lavoration', '=', True)]</field>
         </record>
-        <!--<record model="ir.actions.act_window" id="action_stock_picking_cl">
-            <field name="name">New lavoration document</field>
-            <field name="res_model">stock.picking</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form</field>
-            <field name="view_id" ref="view_stock_picking_cl_form"/>
-            <field name="context">{'open_mrp_lavoration': True, 'default_state': 'done'}</field>
-            <field name="domain">[('is_mrp_lavoration', '=', True)]</field>
-        </record>-->
         <menuitem 
             parent="mrp.menu_mrp_manufacturing" 
             id="menu_stock_picking_cl" 

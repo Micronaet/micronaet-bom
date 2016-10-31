@@ -89,14 +89,13 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         # Utility function embedded:
         # ---------------------------------------------------------------------
-        def add_product_component(products, component, mode):
-            ''' Add new component to record
+        def add_product_item(products, item):
+            ''' Add new item to record
                 products: list of records
-                component: browse obj
+                item: browse obj
             '''
-            # TODO manage component mode
-            product = component.product_id
-            products[product.default_code] = [
+            product = item.product_id
+            products[product.default_code] = [ # halfworked of component
                 # Reset counter for this product    
                 product.inventory_start or 0.0, # inv
                 0.0, # tcar
@@ -105,7 +104,7 @@ class Parser(report_sxw.rml_parse):
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # OC  (+ extra per.)
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # OF  (+ extra per.)
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # SAL (+ extra per.)
-                product,
+                product, # product or halfworked
                 ]
             return    
             
@@ -134,14 +133,20 @@ class Parser(report_sxw.rml_parse):
         bom_pool = self.pool.get('mrp.bom')
         mrp_pool = self.pool.get('mrp.production')
         
+        # Get product BOM dyamic lines (from active order):
         product_data = sale_pool.get_component_in_product_order_open(
             cr, uid, context=context)
 
+        # Load X axis for report:
         products = {}
-
         for product in product_data['product']:
-            for component in product.dynamic_bom_line_ids:
-                add_product_component(products, component, mode)
+            for item in product.dynamic_bom_line_ids:
+                if mode == 'half':
+                    add_product_item(products, item)
+                else: # mode = 'component' 
+                    # relative_type = 'half'
+                    for component in item.half_bom_ids:
+                        add_product_item(item, component)
 
         debug_file.write('\n\nComponent selected:\n%s\n\n'% (
             products.keys()))

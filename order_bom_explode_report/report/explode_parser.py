@@ -116,9 +116,9 @@ class Parser(report_sxw.rml_parse):
                 _logger.error('Date not found')
                 return False
             month = int(date[5:7])
-            if month >= 9: # september = 0
+            if month >= 9: # september = 0                
                 return month - 9
-            # january = 4    
+            # january = 4            
             return month + 3    
         
         # Debug files:
@@ -208,7 +208,7 @@ class Parser(report_sxw.rml_parse):
                         block, 'NOT USED', pick.name, pick.origin, pick.date,
                         pos, '', # product_code
                         default_code, '', 0, 0, 0,
-                        'OF / BF Warn. Code not in component',
+                        'OF / BF WARNING CODE NOT IN SELECTED LIST (X)',
                         )) 
                     # TODO create record if component or halfwork!!!!!!!!!!!!!!
                     continue

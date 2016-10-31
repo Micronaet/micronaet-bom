@@ -89,12 +89,11 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         # Utility function embedded:
         # ---------------------------------------------------------------------
-        def add_product_item(y_axis, item):
+        def add_x_item(y_axis, product):
             ''' Add new item to record
                 y_axis: list of records
-                item: browse obj
+                product: browse obj
             '''
-            product = item.product_id
             y_axis[product.default_code] = [ # halfworked of component
                 # Reset counter for this product    
                 product.inventory_start or 0.0, # inv
@@ -142,12 +141,12 @@ class Parser(report_sxw.rml_parse):
         for product in product_data['product']:
             for item in product.dynamic_bom_line_ids:
                 if mode == 'half':
-                    add_product_item(y_axis, item)
+                    add_x_item(y_axis, item.product_id)
                 else: # mode = 'component' 
                     # TODO log halfcomponent with empty list
                     # relative_type = 'half'
                     for component in item.half_bom_ids:
-                        add_product_item(item, component)
+                        add_x_item(item, component.product_id)
 
         debug_file.write('\n\nComponent / Halfworked selected:\n%s\n\n'% (
             y_axis.keys()))
@@ -371,16 +370,34 @@ class Parser(report_sxw.rml_parse):
                 else:    
                     remain = line.product_uom_qty - line.delivered_qty
 
-                # OC direct component:
-                if product_code in y_axis:
-                    y_axis[product_code][4][pos] -= remain # OC block
-                    debug_mm.write(mask % (
-                        block, 'USED', order.name, '', date, pos, '', # code
-                        product_code, # Direct component
-                        '', 0, # +MM
-                        ('%s' % remain).replace('.', ','), # -OC
-                        0, 'OC DIRECT SALE HW OR COMPONENT',
-                        ))                      
+                # OC direct halfwork or component:
+                if product_code in y_axis: # HW direct:
+                    if mode == 'half':
+                        y_axis[product_code][4][pos] -= remain # OC block
+                        debug_mm.write(mask % (
+                            block, 'USED', order.name, '', date, pos, '', # code
+                            product_code, # Direct component
+                            '', 0, # +MM
+                            ('%s' % remain).replace('.', ','), # -OC
+                            0, 'OC DIRECT SALE HALFWORK',
+                            ))                      
+                    else: # mode = 'component' 
+                        # TODO log halfcomponent with empty list
+                        # relative_type = 'half'
+                        # Explode OC for all component of halfwork
+                        for comp in product.half_bom_ids:
+                            comp_code = comp.product_id.default_code
+                            remain *= comp.product_qty # explode in qty comp.
+                            y_axis[comp_code][4][pos] -= remain # OC block
+                            debug_mm.write(mask % (
+                                block, 'USED', order.name, '', date, pos, 
+                                '', # Code
+                                comp_code, # Direct component
+                                '', 0, # +MM
+                                ('%s' % remain).replace('.', ','), # -OC
+                                0, 'OC DIRECT SALE HW EXPLODED IN COMPONENT',
+                                ))                      
+
                     continue                    
 
                 if not len(product.dynamic_bom_line_ids): # no bom

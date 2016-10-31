@@ -64,7 +64,7 @@ class StockQuant(orm.Model):
     _inherit = 'stock.quant'
     
     _columns = {
-        'laboration_link_id': fields.many2one(
+        'lavoration_link_id': fields.many2one(
             'stock.picking', 'Link to CL lavoration', ondelete='cascade'),
         }
 
@@ -167,7 +167,6 @@ class MRPLavoration(orm.Model):
                 'location_id': stock_location,
                 'product_id': product.id,
                 'qty': load_qty,
-                'product_uom': product.uom_id.id,
                 'lavoration_link_id': pick_proxy.id,
                 }, context=context)
             
@@ -204,7 +203,6 @@ class MRPLavoration(orm.Model):
                     'location_id': stock_location,
                     'product_id': product.id,
                     'qty': - unload_qty,
-                    'product_uom': product.uom_id.id,
                     'lavoration_link_id': pick_proxy.id,
                     }, context=context)
         

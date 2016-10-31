@@ -89,13 +89,13 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         # Utility function embedded:
         # ---------------------------------------------------------------------
-        def add_product_item(products, item):
+        def add_product_item(y_axis, item):
             ''' Add new item to record
-                products: list of records
+                y_axis: list of records
                 item: browse obj
             '''
             product = item.product_id
-            products[product.default_code] = [ # halfworked of component
+            y_axis[product.default_code] = [ # halfworked of component
                 # Reset counter for this product    
                 product.inventory_start or 0.0, # inv
                 0.0, # tcar
@@ -137,19 +137,20 @@ class Parser(report_sxw.rml_parse):
         product_data = sale_pool.get_component_in_product_order_open(
             cr, uid, context=context)
 
-        # Load X axis for report:
-        products = {}
+        # Load Y axis for report (halfwork or component):
+        y_axis = {}
         for product in product_data['product']:
             for item in product.dynamic_bom_line_ids:
                 if mode == 'half':
-                    add_product_item(products, item)
+                    add_product_item(y_axis, item)
                 else: # mode = 'component' 
+                    # TODO log halfcomponent with empty list
                     # relative_type = 'half'
                     for component in item.half_bom_ids:
                         add_product_item(item, component)
 
-        debug_file.write('\n\nComponent selected:\n%s\n\n'% (
-            products.keys()))
+        debug_file.write('\n\nComponent / Halfworked selected:\n%s\n\n'% (
+            y_axis.keys()))
         
         # =====================================================================
         # Get parameters for search:
@@ -185,11 +186,11 @@ class Parser(report_sxw.rml_parse):
         # =====================================================================
         # 1. LOAD PICKING (CUSTOMER ORDER AND PICK IN )
         # =====================================================================
-        block = 'OF and BF'
+        block = 'OF and BF' # CL, CL lav., CL inv.
         # XXX Note: first for creation of new elements if not present in OC
         
         in_picking_type_ids = []
-        # XXX Note: use textilene data:
+        # XXX Note: use textilene data fields:
         for item in company_proxy.stock_report_tx_load_in_ids:
             in_picking_type_ids.append(item.id)
             
@@ -208,14 +209,13 @@ class Parser(report_sxw.rml_parse):
                 default_code = line.product_id.default_code                              
                 qty = line.product_uom_qty
                 
-                if default_code not in products:
+                if default_code not in y_axis:
                     debug_mm.write(mask % (
                         block, 'NOT USED', pick.name, pick.origin, pick.date,
                         pos, '', # product_code
                         default_code, '', 0, 0, 0,
                         'OF / BF WARNING CODE NOT IN SELECTED LIST (X)',
                         )) 
-                    # TODO create record if component or halfwork!!!!!!!!!!!!!!
                     continue
 
                 # -------------------------------------------------------------
@@ -236,7 +236,7 @@ class Parser(report_sxw.rml_parse):
                         continue
 
                     pos = get_position_season(line.date_expected)
-                    products[default_code][5][pos] += qty # OF block
+                    y_axis[default_code][5][pos] += qty # OF block
                     debug_mm.write(mask % (
                         block, 'USED', pick.name, pick.origin, 
                         line.date_expected, pos, '', # product_code                                
@@ -263,8 +263,8 @@ class Parser(report_sxw.rml_parse):
                             )) 
                         continue
                     
-                    products[default_code][3][pos] += qty # MM block
-                    products[default_code][1] += qty # TCAR                    
+                    y_axis[default_code][3][pos] += qty # MM block
+                    y_axis[default_code][1] += qty # TCAR                    
                     debug_mm.write(mask % (
                         block, 'USED', pick.name, pick.origin, date,
                         pos, '', # product_code                                
@@ -308,10 +308,10 @@ class Parser(report_sxw.rml_parse):
                     continue    
                     
                 # check direct sale:
-                if product_code in products: # Component direct:
+                if product_code in y_axis: # Component direct:
                     qty = line.product_uom_qty # for direct sale            
-                    products[product_code][3][pos] -= qty # MM block  
-                    products[product_code][2] -= qty # TSCAR
+                    y_axis[product_code][3][pos] -= qty # MM block  
+                    y_axis[product_code][2] -= qty # TSCAR
                     debug_mm.write(mask % (
                         block, 'USED', pick.name, pick.origin,
                         pick.date, pos, '', product_code, # Prod is MP
@@ -331,18 +331,17 @@ class Parser(report_sxw.rml_parse):
         order_ids = sale_pool.search(cr, uid, [
             ('state', 'not in', ('cancel', 'send', 'draft')),
             ('pricelist_order', '=', False),
-            #('partner_id', 'not in', exclude_partner_ids), # XXX include FC
             ('mx_closed', '=', False), # Only open orders (not all MRP after)
             # Also forecasted order
-            # No filter date TODO use over data for reporting
-            # TODO filter products for optimize!
+            # No filter date TODO use over data for reporting extra
+            # XXX no x axis filter!
             ])
         # Add forecasted draft order (not in closed production)
         forecasted_ids = sale_pool.search(cr, uid, [
             ('forecasted_production_id', '!=', False),
             ('forecasted_production_id.state', 'not in', ('done', 'cancel')),
             ])
-        order_ids.extend(forecasted_ids) # no double FC is draft mode
+        order_ids.extend(forecasted_ids) # XXX no double FC is draft mode
             
         for order in sale_pool.browse(cr, uid, order_ids, context=context):
             # Search in order line:
@@ -354,8 +353,8 @@ class Parser(report_sxw.rml_parse):
                 date = line.date_deadline or order.date_order
                 pos = get_position_season(date)
                 
-                # OC exclude no parcels prodcut:
-                if product_code in products:
+                # OC exclude no parcels product:                
+                if product.exclude_parcels:
                     debug_mm.write(mask % (
                         block, 'NOT USED', order.name, '', date, pos, '', # code
                         product_code, # Direct component
@@ -373,8 +372,8 @@ class Parser(report_sxw.rml_parse):
                     remain = line.product_uom_qty - line.delivered_qty
 
                 # OC direct component:
-                if product_code in products:
-                    products[product_code][4][pos] -= remain # OC block
+                if product_code in y_axis:
+                    y_axis[product_code][4][pos] -= remain # OC block
                     debug_mm.write(mask % (
                         block, 'USED', order.name, '', date, pos, '', # code
                         product_code, # Direct component
@@ -419,9 +418,9 @@ class Parser(report_sxw.rml_parse):
                 # --------------------
                 for comp in product.dynamic_bom_line_ids:
                     comp_code = comp.product_id.default_code
-                    if comp_code in products: # OC out component (no prod.):
+                    if comp_code in y_axis: # OC out component (no prod.):
                         comp_remain = remain * comp.product_qty
-                        products[comp_code][4][pos] -= comp_remain # OC block
+                        y_axis[comp_code][4][pos] -= comp_remain # OC block
                         debug_mm.write(mask % (
                             block, 'USED', order.name, '', date, pos, 
                             product_code, # code
@@ -477,9 +476,9 @@ class Parser(report_sxw.rml_parse):
                 for comp in product.dynamic_bom_line_ids:
                     comp_code = comp.product_id.default_code
                     comp_qty = qty * comp.product_qty 
-                    if comp_code in products: # OC out component (no prod.):
-                        products[comp_code][3][pos] -= comp_qty # MM block
-                        products[comp_code][2] -= comp_qty #TSCAR XXX also mrp?
+                    if comp_code in y_axis: # OC out component (no prod.):
+                        y_axis[comp_code][3][pos] -= comp_qty # MM block
+                        y_axis[comp_code][2] -= comp_qty #TSCAR XXX also mrp?
                         debug_mm.write(mask % (
                             block, 'USED', order.name, '', date, pos, 
                             product_code,
@@ -503,12 +502,12 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         res = []
         self.jumped = []
-        for key in sorted(products, key=lambda products: '%s%s%s' % (
-                products[0:3] or ' ' * 3,
-                products[6:12] or ' ' * 6,
-                products[3:6] or ' ' * 3,
+        for key in sorted(y_axis, key=lambda y_axis: '%s%s%s' % (
+                y_axis[0:3] or ' ' * 3,
+                y_axis[6:12] or ' ' * 6,
+                y_axis[3:6] or ' ' * 3,
                 )):
-            current = products[key] # readability:
+            current = y_axis[key] # readability:
             total = 0.0 # INV 0.0
             
             # NOTE: INV now is 31/12 next put Sept.

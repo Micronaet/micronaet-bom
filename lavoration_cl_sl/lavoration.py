@@ -92,7 +92,6 @@ class StockMove(orm.Model):
         'linked_sl_stock_move_ids': fields.one2many(
             'stock.move', 'linked_cl_stock_move_id', 
             'Link SL move'),
-
         'linked_sl_status': fields.function(
             _get_linked_sl_status, method=True, 
             type='text', string='SL movement', 

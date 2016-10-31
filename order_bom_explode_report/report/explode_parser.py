@@ -101,9 +101,9 @@ class Parser(report_sxw.rml_parse):
                 product.inventory_start or 0.0, # inv
                 0.0, # tcar
                 0.0, # tscar
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # MM
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # OC
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # OF
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # MM
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # OC
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # OF
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # SAL
                 product,
                 ]
@@ -375,7 +375,7 @@ class Parser(report_sxw.rml_parse):
                         product_code, # Direct component
                         '', 0, # +MM
                         ('%s' % remain).replace('.', ','), # -OC
-                        0, 'OC DIRECT COMPONENT AS PRODUCT',
+                        0, 'OC DIRECT SALE HW OR COMPONENT',
                         ))                      
                     continue                    
 
@@ -395,7 +395,7 @@ class Parser(report_sxw.rml_parse):
                         block, 'NOT USED', order.name, '', date, pos,
                         product_code, '', # MP
                         '', 0, # +MM
-                        0, 0, 'OC ALL DELIVERED',
+                        0, 0, 'OC ALL DELIVERED OR NEGATIVE DELIVER',
                         ))  
                     continue
                 
@@ -423,7 +423,7 @@ class Parser(report_sxw.rml_parse):
                             comp_code, # MP
                             '', 0, # +MM
                             ('%s' % comp_remain).replace('.', ','), # -OC
-                            0, 'OC COMPONENT REMAIN',
+                            0, 'OC HALFWORKED REMAIN',
                             ))                      
                         continue                    
                     
@@ -454,7 +454,7 @@ class Parser(report_sxw.rml_parse):
                 pos = get_position_season(date)                                
                 qty = line.product_uom_maked_sync_qty
 
-                # XXX No direct production:
+                # XXX No direct production (use lavoration CL / CL for this):
                 
                 if not len(product.dynamic_bom_line_ids): # no bom
                     debug_mm.write(mask % (

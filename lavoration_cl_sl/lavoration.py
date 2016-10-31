@@ -58,6 +58,16 @@ class ResCompany(orm.Model):
             'stock.picking.type', 'CL Lavoration'),
         }
 
+class StockQuant(orm.Model):
+    """ Model name: Stock quant
+    """    
+    _inherit = 'stock.quant'
+    
+    _columns = {
+        'laboration_link_id': fields.many2one(
+            'stock.picking', 'Link to CL lavoration', ondelete='cascade'),
+        }
+
 class StockMove(orm.Model):
     """ Model name: StockMove
     """    
@@ -79,13 +89,13 @@ class StockMove(orm.Model):
         ''' Fields function for calculate 
         '''
         res = {}
-        for item in self.browse(cr, uid, ids, context=context):
-            res[item.id] = ''
-            for sl in item.linked_sl_stock_move_ids:
-                res[item.id] += '%s: %s\n' % (
-                    sl.product_id.default_code or '??',
-                    sl.product_qty,
-                    )
+        #for item in self.browse(cr, uid, ids, context=context):
+        #    res[item.id] = ''
+        #    for sl in item.linked_sl_stock_move_ids:
+        #        res[item.id] += '%s: %s\n' % (
+        #            sl.product_id.default_code or '??',
+        #            sl.product_qty,
+        #            )
         return res
 
     _columns = {
@@ -108,18 +118,21 @@ class MRPLavoration(orm.Model):
         '''
         # Pool used:
         move_pool = self.pool.get('stock.move')
+        quant_pool = self.pool.get('stock.quant')
 
         pick_proxy = self.browse(cr, uid, ids, context=context)[0]
 
         # Read paremeters:
-        company_proxy = self.pool.get('res.comapany')._get_company_browse(
+        company_proxy = self.pool.get('res.company')._get_company_browse(
             cr, uid, context=context)        
             
         sl_type = company_proxy.sl_mrp_lavoration_id
         sl_type_id = sl_type.id or False
         stock_location = sl_type.default_location_src_id.id or False
         mrp_location = sl_type.default_location_dest_id.id or False 
-        # TODO better MRP, now is procurements?
+        origin = 'CL-LAV-%s' % pick_proxy.name
+        now = datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+        # TODO better MRP, now is procurements type?
 
         if not(mrp_location and stock_location):
             raise osv.except_osv(
@@ -134,64 +147,66 @@ class MRPLavoration(orm.Model):
         else:
             sl_id = self.create(cr, uid, {
                 'picking_type_id': sl_type_id,
-                
+                'state': 'done',
+                'date': now,
+                'origin': origin,    
                 #TODO
                 }, context=context)
                 
         # ---------------------------------------------------------------------
         # (Re) create movement for SL depend on CL:
         # ---------------------------------------------------------------------
-        for unload in pick_proxy.move_lines:
-            product = unload.product_id
+        for load in pick_proxy.move_lines:
+            product = load.product_id
+            load_qty = load.product_qty
+            
+            # Load quats materials:
+            quant_pool.create(cr, uid, {
+                'in_date': now,
+                'cost': 0.0, # TODO
+                'location_id': stock_location,
+                'product_id': product.id,
+                'qty': load_qty,
+                'product_uom': product.uom_id.id,
+                'lavoration_link_id': pick_proxy.id,
+                }, context=context)
+            
             for component in product.half_bom_ids:
+                product = component.product_id
+                unload_qty = component.product_qty * load_qty
+                if unload_qty <= 0.0:
+                    continue # jump line
+
+                # Unload with stock move:
                 move_pool.create(cr, uid, {
                     'picking_id': sl_id,
                     'linked_cl_stock_move_id': component.id,
-                    # TODO
-                    }, context=context)
-            '''
-            # Unload materials:
-            for bom in bom_proxy.bom_line_ids:
-                unload_qty = bom.product_qty * maked_qty
-                if unload_qty <= 0.0:
-                    continue # jump line
-                    
-                # Move create:    
-                move_pool.create(cr, uid, {
-                    'picking_id': mrp_picking_out,
-                    'production_load_type': 'sl',
-                    'location_dest_id': mrp_location,
                     'location_id': stock_location,
-                    'picking_type_id': mrp_type_out,
-                    'product_id': bom.product_id.id,
+                    'location_dest_id': mrp_location,
+                    'picking_type_id': sl_type_id,
+                    'product_id': product.id,
                     'product_uom_qty': unload_qty, 
-                    'product_uom': bom.product_id.uom_id.id,
-
+                    'product_uom': product.uom_id.id,
+                    'state': 'done', # confirmed, available
+                    'origin': origin, # CL lavoration
+                    'date_expected': now,
+                    'name': _('SL-LAV-%s') % pick_proxy.name,
+                    #'display_name': 'SL: %s' % line_proxy.product_id.name,
                     #'product_uom_qty',
                     #'product_uos',
                     #'product_uos_qty',
-                    'production_sol_id': line_proxy.id,
-                    'state': 'done', # confirmed, available
-                    'date_expected': datetime.now().strftime(
-                        DEFAULT_SERVER_DATE_FORMAT),
-                    'origin': line_proxy.mrp_id.name,
-                    'display_name': 'SL: %s' % line_proxy.product_id.name,
-                    'name': 'SL: %s' % line_proxy.product_id.name,
-                    'persistent': persistent,                 
-                # Quants create:    
+                    }, context=context)
+                    
+                # Unload quats materials:
                 quant_pool.create(cr, uid, {
-                    'in_date': datetime.now().strftime(
-                        DEFAULT_SERVER_DATETIME_FORMAT),
+                    'in_date': now,
                     'cost': 0.0, # TODO
                     'location_id': stock_location,
-                    'product_id': bom.product_id.id,
-                    'qty': - unload_qty, 
-                    #'product_uom': bom.product_id.uom_id.id,
-                    'production_sol_id': line_proxy.id,
-                    'persistent': persistent,
-                    }, context=context)   
-
-        '''   
+                    'product_id': product.id,
+                    'qty': - unload_qty,
+                    'product_uom': product.uom_id.id,
+                    'lavoration_link_id': pick_proxy.id,
+                    }, context=context)
         
         # ---------------------------------------------------------------------
         # Udate CL move status:
@@ -208,11 +223,13 @@ class MRPLavoration(orm.Model):
         # ---------------------------------------------------------------------
         return self.write(cr, uid, ids, {
             'state': 'done',
+            'linked_sl_id': sl_id,
             }, context=context)
 
     def force_draft(self, cr, uid, ids, context=None):
         ''' Confirm lavoration
         '''
+        pick_proxy = self.browse(cr, uid, ids, context=context)[0]
         # Delete load movements:
         
         # Move:
@@ -221,12 +238,19 @@ class MRPLavoration(orm.Model):
 
         # Delete previous SL movements:
         sl_id = pick_proxy.linked_sl_id.id
-        line_ids = move_pool.search(cr, uid, [
-            ('picking_id', '=', sl_id),
-            ], context=context)
-        # Set draft before?
-        # Delete quants before?
-        move_pool.unlink(cr, uid, line_ids, context=context)
+
+        if sl_id:
+            # Search SL lined:
+            line_ids = move_pool.search(cr, uid, [
+                ('picking_id', '=', sl_id),
+                ], context=context)
+            # Set draft before delete:
+            move_pool.write(cr, uid, line_ids, {
+                'state': 'draft',
+                }, context=context)            
+            # TODO Delete quants before
+            # Delete move:
+            move_pool.unlink(cr, uid, line_ids, context=context)
 
         stock_ids = move_pool.search(cr, uid, [
             ('picking_id', '=', ids[0])], context=None)
@@ -266,7 +290,7 @@ class MRPLavoration(orm.Model):
                 'done': [('readonly', True)], 
                 'cancel': [('readonly', True)],
                 }, required=True),
-        'linked_sl_id': fields.many2one('stock.picking', 'SL lined'),
+        'linked_sl_id': fields.many2one('stock.picking', 'SL linked'),
         }       
     
     _defaults = {

@@ -377,6 +377,26 @@ class Parser(report_sxw.rml_parse):
                 # --------------------------------
                 # OC direct halfwork or component:
                 # --------------------------------
+                # Explode HW subcomponent for report 2
+                if mode not 'halfwork': 
+                    for comp in product.half_bom_ids:
+                        comp_code = comp.product_id.default_code
+                        if comp_code not in y_axis: # OC out item (no prod.):
+                            # TODO log component not used
+                            continue
+                        comp_remain = item_remain * comp.product_qty
+                        y_axis[comp_code][4][pos] -= comp_remain # OC
+                        debug_mm.write(mask % (
+                            block, 'USED', order.name, '', date, pos, 
+                            item_code, # Code
+                            comp_code, # component
+                            '', 0, # +MM
+                            ('%s' % comp_remain).replace('.', ','),#-OC
+                            0, 'OC DIRECT SALE HW SO COMPONENT UNLOAD',
+                            ))
+                        # go ahead for download component    
+
+                # Direct sale hw or component:
                 if product_code in y_axis: # HW or component direct:
                     y_axis[product_code][4][pos] -= remain # OC block
                     debug_mm.write(mask % (
@@ -386,9 +406,7 @@ class Parser(report_sxw.rml_parse):
                         ('%s' % remain).replace('.', ','), # -OC
                         0, 'OC DIRECT SALE HALFWORK OR COMPONENT',
                         ))                      
-                    continue           
-                          
-                # TODO explore here HW subcomponent report 2?
+                    continue                          
                  
                 if not len(product.dynamic_bom_line_ids): # no bom
                     debug_mm.write(mask % (

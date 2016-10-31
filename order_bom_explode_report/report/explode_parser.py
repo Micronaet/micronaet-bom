@@ -440,7 +440,7 @@ class Parser(report_sxw.rml_parse):
                                 ))                      
                         # else: TODO log not used        
                     else: # mode = 'component'
-                        for comp in item.half_bom_ids:
+                        for comp in item.product_id.half_bom_ids:
                             comp_code = comp.product_id.default_code
                             if comp_code not in y_axis: # OC out item (no prod.):
                                 # TODO log component not used

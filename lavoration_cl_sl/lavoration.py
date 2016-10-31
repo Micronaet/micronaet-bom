@@ -236,7 +236,18 @@ class MRPLavoration(orm.Model):
         move_pool = self.pool.get('stock.move')
         quant_pool = self.pool.get('stock.quant')
 
+        # ---------------------------------------------------------------------
+        # Delete all quant movement:
+        # ---------------------------------------------------------------------
+        quant_ids = quant_pool.search(cr, uid, [
+            ('lavoration_link_id', '=', ids[0]),
+            ], context=context)
+        if quant_ids:
+            quant_pool.unlink(cr, uid, quant_ids, context=context)  
+
+        # ---------------------------------------------------------------------
         # Delete previous SL movements:
+        # ---------------------------------------------------------------------
         sl_id = pick_proxy.linked_sl_id.id
 
         if sl_id:
@@ -247,15 +258,19 @@ class MRPLavoration(orm.Model):
             # Set draft before delete:
             move_pool.write(cr, uid, line_ids, {
                 'state': 'draft',
-                }, context=context)            
-            # TODO Delete quants before
+                }, context=context)
             # Delete move:
             move_pool.unlink(cr, uid, line_ids, context=context)
 
+        # ---------------------------------------------------------------------
+        # Draft CL movements and header:
+        # ---------------------------------------------------------------------
+        # Movement:
         stock_ids = move_pool.search(cr, uid, [
             ('picking_id', '=', ids[0])], context=None)
         move_pool.write(cr, uid, stock_ids, {
             'state': 'draft'}, context=context)
+            
         # Header:        
         return self.write(cr, uid, ids, {
             'state': 'draft',

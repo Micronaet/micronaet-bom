@@ -74,6 +74,7 @@ class StockMove(orm.Model):
     _inherit = 'stock.move'
     
     _columns = {
+        # For show direct SL lavoration when confirmed:
         'linked_cl_stock_move_id': fields.many2one(
             'stock.move', 'Link CL linked move', ondelete='set null'),
         }
@@ -89,19 +90,27 @@ class StockMove(orm.Model):
         ''' Fields function for calculate 
         '''
         res = {}
-        #for item in self.browse(cr, uid, ids, context=context):
-        #    res[item.id] = ''
-        #    for sl in item.linked_sl_stock_move_ids:
-        #        res[item.id] += '%s: %s\n' % (
-        #            sl.product_id.default_code or '??',
-        #            sl.product_qty,
-        #            )
+        
+        for item in self.browse(cr, uid, ids, context=context):
+            res[item.id] = ''
+            if item.picking_id.state == 'done': # SL movement:
+                for sl in item.linked_sl_stock_move_id_ids:
+                    res[item.id] += '%s: %s\n' % (
+                        sl.product_id.default_code or '??',
+                        sl.product_qty,
+                        )
+            else: # show BOM:
+                for bom in item.product_id.half_bom_ids:
+                    res[item.id] += '%s: %s\n' % (
+                        bom.product_id.default_code or '??',
+                        item.product_uom_qty * bom.product_qty,
+                        )
         return res
 
     _columns = {
-        'linked_sl_stock_move_ids': fields.one2many(
+        'linked_sl_stock_move_id_ids': fields.one2many(
             'stock.move', 'linked_cl_stock_move_id', 
-            'Link SL move'),
+            'Linked SL movements'),
         'linked_sl_status': fields.function(
             _get_linked_sl_status, method=True, 
             type='text', string='SL movement', 
@@ -150,7 +159,8 @@ class MRPLavoration(orm.Model):
                 'state': 'done',
                 'date': now,
                 'origin': origin,    
-                #TODO
+                'is_mrp_lavoration': False, # SL is hidden
+                # TODO no more fields?
                 }, context=context)
                 
         # ---------------------------------------------------------------------
@@ -190,6 +200,7 @@ class MRPLavoration(orm.Model):
                     'origin': origin, # CL lavoration
                     'date_expected': now,
                     'name': _('SL-LAV-%s') % pick_proxy.name,
+                    'linked_cl_stock_move_id': load.id, # link CL move
                     #'display_name': 'SL: %s' % line_proxy.product_id.name,
                     #'product_uom_qty',
                     #'product_uos',
@@ -274,13 +285,6 @@ class MRPLavoration(orm.Model):
             'state': 'draft',
             }, context=context)
             
-    def _get_is_mrp_lavoration(self, cr, uid, context=None):
-        ''' Check value from startup method in context
-        '''       
-        if context is None:
-            context = {}
-        return context.get('open_mrp_lavoration', False)
-
     # Default function:
     def _get_picking_type_id(self, cr, uid, context=None):
         ''' Check value from startup method in context
@@ -307,8 +311,6 @@ class MRPLavoration(orm.Model):
         }       
     
     _defaults = {
-        #'is_mrp_lavoration': lambda s, cr, uid, ctx: s._get_is_mrp_lavoration(
-        #    cr, uid, ctx),
         'picking_type_id': lambda s, cr, uid, ctx: s._get_picking_type_id(
             cr, uid, ctx),
         }

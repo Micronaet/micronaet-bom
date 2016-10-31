@@ -278,6 +278,7 @@ class Parser(report_sxw.rml_parse):
         # =====================================================================
         # UNLOAD PICKING (CUSTOMER ORDER PICK OUT) DIRECT SALE OF COMPONENT
         # =====================================================================
+        # TODO manage inventory_id > stock.inventory for manual correction 
         block = 'BC PICK OUT' # Direct sale of halfwork
         # XXX Note: no unload MM during BC (only production)
             

@@ -142,7 +142,7 @@ class Parser(report_sxw.rml_parse):
         y_axis = {}
         for product in product_data['product']:
             for item in product.dynamic_bom_line_ids:
-                if mode == 'half':
+                if mode == 'halfwork':
                     add_x_item(y_axis, item.product_id)
                 else: # mode = 'component' 
                     # TODO log halfcomponent with empty list
@@ -427,7 +427,7 @@ class Parser(report_sxw.rml_parse):
                     item_code = item.product_id.default_code
                     item_remain = remain * item.product_qty
                     
-                    if mode == 'half':
+                    if mode == 'halfwork':
                         if item_code in y_axis: # OC out item (no prod.):
                             y_axis[item_code][4][pos] -= item_remain # OC block
                             debug_mm.write(mask % (
@@ -463,7 +463,7 @@ class Parser(report_sxw.rml_parse):
         block = 'MRP (unload component prod.)'
         # XXX Note: used only for manage OC remain: 
         
-        if mode == 'half': # only half explode MRP (comp > lavoration)
+        if mode == 'halfwork': # only half explode MRP (comp > lavoration)
             mrp_ids = mrp_pool.search(cr, uid, [        
                 # State filter:
                 ('state', '!=', 'cancel'),

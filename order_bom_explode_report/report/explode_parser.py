@@ -94,6 +94,8 @@ class Parser(report_sxw.rml_parse):
                 y_axis: list of records
                 product: browse obj
             '''
+            if product.default_code in y_axis:
+                return # yet present (for component check)
             y_axis[product.default_code] = [ # halfworked of component
                 # Reset counter for this product    
                 product.inventory_start or 0.0, # inv
@@ -145,8 +147,8 @@ class Parser(report_sxw.rml_parse):
                 else: # mode = 'component' 
                     # TODO log halfcomponent with empty list
                     # relative_type = 'half'
-                    for component in item.half_bom_ids:
-                        add_x_item(item, component.product_id)
+                    for component in item.product_id.half_bom_ids:
+                        add_x_item(y_axis, component.product_id)
 
         debug_file.write('\n\nComponent / Halfworked selected:\n%s\n\n'% (
             y_axis.keys()))

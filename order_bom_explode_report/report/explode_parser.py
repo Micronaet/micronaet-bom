@@ -363,43 +363,31 @@ class Parser(report_sxw.rml_parse):
                         ))                      
                     continue                    
 
+                # -----------------------
                 # Check remain to produce
+                # -----------------------
                 if line.product_uom_maked_sync_qty >= line.delivered_qty:
                     remain = \
                         line.product_uom_qty - line.product_uom_maked_sync_qty
                 else:    
                     remain = line.product_uom_qty - line.delivered_qty
 
+                # --------------------------------
                 # OC direct halfwork or component:
-                if product_code in y_axis: # HW direct:
-                    if mode == 'half':
-                        y_axis[product_code][4][pos] -= remain # OC block
-                        debug_mm.write(mask % (
-                            block, 'USED', order.name, '', date, pos, '', # code
-                            product_code, # Direct component
-                            '', 0, # +MM
-                            ('%s' % remain).replace('.', ','), # -OC
-                            0, 'OC DIRECT SALE HALFWORK',
-                            ))                      
-                    else: # mode = 'component' 
-                        # TODO log halfcomponent with empty list
-                        # relative_type = 'half'
-                        # Explode OC for all component of halfwork
-                        for comp in product.half_bom_ids:
-                            comp_code = comp.product_id.default_code
-                            remain *= comp.product_qty # explode in qty comp.
-                            y_axis[comp_code][4][pos] -= remain # OC block
-                            debug_mm.write(mask % (
-                                block, 'USED', order.name, '', date, pos, 
-                                '', # Code
-                                comp_code, # Direct component
-                                '', 0, # +MM
-                                ('%s' % remain).replace('.', ','), # -OC
-                                0, 'OC DIRECT SALE HW EXPLODED IN COMPONENT',
-                                ))                      
-
-                    continue                    
-
+                # --------------------------------
+                if product_code in y_axis: # HW or component direct:
+                    y_axis[product_code][4][pos] -= remain # OC block
+                    debug_mm.write(mask % (
+                        block, 'USED', order.name, '', date, pos, '', # code
+                        product_code, # Direct component
+                        '', 0, # +MM
+                        ('%s' % remain).replace('.', ','), # -OC
+                        0, 'OC DIRECT SALE HALFWORK OR COMPONENT',
+                        ))                      
+                    continue           
+                          
+                # TODO explore here HW subcomponent report 2?
+                 
                 if not len(product.dynamic_bom_line_ids): # no bom
                     debug_mm.write(mask % (
                         block, 'NOT USED', order.name, '', date, pos,
@@ -430,23 +418,42 @@ class Parser(report_sxw.rml_parse):
                         ))                      
                     continue
 
-                # --------------------
-                # Search in component:
-                # --------------------
-                for comp in product.dynamic_bom_line_ids:
-                    comp_code = comp.product_id.default_code
-                    if comp_code in y_axis: # OC out component (no prod.):
-                        comp_remain = remain * comp.product_qty
-                        y_axis[comp_code][4][pos] -= comp_remain # OC block
-                        debug_mm.write(mask % (
-                            block, 'USED', order.name, '', date, pos, 
-                            product_code, # code
-                            comp_code, # MP
-                            '', 0, # +MM
-                            ('%s' % comp_remain).replace('.', ','), # -OC
-                            0, 'OC HALFWORKED REMAIN',
-                            ))                      
-                        continue                    
+                # -----------------------------------
+                # OC Halfworked or Component explode:
+                # -----------------------------------
+                for item in product.dynamic_bom_line_ids:
+                    item_code = item.product_id.default_code
+                    item_remain = remain * item.product_qty
+                    
+                    if mode == 'half':
+                        if item_code in y_axis: # OC out item (no prod.):
+                            y_axis[item_code][4][pos] -= item_remain # OC block
+                            debug_mm.write(mask % (
+                                block, 'USED', order.name, '', date, pos, 
+                                product_code, # code
+                                item_code, # MP
+                                '', 0, # +MM
+                                ('%s' % item_remain).replace('.', ','), # -OC
+                                0, 'OC HALFWORKED REMAIN',
+                                ))                      
+                        # else: TODO log not used        
+                    else: # mode = 'component'
+                        for comp in item.half_bom_ids:
+                            comp_code = comp.product_id.default_code
+                            if comp_code not in y_axis: # OC out item (no prod.):
+                                # TODO log component not used
+                                continue
+                            comp_remain = item_remain * comp.product_qty
+                            y_axis[comp_code][4][pos] -= comp_remain # OC
+                            debug_mm.write(mask % (
+                                block, 'USED', order.name, '', date, pos, 
+                                item_code, # Code
+                                comp_code, # component
+                                '', 0, # +MM
+                                ('%s' % comp_remain).replace('.', ','),#-OC
+                                0, 'OC COMPONENT REMAIN',
+                                ))
+                        continue                
                     
         # =====================================================================
         #                  UNLOAD FOR PRODUCTION MRP ORDER
@@ -454,65 +461,66 @@ class Parser(report_sxw.rml_parse):
         block = 'MRP (unload component prod.)'
         # XXX Note: used only for manage OC remain: 
         
-        mrp_ids = mrp_pool.search(cr, uid, [        
-            # State filter:
-            ('state', '!=', 'cancel'),
-            
-            # Period filter:
-            ('date_planned', '>=', period_from), 
-            ('date_planned', '<=', period_to), 
-            
-            # No customer excklude filter
-            ])
-            
-        for order in mrp_pool.browse(cr, uid, mrp_ids, context=context):
-            date = order.date_planned
-            
-            # Search in order line:
-            for line in order.order_line_ids:                
-                product = line.product_id # readability
-                product_code = line.product_id.default_code
-                pos = get_position_season(date)                                
-                qty = line.product_uom_maked_sync_qty
-
-                # XXX No direct production (use lavoration CL / CL for this):
+        if mode == 'half': # only half explode MRP (comp > lavoration)
+            mrp_ids = mrp_pool.search(cr, uid, [        
+                # State filter:
+                ('state', '!=', 'cancel'),
                 
-                if not len(product.dynamic_bom_line_ids): # no bom
-                    debug_mm.write(mask % (
-                        block, 'NOT USED', order.name, '', date, pos,
-                        product_code, '', # Original product
-                        '', 0, # +MM
-                        0, # -OC
-                        0, 'MRP PRODUCT WITHOUT BOM, Q.: %s' % qty,
-                        ))                      
-                    continue
+                # Period filter:
+                ('date_planned', '>=', period_from), 
+                ('date_planned', '<=', period_to), 
+                
+                # No customer excklude filter
+                ])
+            
+            for order in mrp_pool.browse(cr, uid, mrp_ids, context=context):
+                date = order.date_planned
+                
+                # Search in order line:
+                for line in order.order_line_ids:
+                    product = line.product_id # readability
+                    product_code = line.product_id.default_code
+                    pos = get_position_season(date)                                
+                    qty = line.product_uom_maked_sync_qty
 
-                # --------------------
-                # Search in component:
-                # --------------------
-                for comp in product.dynamic_bom_line_ids:
-                    comp_code = comp.product_id.default_code
-                    comp_qty = qty * comp.product_qty 
-                    if comp_code in y_axis: # OC out component (no prod.):
-                        y_axis[comp_code][3][pos] -= comp_qty # MM block
-                        y_axis[comp_code][2] -= comp_qty #TSCAR XXX also mrp?
+                    # XXX No direct production (use lavorat. CL / CL for this):
+                    
+                    if not len(product.dynamic_bom_line_ids): # no bom
                         debug_mm.write(mask % (
-                            block, 'USED', order.name, '', date, pos, 
-                            product_code,
-                            comp_code, # MP
-                            '', ('%s' % -comp_qty).replace('.', ','), # -MM
-                            0, 0, 'MRP COMPONENT UNLOAD (ADD in TSCAR)',
-                            ))                       
+                            block, 'NOT USED', order.name, '', date, pos,
+                            product_code, '', # Original product
+                            '', 0, # +MM
+                            0, # -OC
+                            0, 'MRP PRODUCT WITHOUT BOM, Q.: %s' % qty,
+                            ))                      
                         continue
-                    else:
-                        debug_mm.write(mask % (
-                            block, 'NOT USED', order.name, '', date, pos, 
-                            product_code,
-                            comp_code, # MP
-                            '', ('%s' % -comp_qty).replace('.', ','), # -MM
-                            0, 0, 'MRP COMPONENT NOT IN LIST',
-                            ))  
-                        continue                         
+
+                    # --------------------
+                    # Search in component:
+                    # --------------------
+                    for comp in product.dynamic_bom_line_ids:
+                        comp_code = comp.product_id.default_code
+                        comp_qty = qty * comp.product_qty 
+                        if comp_code in y_axis: # OC out component (no prod.):
+                            y_axis[comp_code][3][pos] -= comp_qty # MM block
+                            y_axis[comp_code][2] -= comp_qty #TSCAR for MRP
+                            debug_mm.write(mask % (
+                                block, 'USED', order.name, '', date, pos, 
+                                product_code,
+                                comp_code, # MP
+                                '', ('%s' % -comp_qty).replace('.', ','), # -MM
+                                0, 0, 'MRP COMPONENT UNLOAD (ADD in TSCAR)',
+                                ))                       
+                            continue
+                        else:
+                            debug_mm.write(mask % (
+                                block, 'NOT USED', order.name, '', date, pos, 
+                                product_code,
+                                comp_code, # MP
+                                '', ('%s' % -comp_qty).replace('.', ','), # -MM
+                                0, 0, 'MRP COMPONENT NOT IN LIST',
+                                ))  
+                            continue                         
 
         # ---------------------------------------------------------------------
         # Prepare data for report:

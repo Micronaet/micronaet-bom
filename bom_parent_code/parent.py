@@ -256,7 +256,6 @@ class MRPBom(orm.Model):
             }
             
         # Default code:    
-        import pdb; pdb.set_trace()
         default_code = bom_proxy.product_id.default_code        
         if not default_code:
             _logger.error('ID %s. No product code' % bom_proxy.id)

@@ -58,6 +58,7 @@ class MrpBomMigrateWizard(orm.TransientModel):
         
         bom_ids = bom_pool.search(cr, uid, [
             ('product_id.default_code', '=ilike', '%s%%' % code),
+            ('bom_category', '=', 'product'),
             ], context=context)
         print bom_ids
         for bom in bom_pool.browse(cr, uid, bom_ids, context=context):

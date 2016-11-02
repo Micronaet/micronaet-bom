@@ -239,9 +239,24 @@ class MRPBom(orm.Model):
             '552', # Non più come 550
             '810', '900', '905',
             # 'G241', # ??? TLG420, PA600
-            ]         
+            ] 
+        
+        # Product and Halfworked    
+        direct_sale = {
+            # Parasoli
+            '601': 'PA', 
+            '600': 'PA', 
+            # Poggiatesta / Cuscino
+            '650': 'PO', 
+            '651': 'PO', 
+            '630': 'PO', 
+            '649': 'PO',
+            # Supporti:
+            '620': 'SU',
+            }
             
         # Default code:    
+        import pdb; pdb.set_trace()
         default_code = bom_proxy.product_id.default_code        
         if not default_code:
             _logger.error('ID %s. No product code' % bom_proxy.id)
@@ -278,7 +293,10 @@ class MRPBom(orm.Model):
             
             # Parent code:
             parent = default_code[:3]
-            if parent in ('810', '081', '085'):
+            if parent in direct_sale:
+                parent_code = ''
+                type_code = '%s%s' % (direct_sale[parent], default_code)
+            elif parent in ('810', '081', '085'):
                 type_code = 'PVC6LU'
                 parent_code = ''
             elif parent in ('084', ):
@@ -295,7 +313,7 @@ class MRPBom(orm.Model):
                 return
                             
             #Fabric code:
-            if parent in ('810', '081', '085', '084'):
+            if parent in ('810', '081', '085', '084') or parent in direct_sale:
                 fabric_code = ''
             else:
                 # Default code:                
@@ -305,7 +323,10 @@ class MRPBom(orm.Model):
                     fabric_code = default_code[3:6]
 
             # Color code        
-            color_code = default_code[8:12].strip()
+            if parent in direct_sale:
+                color_code = ''
+            else:    
+                color_code = default_code[8:12].strip()
             if len(color_code) == 1:
                 _logger.error('Code %s.%s Colore 1 carattere %s' % (
                     default_code, line.id, component_code))
@@ -389,7 +410,6 @@ class MRPBom(orm.Model):
                         'ean13_auto': False, # XXX
                         }, context=context)
              
-
                 # -------------------------------------------------------------
                 # Create / Update fabric under HW component
                 # -------------------------------------------------------------

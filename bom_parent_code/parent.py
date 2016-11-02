@@ -315,7 +315,6 @@ class MRPBom(orm.Model):
             HW_codes = []
             if parent in crea_hw:
                 for hw, component, qty in crea_hw[parent]:
-                    import pdb; pdb.set_trace()
                     HW_code = '%s%s%s' % (
                         hw, fabric_code, color_code)
                     fabric_product = '%s%s' % (

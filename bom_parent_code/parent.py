@@ -375,11 +375,11 @@ class MRPBom(orm.Model):
                         fabric_code, 
                         color_code,
                         ), 
-                    line.product_id.id, # fabric_id    
-                    line.product_uom.id, # fabric_uom
+                    line.product_id.id, # fabric_id   
+                    line.product_id.uom_id.id, # fabric_uom
                     line.product_qty,
                     )]
-                        
+
             for HW_code, fabric_id, fabric_uom, product_qty in HW_codes:
                 if parent in direct_sale: # use TL for PA and PO from Direct s.
                     category_id = categ_id.get('TL', False)
@@ -417,12 +417,25 @@ class MRPBom(orm.Model):
                 # Create / Update fabric under HW component
                 # -------------------------------------------------------------
                 HW_proxy = product_pool.browse(cr, uid, HW_id, context=context)
-                if not HW_proxy.half_bom_id: # Button and reload data
+                if HW_proxy.half_bom_id: # Button and reload data
+                    line_pool.create(cr, uid, {
+                        # Link:
+                        'bom_id': HW_proxy.half_bom_id.id, # bom link
+                        'halfwork_id': HW_proxy.id, # product link
+                        
+                        # Fabric data:
+                        'product_id': fabric_id, 
+                        'product_uom': fabric_uom, 
+                        'type': line.type,
+                        'product_qty': product_qty,
+                        }, context=context)
+                else: # yet present        
                     # Only first element
                     product_pool.create_product_half_bom(
                         cr, uid, [HW_id], context=context)
                     HW_proxy = product_pool.browse(
                         cr, uid, HW_id, context=context)                
+                        
                     line_pool.create(cr, uid, {
                         # Link:
                         'bom_id': HW_proxy.half_bom_id.id, # bom link

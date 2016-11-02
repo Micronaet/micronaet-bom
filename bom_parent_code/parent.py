@@ -381,7 +381,11 @@ class MRPBom(orm.Model):
                     )]
                         
             for HW_code, fabric_id, fabric_uom, product_qty in HW_codes:
-                category_id = categ_id.get(HW_code[:2], False)
+                if parent in direct_sale: # use TL for PA and PO from Direct s.
+                    category_id = categ_id.get('TL', False)
+                else:    
+                    category_id = categ_id.get(HW_code[:2], False)
+                    
                 if not category_id:
                     _logger.error('Code %s.%s No BOM categ. : %s' % (
                         default_code, line.id, HW_code))

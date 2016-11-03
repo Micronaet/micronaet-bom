@@ -257,11 +257,11 @@ class MRPBomLine(orm.Model):
             'type': 'ir.actions.act_window',
             'name': _('Halfworked component'),
             'view_type': 'form',
-            'view_mode': 'tree,form',
+            'view_mode': 'form',
             'res_id': bom_id,
             'res_model': 'mrp.bom',
             #'view_id': view_id, # False
-            'views': [(False, 'tree'), (False, 'form')],
+            'views': [(False, 'form')],
             'domain': [('id', '=', bom_id)],
             'context': context,
             'target': 'current', # 'new'

@@ -201,7 +201,7 @@
                                         <field name="dynamic_mask" />
                                         <field name="product_qty" />
                                         <field name="product_uom" string="UOM" />
-                                        <button name="open_halfwork" string="Open halfwork bom" icon="STOCK_JUSTIFY_FILL" type="object" attrs="{'invisible': [('halfwork', '=', False)]}"/>
+                                        <button name="open_halfwork_form" string="Open halfwork bom" icon="STOCK_JUSTIFY_FILL" type="object" attrs="{'invisible': [('halfwork', '=', False)]}"/>
                                     </tree>
                                     <form string="Dynamic BOM:">
                                         <group colspan="4" col="4">

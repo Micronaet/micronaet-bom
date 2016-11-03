@@ -418,18 +418,25 @@ class MRPBom(orm.Model):
                 # -------------------------------------------------------------
                 HW_proxy = product_pool.browse(cr, uid, HW_id, context=context)
                 if HW_proxy.half_bom_id: # Button and reload data
-                    pass # multi line activate manually!!!
-                    #line_pool.create(cr, uid, {
-                    #    # Link:
-                    #    'bom_id': HW_proxy.half_bom_id.id, # bom link
-                    #    'halfwork_id': HW_proxy.id, # product link
-                    #    
-                    #    # Fabric data:
-                    #    'product_id': fabric_id, 
-                    #    'product_uom': fabric_uom, 
-                    #    'type': line.type,
-                    #    'product_qty': product_qty,
-                    #    }, context=context)
+                    # XXX Part manually enabled:
+                    exist = line_pool.search(cr, uid, [
+                        ('bom_id', '=', HW_proxy.half_bom_id.id),
+                        ('halfwork_id', '=', HW_proxy.id),
+                        ('product_id', '=', fabric_id),
+                        ('product_qty', '=', product_qty),
+                        ], context=context)
+                    if not exist:    
+                        line_pool.create(cr, uid, {
+                            # Link:
+                            'bom_id': HW_proxy.half_bom_id.id, # bom link
+                            'halfwork_id': HW_proxy.id, # product link
+                            
+                            # Fabric data:
+                            'product_id': fabric_id, 
+                            'product_uom': fabric_uom, 
+                            'type': line.type,
+                            'product_qty': product_qty,
+                            }, context=context)
                 else: # yet present        
                     # Only first element
                     product_pool.create_product_half_bom(

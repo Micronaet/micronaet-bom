@@ -58,6 +58,9 @@ class MrpBomLine(orm.Model):
     _columns = {
         'halfwork_id': fields.many2one(
             'product.product', 'Halfwork product'),
+        'halfwork': fields.related(
+            'product_id', 'halfwork', 
+            type='boolean', string='Halfwork'),
         }
 
 class ProductProduct(orm.Model):

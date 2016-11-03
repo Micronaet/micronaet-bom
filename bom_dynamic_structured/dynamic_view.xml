@@ -195,11 +195,13 @@
                                 <newline/>
                                 <field name="dynamic_bom_line_ids" nolabel="1" colspan="4" readonly="1">
                                     <tree string="Dynamic BOM:" colors="red:category_id==False;blue:dynamic_mask!=False">
+                                        <field name="halfwork" invisible="1"/>
                                         <field name="category_id" />
                                         <field name="product_id" />
                                         <field name="dynamic_mask" />
                                         <field name="product_qty" />
                                         <field name="product_uom" string="UOM" />
+                                        <button name="open_halfwork" string="Open halfwork bom" icon="STOCK_JUSTIFY_FILL" type="object" attrs="{'invisible': [('halfwork', '=', False)]}"/>
                                     </tree>
                                     <form string="Dynamic BOM:">
                                         <group colspan="4" col="4">

@@ -34,6 +34,7 @@
         'bom_category',
         'product_speech_code',
         'bom_parent_code', # for parent default value
+        'product_pipes', #  ?
         ],
     'init_xml': [],
     'demo': [],

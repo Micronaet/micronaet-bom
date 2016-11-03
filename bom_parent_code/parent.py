@@ -200,7 +200,7 @@ class MRPBom(orm.Model):
             '050': [('TL038', 'TEX165', 2.3), ('PA601', 'TEX150', 0.4)],
             '051': [('TL038', 'TEX165', 2.3), ('PA601', 'TEX150', 0.4), ('PO651', 'TEX165', 0.22)],
             # TODO TX o PE
-            # VEDERE XXX '034': [('TL135', 'TESPOL150', 1.05), ('PA600', 'TESPOL165', 0.22)],
+            '034': [('TL135', 'TESPOL150', 1.05), ('PA600', 'TESPOL165', 0.22)],
             # VEDERE '039': [('TL135', 'TEX150', 1.05), ('PA600', 'TEX165', 0.22)],
             
             # 700
@@ -211,6 +211,7 @@ class MRPBom(orm.Model):
             
             # 'G421': ['TLG420', 'PA600']
             }
+        created_hw = []    
             
         # XXX SOLO INDICATIVO PER FORMALIZZARE LE REGOLE:
         tessuto_con_doppione = [
@@ -333,7 +334,12 @@ class MRPBom(orm.Model):
             
             # TODO Decidere se creare il solo semilavorato oppure continuare
             HW_codes = []
+            import pdb; pdb.set_trace()
             if parent in crea_hw:
+                if default_code in created_hw:
+                    continue # only one
+                else:
+                    created_hw.append(default_code)    
                 for hw, component, qty in crea_hw[parent]:
                     HW_code = '%s%s%s' % (
                         hw, fabric_code, color_code)
@@ -341,7 +347,9 @@ class MRPBom(orm.Model):
                         component, color_code)
                     # Search fabric:
                     fabric_ids = product_pool.search(cr, uid, [
-                        ('default_code', '=', fabric_product)], context=context)    
+                        ('default_code', '=', fabric_product),
+                        # TODO  halfworked?
+                        ], context=context)    
                     if fabric_ids:
                         fabric_id = fabric_ids[0]
                     else:
@@ -350,7 +358,7 @@ class MRPBom(orm.Model):
                             'default_code': fabric_product,
                             'uom_id': 8, # mt
                             'uos_id': 8, # mt
-                            'uom_po_id': 8, # mt                            
+                            'uom_po_id': 8, # mt                          
                             }, context=context)
                         _logger.warning('Create fabric: %s' % fabric_product)
 

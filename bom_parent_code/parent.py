@@ -201,7 +201,7 @@ class MRPBom(orm.Model):
             '051': [('TL038', 'TEX165', 2.3), ('PA601', 'TEX150', 0.4), ('PO651', 'TEX165', 0.22)],
             # TODO TX o PE
             '034': [('TL135', 'TESPOL150', 1.05), ('PA600', 'TESPOL165', 0.22)],
-            # VEDERE '039': [('TL135', 'TEX150', 1.05), ('PA600', 'TEX165', 0.22)],
+            '039': [('TL135', 'TEX150', 1.05), ('PA600', 'TEX165', 0.22)],
             
             # 700
             # 701            
@@ -334,7 +334,7 @@ class MRPBom(orm.Model):
             
             # TODO Decidere se creare il solo semilavorato oppure continuare
             HW_codes = []
-            import pdb; pdb.set_trace()
+
             if parent in crea_hw:
                 if default_code in created_hw:
                     continue # only one

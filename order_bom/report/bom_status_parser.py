@@ -43,9 +43,20 @@ class Parser(report_sxw.rml_parse):
         super(Parser, self).__init__(cr, uid, name, context)
         self.localcontext.update({
             'load_bom': self.load_bom,
+            'get_filter': self.get_filter,
             })
 
     # Method
+    def get_filter(self, data):
+        if data is None:
+            data = {}
+        
+        start_code = data.get('start_code', '')
+        if start_code:
+            return 'Code start with: %s' % start_code
+        else:
+            return 'All product'    
+        
     def load_bom(self, data):
         ''' Master function for generate data
         '''

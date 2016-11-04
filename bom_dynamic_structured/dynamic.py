@@ -230,6 +230,7 @@ class ProductProduct(orm.Model):
         return res
 
     _columns = {
+        'bom_placeholder': fields.boolean('BOM placeholder'),
         'dynamic_bom_line_ids': fields.function(
             _get_dynamic_bom_line_ids, method=True, 
             type='one2many', relation='mrp.bom.line', 

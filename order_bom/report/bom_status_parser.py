@@ -42,16 +42,10 @@ class Parser(report_sxw.rml_parse):
     def __init__(self, cr, uid, name, context):        
         super(Parser, self).__init__(cr, uid, name, context)
         self.localcontext.update({
-            'load_bom': self.load_objects,
-            'get_bom': self.get_db,
+            'load_bom': self.load_bom,
             })
 
     # Method
-    def get_bom(self, name):
-        res = self.master.get(name, [])
-        res.sort(key=lambda x: (x.default_code, x.name))
-        return res
-
     def load_bom(self, data):
         ''' Master function for generate data
         '''
@@ -62,13 +56,11 @@ class Parser(report_sxw.rml_parse):
         uid = self.uid
         context = {}
         
-        sale_order = self.pool.get('sale.order')
-        self.master = sale_order.get_component_in_product_order_open(
-            cr, uid, context=context)
-        
-        self.master['table'] = {}
-        return ''
-
-
+        product_pool = self.pool.get('product.product')
+        start_code = data.get('start_code', '')
+        product_ids = product_pool.search(cr, uid, [
+            ('default_code', '=ilike', '%s%%' % start_code),
+            ], context=context)
+        return product_pool.browse(cr, uid, product_ids, context=context)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

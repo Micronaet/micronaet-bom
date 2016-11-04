@@ -61,6 +61,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             'from_wizard': True,
             'from_date': wiz_proxy.from_date or False,
             'to_date': wiz_proxy.to_date or False,
+            'start_code': wiz_proxy.start_code or '',
             }
         
         if wiz_proxy.mode == 'order':

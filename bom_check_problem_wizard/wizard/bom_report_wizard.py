@@ -68,7 +68,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         elif wiz_proxy.mode == 'parent':
             report_name = 'aeroo_parent_final_component_check_report'
         elif wiz_proxy.mode == 'product':
-            return False
+            report_name = 'aeroo_bom_all_component_check_report'
         elif wiz_proxy.mode == 'half':
             return False
         else:
@@ -90,6 +90,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
 
         'from_date': fields.date('From', help='Date >='),
         'to_date': fields.date('To', help='Date <'),
+        
+        'start_code': fields.char('Start code', size=20),
         }
 
     _defaults = {

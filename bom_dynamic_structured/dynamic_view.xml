@@ -188,6 +188,8 @@
                             <field name="default_code" />
                             <field name="structure_id" />
                             <field name="relative_type" />
+                            <field name="bom_placeholder" />
+                            <newline/>
 
                             <group col="4" colspan="2">
                                 <separator string="Result BOM" colspan="4"/>

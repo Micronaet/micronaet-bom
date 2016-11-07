@@ -8,6 +8,7 @@
             <field name="arch" type="xml">
                 <tree string="BOM structure category" editable="bottom">
                     <field name="name" />
+                    <field name="type_id" />
                     <field name="note" />
                 </tree>
             </field>
@@ -20,6 +21,7 @@
                     <sheet>
                         <group colspan="4" col="4">
                             <field name="name" />
+                            <field name="type_id" />
                             <separator string="Note" colspan="4"/>
                             <field name="note" colspan="4" nolabel="1"/>
                         </group>    
@@ -33,6 +35,10 @@
             <field name="arch" type="xml">
                 <search string="String" version="7.0">        
                     <field name="name" />
+                    <field name="type_id" />
+                    <group expand="0" string="Group By...">
+                        <filter name="group_type" string="Type" context="{'group_by': 'type_id'}"/>
+                    </group>                
                 </search>
             </field>
         </record>

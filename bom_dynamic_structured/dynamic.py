@@ -38,6 +38,20 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+class MrpBomCategoryStructureCategoryType(orm.Model):
+    """ Model name: Mrp Bom Category structure type
+    """
+    
+    _name = 'mrp.bom.structure.category.type'
+    _description = 'BOM structure category type'
+    _order = 'name'
+    
+    _columns = {
+        'name': fields.char('Category type', size=40, required=True,
+            help='Category type for ordering purpose'),
+        'note': fields.text('Note'),
+        }
+
 class MrpBomCategoryStructureCategory(orm.Model):
     """ Model name: Mrp Bom Category structure
     """
@@ -49,6 +63,8 @@ class MrpBomCategoryStructureCategory(orm.Model):
     _columns = {
         'name': fields.char('Category element', size=40, required=True,
             help='Category element (for BOM structure)'),
+        'type_id': fields.many2one(
+            'mrp.bom.structure.category.type', 'Type'),# required=True),    
         'note': fields.text('Note'),        
         }
 

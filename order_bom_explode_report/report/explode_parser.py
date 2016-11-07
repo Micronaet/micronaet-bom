@@ -82,18 +82,22 @@ class Parser(report_sxw.rml_parse):
         cr = self.cr
         uid = self.uid
         context = {}
+        
         if data is None:
             data = {}
         mode = data.get('mode', 'halfwork')
+        type_category = data.get('type_id', False)
         
         # ---------------------------------------------------------------------
         # Utility function embedded:
         # ---------------------------------------------------------------------
-        def add_x_item(y_axis, product):
+        def add_x_item(y_axis, item):
             ''' Add new item to record
                 y_axis: list of records
-                product: browse obj
+                item: bom browse obj
             '''
+            product = item.product_id
+            
             if product.default_code in y_axis:
                 return # yet present (for component check)
             y_axis[product.default_code] = [ # halfworked of component
@@ -106,6 +110,9 @@ class Parser(report_sxw.rml_parse):
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # OF  (+ extra per.)
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # SAL (+ extra per.)
                 product, # product or halfworked
+                item.category_id.type_id.name if \
+                    item.category_id and item.category_id.type_id else _(
+                        'No category'),
                 ]
             return    
             
@@ -143,12 +150,12 @@ class Parser(report_sxw.rml_parse):
         for product in product_data['product']:
             for item in product.dynamic_bom_line_ids:
                 if mode == 'halfwork':
-                    add_x_item(y_axis, item.product_id)
+                    add_x_item(y_axis, item)
                 else: # mode = 'component' 
                     # TODO log halfcomponent with empty list
                     # relative_type = 'half'
                     for component in item.product_id.half_bom_ids:
-                        add_x_item(y_axis, component.product_id)
+                        add_x_item(y_axis, component)
 
         debug_file.write('\n\nComponent / Halfworked selected:\n%s\n\n'% (
             y_axis.keys()))
@@ -548,10 +555,11 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         res = []
         self.jumped = []
-        for key in sorted(y_axis, key=lambda y_axis: '%s%s%s' % (
-                y_axis[0:3] or ' ' * 3,
-                y_axis[6:12] or ' ' * 6,
-                y_axis[3:6] or ' ' * 3,
+        for key in sorted(y_axis, key=lambda k:(    
+                y_axis[k][8],
+                k[0:3] or '',
+                k[6:12] or '',
+                k[3:6] or '',
                 )):
             current = y_axis[key] # readability:
             total = 0.0 # INV 0.0

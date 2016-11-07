@@ -59,6 +59,7 @@ class CcomponentStatusReportWizard(orm.TransientModel):
         
         datas = {
             'mode': wiz_browse.mode,
+            'type_id': wiz_browse.type_id.id or False,
             }
 
         if wiz_browse.mode == 'mrp':
@@ -84,6 +85,8 @@ class CcomponentStatusReportWizard(orm.TransientModel):
         'days': fields.integer('Days', help='Production scheduled now + days'),
         'first_supplier_id': fields.many2one(
             'res.partner', 'First supplier'),
+        'type_id': fields.many2one(
+            'mrp.bom.structure.category.type', 'Component category type'),
         }
         
     _defaults = {

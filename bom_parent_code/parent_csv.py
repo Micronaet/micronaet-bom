@@ -45,7 +45,7 @@ class MRPBom(orm.Model):
 
     # EXTRA BLOCK -------------------------------------------------------------
     def migrate_assign_product_bom_product_csv(self, cr, uid, ids, 
-            empty_hw, mt_new, context=None):
+            context=None):
         ''' Migrate bom in dynamic way
             Create half work element
             Create BOM 
@@ -61,25 +61,28 @@ class MRPBom(orm.Model):
         #structure = bom_proxy.product_id.structure_id
         
         i = 0
-        HW_code = []
+        HW_codes = []
         fabric_uom = 8 # m.
-        import pdb; pdb.set_trace()
-        for row in csv:            
+        structure_id = 1 # TODO needed?
+        dynamic_bom_id = 7366 # bom_category = dynamic
+        
+        for row in csv:
             i += 1
             item = row.split('|')            
-            if len(item) != 9:
+            if len(item) != 7:
                 _logger.error('Different colums')
                 continue
             
             # Read line parameter:
-            bom_id = item[0]
-            default_code = item[1].upper()
-            fabric_id = item[2]
-            #component_id = item[3]
+            import pdb; pdb.set_trace()
+            bom_id = int(item[0])
+            default_code = item[1].upper().strip()
+            fabric_id = int(item[2])
+            fabric_code = item[3].upper().strip()
             product_qty = float(item[4].replace(',', '.'))
-            component_code = item[5].upper() # input data
-            category_id = item[6] # TODO 
-                            
+            component_code = item[5].strip()
+            category_id = int(item[6]) # always present?
+
             # Mask for S or not S (same)
             if default_code[12:13] == 'S':
                 dynamic_mask = default_code[:12] + '%'
@@ -112,28 +115,30 @@ class MRPBom(orm.Model):
                     'relative_type': 'half',
                     }, context=context)    
                 continue                
-            else:
-                HW_id = product_pool.create(cr, uid, {
-                    'name': component_code,
-                    'default_code': component_code,
-                    'relative_type': 'half',       
-                    #'structure_id': structure_id,
-                    'uom_id': 1, # XXX NR
-                    'ean13_auto': False, # XXX
-                    }, context=context)
+
+            HW_id = product_pool.create(cr, uid, {
+                'name': component_code,
+                'default_code': component_code,
+                'relative_type': 'half',       
+                'structure_id': structure_id,
+                'uom_id': 1, # XXX NR
+                'ean13_auto': False,
+                }, context=context)
             HW_codes.append(component_code)
             HW_proxy = product_pool.browse(
                 cr, uid, HW_id, context=context)  
              
-            # Add material:
+            # TODO check yet present material:
             #exist = line_pool.search(cr, uid, [
             #    ('bom_id', '=', HW_proxy.half_bom_id.id),
             #    ('halfwork_id', '=', HW_proxy.id),
             #    ('product_id', '=', fabric_id),
             #    ('product_qty', '=', product_qty),
             #    ], context=context)
+            # Create HW Bom with button:
             product_pool.create_product_half_bom(
                 cr, uid, [HW_id], context=context)
+            # Re-read record    
             HW_proxy = product_pool.browse(
                 cr, uid, HW_id, context=context)                
                 
@@ -158,16 +163,16 @@ class MRPBom(orm.Model):
             #    ('category_id', '=', category_id),
             #    ('product_id', '=', HW_proxy.id),
             #    ], context=context)
-            if not line_ids: # Update or check
-                line_pool.create(cr, uid, {
-                    'bom_id': dynamic_bom_id,
-                    'dynamic_mask': dynamic_mask,
-                    'category_id': category_id,
-                    'product_id': HW_proxy.id, 
-                    'product_uom': HW_proxy.uom_id.id, 
-                    'product_qty': 1, # always!
-                    'type': 'normal',
-                    }, context=context)
+            #if not line_ids: # Update or check
+            line_pool.create(cr, uid, {
+                'bom_id': dynamic_bom_id,
+                'dynamic_mask': dynamic_mask,
+                'category_id': category_id,
+                'product_id': HW_proxy.id, 
+                'product_uom': HW_proxy.uom_id.id, 
+                'product_qty': 1, # always!
+                'type': 'normal',
+                }, context=context)
             self.write(cr, uid, bom_id, {
                 'bom_category': 'remove',
                 }, context=context)

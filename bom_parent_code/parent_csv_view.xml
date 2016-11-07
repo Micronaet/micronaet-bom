@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_bom_parent_code_form">
+            <field name="name">mrp.bom.parent.code.form</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+            <field name="arch" type="xml">
+                <field name="code" position="before">
+                    <group colspan="2" col="3">
+                        <button name="migrate_assign_product_bom_product_csv" string="Migrate CSV" type="object" colspan="1" attrs="{'invisible': [('bom_category','!=','product'), ]}"/>                        
+                    </group>
+                </field>
+            </field>
+        </record>
+    </data>
+</openerp>
+

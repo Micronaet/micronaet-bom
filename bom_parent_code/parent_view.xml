@@ -8,8 +8,8 @@
             <field name="arch" type="xml">
                 <field name="code" position="before">
                     <group colspan="2" col="3">
-                        <field name="subparent_id" domain="[('bom_category','=','half')]" context="{'default_bom_category': 'half'}"/>
-                        <button name="assign_parent_bom" string="Auto assign" type="object" colspan="1"/>
+                        <!--<field name="subparent_id" domain="[('bom_category','=','half')]" context="{'default_bom_category': 'half'}"/>
+                        <button name="assign_parent_bom" string="Auto assign" type="object" colspan="1"/> TODO no more used!-->
                         
                         <!--EXTRA BLOCK-->
                         <button name="migrate_assign_parent_bom" string="Migrate BOM" type="object" colspan="1" attrs="{'invisible': [('bom_category','!=','parent'), ]}"/>                        

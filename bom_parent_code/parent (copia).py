@@ -200,8 +200,8 @@ class MRPBom(orm.Model):
             '050': [('TL038', 'TEX165', 2.3), ('PA601', 'TEX150', 0.4)],
             '051': [('TL038', 'TEX165', 2.3), ('PA601', 'TEX150', 0.4), ('PO651', 'TEX165', 0.22)],
             # TODO TX o PE
-            # VEDERE XXX '034': [('TL135', 'TESPOL150', 1.05), ('PA600', 'TESPOL165', 0.22)],
-            # VEDERE '039': [('TL135', 'TEX150', 1.05), ('PA600', 'TEX165', 0.22)],
+            '034': [('TL135', 'TESPOL150', 1.05), ('PA600', 'TESPOL165', 0.22)],
+            '039': [('TL135', 'TEX150', 1.05), ('PA600', 'TEX165', 0.22)],
             
             # 700
             # 701            
@@ -211,6 +211,7 @@ class MRPBom(orm.Model):
             
             # 'G421': ['TLG420', 'PA600']
             }
+        created_hw = []    
             
         # XXX SOLO INDICATIVO PER FORMALIZZARE LE REGOLE:
         tessuto_con_doppione = [
@@ -333,7 +334,12 @@ class MRPBom(orm.Model):
             
             # TODO Decidere se creare il solo semilavorato oppure continuare
             HW_codes = []
+
             if parent in crea_hw:
+                if default_code in created_hw:
+                    continue # only one
+                else:
+                    created_hw.append(default_code)    
                 for hw, component, qty in crea_hw[parent]:
                     HW_code = '%s%s%s' % (
                         hw, fabric_code, color_code)
@@ -341,7 +347,9 @@ class MRPBom(orm.Model):
                         component, color_code)
                     # Search fabric:
                     fabric_ids = product_pool.search(cr, uid, [
-                        ('default_code', '=', fabric_product)], context=context)    
+                        ('default_code', '=', fabric_product),
+                        # TODO  halfworked?
+                        ], context=context)    
                     if fabric_ids:
                         fabric_id = fabric_ids[0]
                     else:
@@ -350,7 +358,7 @@ class MRPBom(orm.Model):
                             'default_code': fabric_product,
                             'uom_id': 8, # mt
                             'uos_id': 8, # mt
-                            'uom_po_id': 8, # mt                            
+                            'uom_po_id': 8, # mt                          
                             }, context=context)
                         _logger.warning('Create fabric: %s' % fabric_product)
 
@@ -375,11 +383,11 @@ class MRPBom(orm.Model):
                         fabric_code, 
                         color_code,
                         ), 
-                    line.product_id.id, # fabric_id    
-                    line.product_uom.id, # fabric_uom
+                    line.product_id.id, # fabric_id   
+                    line.product_id.uom_id.id, # fabric_uom
                     line.product_qty,
                     )]
-                        
+
             for HW_code, fabric_id, fabric_uom, product_qty in HW_codes:
                 if parent in direct_sale: # use TL for PA and PO from Direct s.
                     category_id = categ_id.get('TL', False)
@@ -417,12 +425,33 @@ class MRPBom(orm.Model):
                 # Create / Update fabric under HW component
                 # -------------------------------------------------------------
                 HW_proxy = product_pool.browse(cr, uid, HW_id, context=context)
-                if not HW_proxy.half_bom_id: # Button and reload data
+                if HW_proxy.half_bom_id: # Button and reload data
+                    # XXX Part manually enabled:
+                    exist = line_pool.search(cr, uid, [
+                        ('bom_id', '=', HW_proxy.half_bom_id.id),
+                        ('halfwork_id', '=', HW_proxy.id),
+                        ('product_id', '=', fabric_id),
+                        ('product_qty', '=', product_qty),
+                        ], context=context)
+                    if not exist:    
+                        line_pool.create(cr, uid, {
+                            # Link:
+                            'bom_id': HW_proxy.half_bom_id.id, # bom link
+                            'halfwork_id': HW_proxy.id, # product link
+                            
+                            # Fabric data:
+                            'product_id': fabric_id, 
+                            'product_uom': fabric_uom, 
+                            'type': line.type,
+                            'product_qty': product_qty,
+                            }, context=context)
+                else: # yet present        
                     # Only first element
                     product_pool.create_product_half_bom(
                         cr, uid, [HW_id], context=context)
                     HW_proxy = product_pool.browse(
                         cr, uid, HW_id, context=context)                
+                        
                     line_pool.create(cr, uid, {
                         # Link:
                         'bom_id': HW_proxy.half_bom_id.id, # bom link

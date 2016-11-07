@@ -38,6 +38,7 @@
     'data': [
         #'security/ir.model.access.csv',    
         'parent_view.xml',        
+        'parent_csv_view.xml', # TODO remove
         'data/config_data.xml',
         ],
     'active': False,

@@ -80,10 +80,13 @@ class Parser(report_sxw.rml_parse):
         uid = self.uid
         context = {}
         
+        start_code = data.get('start_code', False)
+        domain = [('bom_category', '=', 'parent')]
+        if start_code:
+            domain.append(('code', '=ilike', start_code))
         bom_pool = self.pool.get('mrp.bom')
-        bom_ids = bom_pool.search(cr, uid, [
-            ('bom_category', '=', 'parent')], order='code', context=context)
-            
+        bom_ids = bom_pool.search(
+            cr, uid, domain, order='code', context=context)
         return bom_pool.browse(cr, uid, bom_ids, context=context)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

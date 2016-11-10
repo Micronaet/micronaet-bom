@@ -97,9 +97,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         'only': fields.selection([
             ('all', 'All'),
             ('error', 'Only error'),
-            ('override', 'Only override and error'),
-            ], 'Only line', required=True),
-                
+            ('override', 'Only error and overrided'),
+            ], 'Only line', required=True),                
         }
 
     _defaults = {
@@ -107,5 +106,3 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         'only': lambda *x: 'all',
         }    
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
-
-

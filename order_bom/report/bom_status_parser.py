@@ -98,8 +98,8 @@ class Parser(report_sxw.rml_parse):
                         component.dynamic_mask:
                     continue
 
-                # If only error jump placeholder and error both false
-                if only=='error' and not placeholder and not error:
+                # If only error jump placeholder and double both false
+                if only=='error' and not placeholder and not double:
                     continue
                     
                 record[1].append((component, double, placeholder))

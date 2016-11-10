@@ -52,15 +52,13 @@ class Parser(report_sxw.rml_parse):
             data = {}
 
         start_code = data.get('start_code', '')
-        only_override = data.get('only_override', False)
+        only = data.get('only', 'all')
         
-        description = ''        
+        description = _('Line: %s') % only
         if start_code:
             description += _('Code start with: %s') % start_code
-        if only_override:
-            description += _('Only mask override')            
         if not description:    
-            description = 'All product'    
+            description = _('All product')
         return description
         
     def load_bom(self, data):
@@ -75,7 +73,7 @@ class Parser(report_sxw.rml_parse):
         
         product_pool = self.pool.get('product.product')
         start_code = data.get('start_code', '')
-        only_override = data.get('only_override', False)
+        only = data.get('only', 'all')
         product_ids = product_pool.search(cr, uid, [
             ('default_code', '=ilike', '%s%%' % start_code),
             ], context=context)
@@ -86,6 +84,8 @@ class Parser(report_sxw.rml_parse):
             record = (item, [])
             double_check = [] # save component id
             for component in item.dynamic_bom_line_ids:
+                placeholder = component.product_id.bom_placeholder
+                
                 # Test if yet present:
                 if component.product_id.id in double_check:
                     double = True
@@ -93,10 +93,16 @@ class Parser(report_sxw.rml_parse):
                     double = False
                     double_check.append(component.product_id.id)
                     
-                if not double and only_override and not component.dynamic_mask:
+                # Consider ph error, double error and override if required:    
+                if not placeholder and not double and only=='override' and not\
+                        component.dynamic_mask:
+                    continue
+
+                # If only error jump placeholder and error both false
+                if only=='error' and not placeholder and not error:
                     continue
                     
-                record[1].append((component, double))
+                record[1].append((component, double, placeholder))
             res.append(record)    
         return res
 

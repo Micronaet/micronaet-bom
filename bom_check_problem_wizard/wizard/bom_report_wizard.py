@@ -96,10 +96,17 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         'start_code': fields.char('Start code', size=20),
         'only_override':fields.boolean('Only override', 
             help='Show only override component (or error for double)'),
+        'only': fields.selection([
+            ('all', 'All'),
+            ('override', 'Only override (and error)'),
+            ('error', 'Only error'),
+            ], 'Only line', required=True),
+                
         }
 
     _defaults = {
         'mode': lambda *x: 'order',
+        'only': lambda *x: 'all',
         }    
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 

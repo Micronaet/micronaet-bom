@@ -62,6 +62,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             'from_date': wiz_proxy.from_date or False,
             'to_date': wiz_proxy.to_date or False,
             'start_code': wiz_proxy.start_code or '',
+            'only_override': wiz_proxy.only_override or False,
             }
         
         if wiz_proxy.mode == 'order':
@@ -93,6 +94,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         'to_date': fields.date('To', help='Date <'),
         
         'start_code': fields.char('Start code', size=20),
+        'only_override':fields.boolean('Only override', 
+            help='Show only override component (or error for double)'),
         }
 
     _defaults = {

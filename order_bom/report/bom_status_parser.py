@@ -52,14 +52,14 @@ class Parser(report_sxw.rml_parse):
             data = {}
 
         start_code = data.get('start_code', '')
-        only_overrided = data.get('only_overrided', False)
+        only_override = data.get('only_override', False)
         
         description = ''        
         if start_code:
             description += _('Code start with: %s') % start_code
-        if only_overrided:
+        if only_override:
             description += _('Only mask override')            
-        if not f:    
+        if not description:    
             description = 'All product'    
         return description
         
@@ -75,18 +75,29 @@ class Parser(report_sxw.rml_parse):
         
         product_pool = self.pool.get('product.product')
         start_code = data.get('start_code', '')
-        only_overrided = data.get('only_overrided', False)
+        only_override = data.get('only_override', False)
         product_ids = product_pool.search(cr, uid, [
             ('default_code', '=ilike', '%s%%' % start_code),
             ], context=context)
         
         res = []
-        for item in product_pool.browse(cr, uid, product_ids, context=context)
+        
+        for item in product_pool.browse(cr, uid, product_ids, context=context):
             record = (item, [])
+            double_check = [] # save component id
             for component in item.dynamic_bom_line_ids:
-                if only_overrided and not component.dynamic_mask:
+                # Test if yet present:
+                if component.product_id.id in double_check:
+                    double = True
+                else:
+                    double = False
+                    double_check.append(component.product_id.id)
+                    
+                if not double and only_override and not component.dynamic_mask:
                     continue
-                record[1].append(component)                
+                    
+                record[1].append((component, double))
+            res.append(record)    
         return res
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

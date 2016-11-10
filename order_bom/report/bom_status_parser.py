@@ -50,12 +50,18 @@ class Parser(report_sxw.rml_parse):
     def get_filter(self, data):
         if data is None:
             data = {}
-        
+
         start_code = data.get('start_code', '')
+        only_overrided = data.get('only_overrided', False)
+        
+        description = ''        
         if start_code:
-            return 'Code start with: %s' % start_code
-        else:
-            return 'All product'    
+            description += _('Code start with: %s') % start_code
+        if only_overrided:
+            description += _('Only mask override')            
+        if not f:    
+            description = 'All product'    
+        return description
         
     def load_bom(self, data):
         ''' Master function for generate data
@@ -69,9 +75,18 @@ class Parser(report_sxw.rml_parse):
         
         product_pool = self.pool.get('product.product')
         start_code = data.get('start_code', '')
+        only_overrided = data.get('only_overrided', False)
         product_ids = product_pool.search(cr, uid, [
             ('default_code', '=ilike', '%s%%' % start_code),
             ], context=context)
-        return product_pool.browse(cr, uid, product_ids, context=context)
+        
+        res = []
+        for item in product_pool.browse(cr, uid, product_ids, context=context)
+            record = (item, [])
+            for component in item.dynamic_bom_line_ids:
+                if only_overrided and not component.dynamic_mask:
+                    continue
+                record[1].append(component)                
+        return res
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

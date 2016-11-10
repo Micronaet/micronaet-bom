@@ -15,7 +15,7 @@
                         <field name="mode" />
                         <newline/>
                         <field name="start_code" attrs="{'required': [('mode','=','product')], 'invisible': [('mode','not in',('product', 'parent'))]}"/>
-                        <field name="only_override" attrs="{'invisible': [('mode','not in',('product'))]}"/>
+                        <field name="only" attrs="{'invisible': [('mode','not in',('product'))]}"/>
                         <!--<field name="from_date" />
                         <field name="to_date" />-->
                    </group>

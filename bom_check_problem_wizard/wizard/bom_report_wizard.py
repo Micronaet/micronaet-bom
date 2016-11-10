@@ -72,7 +72,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         elif wiz_proxy.mode == 'product':
             report_name = 'aeroo_bom_all_component_check_report'
         elif wiz_proxy.mode == 'half':
-            return False
+            report_name = 'aeroo_hw_bom_all_component_check_report'
         else:
             _logger.error('No report mode %s!') % wiz_proxy.mode            
 

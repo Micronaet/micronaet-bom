@@ -76,19 +76,22 @@ class ProductProduct(orm.Model):
         bom_pool = self.pool.get('mrp.bom')
         
         product_proxy = self.browse(cr, uid, ids, context=context)[0]
-        bom_id = bom_pool.create(cr, uid, {
-            'product_tmpl_id': product_proxy.product_tmpl_id.id,
-            'product_id': product_proxy.id,
-            'bom_category': 'half',
-            'product_qty': 1.0,
-            'code': product_proxy.default_code,
-            'type': 'normal',
-            'product_uom': product_proxy.uom_id.id,
-            'halfwork_id': product_proxy.id,
-            }, context=context)
-        return self.write(cr, uid, ids, {
-            'half_bom_id': bom_id,
-            }, context=context)
+        if product_proxy.half_bom_id:
+            return True
+        else:
+            bom_id = bom_pool.create(cr, uid, {
+                'product_tmpl_id': product_proxy.product_tmpl_id.id,
+                'product_id': product_proxy.id,
+                'bom_category': 'half',
+                'product_qty': 1.0,
+                'code': product_proxy.default_code,
+                'type': 'normal',
+                'product_uom': product_proxy.uom_id.id,
+                'halfwork_id': product_proxy.id,
+                }, context=context)
+            return self.write(cr, uid, ids, {
+                'half_bom_id': bom_id,
+                }, context=context)
         
         
     _columns = {

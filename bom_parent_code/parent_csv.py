@@ -77,12 +77,21 @@ class MRPBom(orm.Model):
             import pdb; pdb.set_trace()
             bom_id = int(item[0])
             default_code = item[1].upper().strip()
-            fabric_id = int(item[2])
+            #fabric_id = int(item[2]) # TODO Not used!!!!!!
             fabric_code = item[3].upper().strip()
             product_qty = float(item[4].replace(',', '.'))
             component_code = item[5].strip()
             category_id = int(item[6]) # always present?
 
+            fabric_ids = product_pool.search(cr, uid, [
+                ('default_code', '=', fabric_code)], context=context)
+            if fabric_ids:
+                fabric_id = fabric_ids[0]
+                if len(fabric_ids) > 1:
+                    _logger.error('More than one fabric: %s' % fabric_code)
+            else: 
+                _logger.error('Fabric not found!!!')
+                
             # Mask for S or not S (same)
             if default_code[12:13] == 'S':
                 dynamic_mask = default_code[:12] + '%'
@@ -108,7 +117,7 @@ class MRPBom(orm.Model):
                 ], context=context)
 
             if component_ids:
-                _logger.error('%s Code component yet present' % (   
+                _logger.error('%s Code component yet present: %s' % (   
                     i, component_code))
                 # Update as half    
                 product_pool.write(cr, uid, component_ids, {
@@ -157,22 +166,24 @@ class MRPBom(orm.Model):
             # -------------------------------------------------------------
             # Create / Update rule in dynamic:
             # -------------------------------------------------------------
-            #line_ids = line_pool.search(cr, uid, [
-            #    ('bom_id', '=', dynamic_bom_id), # dynamic bom for structure
-            #    ('dynamic_mask', '=', dynamic_mask), # mask
-            #    ('category_id', '=', category_id),
-            #    ('product_id', '=', HW_proxy.id),
-            #    ], context=context)
-            #if not line_ids: # Update or check
-            line_pool.create(cr, uid, {
-                'bom_id': dynamic_bom_id,
-                'dynamic_mask': dynamic_mask,
-                'category_id': category_id,
-                'product_id': HW_proxy.id, 
-                'product_uom': HW_proxy.uom_id.id, 
-                'product_qty': 1, # always!
-                'type': 'normal',
-                }, context=context)
+            line_ids = line_pool.search(cr, uid, [
+                ('bom_id', '=', dynamic_bom_id), # dynamic bom for structure
+                ('dynamic_mask', '=', dynamic_mask), # mask
+                ('category_id', '=', category_id),
+                ('product_id', '=', HW_proxy.id),
+                ], context=context)
+            if not line_ids: # Update or check
+                line_pool.create(cr, uid, {
+                    'bom_id': dynamic_bom_id,
+                    'dynamic_mask': dynamic_mask,
+                    'category_id': category_id,
+                    'product_id': HW_proxy.id, 
+                    'product_uom': HW_proxy.uom_id.id, 
+                    'product_qty': 1, # always!
+                    'type': 'normal',
+                    }, context=context)
+                    
+            # Mark old BOM as to remove:
             self.write(cr, uid, bom_id, {
                 'bom_category': 'remove',
                 }, context=context)

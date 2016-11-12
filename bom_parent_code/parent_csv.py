@@ -106,10 +106,10 @@ class MRPBom(orm.Model):
                 continue
             
             # TODO Decidere se creare il solo semilavorato oppure continuare
-            if component_code in HW_codes:
-                _logger.error('%s Code component yet present: %s' % (
-                    i, component_code))
-                continue
+            #if component_code in HW_codes:
+            #    _logger.error('%s Code component yet present: %s' % (
+            #        i, component_code))
+            #    continue
 
             component_ids = product_pool.search(cr, uid, [
                 ('default_code', '=', component_code),
@@ -117,51 +117,53 @@ class MRPBom(orm.Model):
                 ], context=context)
 
             if component_ids:
-                _logger.error('%s Code component yet present: %s' % (   
+                _logger.warning('%s Code component yet present: %s' % (   
                     i, component_code))
                 # Update as half    
                 product_pool.write(cr, uid, component_ids, {
                     'relative_type': 'half',
                     }, context=context)    
-                continue                
-
-            HW_id = product_pool.create(cr, uid, {
-                'name': component_code,
-                'default_code': component_code,
-                'relative_type': 'half',       
-                'structure_id': structure_id,
-                'uom_id': 1, # XXX NR
-                'ean13_auto': False,
-                }, context=context)
-            HW_codes.append(component_code)
-            HW_proxy = product_pool.browse(
-                cr, uid, HW_id, context=context)  
+                HW_id = component_ids[0]
+                HW_proxy = product_pool.browse(
+                    cr, uid, HW_id, context=context)                
+            else:
+                HW_id = product_pool.create(cr, uid, {
+                    'name': component_code,
+                    'default_code': component_code,
+                    'relative_type': 'half',       
+                    'structure_id': structure_id,
+                    'uom_id': 1, # XXX NR
+                    'ean13_auto': False,
+                    }, context=context)
+                #HW_codes.append(component_code)
+                HW_proxy = product_pool.browse(
+                    cr, uid, HW_id, context=context)  
              
-            # TODO check yet present material:
-            #exist = line_pool.search(cr, uid, [
-            #    ('bom_id', '=', HW_proxy.half_bom_id.id),
-            #    ('halfwork_id', '=', HW_proxy.id),
-            #    ('product_id', '=', fabric_id),
-            #    ('product_qty', '=', product_qty),
-            #    ], context=context)
-            # Create HW Bom with button:
-            product_pool.create_product_half_bom(
-                cr, uid, [HW_id], context=context)
-            # Re-read record    
-            HW_proxy = product_pool.browse(
-                cr, uid, HW_id, context=context)                
+                # TODO check yet present material:
+                #exist = line_pool.search(cr, uid, [
+                #    ('bom_id', '=', HW_proxy.half_bom_id.id),
+                #    ('halfwork_id', '=', HW_proxy.id),
+                #    ('product_id', '=', fabric_id),
+                #    ('product_qty', '=', product_qty),
+                #    ], context=context)
+                # Create HW Bom with button:
+                product_pool.create_product_half_bom(
+                    cr, uid, [HW_id], context=context)
+                # Re-read record    
+                HW_proxy = product_pool.browse(
+                    cr, uid, HW_id, context=context)                
                 
-            line_pool.create(cr, uid, {
-                # Link:
-                'bom_id': HW_proxy.half_bom_id.id, # bom link
-                'halfwork_id': HW_proxy.id, # product link
-                
-                # Fabric data:
-                'product_id': fabric_id, 
-                'product_uom': fabric_uom, 
-                #'type': line.type,
-                'product_qty': product_qty,
-                }, context=context)
+                line_pool.create(cr, uid, {
+                    # Link:
+                    'bom_id': HW_proxy.half_bom_id.id, # bom link
+                    'halfwork_id': HW_proxy.id, # product link
+                    
+                    # Fabric data:
+                    'product_id': fabric_id, 
+                    'product_uom': fabric_uom, 
+                    #'type': line.type,
+                    'product_qty': product_qty,
+                    }, context=context)
 
             # -------------------------------------------------------------
             # Create / Update rule in dynamic:

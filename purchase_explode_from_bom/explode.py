@@ -104,7 +104,7 @@ class PurchaseOrderBOM(orm.Model):
                         )
                     })
                 line_pool.create(cr, uid, item_data, context=context)
-        return True
+        return True #{'type': 'ir.actions.client', 'tag': 'reload'}
     
     _columns = {
         # Link:
@@ -334,7 +334,7 @@ class PurchaseOrderLine(orm.Model):
             partner_id, date_order=False, fiscal_position_id=False, 
             date_planned=False, name=False, price_unit=False, state='draft', 
             context=None):
-        ''' Update onchange and correct for pipe
+        ''' Update onchange and correct for line depend on hw linked
         ''' 
         res = super(PurchaseOrderLine, self).onchange_product_id(
             cr, uid, ids, pricelist_id, product_id, qty, uom_id,

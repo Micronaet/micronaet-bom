@@ -32,7 +32,7 @@
                                     <field name="product_id" readonly="1" />                                    
                                     <field name="quantity" readonly="1"/>
                                     
-                                    <field name="quantity_order" />
+                                    <field name="quantity_order" /><!--on_change="onchange_quantity_order()"-->
                                     <button name="explode_hw_purchase_line" string="Recalc." type="object" />
                                     <field name="explode_bom_calc" widget="html" readonly="1" />
                                     <field name="explode_bom_error" widget="html" readonly="1" />

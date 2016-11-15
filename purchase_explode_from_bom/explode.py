@@ -119,8 +119,16 @@ class PurchaseOrderBOM(orm.Model):
     def _get_explode_bom_result(self, cr, uid, ids, fields, args, 
             context=None):
         ''' Fields function for calculate 
-        '''        
-        res = dict.fromkeys(ids, '')        
+        '''     
+        res = {}   
+        for line in self.browse(cr, uid, ids, context=context):
+            res[line.id] = ''
+            for cmpt in line.product_id.half_bom_ids:
+                res[line.id] += _('%s q.: %s (min. %s)\n') % (
+                    cmpt.product_id.default_code,
+                    cmpt.product_qty * line.quantity_order,
+                    cmpt.product_id.pipe_min_order,
+                    )
         return res
     
     _columns = {

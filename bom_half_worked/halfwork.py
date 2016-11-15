@@ -61,6 +61,14 @@ class MrpBomLine(orm.Model):
         'halfwork': fields.related(
             'product_id', 'halfwork', 
             type='boolean', string='Halfwork'),
+        #'relative_type': fields.related(
+        #    'product_id', 'relative_type', 
+        #    #selection=[
+        #    #    ('none', 'None'),
+        #    #    ('half', 'Halfworked BOM'),
+        #    #    ('parent', 'Parent BOM'),
+        #    #    ], 
+        #    type='selection', string='Relative type'),
         }
 
     # Button:

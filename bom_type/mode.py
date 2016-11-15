@@ -40,10 +40,9 @@ _logger = logging.getLogger(__name__)
 
 class ProductProduct(orm.Model):
     """ Model name: ProductProduct
-    """
-    
+    """    
     _inherit = 'product.product'
-
+    
     _columns = {
         'relative_type': fields.selection([
             ('none', 'None'),

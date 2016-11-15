@@ -1,6 +1,41 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+        <!--product.pipe.material-->
+        <record model="ir.ui.view" id="view_product_pipe_material_tree">
+            <field name="name">product.pipe.material.tree</field>
+            <field name="model">product.pipe.material</field>
+            <field name="arch" type="xml">
+                <tree string="Pipe material">        
+                    <field name="code" />
+                    <field name="name" />
+                    <field name="resistence" />
+                    <field name="note" />
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_product_pipe_material_form">
+            <field name="name">product.pipe.material.product.pipe.material</field>
+            <field name="model">product.pipe.material</field>
+            <field name="arch" type="xml">
+                <tree string="Pipe material">        
+                    <field name="code" />
+                    <field name="name" />
+                    <field name="resistence" />
+                    <newline/>
+                    <separator string="Order lot" colspan="4"/>
+                    <field name="lot_ids" colspan="4" nolabel="1" >
+                        <tree string="Order lot" editable="bottom">
+                            <field name="diameter" />
+                            <field name="order_lot" />
+                        </tree>
+                    </field>                    
+                    <separator string="Note" colspan="4"/>
+                    <field name="note" colspan="4" nolabel="1"/>
+                </tree>
+            </field>
+        </record>
+        
         <record model="ir.ui.view" id="view_add_pipe_product_variant_form">
             <field name="name">product.product.form</field>
             <field name="model">product.product</field>

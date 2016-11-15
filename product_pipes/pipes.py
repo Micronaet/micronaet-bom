@@ -77,13 +77,24 @@ class ProductProduct(orm.Model):
     _columns = {
         'material_id': fields.many2one(
             'product.pipe.material', 'Material'),
-        'diameter': fields.diamter('Diameter', required=True),
+        'diameter': fields.float('Diameter mm.', digits=(16, 2)),
         'order_lot': fields.integer('Min. lot', required=True),
         }
     
     _defaults = {
         'order_lot': lambda *x: 1,
         }    
+
+class ProductProduct(orm.Model):
+    """ Model name: Product
+    """    
+    _inherit = 'product.pipe.material'
+    
+    _columns = {
+        'lot_ids': fields.one2many(
+            'product.pipe.material.lot', 'material_id', 
+            'Order lot'),
+        }
 
 class ProductProduct(orm.Model):
     """ Model name: Product
@@ -101,8 +112,9 @@ class ProductProduct(orm.Model):
         'pipe_material': fields.selection([
             ('fe', 'Iron'),
             ('al', 'Aluminium'),
-            ], 'Pipe material')
+            ], 'Pipe material'),
         # Override pipe_material:
-            
+        'pipe_material_id': fields.many2one(
+            'product.pipe.material', 'Material'),     
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

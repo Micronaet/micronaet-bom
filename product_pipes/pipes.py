@@ -54,7 +54,7 @@ class MRPBomLine(orm.Model):
             help='Total pipes for create the part')
         }
 
-class ProductProduct(orm.Model):
+class ProductPipeMaterial(orm.Model):
     """ Model name: Product
     """    
     _name = 'product.pipe.material'
@@ -67,7 +67,7 @@ class ProductProduct(orm.Model):
         'note': fields.text('Note'),
         }
 
-class ProductProduct(orm.Model):
+class ProductPipeMaterialLot(orm.Model):
     """ Model name: Product
     """    
     _name = 'product.pipe.material.lot'
@@ -85,7 +85,7 @@ class ProductProduct(orm.Model):
         'order_lot': lambda *x: 1,
         }    
 
-class ProductProduct(orm.Model):
+class ProductPipeMaterial(orm.Model):
     """ Model name: Product
     """    
     _inherit = 'product.pipe.material'

@@ -1,6 +1,16 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+        <record model="ir.ui.view" id="view_add_pipe_product_variant_form">
+            <field name="name">product.product.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_normal_form_view"/>
+            <field name="arch" type="xml">
+                <field name="active" position="after">
+                    <field name="is_pipe" />
+                </field>
+            </field>
+        </record>
         <!--mrp.bom-->
         <record model="ir.ui.view" id="view_mrp_bom_compoment_form">
             <field name="name">mrp.bom.form</field>

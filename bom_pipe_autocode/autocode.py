@@ -51,21 +51,63 @@ class ProductProduct(orm.Model):
         
         part = 4
         product_proxy = self.browse(cr, uid, ids, context=context)
-        default_code = product_proxy.default_code
-        code = default_code.split('x')
+        default_code = product_proxy.name.upper()        
+        code = default_code.split('X')
+
         if len(code) != 3:
             return False
-        
+
+        # Extract data:        
         material = code[0][:part]
+        pipe_diameter = code[0][part:]
+        pipe_thick = code[1].replace(',', '.')
+        pipe_length = code[2]
         
+        material_pool = self.pool.get('product.pipe.material')
+        material_ids = material_pool.search(cr, uid, [
+            ('code', '=', material)], context=context)
+            
+        # Default:
+        pipe_min_order = 1
+        pipe_resistence = ''
+        first_supplier_id = False
+        pipe_material_id = False
+        if material_ids:    
+            pipe_material_id = material_ids[0]
+            material_proxy = material_pool.browse(
+                cr, uid, material_ids, context=context)    
+            material_name = material_proxy.name
+
+            for lot in material_proxy[0].lot_ids:
+                if lot.diameter == float(pipe_diameter):
+                    pipe_min_order = lot.order_lot
+                    pipe_resistence = lot.resistence
+                    first_supplier_id = lot.first_supplier_id.id                    
+                    break
+                
+        else: # not found
+            _logger.warning('Material not fount: %s' % material)
+            material_name = material
+        
+        name = _('Tubo %s Diam. %s Spess. %s Lungh. %s') % (
+            material_name, # TODO
+            pipe_diameter,
+            pipe_thick,
+            pipe_length,
+            )
+            
         return self.write(cr, uid, ids, {
+            'name': name,
+            'default_code': default_code,
+            
             #'is_pipe'
-            'pipe_diameter': code[0][part:],
-            'pipe_thick': code[1],
-            'pipe_length': code[2],
-            #'pipe_resistence': 
-            #'pipe_min_order': 
-            #'pipe_material_id': 
+            'pipe_diameter': pipe_diameter,
+            'pipe_thick': pipe_thick,
+            'pipe_length': pipe_length,
+            'pipe_resistence': pipe_resistence,
+            'pipe_min_order': pipe_min_order,
+            'pipe_material_id': pipe_material_id,
+            #'first_supplier_id': first_supplier_id, # TODO add dep.
             }, context=context)
             
         

@@ -63,6 +63,8 @@ class ProductPipeMaterial(orm.Model):
     _columns = {
         'code': fields.char('Code', size=10),
         'name': fields.char('Pipe material', size=32),
+        'first_supplier_id': fields.many2one(
+            'res.partner', 'First supplier'),
         'resistence': fields.char('Resistence', size=20),
         'note': fields.text('Note'),
         }

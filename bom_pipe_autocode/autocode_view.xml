@@ -8,7 +8,8 @@
             <field name="priority" eval="50" />
             <field name="arch" type="xml">
                 <field name="default_code" position="after">
-                    <button name="generate_pipe_data_from_code" string="Extra info" type="object" icon="gtk-ok"/>
+                    <button name="generate_pipe_data_from_code" string="Generate info" type="object" icon="gtk-ok"/>
+                    <newline/>
                 </field>
             </field>
         </record>

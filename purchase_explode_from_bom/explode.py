@@ -73,7 +73,7 @@ class PurchaseOrderBOM(orm.Model):
             item_quantity = half_quantity * item.product_qty
             
             item_data = line_pool.onchange_product_id(
-                cr, uid, ids, 
+                cr, uid, False, 
                 order_proxy.pricelist_id.id, 
                 item.product_id.id, 
                 item_quantity, 
@@ -97,8 +97,11 @@ class PurchaseOrderBOM(orm.Model):
                 item_data.update({
                     'order_id': order_id,
                     'explode_bom_id': half_id,
-                    'product_id': item.product_id.id,                    
-                    'for_hw_id': half_proxy.product_id,
+                    'product_id': item.product_id.id,
+                    'name': '[%s] %s' % (
+                        name,
+                        item_data.get('name', ''),
+                        )
                     })
                 line_pool.create(cr, uid, item_data, context=context)
         return True
@@ -221,12 +224,8 @@ class PurchaseOrder(orm.Model):
                 # Create purchase order line:
                 item_quantity = half_quantity * item.product_qty
                 
-                # Update context for line description:
-                context['for_hw_id'] = half.product_id.id
-                context['for_hw_code'] = name
-                
                 item_data = line_pool.onchange_product_id(
-                    cr, uid, ids, 
+                    cr, uid, False, 
                     order_proxy.pricelist_id.id, 
                     item.product_id.id, 
                     item_quantity, 
@@ -252,6 +251,10 @@ class PurchaseOrder(orm.Model):
                         'order_id': order_id,
                         'explode_bom_id': half_id,
                         'product_id': item.product_id.id,
+                        'name': '[%s] %s' % (
+                            name,
+                            item_data.get('name', ''), 
+                            )                                        
                         })
                     line_pool.create(cr, uid, item_data, context=context)
         return True
@@ -333,35 +336,22 @@ class PurchaseOrderLine(orm.Model):
             context=None):
         ''' Update onchange and correct for pipe
         ''' 
-        
-        # Call original:
         res = super(PurchaseOrderLine, self).onchange_product_id(
             cr, uid, ids, pricelist_id, product_id, qty, uom_id,
-            partner_id, date_order, fiscal_position_id, date_planned,
-            name, price_unit, state, context=context)
-        
-        # No change:    
-        if not product_id or 'value' not in res or context.get(
-                'pipe_updated', False):
-            return res
-            
-        # Change description for pipes:        
-        product_pool = self.pool.get('product.product')    
-        product_proxy = product_pool.browse(
-            cr, uid, product_id, context=context)
-        if product_proxy.is_pipe:
-            res['value']['name'] = '[%s] %s' % (
-                product_proxy.for_hw_id.default_code or '??', 
-                res['value'].get('name', ''),
-                ),
-        context['pipe_updated'] = True
-        return res   
-        
+            partner_id, date_order, fiscal_position_id, 
+            date_planned, name, price_unit, state, context=context)
+        if ids:
+            line_proxy = self.browse(cr, uid, ids, context=context) 
+            if line_proxy.explode_bom_id: # calc name depend on HW bom             
+                res['value']['name'] = '[%s] %s' % (
+                    line_proxy.explode_bom_id.product_id.default_code,
+                    res['value'].get('name', ''), 
+                    )                                        
+        return res
+    
     _columns = {
         'explode_bom_id': fields.many2one(
             'purchase.order.bom', 'Explode BOM', ondelete='cascade'),            
-        'for_hw_id': fields.many2one(
-            'product.product', 'For HW'),
         }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

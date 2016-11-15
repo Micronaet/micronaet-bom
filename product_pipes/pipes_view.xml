@@ -18,7 +18,7 @@
             <field name="name">product.pipe.material.product.pipe.material</field>
             <field name="model">product.pipe.material</field>
             <field name="arch" type="xml">
-                <tree string="Pipe material">        
+                <form string="Pipe material">        
                     <field name="code" />
                     <field name="name" />
                     <field name="resistence" />
@@ -32,7 +32,7 @@
                     </field>                    
                     <separator string="Note" colspan="4"/>
                     <field name="note" colspan="4" nolabel="1"/>
-                </tree>
+                </form>
             </field>
         </record>
         

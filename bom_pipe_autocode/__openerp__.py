@@ -18,26 +18,24 @@
 ###############################################################################
 
 {
-    'name': 'Pipes product',
+    'name': 'Pipe autocode',
     'version': '0.1',
     'category': 'Product',
-    'description': '''        
-        Pipes product
+    'description': '''  
+        Pipe autocode with format: TB - MATERIAL - DIAM - THICK - LENGHT      
         ''',
     'author': 'Micronaet S.r.l. - Nicola Riolini',
     'website': 'http://www.micronaet.it',
     'license': 'AGPL-3',
     'depends': [
         'base',
+        'product_pipes',
         'product',
-        'mrp',
-        'purchase_extra_field', # first supplier
         ],
     'init_xml': [],
     'demo': [],
     'data': [
-        'security/ir.model.access.csv',
-        'pipes_view.xml',
+        #'_view.xml',
         ],
     'active': False,
     'installable': True,

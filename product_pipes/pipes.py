@@ -57,6 +57,37 @@ class MRPBomLine(orm.Model):
 class ProductProduct(orm.Model):
     """ Model name: Product
     """    
+    _name = 'product.pipe.material'
+    _description = 'Pipe description'
+    
+    _columns = {
+        'code': fields.char('Code', size=10),
+        'name': fields.char('Pipe material', size=32),
+        'resistence': fields.char('Resistence', size=20),
+        'note': fields.text('Note'),
+        }
+
+class ProductProduct(orm.Model):
+    """ Model name: Product
+    """    
+    _name = 'product.pipe.material.lot'
+    _description = 'Pipe order lot'
+    _rec_name = 'material_id'
+    
+    _columns = {
+        'material_id': fields.many2one(
+            'product.pipe.material', 'Material'),
+        'diameter': fields.diamter('Diameter', required=True),
+        'order_lot': fields.integer('Min. lot', required=True),
+        }
+    
+    _defaults = {
+        'order_lot': lambda *x: 1,
+        }    
+
+class ProductProduct(orm.Model):
+    """ Model name: Product
+    """    
     _inherit = 'product.product'
     
     _columns = {
@@ -66,10 +97,12 @@ class ProductProduct(orm.Model):
         'pipe_length': fields.float('Pipe length mm.', digits=(16, 2)),
         'pipe_resistence': fields.char('Pipe resistence', size=32),
         'pipe_min_order': fields.integer('Pipe min order'),
+        # TODO remove:
         'pipe_material': fields.selection([
             ('fe', 'Iron'),
             ('al', 'Aluminium'),
             ], 'Pipe material')
+        # Override pipe_material:
             
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

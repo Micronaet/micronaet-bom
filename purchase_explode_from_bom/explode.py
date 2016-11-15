@@ -46,6 +46,11 @@ class PurchaseOrderBOM(orm.Model):
     _description = 'Purchase from BOM'
     _rec_name = 'bom_id'
     
+    def onchange_quantity_order(self, cr, uid, ids, context=None):
+        ''' When change q. remember to recalc
+        '''
+        return {'value': {'to_recalc': True, }}
+        
     def explode_hw_purchase_line(self, cr, uid, ids, context=None):
         ''' Recal single component
         '''
@@ -98,17 +103,30 @@ class PurchaseOrderBOM(orm.Model):
                     'order_id': order_id,
                     'explode_bom_id': half_id,
                     'product_id': item.product_id.id,
+                    'to_recalc': False,
                     'name': '[%s] %s' % (
                         name,
                         item_data.get('name', ''),
                         )
                     })
                 line_pool.create(cr, uid, item_data, context=context)
+                
+                # Remove recalc flag:
+                self.write(cr, uid, ids, {
+                    'to_recalc': False}, context=context)
         return True #{'type': 'ir.actions.client', 'tag': 'reload'}
+
+    def _get_explode_bom_result(self, cr, uid, ids, fields, args, 
+            context=None):
+        ''' Fields function for calculate 
+        '''        
+        res = dict.fromkeys(ids, '')        
+        return res
     
     _columns = {
         # Link:
         'purchase_id': fields.many2one('purchase.order', 'Order'),
+        'to_recalc': fields.boolean('To recalc'),
         'bom_id': fields.many2one('mrp.bom', 'BOM', readonly=True),
         'parent_quantity': fields.integer('Parent total', readonly=True), 
 
@@ -117,7 +135,9 @@ class PurchaseOrderBOM(orm.Model):
         'quantity': fields.integer('Total', readonly=True),        
         'quantity_order': fields.integer('Order'),
         
-        'explode_bom_calc': fields.text('Explode calc', readonly=True), 
+        'explode_bom_calc': fields.function(
+            _get_explode_bom_result, method=True, type='text', 
+            string='Explode calc.', store=False),# TODO multi 
         'explode_bom_error': fields.text('Explode error', readonly=True), 
 
         'note': fields.text('Note'),
@@ -247,72 +267,28 @@ class PurchaseOrder(orm.Model):
                 
                 name
                 if item_data:                      
+                    resistence = \
+                        item.product_id.pipe_resistence
                     item_data.update({
                         'order_id': order_id,
                         'explode_bom_id': half_id,
                         'product_id': item.product_id.id,
-                        'name': '[%s] %s' % (
+                        'name': '[%s] %s (res. %s)' % (
                             name,
                             item_data.get('name', ''), 
+                            resistence or '/',                            
                             )                                        
                         })
                     line_pool.create(cr, uid, item_data, context=context)
+                    
         return True
         
-    """TODO 
-    def _get_explode_bom_result(
-            self, cr, uid, ids, fields, args, context=None):
-        ''' Fields function for calculate bom esit and error
-        '''
-        res = {}
-        
-        # Pool used:
-        line_pool = self.pool.get('purchase.order.line')
-        
-        if not ids: 
-            return res
-            
-        self.browse(cr, uid, ids, context=context)
-        
-        line_ids = line_pool.search(cr, uid, [
-            ('explode_bom_id', '!=', False),
-            ('order_id', '=', 
-            ], context=context)
-        
-        # Create DB for link bom with purchase line
-        db_link = {}
-        for line in line_pool.browse(cr, uid, line_ids, context=context):
-            if line.explode_bom_id.id not in db_link:
-                db_link[line.explode_bom_id.id] = []
-            db_link[line.explode_bom_id.id].append(line.id)
-        
-        for line in :
-            res[line.id] = ''
-            
-                    #bom_data[bom.id][0] += _(
-            #    '%s: %s x %s x %s = %s  [%s]\n') % (
-            #        half.product_id.default_code or 'cod. ?',
-            #        bom.quantity,
-            #        half.product_qty,
-            #        item.product_qty,
-            #        qty,
-            #        item.product_id.default_code or 'cod. ?',
-            #        )
-        #else:    
-        #    bom_data[bom.id][0] += _(
-        #        '%s No data to write') % bom.product_id.name
-    """  
-    
     _columns = {
         # Data for explode wizard:
         'load_bom_code': fields.char('Load BOM Code', size=20),
         'load_bom_id': fields.many2one(
             'mrp.bom', 'Load BOM'),
         'quantity': fields.integer('Total'),
-        #'explode_bom_calc': fields.function(
-        #    _get_explode_bom_result, method=True, type='text', 
-        #    string='Explode calc.', store=False),# TODO multi 
-                        
         'explode_bom_calc': fields.text('Explode calc.', readonly=True), 
         'explode_bom_error': fields.text('Explode error', readonly=True), 
 
@@ -342,10 +318,12 @@ class PurchaseOrderLine(orm.Model):
             date_planned, name, price_unit, state, context=context)
         if ids:
             line_proxy = self.browse(cr, uid, ids, context=context) 
+            resistence = line_proxy.product_id.pipe_resistence
             if line_proxy.explode_bom_id: # calc name depend on HW bom             
-                res['value']['name'] = '[%s] %s' % (
+                res['value']['name'] = '[%s] %s (res. %s)' % (
                     line_proxy.explode_bom_id.product_id.default_code,
-                    res['value'].get('name', ''), 
+                    res['value'].get('name', ''),
+                    resistence or '/',
                     )                                        
         return res
     

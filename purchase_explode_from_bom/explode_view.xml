@@ -25,17 +25,17 @@
                             <field name="explode_bom_calc" nolabel="1" />
                             <field name="explode_bom_error" nolabel="1" />
                             
-                            <separator string="Halfworked component:" colspan="4"/>
+                            <separator string="Halfworked component (red=press recalc):" colspan="4"/>
                             <field name="explode_bom_ids" editable="bottom" nolabel="1" colspan="4">
-                                <tree string="Explode BOM" editable="bottom">
+                                <tree string="Explode BOM (red=to recalc)" editable="bottom" colors="red:to_recalc==True">
                                     <field name="bom_id" readonly="1"/>
                                     <field name="product_id" readonly="1" />                                    
-                                    <field name="quantity" readonly="1"/>
-                                    
-                                    <field name="quantity_order" /><!--on_change="onchange_quantity_order()"-->
+                                    <field name="quantity" readonly="1"/>                                    
+                                    <field name="quantity_order" on_change="onchange_quantity_order()"/>
+                                    <field name="to_recalc" invisible="1" />
                                     <button name="explode_hw_purchase_line" string="Recalc." type="object" />
                                     <field name="explode_bom_calc" widget="html" readonly="1" />
-                                    <field name="explode_bom_error" widget="html" readonly="1" />
+                                    <!--<field name="explode_bom_error" widget="html" readonly="1" />-->
                                     <field name="note" />
                                 </tree>
                             </field>

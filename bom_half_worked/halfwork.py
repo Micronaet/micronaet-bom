@@ -63,6 +63,32 @@ class MrpBomLine(orm.Model):
             type='boolean', string='Halfwork'),
         }
 
+    # Button:
+    def open_halfwork_form(self, cr, uid, ids, context=None):
+        ''' Open component HW for check bom
+        '''
+        assert len(ids) == 1, 'Works only with one record a time'
+        
+        line_proxy = self.browse(cr, uid, ids, context=context)[0]
+        bom_id = line_proxy.product_id.half_bom_id.id
+        #model_pool = self.pool.get('ir.model.data')
+        #view_id = model_pool.get_object_reference('module_name', 'view_name')[1]
+    
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Halfworked component'),
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_id': bom_id,
+            'res_model': 'mrp.bom',
+            #'view_id': view_id, # False
+            'views': [(False, 'form')],
+            'domain': [('id', '=', bom_id)],
+            'context': context,
+            'target': 'current', # 'new'
+            'nodestroy': False,
+            }
+
 class ProductProduct(orm.Model):
     """ Model name: ProductProduct
     """

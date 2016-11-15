@@ -73,10 +73,10 @@ class Parser(report_sxw.rml_parse):
         context = {}
         
         product_pool = self.pool.get('product.product')
-        #start_code = data.get('start_code', '')
+        start_code = data.get('start_code', '')
         #only = data.get('only', 'all')
         product_ids = product_pool.search(cr, uid, [
-            #('default_code', '=ilike', '%s%%' % start_code),
+            ('default_code', '=ilike', '%s%%' % start_code),
             ('relative_type', '=', 'half'),
             ], context=context)
         

@@ -35,7 +35,7 @@
     'init_xml': [],
     'demo': [],
     'data': [
-        #'_view.xml',
+        'autocode_view.xml',
         ],
     'active': False,
     'installable': True,

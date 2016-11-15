@@ -44,6 +44,31 @@ class ProductProduct(orm.Model):
     
     _inherit = 'product.product'
     
+    def generate_pipe_data_from_code(self, cr, uid, ids, context=None):
+        ''' Extract data from code:
+        '''
+        assert len(ids) == 1, 'Works only with one record a time'
+        
+        part = 4
+        product_proxy = self.browse(cr, uid, ids, context=context)
+        default_code = product_proxy.default_code
+        code = default_code.split('x')
+        if len(code) != 3:
+            return False
+        
+        material = code[0][:part]
+        
+        return self.write(cr, uid, ids, {
+            #'is_pipe'
+            'pipe_diameter': code[0][part:],
+            'pipe_thick': code[1],
+            'pipe_length': code[2],
+            #'pipe_resistence': 
+            #'pipe_min_order': 
+            #'pipe_material_id': 
+            }, context=context)
+            
+        
     
     
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

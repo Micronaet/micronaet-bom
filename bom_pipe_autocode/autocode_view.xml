@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_product_product_pipes_form">
+            <field name="name">product.product.pipe.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product_pipes.view_product_product_pipes_form"/>
+            <field name="priority" eval="50" />
+            <field name="arch" type="xml">
+                <field name="default_code" position="after">
+                    <button name="generate_pipe_data_from_code" string="Extra info" type="object" icon="gtk-ok"/>
+                </field>
+            </field>
+        </record>
+    </data>
+</openerp>
+

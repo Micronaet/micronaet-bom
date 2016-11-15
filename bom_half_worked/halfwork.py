@@ -58,17 +58,20 @@ class MrpBomLine(orm.Model):
     _columns = {
         'halfwork_id': fields.many2one(
             'product.product', 'Halfwork product'),
+        # TODO remove? yet used?    
         'halfwork': fields.related(
             'product_id', 'halfwork', 
             type='boolean', string='Halfwork'),
-        #'relative_type': fields.related(
-        #    'product_id', 'relative_type', 
-        #    #selection=[
-        #    #    ('none', 'None'),
-        #    #    ('half', 'Halfworked BOM'),
-        #    #    ('parent', 'Parent BOM'),
-        #    #    ], 
-        #    type='selection', string='Relative type'),
+            
+        # Add for layout button:
+        'relative_type': fields.related(
+            'product_id', 'relative_type', 
+            selection=[
+                ('none', 'None'),
+                ('half', 'Halfworked BOM'),
+                ('parent', 'Parent BOM'),
+                ], 
+            type='selection', string='Relative type'),
         }
 
     # Button:

@@ -82,7 +82,7 @@ class ProductProduct(orm.Model):
             ('code', '=', material)], context=context)
             
         # Default:
-        pipe_min_order = 1
+        pipe_min_order = False
         pipe_resistence = ''
         first_supplier_id = False
         pipe_material_id = False
@@ -123,10 +123,17 @@ class ProductProduct(orm.Model):
             #'pipe_resistence': pipe_resistence,
             'pipe_min_order': pipe_min_order,
             'pipe_material_id': pipe_material_id,
-            'first_supplier_id': first_supplier_id, # TODO add dep.
+            #'first_supplier_id': first_supplier_id, # TODO add dep.
             }               
         if pipe_resistence:       
             data['pipe_resistence'] = pipe_resistence
+
+        if first_supplier_id
+            data['first_supplier_id'] = first_supplier_id
+        
+        if pipe_min_order:
+            data['pipe_min_order'] = pipe_min_order
+            
         return self.write(cr, uid, ids, data, context=context)
     
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

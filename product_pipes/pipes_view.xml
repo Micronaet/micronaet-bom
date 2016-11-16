@@ -38,6 +38,15 @@
                 </form>
             </field>
         </record>
+        <record model="ir.actions.act_window" id="action_product_pipe_material_form">
+            <field name="name">Pipe material</field>
+            <field name="res_model">product.pipe.material</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_product_pipe_material_tree"/>
+            <field name="context">{}</field>
+            <field name="domain">[]</field>
+        </record>
         
         <record model="ir.ui.view" id="view_add_pipe_product_variant_form">
             <field name="name">product.product.form</field>
@@ -155,6 +164,13 @@
             action="action_product_product_pipes"
             sequence="30"
             />
+            <menuitem 
+                parent="menu_action_product_product_pipes_tree" 
+                id="menu_action_product_product_pipes_material_tree" 
+                action="action_product_pipe_material_form"
+                sequence="10"
+                />
+            
         
     </data>
 </openerp>

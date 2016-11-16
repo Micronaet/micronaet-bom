@@ -78,7 +78,8 @@ class Parser(report_sxw.rml_parse):
                 if product.default_code not in res:
                     res[product.default_code] = []
                 res[product.default_code].append(item.default_code)
-        res = sorted(res)
-        return res.iteritems()
-
+        result = []
+        for key in sorted(res):
+            result.append((key, res[key]))
+        return result
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

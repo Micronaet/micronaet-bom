@@ -130,7 +130,7 @@
                     <field name="pipe_material_id" />
                     <group expand="0" string="Group By...">
                         <filter name="group_supplier" string="First Supplier" context="{'group_by': 'first_supplier_id'}"/>
-                        <filter name="group_material" string="Pipe material" context="{'group_by': 'pipe_material'}"/>
+                        <filter name="group_material" string="Pipe material" context="{'group_by': 'pipe_material_id'}"/>
                         <filter name="group_diameter" string="Pipe diameter" context="{'group_by': 'pipe_diameter'}"/>
                         <filter name="group_thick" string="Pipe thick" context="{'group_by': 'pipe_thick'}"/>
                         <filter name="group_length" string="Pipe length" context="{'group_by': 'pipe_length'}"/>
@@ -155,7 +155,6 @@
             action="action_product_product_pipes"
             sequence="30"
             />
-        
         
     </data>
 </openerp>

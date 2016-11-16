@@ -121,14 +121,14 @@ class ProductProduct(orm.Model):
             'pipe_thick': pipe_thick,
             'pipe_length': pipe_length,
             #'pipe_resistence': pipe_resistence,
-            'pipe_min_order': pipe_min_order,
+            #'pipe_min_order': pipe_min_order,
             'pipe_material_id': pipe_material_id,
             #'first_supplier_id': first_supplier_id, # TODO add dep.
             }               
         if pipe_resistence:       
             data['pipe_resistence'] = pipe_resistence
 
-        if first_supplier_id
+        if first_supplier_id:
             data['first_supplier_id'] = first_supplier_id
         
         if pipe_min_order:

@@ -170,8 +170,6 @@
                 action="action_product_pipe_material_form"
                 sequence="10"
                 />
-            
-        
     </data>
 </openerp>
 

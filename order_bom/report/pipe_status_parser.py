@@ -63,10 +63,21 @@ class Parser(report_sxw.rml_parse):
         cr = self.cr
         uid = self.uid
         context = {}
-        
+                
         product_pool = self.pool.get('product.product')
+        line_pool = self.pool.get('mrp.bom.line')
+        
+        # Generate bom list
+        line_ids = line_pool.search(cr, uid, [
+            ('bom_id.bom_category', '=', 'parent'),
+            ('product_id.relative_type', '=', 'half'),
+            ], context=context)
+        line_proxy = line_pool.browse(cr, uid, line_ids, context=context)
+        hw_in_bom = [item.product_id.id for item in line_proxy]
+        
         product_ids = product_pool.search(cr, uid, [
             ('relative_type', '=', 'half'),
+            ('id', 'in', hw_in_bom),
             ], context=context)
         
         res = {}        

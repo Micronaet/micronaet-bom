@@ -20,5 +20,6 @@
 from . import status_parser
 from . import bom_status_parser
 from . import hw_status_parser
+from . import pipe_status_parser
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

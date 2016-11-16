@@ -43,15 +43,29 @@ class ProductProduct(orm.Model):
     """
     
     _inherit = 'product.product'
+
+    def is_pipe_generate_pipe_data_from_code(
+            self, cr, uid, ids, field, context=None):
+        ''' from name generate code
+        '''    
+        return self.generate_pipe_data_from_code(
+            cr, uid, ids, 'name', context=context)
+            
+    def yet_pipe_generate_pipe_data_from_code(
+            self, cr, uid, ids, field, context=None):
+        ''' from default_code re-generate code
+        '''    
+        return self.generate_pipe_data_from_code(
+            cr, uid, ids, 'default_code', context=context)
     
-    def generate_pipe_data_from_code(self, cr, uid, ids, context=None):
+    def generate_pipe_data_from_code(self, cr, uid, ids, field, context=None):
         ''' Extract data from code:
         '''
         assert len(ids) == 1, 'Works only with one record a time'
         
         part = 4
         product_proxy = self.browse(cr, uid, ids, context=context)
-        default_code = product_proxy.name.upper()        
+        default_code = product_proxy.__getattribute__(field).upper()        
         code = default_code.split('X')
 
         if len(code) != 3:
@@ -81,8 +95,8 @@ class ProductProduct(orm.Model):
             for lot in material_proxy[0].lot_ids:
                 if lot.diameter == float(pipe_diameter):
                     pipe_min_order = lot.order_lot
-                    pipe_resistence = lot.resistence
-                    first_supplier_id = lot.first_supplier_id.id                    
+                    pipe_resistence = material_proxy[0].resistence
+                    first_supplier_id = material_proxy[0].first_supplier_id.id                    
                     break
                 
         else: # not found
@@ -100,17 +114,14 @@ class ProductProduct(orm.Model):
             'name': name,
             'default_code': default_code,
             
-            #'is_pipe'
+            'is_pipe'
             'pipe_diameter': pipe_diameter,
             'pipe_thick': pipe_thick,
             'pipe_length': pipe_length,
             'pipe_resistence': pipe_resistence,
             'pipe_min_order': pipe_min_order,
             'pipe_material_id': pipe_material_id,
-            #'first_supplier_id': first_supplier_id, # TODO add dep.
+            'first_supplier_id': first_supplier_id, # TODO add dep.
             }, context=context)
-            
-        
-    
     
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

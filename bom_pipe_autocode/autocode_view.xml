@@ -8,8 +8,32 @@
             <field name="priority" eval="50" />
             <field name="arch" type="xml">
                 <field name="default_code" position="after">
-                    <button name="generate_pipe_data_from_code" string="Generate info" type="object" icon="gtk-ok"/>
+                    <button name="is_pipe_generate_pipe_data_from_code" string="Is pipe" type="object" icon="gtk-ok" attrs="{'invisible': [('default_code','=',False)]}"/>
+                    <button name="yet_pipe_generate_pipe_data_from_code" string="Re-generate pipe info" type="object" icon="gtk-ok" attrs="{'invisible': [('default_code','!=',False)]}"/>
                     <newline/>
+                </field>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_product_product_pipes_tree">
+            <field name="name">product.product.pipe.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product_pipes.view_product_product_pipes_tree"/>
+            <field name="priority" eval="50" />
+            <field name="arch" type="xml">
+                <field name="pipe_min_order" position="after">
+                    <button name="is_pipe_generate_pipe_data_from_code" string="Is pipe" type="object" icon="gtk-ok" attrs="{'invisible': [('default_code','=',False)]}"/>
+                    <button name="yet_pipe_generate_pipe_data_from_code" string="Re-generate pipe info" type="object" icon="gtk-ok" attrs="{'invisible': [('default_code','!=',False)]}"/>
+                </field>
+            </field>
+        </record>
+        
+        <record model="ir.ui.view" id="view_product_is_pipe_form">
+            <field name="name">product.product.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_normal_form_view"/>
+            <field name="arch" type="xml">
+                <field name="name" position="before">
+                    <button name="is_pipe_generate_pipe_data_from_code" string="Is pipe" type="object" icon="gtk-ok" attrs="{'invisible': [('default_code','=',False)]}"/>
                 </field>
             </field>
         </record>

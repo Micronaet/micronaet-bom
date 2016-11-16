@@ -8,8 +8,8 @@
             <field name="priority" eval="50" />
             <field name="arch" type="xml">
                 <field name="default_code" position="after">
-                    <button name="is_pipe_generate_pipe_data_from_code" string="Is pipe" type="object" icon="gtk-ok" attrs="{'invisible': [('default_code','=',False)]}"/>
-                    <button name="yet_pipe_generate_pipe_data_from_code" string="Re-generate pipe info" type="object" icon="gtk-ok" attrs="{'invisible': [('default_code','!=',False)]}"/>
+                    <button name="is_pipe_generate_pipe_data_from_code" string="Is pipe" type="object" icon="gtk-ok" attrs="{'invisible': [('default_code','!=',False)]}"/>
+                    <button name="yet_pipe_generate_pipe_data_from_code" string="Re-generate pipe info" type="object" icon="gtk-ok" attrs="{'invisible': [('default_code','=',False)]}"/>
                     <newline/>
                 </field>
             </field>
@@ -21,8 +21,8 @@
             <field name="priority" eval="50" />
             <field name="arch" type="xml">
                 <field name="pipe_min_order" position="after">
-                    <button name="is_pipe_generate_pipe_data_from_code" string="Is pipe" type="object" icon="gtk-ok" attrs="{'invisible': [('default_code','=',False)]}"/>
-                    <button name="yet_pipe_generate_pipe_data_from_code" string="Re-generate pipe info" type="object" icon="gtk-ok" attrs="{'invisible': [('default_code','!=',False)]}"/>
+                    <button name="is_pipe_generate_pipe_data_from_code" string="Is pipe" type="object" icon="gtk-ok" attrs="{'invisible': [('default_code','!=',False)]}"/>
+                    <button name="yet_pipe_generate_pipe_data_from_code" string="Re-generate pipe info" type="object" icon="gtk-ok" attrs="{'invisible': [('default_code','=',False)]}"/>
                 </field>
             </field>
         </record>
@@ -33,7 +33,7 @@
             <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="arch" type="xml">
                 <field name="name" position="before">
-                    <button name="is_pipe_generate_pipe_data_from_code" string="Is pipe" type="object" icon="gtk-ok" attrs="{'invisible': [('default_code','=',False)]}"/>
+                    <button name="is_pipe_generate_pipe_data_from_code" string="Is pipe" type="object" icon="gtk-ok" attrs="{'invisible': [('default_code','!=',False)]}"/>
                 </field>
             </field>
         </record>

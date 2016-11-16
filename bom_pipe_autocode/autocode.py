@@ -92,11 +92,13 @@ class ProductProduct(orm.Model):
                 cr, uid, material_ids, context=context)    
             material_name = material_proxy.name
 
+            # Header data:
+            pipe_resistence = material_proxy[0].resistence
+            first_supplier_id = material_proxy[0].first_supplier_id.id
+            
             for lot in material_proxy[0].lot_ids:
                 if lot.diameter == float(pipe_diameter):
                     pipe_min_order = lot.order_lot
-                    pipe_resistence = material_proxy[0].resistence
-                    first_supplier_id = material_proxy[0].first_supplier_id.id                    
                     break
                 
         else: # not found
@@ -114,7 +116,7 @@ class ProductProduct(orm.Model):
             'name': name,
             'default_code': default_code,
             
-            'is_pipe'
+            'is_pipe': True,
             'pipe_diameter': pipe_diameter,
             'pipe_thick': pipe_thick,
             'pipe_length': pipe_length,

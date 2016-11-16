@@ -90,7 +90,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ('parent', 'Parent BOM'),
             ('product', 'Product BOM'),
             ('half', 'Halfworked BOM'),            
-            ('pipe', 'Pipe in Halfworded'),
+            ('pipe', 'Pipe in Halfworked'),
             ], 'Report mode', required=True),            
 
         'from_date': fields.date('From', help='Date >='),

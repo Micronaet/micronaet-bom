@@ -71,12 +71,14 @@ class Parser(report_sxw.rml_parse):
         
         res = {}        
         for item in product_pool.browse(cr, uid, product_ids, context=context):
-            for component in item.dynamic_bom_line_ids:
-                if not component.is_pipe:
+            for component in item.half_bom_ids:
+                product = component.product_id
+                if not product.is_pipe:
                     continue
-                if component.default_code not in res:
-                    res[component.default_code] = []
-                res[component.default_code].append(item.default_code)
+                if product.default_code not in res:
+                    res[product.default_code] = []
+                res[product.default_code].append(item.default_code)
+        res = sorted(res)
         return res.iteritems()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

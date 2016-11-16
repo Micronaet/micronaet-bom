@@ -112,7 +112,7 @@ class ProductProduct(orm.Model):
             pipe_length,
             )
             
-        return self.write(cr, uid, ids, {
+        data = {
             'name': name,
             'default_code': default_code,
             
@@ -120,10 +120,13 @@ class ProductProduct(orm.Model):
             'pipe_diameter': pipe_diameter,
             'pipe_thick': pipe_thick,
             'pipe_length': pipe_length,
-            'pipe_resistence': pipe_resistence,
+            #'pipe_resistence': pipe_resistence,
             'pipe_min_order': pipe_min_order,
             'pipe_material_id': pipe_material_id,
             'first_supplier_id': first_supplier_id, # TODO add dep.
-            }, context=context)
+            }               
+        if pipe_resistence:       
+            data['pipe_resistence'] = pipe_resistence
+        return self.write(cr, uid, ids, data, context=context)
     
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

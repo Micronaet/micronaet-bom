@@ -96,7 +96,7 @@ class MrpBom(orm.Model):
         # TODO write message
         return self.write(cr, uid, ids, {
             'checked': True,
-            'checked_user_id': uid,
+            'check_user_id': uid,
             'check_detail': check_detail,
             'check_date': datetime.now().strftime(
                 DEFAULT_SERVER_DATETIME_FORMAT),

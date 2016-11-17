@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_mrp_bom_validate_form">
+            <field name="name">mrp.bom.form</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="/form/group" position="before">
+                   <header>
+                       <button name="set_as_checked" string="Check OK now" type="object" class="oe-highlight"/>
+                   </header>
+                </xpath>
+                <xpath expr="//page[1]" position="before">
+                    <page string="Check" attrs="{'invisible': [('checked','=',False)]}">
+                        <group colspan="4" col="4">
+                           <field name="check_user_id" />
+                           <field name="check_date" />
+                           <field name="modified_after" />
+                           <field name="check_detail" readonly="1" widget="html" />
+                       </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</openerp>
+

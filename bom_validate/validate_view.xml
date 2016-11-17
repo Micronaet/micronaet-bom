@@ -8,7 +8,7 @@
             <field name="arch" type="xml">
                 <xpath expr="/form/group" position="before">
                    <header>
-                       <button name="set_as_checked" string="Check OK now" type="object" class="oe_highlight"/>
+                       <button name="set_as_checked" string="Check OK now" type="object" class="oe_highlight" groups="bom_validate.group_checked_bom_manager" icon="gtk-ok"/>
                    </header>
                 </xpath>
                 <xpath expr="//page[1]" position="after">

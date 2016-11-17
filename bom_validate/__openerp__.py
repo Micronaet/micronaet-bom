@@ -30,6 +30,7 @@
     'depends': [
         'base',
         'mrp',
+        'bom_value_report',
         ],
     'init_xml': [],
     'demo': [],

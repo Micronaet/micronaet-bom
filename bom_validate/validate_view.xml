@@ -2,7 +2,7 @@
 <openerp>
     <data>
         <record model="ir.ui.view" id="view_mrp_bom_validate_form">
-            <field name="name">mrp.bom.form</field>
+            <field name="name">mrp.bom.validate.form</field>
             <field name="model">mrp.bom</field>
             <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
             <field name="arch" type="xml">
@@ -22,6 +22,21 @@
                            <field name="checked" invisible="1" />
                        </group>
                     </page>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_mrp_bom_validate_tree">
+            <field name="name">mrp.bom.validate.tree</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="bom_value_report.mrp_bom_component_tree_view_obsolete_color"/>
+            <field name="arch" type="xml">
+                <field name="name" position="before">
+                    <field name="checked" invisible="1" />
+                    <button name="set_as_checked" string="Check OK now" type="object" class="oe_highlight" groups="bom_validate.group_checked_bom_manager" icon="gtk-ok"/>
+                </field>
+                <xpath expr="/tree" position="attributes">
+                    <attribute name="colors">blue:checked==True</attribute>
                 </xpath>
             </field>
         </record>

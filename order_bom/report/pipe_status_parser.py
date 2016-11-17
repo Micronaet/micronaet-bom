@@ -80,28 +80,25 @@ class Parser(report_sxw.rml_parse):
             ], context=context)
         line_proxy = line_pool.browse(cr, uid, line_ids, context=context)
         
-        hw_in_bom = [] # product list        
+        hw_ids = [] # pipe list        
         self.hw_bom = {} # bom for hw
         for item in line_proxy:
-            hw_in_bom.append(item.product_id.id)
-            if item.product_id not in self.hw_bom:
+            hw_ids.append(item.product_id.id)
+            if item.product_id.id not in self.hw_bom:
                 self.hw_bom[item.product_id.id] = []   
             self.hw_bom[item.product_id.id].append(item.bom_id.code)
         
-        product_ids = product_pool.search(cr, uid, [
-            #('relative_type', '=', 'half'),
-            ('id', 'in', hw_in_bom),
-            ], context=context)
-        
         res = {}        
-        for item in product_pool.browse(cr, uid, product_ids, context=context):
+        for item in product_pool.browse(cr, uid, hw_ids, context=context):
             for component in item.half_bom_ids:
                 product = component.product_id
                 if not product.is_pipe:
                     continue
                 if product not in res:
                     res[product] = []
-                res[product].append(item)
+                res[product].append(item) # HW
+        
+        # Sort data:        
         result = []
         for key in sorted(res):
             result.append((key, res[key]))

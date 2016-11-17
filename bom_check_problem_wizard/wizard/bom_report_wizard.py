@@ -63,6 +63,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             'to_date': wiz_proxy.to_date or False,
             'start_code': wiz_proxy.start_code or '',
             'only': wiz_proxy.only,
+            'modal': wiz_proxy.modal or False,
             }
         
         if wiz_proxy.mode == 'order':
@@ -92,11 +93,16 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ('half', 'Halfworked BOM'),            
             ('pipe', 'Pipe in Halfworked'),
             ], 'Report mode', required=True),            
+        
+        'modal': fields.selection([
+            ('pipe', 'Pipe layout'),   
+            ], 'Report mode', required=False),
 
         'from_date': fields.date('From', help='Date >='),
-        'to_date': fields.date('To', help='Date <'),
+        'to_date': fields.date('To', help='Date <'),        
         
         'start_code': fields.char('Start code', size=20),
+        
         'only': fields.selection([
             ('all', 'All'),
             ('error', 'Only error'),

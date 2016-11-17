@@ -45,6 +45,7 @@ class Parser(report_sxw.rml_parse):
             'load_objects': self.load_objects,
             'load_parent_objects': self.load_parent_objects,
             'get_db': self.get_db,
+            'ok_modal': self.ok_modal,
             })
 
     # Method
@@ -70,6 +71,19 @@ class Parser(report_sxw.rml_parse):
         self.master['table'] = {}
         return ''
 
+    def ok_modal(self, hw, data):
+        ''' Check modal selection and pipe hw elements
+        '''
+        if data is None:
+            data = {}
+        if data.get('modal', False) != 'pipe':
+            return True # always print if not pipe
+        if hw.product_id.half_bom_ids and \
+                hw.product_id.half_bom_ids[0].product_id.is_pipe:
+            return True
+        else:    
+            return False
+            
     def load_parent_objects(self, data):
         ''' Master function for generate data parent report
         '''

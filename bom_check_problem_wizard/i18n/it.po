@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-26 15:45+0000\n"
-"PO-Revision-Date: 2016-10-26 17:45+0100\n"
+"POT-Creation-Date: 2016-11-17 15:17+0000\n"
+"PO-Revision-Date: 2016-11-17 16:18+0100\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,6 +16,11 @@ msgstr ""
 "Plural-Forms: \n"
 "Language: it\n"
 "X-Generator: Poedit 1.6.10\n"
+
+#. module: bom_check_problem_wizard
+#: selection:mrp.bom.check.problem.wizard,only:0
+msgid "All"
+msgstr "Tutti"
 
 #. module: bom_check_problem_wizard
 #: view:mrp.bom.check.problem.wizard:bom_check_problem_wizard.mrp_bom_check_problem_wizard_view
@@ -74,9 +79,34 @@ msgid "Last Updated on"
 msgstr "Ultimo aggiornamento il"
 
 #. module: bom_check_problem_wizard
+#: selection:mrp.bom.check.problem.wizard,only:0
+msgid "Only error"
+msgstr "Solo errori"
+
+#. module: bom_check_problem_wizard
+#: selection:mrp.bom.check.problem.wizard,only:0
+msgid "Only error and overrided"
+msgstr "Solo errori e sovrascizioni"
+
+#. module: bom_check_problem_wizard
+#: field:mrp.bom.check.problem.wizard,only:0
+msgid "Only line"
+msgstr "Solo righe"
+
+#. module: bom_check_problem_wizard
 #: selection:mrp.bom.check.problem.wizard,mode:0
 msgid "Parent BOM"
 msgstr "DB padre"
+
+#. module: bom_check_problem_wizard
+#: selection:mrp.bom.check.problem.wizard,mode:0
+msgid "Pipe in Halfworked"
+msgstr "Tubi e semilavorati"
+
+#. module: bom_check_problem_wizard
+#: selection:mrp.bom.check.problem.wizard,modal:0
+msgid "Pipe layout"
+msgstr "Layout modo tubo"
 
 #. module: bom_check_problem_wizard
 #: view:mrp.bom.check.problem.wizard:bom_check_problem_wizard.mrp_bom_check_problem_wizard_view
@@ -94,9 +124,15 @@ msgid "Product BOM from order"
 msgstr "DB prodotto da ordinato"
 
 #. module: bom_check_problem_wizard
+#: field:mrp.bom.check.problem.wizard,modal:0
 #: field:mrp.bom.check.problem.wizard,mode:0
 msgid "Report mode"
 msgstr "Modalità report"
+
+#. module: bom_check_problem_wizard
+#: field:mrp.bom.check.problem.wizard,start_code:0
+msgid "Start code"
+msgstr "Inizio codice"
 
 #. module: bom_check_problem_wizard
 #: field:mrp.bom.check.problem.wizard,to_date:0

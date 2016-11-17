@@ -63,7 +63,7 @@ class Parser(report_sxw.rml_parse):
         cr = self.cr
         uid = self.uid
         context = {}
-                
+
         product_pool = self.pool.get('product.product')
         line_pool = self.pool.get('mrp.bom.line')
         
@@ -86,9 +86,9 @@ class Parser(report_sxw.rml_parse):
                 product = component.product_id
                 if not product.is_pipe:
                     continue
-                if product.default_code not in res:
-                    res[product.default_code] = []
-                res[product.default_code].append(item.default_code)
+                if product not in res:
+                    res[product] = []
+                res[product].append(item)
         result = []
         for key in sorted(res):
             result.append((key, res[key]))

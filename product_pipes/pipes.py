@@ -50,7 +50,7 @@ class MRPBomLine(orm.Model):
             help='Part for cut pipe that will be wasted'), # not used for now
         'part_x_pipe': fields.integer('Part per pipe',
             help='Number of parts for create component in a bar'), 
-        'pipe_total': fields.integer('Pipe per part', 
+        'pipe_total': fields.integer('Total pipes', 
             help='Total pipes for create the part')
         }
 

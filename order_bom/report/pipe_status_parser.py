@@ -100,7 +100,7 @@ class Parser(report_sxw.rml_parse):
         
         # Sort data:        
         result = []
-        for key in sorted(res):
+        for key in sorted(res, key=lambda x: x.default_code):
             result.append((key, res[key]))
         return result
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

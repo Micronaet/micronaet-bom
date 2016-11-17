@@ -44,9 +44,15 @@ class Parser(report_sxw.rml_parse):
         self.localcontext.update({
             'load_pipe_bom': self.load_pipe_bom,
             'get_filter': self.get_filter,
+            'used_bom': self.used_bom,
             })
 
     # Method
+    def used_bom(self, hw_id):
+        ''' Return bom where hw is used
+        '''
+        return self.hw_bom.get(hw_id, [])
+        
     def get_filter(self, data):
         if data is None:
             data = {}
@@ -73,10 +79,17 @@ class Parser(report_sxw.rml_parse):
             ('product_id.relative_type', '=', 'half'),
             ], context=context)
         line_proxy = line_pool.browse(cr, uid, line_ids, context=context)
-        hw_in_bom = [item.product_id.id for item in line_proxy]
+        
+        hw_in_bom = [] # product list        
+        self.hw_bom = {} # bom for hw
+        for item in line_proxy:
+            hw_in_bom.append(item.product_id.id)
+            if item.product_id not in self.hw_bom:
+                self.hw_bom[item.product_id.id] = []   
+            self.hw_bom[item.product_id.id].append(item.bom_id.code)
         
         product_ids = product_pool.search(cr, uid, [
-            ('relative_type', '=', 'half'),
+            #('relative_type', '=', 'half'),
             ('id', 'in', hw_in_bom),
             ], context=context)
         

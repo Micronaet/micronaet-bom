@@ -8,16 +8,18 @@
             <field name="arch" type="xml">
                 <xpath expr="/form/group" position="before">
                    <header>
-                       <button name="set_as_checked" string="Check OK now" type="object" class="oe-highlight"/>
+                       <button name="set_as_checked" string="Check OK now" type="object" class="oe_highlight"/>
                    </header>
                 </xpath>
-                <xpath expr="//page[1]" position="before">
+                <xpath expr="//page[1]" position="after">
                     <page string="Check" attrs="{'invisible': [('checked','=',False)]}">
                         <group colspan="4" col="4">
-                           <field name="check_user_id" />
-                           <field name="check_date" />
-                           <field name="modified_after" />
-                           <field name="check_detail" readonly="1" widget="html" />
+                           <field name="check_user_id" readonly="1" />
+                           <field name="check_date" readonly="1" />
+                           <!--<field name="modified_after" readonly="1" />-->
+                           <separator string="Checked BOM" colspan="4"/>
+                           <field name="check_detail" readonly="1" widget="html" nolabel="1" colspan="4"/>
+                           <field name="checked" invisible="1" />
                        </group>
                     </page>
                 </xpath>

@@ -46,10 +46,58 @@ class MrpBom(orm.Model):
     def set_as_checked(self, cr, uid, ids, context=None): 
         ''' Set as checked the bom and save the date
         '''
+        assert len(ids) == 1, 'Works only with one record a time'
+        
+        check_detail = ''
+        for item in self.browse(cr, uid, ids, context=context)[0].bom_line_ids:
+            hw_detail = ''
+            for comp in item.product_id.half_bom_ids:
+                hw_detail += '%s: %s %s<br/>' % (
+                    comp.product_id.default_code,
+                    comp.product_qty,
+                    comp.product_uom.name,
+                    )
+                
+            check_detail += '<tr><td>%s</td><td>%s %s</td><td>%s</td></tr>' % (
+                item.product_id.default_code,
+                item.product_qty,
+                item.product_uom.name,
+                hw_detail,            
+                )
+        check_detail = \
+            '''<style>
+                    .table_bf {
+                         border:1px 
+                         padding: 3px;
+                         solid black;
+                     }
+                    .table_bf td {
+                         border:1px 
+                         solid black;
+                         padding: 3px;
+                         text-align: center;
+                     }
+                    .table_bf th {
+                         border:1px 
+                         solid black;
+                         padding: 3px;
+                         text-align: center;
+                         background-color: grey;
+                         color: white;
+                     }
+                </style>
+                <table class='table_bf'>
+                    <tr class='table_bf'>
+                        <th>Comp.</th><th>Q.</th><th>Subcomp.</th>
+                    </tr>
+                    %s
+                </table>''' % check_detail
+                
         # TODO write message
         return self.write(cr, uid, ids, {
             'checked': True,
             'checked_user_id': uid,
+            'check_detail': check_detail,
             'check_date': datetime.now().strftime(
                 DEFAULT_SERVER_DATETIME_FORMAT),
             }, context=context)

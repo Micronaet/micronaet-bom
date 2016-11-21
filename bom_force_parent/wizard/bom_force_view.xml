@@ -10,7 +10,7 @@
                    <header>
                        <button string="Cancel" special="cancel" />
                        <button name="action_get_selection" string="Get selection" type="object" icon="gtk-justify-fill" />
-                       <button name="action_print" string="Print" type="object" icon="gtk-print" class="oe_highlight" />
+                       <button name="action_print" string="Force parent BOM" type="object" icon="gtk-ok" class="oe_highlight" />
                    </header>                   
                    <group colspan="4" col="4">
                         <field name="start_code" />

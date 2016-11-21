@@ -80,7 +80,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         start_code = wiz_proxy.start_code
         parent_bom_id = wiz_proxy.parent_bom_id.id
         
-        return = product_pool.search(cr, uid, [
+        return product_pool.search(cr, uid, [
             ('default_code', '=ilike', start_code)], context=context)
         
     def action_print(self, cr, uid, ids, context=None):

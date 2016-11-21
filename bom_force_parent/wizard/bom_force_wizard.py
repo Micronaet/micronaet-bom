@@ -53,10 +53,13 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         ''' Return list of product selected
         '''
         model_pool = self.pool.get('ir.model.data')
-        view_id = model_pool.get_object_reference(cr, uid, 
+        tree_view_id = model_pool.get_object_reference(cr, uid, 
             'bom_dynamic_structured', 
             'view_product_product_dynamic_bom_tree')[1]
-        
+        form_view_id = model_pool.get_object_reference(cr, uid, 
+            'bom_dynamic_structured', 
+            'view_product_product_dynamic_bom_form')[1]
+            
         return {
             'type': 'ir.actions.act_window',
             'name': _('Result for force'),
@@ -64,8 +67,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             'view_mode': 'tree,form',
             #'res_id': 1,
             'res_model': 'product.product',
-            'view_id': view_id, # False
-            'views': [(view_id, 'tree'), (False, 'form')],
+            'view_id': tree_view_id,
+            'views': [(tree_view_id, 'tree'), (form_view_id, 'form')],
             'domain': [('id', 'in', ids)],
             'context': context,
             'target': 'current', # 'new'
@@ -79,7 +82,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
         start_code = wiz_proxy.start_code
         return product_pool.search(cr, uid, [
-            ('default_code', '=ilike', start_code)], context=context)
+            ('default_code', '=ilike', '%s%%' % start_code)], context=context)
     
     def action_get_selection(self, cr, uid, ids, context=None):
         ''' Get tree of selected product
@@ -91,8 +94,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         ''' Event for button print
         '''
         if context is None: 
-            context = {}        
-        
+            context = {}     
 
         product_pool = self.pool.get('product.product')
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
@@ -102,41 +104,6 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         product_pool.write(cr, uid, product_ids, {
             'parent_bom_id': parent_bom_id}, context=context)
         return self.return_product_tree(cr, uid, product_ids, context=context)
-
-    def action_print(self, cr, uid, ids, context=None):
-        ''' Event for button print
-        '''
-        if context is None: 
-            context = {}        
-        
-        product_pool = self.pool.get('product.product')
-        wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
-        start_code = wiz_proxy.start_code
-        parent_bom_id = wiz_proxy.parent_bom_id.id
-        
-        product_ids = product_pool.search(cr, uid, [
-            ('default_code', '=ilike', start_code)], context=context)
-            
-        product_pool.write(cr, uid, product_ids, {
-            'parent_bom_id': parent_bom_id}, context=context)
-        
-        model_pool = self.pool.get('ir.model.data')
-        view_id = model_pool.get_object_reference('bom_dynamic_structured', 'view_product_product_dynamic_bom_tree')[1]
-        
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _('Result for force'),
-            'view_type': 'form',
-            'view_mode': 'tree,form',
-            #'res_id': 1,
-            'res_model': 'product.product',
-            'view_id': view_id, # False
-            'views': [(view_id, 'tree'), (False, 'form')],
-            'domain': [('id', 'in', product_ids)],
-            'context': context,
-            'target': 'current', # 'new'
-            'nodestroy': False,
-            }
 
     _columns = {
         'start_code': fields.char('Start code', size=20, required=True),

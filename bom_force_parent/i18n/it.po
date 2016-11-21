@@ -1,0 +1,85 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* bom_force_parent
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-11-21 07:56+0000\n"
+"PO-Revision-Date: 2016-11-21 08:56+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: it\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#. module: bom_force_parent
+#: view:mrp.bom.force.parent.wizard:bom_force_parent.mrp_bom_force_parent_wizard_view
+msgid "Cancel"
+msgstr "Annulla"
+
+#. module: bom_force_parent
+#: field:mrp.bom.force.parent.wizard,create_uid:0
+msgid "Created by"
+msgstr "Creato da"
+
+#. module: bom_force_parent
+#: field:mrp.bom.force.parent.wizard,create_date:0
+msgid "Created on"
+msgstr "Creato il"
+
+#. module: bom_force_parent
+#: view:mrp.bom.force.parent.wizard:bom_force_parent.mrp_bom_force_parent_wizard_view
+msgid "Force parent BOM"
+msgstr "Forza DB padre"
+
+#. module: bom_force_parent
+#: model:ir.actions.act_window,name:bom_force_parent.action_mrp_bom_force_parent_wizard_view
+#: model:ir.ui.menu,name:bom_force_parent.menu_mrp_bom_force_parent_wizard_view
+msgid "Force parent BOM wizard"
+msgstr "Wizard Forza DB padre"
+
+#. module: bom_force_parent
+#: view:mrp.bom.force.parent.wizard:bom_force_parent.mrp_bom_force_parent_wizard_view
+msgid "Get selection"
+msgstr "Selezione attuale"
+
+#. module: bom_force_parent
+#: field:mrp.bom.force.parent.wizard,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: bom_force_parent
+#: field:mrp.bom.force.parent.wizard,write_uid:0
+msgid "Last Updated by"
+msgstr "Last Updated by"
+
+#. module: bom_force_parent
+#: field:mrp.bom.force.parent.wizard,write_date:0
+msgid "Last Updated on"
+msgstr "Last Updated on"
+
+#. module: bom_force_parent
+#: field:mrp.bom.force.parent.wizard,parent_bom_id:0
+msgid "Parent bom"
+msgstr "DB padre"
+
+#. module: bom_force_parent
+#: code:addons/bom_force_parent/wizard/bom_force_wizard.py:65
+#, python-format
+msgid "Result for force"
+msgstr "Risultato da forzare"
+
+#. module: bom_force_parent
+#: field:mrp.bom.force.parent.wizard,start_code:0
+msgid "Start code"
+msgstr "Codice iniziale"
+
+#. module: bom_force_parent
+#: view:mrp.bom.force.parent.wizard:bom_force_parent.mrp_bom_force_parent_wizard_view
+msgid "Wizard"
+msgstr "Wizard"

@@ -74,6 +74,7 @@ class Parser(report_sxw.rml_parse):
         
         product_pool = self.pool.get('product.product')
         start_code = data.get('start_code', '')
+        component = data.get('component', False)
         #only = data.get('only', 'all')
         product_ids = product_pool.search(cr, uid, [
             ('default_code', '=ilike', '%s%%' % start_code),

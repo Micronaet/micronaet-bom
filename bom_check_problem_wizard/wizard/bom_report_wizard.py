@@ -49,6 +49,40 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
     # --------------------
     # Wizard button event:
     # --------------------
+    def action_show_list(self, cr, uid, ids, context=None):
+        ''' Show list in tree view
+        '''
+        product_pool = self.pool.get('product.product')
+        
+        wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
+        start_code = wiz_proxy.get('start_code', '')
+        component = wiz_proxy.get('component', False)
+
+        product_ids = product_pool.search(cr, uid, [
+            ('default_code', '=ilike', '%s%%' % start_code),
+            ('relative_type', '=', 'half'),
+            ], context=context)
+        
+        res_ids = []
+        for product in product_pool.browse(cr, uid, product_ids, context=context):
+            if not component or len(product.half_bom_ids) >= component:
+                res_ids.append(product.id)
+        
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Product list'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            #'res_id': 1,
+            'res_model': 'product.product',
+            'view_id': False,
+            'views': [(False, 'tree'), (False, 'form')],
+            'domain': [('id', 'in', res_ids)],
+            'context': context,
+            'target': 'current', # 'new'
+            'nodestroy': False,
+            }
+            
     def action_print(self, cr, uid, ids, context=None):
         ''' Event for button print
         '''
@@ -64,6 +98,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             'start_code': wiz_proxy.start_code or '',
             'only': wiz_proxy.only,
             'modal': wiz_proxy.modal or False,
+            'component': wiz_proxy.component,
             }
         
         if wiz_proxy.mode == 'order':
@@ -102,6 +137,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         'to_date': fields.date('To', help='Date <'),        
         
         'start_code': fields.char('Start code', size=20),
+        'component': fields.integer('> # component'),
         
         'only': fields.selection([
             ('all', 'All'),

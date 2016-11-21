@@ -166,6 +166,22 @@
         </record>
         
         <!--product.product-->
+        <record model="ir.ui.view" id="view_product_bom_dynamic_search">
+            <field name="name">product.product.search</field>
+            <field name="model">product.product</field>
+            <field name="priority" eval="50" />
+            <field name="arch" type="xml">
+                <search string="Product and bom" version="7.0">
+                    <field name="name" />
+                    <field name="default_code" />
+                    
+                    <filter name="no_parent_bom" string="No parent bom" domain="[('parent_bom_id','=',False)]"/>
+                    <group expand="0" string="Group By...">
+                        <filter name="group_parent_bom" string="Parent BOM" context="{'group_by': 'parent_bom_id'}"/>
+                    </group>                
+                </search>
+            </field>
+        </record>
         <record model="ir.ui.view" id="view_product_product_dynamic_button_bom_form">
             <field name="name">product.product.dynamic.bom.button.form</field>
             <field name="model">product.product</field>
@@ -263,6 +279,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_product_product_dynamic_bom_tree"/>
+            <field name="search_view_id" ref="view_product_bom_dynamic_search" />
             <field name="context">{'form_view_ref': 'bom_dynamic_structured.view_product_product_dynamic_bom_form'}</field>
             <field name="domain">[]</field>
         </record>        

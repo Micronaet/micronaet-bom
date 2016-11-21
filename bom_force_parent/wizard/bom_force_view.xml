@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+       <!-- mrp.bom.force.parent.wizard -->
+       <record id="mrp_bom_force_parent_wizard_view" model="ir.ui.view">
+            <field name="name">Force parent BOM wizard</field>
+            <field name="model">mrp.bom.force.parent.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Wizard" version="7.0">
+                   <header>
+                       <button string="Cancel" special="cancel" />
+                       <button name="action_print" string="Print" type="object" icon="gtk-print" class="oe_highlight" />
+                   </header>                   
+                   <group colspan="4" col="4">
+                        <field name="start_code" attrs="{'required': [('mode','=','product')], 'invisible': [('mode','not in',('product', 'parent', 'half'))]}"/>
+                        <field name="parent_bomid" attrs="{'invisible': [('bom_category','=','parent')]}"/>
+                   </group>
+                </form>
+            </field>
+      </record>
+      <record model="ir.actions.act_window" id="action_mrp_bom_force_parent_wizard_view">
+          <field name="name">Force parent BOM wizard</field>
+          <field name="res_model">mrp.bom.force.parent.wizard</field>
+          <field name="view_type">form</field>
+          <field name="view_mode">form</field>
+          <field name="target">new</field>
+          <field name="view_id" ref="mrp_bom_force_parent_wizard_view"/>          
+      </record>
+      <menuitem 
+          parent="mrp.menu_mrp_manufacturing" 
+          id="menu_mrp_bom_force_parent_wizard_view" 
+          action="action_mrp_bom_force_parent_wizard_view"
+          sequence="100"
+          />
+    </data>
+</openerp>

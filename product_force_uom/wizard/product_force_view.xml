@@ -25,6 +25,17 @@
           <field name="target">new</field>
           <field name="view_id" ref="mrp_bom_force_parent_wizard_view"/>          
       </record>
-      <!--TODO product.product button-->
+      
+      <!-- product.product button-->
+      <record model="ir.ui.view" id="view_product_product_force_button_form">
+          <field name="name">product.product.form</field>
+          <field name="model">product.product</field>
+          <field name="inherit_id" ref="product.product_normal_form_view"/>
+          <field name="arch" type="xml">
+              <field name="uom_id" position="after">
+                  <button name="%(product_force_uom.action_product_product_uom_force_wizard)d" string="Force UOM" type="action" confirm="Change UOM give problem in there's stock movement with old UOM! Confirm?"/>
+              </field>
+          </field>
+      </record>
     </data>
 </openerp>

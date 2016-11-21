@@ -52,6 +52,7 @@ class ProductProductUomForceWizard(orm.TransientModel):
     def action_force_uom(self, cr, uid, ids, context=None):
         ''' Force uom in product
         '''
+        import pdb; pdb.set_trace()
         if context is None:
             context = {}
         active_id = context.get('active_id', False)

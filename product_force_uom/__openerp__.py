@@ -34,6 +34,7 @@
     'init_xml': [],
     'demo': [],
     'data': [
+        'security/bom_group.xml',
         'wizard/product_force_view.xml',
         ],
     'active': False,

@@ -55,8 +55,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         product_pool = self.pool.get('product.product')
         
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
-        start_code = wiz_proxy.get('start_code', '')
-        component = wiz_proxy.get('component', False)
+        start_code = wiz_proxy.start_code or ''
+        component = wiz_proxy.component or False
 
         product_ids = product_pool.search(cr, uid, [
             ('default_code', '=ilike', '%s%%' % start_code),
@@ -64,7 +64,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ], context=context)
         
         res_ids = []
-        for product in product_pool.browse(cr, uid, product_ids, context=context):
+        for product in product_pool.browse(
+                cr, uid, product_ids, context=context):
             if not component or len(product.half_bom_ids) >= component:
                 res_ids.append(product.id)
         

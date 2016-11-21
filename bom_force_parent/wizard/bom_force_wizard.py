@@ -78,11 +78,15 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         product_pool = self.pool.get('product.product')
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
         start_code = wiz_proxy.start_code
-        parent_bom_id = wiz_proxy.parent_bom_id.id
-        
         return product_pool.search(cr, uid, [
             ('default_code', '=ilike', start_code)], context=context)
-        
+    
+    def action_get_selection(self, cr, uid, ids, context=None):
+        ''' Get tree of selected product
+        '''
+        product_ids = self.get_product_ids(cr, uid, ids, context=context)
+        return self.return_product_tree(cr, uid, product_ids, context=context)
+                
     def action_print(self, cr, uid, ids, context=None):
         ''' Event for button print
         '''

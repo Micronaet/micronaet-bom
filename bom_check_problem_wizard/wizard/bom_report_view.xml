@@ -9,7 +9,7 @@
                 <form string="Wizard" version="7.0">
                    <header>
                        <button string="Cancel" special="cancel" />
-                       <button name="action_show_list" string="Show list" type="object" icon="gtk-justify-fill" class="oe_highlight" attrs="{'invisible': [('mode','!=','half')]}" />
+                       <button name="action_show_list" string="Show list" type="object" icon="gtk-justify-fill" attrs="{'invisible': [('mode','!=','half')]}" />
                        <button name="action_print" string="Print" type="object" icon="gtk-print" class="oe_highlight" />
                    </header>                   
                    <group colspan="4" col="4">

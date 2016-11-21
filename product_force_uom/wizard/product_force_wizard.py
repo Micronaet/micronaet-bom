@@ -49,10 +49,11 @@ class ProductProductUomForceWizard(orm.TransientModel):
     # --------------------
     # Wizard button event:
     # --------------------
-    def action_force_uom(self, cr, uid, ids, context=None):
+    def force_uom(self, cr, uid, ids, context=None):
         ''' Force uom in product
         '''
-        import pdb; pdb.set_trace()
+        product_pool = self.pool.get('product.product')
+        
         if context is None:
             context = {}
         active_id = context.get('active_id', False)
@@ -61,9 +62,13 @@ class ProductProductUomForceWizard(orm.TransientModel):
                 _('No product'), 
                 _('Error reading product to force'),
                 )
+        product_proxy = product_pool.browse(
+            cr, uid, active_id, context=context)    
+        previous_uom = product_proxy.uom_id.name    
             
         wiz_proxy = self.browse(cr, uid, ids, context=context)
         
+        current_uom = wiz_proxy.uom_id.name
         uom_id = wiz_proxy.uom_id.id
         cr.execute('''
             UPDATE product_template 
@@ -74,7 +79,15 @@ class ProductProductUomForceWizard(orm.TransientModel):
                 WHERE id=%s);            
             ''', (uom_id, uom_id, uom_id, active_id))
 
-        # TODO log message for force
+        # log message for force
+        self.pool.get('product.product').message_post(cr, uid, active_id, 
+            type='email', 
+            body=_('Forced UOM from %s to %s') % (
+                previous_uom, current_uom), 
+            subject='Change UOM product: %s' % product_proxy.default_code,
+            partner_ids=[(6, 0, (1, ))],
+            attachments=[], context=context
+            )
         return True
 
     _columns = {

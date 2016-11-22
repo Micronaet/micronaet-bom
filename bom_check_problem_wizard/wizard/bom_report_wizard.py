@@ -112,6 +112,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             report_name = 'aeroo_hw_bom_all_component_check_report'
         elif wiz_proxy.mode == 'pipe':
             report_name = 'aeroo_pipe_bom_all_component_check_report'
+        elif wiz_proxy.mode == 'line':
+            report_name = 'aeroo_product_in_bom_report'
         else:
             _logger.error('No report mode %s!') % wiz_proxy.mode            
 
@@ -128,6 +130,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ('product', 'Product BOM'),
             ('half', 'Halfworked BOM'),            
             ('pipe', 'Pipe in Halfworked'),
+            ('line', 'Product present in bom'),
             ], 'Report mode', required=True),            
         
         'modal': fields.selection([

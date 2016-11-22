@@ -47,6 +47,7 @@ class ResCompany(orm.Model):
     def generate_pipe_from_hw(self, cr, uid, ids, context=None):
         ''' Import hw component, output pipe
         '''
+        import pdb; pdb.set_trace()
         in_file = '/home/administrator/photo/import_tubi.csv
         out_file = '/home/administrator/photo/output_tubi.csv
         separator = '|'

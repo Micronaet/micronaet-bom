@@ -49,6 +49,12 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
     # --------------------
     # Wizard button event:
     # --------------------
+    def action_show_line_list(self, cr, uid, ids, context=None):
+        ''' Show list in tree view (product in bom)
+        '''
+        # TODO 
+        return True
+        
     def action_show_list(self, cr, uid, ids, context=None):
         ''' Show list in tree view
         '''

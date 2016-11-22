@@ -53,14 +53,13 @@ class Parser(report_sxw.rml_parse):
 
         start_code = data.get('start_code', '')
         
-        description = _('Line: %s') % only
+        description = ''
         if start_code:
             description += _('Code start with: %s') % start_code
         return description
-        
-    def load_bom(self, data):
-        ''' Master function for generate data list of product in 
-            parent bom and dynamic bom, half bom
+    
+    def get_product_ids(self, data):
+        ''' Get filter from data and return produc_ids list
         '''
         if data is None:
             data = {}
@@ -70,15 +69,29 @@ class Parser(report_sxw.rml_parse):
         context = {}
 
         line_pool = self.pool.get('mrp.bom.line')
-        start_code = data.get('start_code', '')        
+        start_code = data.get('start_code', '')
         
         # Create dynamic domain:
-        domain = [('bom_id.bom_category', 'in', ('half', 'parent', 'dynamic')]
+        domain = [
+            ('bom_id.bom_category', 'in', ('half', 'parent', 'dynamic')),
+            ]
+
         if start_code:
             domain.append(
                 ('product_id.default_code', '=ilike', '%s%%' % start_code))
-                
-        line_ids = line_poo.search(cr, uid, domain, context=context)
+        return line_pool.search(cr, uid, domain, context=context)
+        
+    def load_bom(self, data):
+        ''' Master function for generate data list of product in 
+            parent bom and dynamic bom, half bom
+        '''
+        cr = self.cr
+        uid = self.uid
+        context = {}
+
+        line_pool = self.pool.get('mrp.bom.line')
+        line_ids = self.get_product_ids(data)
+
         products = {}
         
         for line in line_pool.browse(cr, uid, line_ids, context=context):

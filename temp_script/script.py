@@ -48,8 +48,8 @@ class ResCompany(orm.Model):
         ''' Import hw component, output pipe
         '''
         import pdb; pdb.set_trace()
-        in_file = '/home/administrator/photo/import_tubi.csv
-        out_file = '/home/administrator/photo/output_tubi.csv
+        in_file = '/home/administrator/photo/import_tubi.csv'
+        out_file = '/home/administrator/photo/output_tubi.csv'
         separator = '|'
         
         f_in = open(in_file, 'r')
@@ -59,19 +59,19 @@ class ResCompany(orm.Model):
         product_pool = self.pool.get('product.product')
         
         i = 0
-        _logger.error('Start read: %s' % in_file)
-        _logger.error('Start out: %s' % out_file)
+        _logger.info('Start read: %s' % in_file)
+        _logger.info('Start out: %s' % out_file)
         for line in f_in:
             i += 1
             line = line.strip().split(separator)
-            if line != 3:
+            if len(line) != 3:
                 _logger.error('Column error')
                 continue
                 
             # Read columns:    
             bom = line[0]
             hw = line[1]  
-            quantity = hw = line[2]
+            quantity = line[2]
             
             product_ids = product_pool.search(cr, uid, [
                 ('default_code', '=', hw),
@@ -92,6 +92,6 @@ class ResCompany(orm.Model):
                 quantity,
                 ))
 
-        _logger.error('End read: %s > %s' % (in_file, out_file))
+        _logger.info('End read: %s > %s' % (in_file, out_file))
     
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

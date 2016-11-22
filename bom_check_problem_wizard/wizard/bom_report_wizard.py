@@ -127,10 +127,10 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         'mode': fields.selection([
             ('order', 'Product BOM from order'),
             ('parent', 'Parent BOM'),
-            ('product', 'Product BOM'),
+            ('product', 'Product result BOM'),
             ('half', 'Halfworked BOM'),            
             ('pipe', 'Pipe in Halfworked'),
-            ('line', 'Product present in bom'),
+            ('line', 'Product presence bom'),
             ], 'Report mode', required=True),            
         
         'modal': fields.selection([

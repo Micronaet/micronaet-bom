@@ -10,12 +10,13 @@
                    <header>
                        <button string="Cancel" special="cancel" />
                        <button name="action_show_list" string="Show list" type="object" icon="gtk-justify-fill" attrs="{'invisible': [('mode','!=','half')]}" />
+                       <button name="action_show_line_list" string="Show list" type="object" icon="gtk-justify-fill" attrs="{'invisible': [('mode','!=','line')]}" />
                        <button name="action_print" string="Print" type="object" icon="gtk-print" class="oe_highlight" />
                    </header>                   
                    <group colspan="4" col="4">
                         <field name="mode" />
                         <field name="modal" attrs="{'invisible': [('mode','!=','parent')]}" />
-                        <field name="start_code" attrs="{'required': [('mode','=','product')], 'invisible': [('mode','not in',('product', 'parent', 'half'))]}"/>
+                        <field name="start_code" attrs="{'required': [('mode','=','product')], 'invisible': [('mode','not in',('product', 'parent', 'half', 'line'))]}"/>
                         <field name="component" attrs="{'invisible': [('mode','!=','half')]}" />
                         <field name="only" attrs="{'invisible': [('mode','not in',('product'))]}"/>
                         <!--<field name="from_date" />

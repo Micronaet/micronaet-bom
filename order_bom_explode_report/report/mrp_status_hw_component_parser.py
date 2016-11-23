@@ -174,7 +174,7 @@ class Parser(report_sxw.rml_parse):
             if not parent_bom:
                 continue # TODO raise error
             total = record[2] - record[1] 
-            for hw in parent_bom:
+            for hw in parent_bom.bom_line_ids:
                 halfwork = hw.product_id
                 if halfwork.relative_type != 'half':
                     continue
@@ -238,5 +238,6 @@ class Parser(report_sxw.rml_parse):
                         item[2].append(hw.product_id)
                     
             res.append(item)
+        import pdb; pdb.set_trace()    
         return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

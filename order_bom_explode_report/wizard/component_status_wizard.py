@@ -60,14 +60,14 @@ class CcomponentStatusReportWizard(orm.TransientModel):
             'mode': wiz_browse.mode,
             'type_id': wiz_browse.type_id.id or False,
             'days': wiz_browse.days,
-            'first_supplier_id' wiz_browse.first_supplier_id.id or False,
+            'first_supplier_id': wiz_browse.first_supplier_id.id or False,
             }
             
         if wiz_browse.mode == 'mrp':
             report_name = 'mrp_status_explode_report'            
         elif wiz_browse.mode == 'todo':
             report_name = 'mrp_status_hw_cmp_report'
-        elif: # halfwork, component
+        else: # halfwork, component
             report_name = 'stock_status_explode_report'
             
         return {
@@ -81,7 +81,7 @@ class CcomponentStatusReportWizard(orm.TransientModel):
             ('halfwork', 'Halfwork'),
             ('component', 'Final component'),
             ('mrp', 'Scheduled production'),
-            ('todo', 'TODO hw and component),
+            ('todo', 'TODO hw and component'),
             ], 'Report mode', required=True),
         'days': fields.integer('Days', help='Production scheduled now + days'),
         'first_supplier_id': fields.many2one(

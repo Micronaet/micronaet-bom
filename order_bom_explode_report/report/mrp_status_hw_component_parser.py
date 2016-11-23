@@ -112,6 +112,8 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------        
         # Database
         parent_todo = {}
+        self.hws = {}
+
         order_ids = company_pool.mrp_domain_sale_order_line(
             cr, uid, context=context)
 
@@ -135,7 +137,7 @@ class Parser(report_sxw.rml_parse):
                         ]
                     
                 # -------------------------------------------------------------    
-                # Populate database:
+                # Populate parent database:
                 # -------------------------------------------------------------    
                 # Parent:
                 parent_bom = product.parent_bom_id
@@ -156,43 +158,40 @@ class Parser(report_sxw.rml_parse):
                 parent_todo[parent_code][1] += stock_net
                 
                 # Check negative
-                parent_todo[parent_code][2] += \
-                    company_pool.mrp_order_line_to_produce(line)
-
-        # ---------------------------------------------------------------------        
-        # Explode bom
-        # ---------------------------------------------------------------------        
-        # Database
-        self.hws = {}
-        for parent, record in parent_todo.iteritems():
-            parent_bom = record[0]
-            if not parent_bom:
-                continue # TODO raise error
-            todo = record[2] - record[1] 
-            # -----------------------------------------------------------------
-            # Halfwork from parent BOM
-            # -----------------------------------------------------------------
-            for hw in parent_bom.bom_line_ids:
-                halfwork = hw.product_id
-                if halfwork.relative_type != 'half':
-                    continue
-                if halfwork not in self.hws: # halfwork browse obj
-                    self.hws[halfwork] = [
-                        0.0, # 1. Production,                        
-                        halfwork.mx_net_qty, # 0. Stock
-                        # XXX No OF
-                        ]
-                # Update total TODO * q. in BOM:
-                self.hws[halfwork][0] += todo * hw.product_qty
+                oc_remain = company_pool.mrp_order_line_to_produce(line)
+                parent_todo[parent_code][2] += oc_remain
+                
+                # -------------------------------------------------------------    
+                # Populate halfwork database:
+                # -------------------------------------------------------------    
+                todo = oc_remain - stock_net 
+                # -----------------------------------------------------------------
+                # Halfwork from parent BOM
+                # -----------------------------------------------------------------
+                for hw in parent_bom.bom_line_ids:
+                    halfwork = hw.product_id
+                    if halfwork.relative_type != 'half':
+                        continue
+                    if halfwork not in self.hws: # halfwork browse obj
+                        self.hws[halfwork] = [
+                            0.0, # 0. Needed                            
+                            halfwork.mx_net_qty, # 1. Net (after - MRP)
+                            {}, # total component
+                            # XXX No OF
+                            ]
+                    # Update total TODO * q. in BOM:
+                    self.hws[halfwork][0] += todo * hw.product_qty
+                    self.hws[halfwork][2][(parent, halfwork)] = hw.product_qty
+                    
                 
         # ---------------------------------------------------------------------
         # Clean HW for unload production:
         # ---------------------------------------------------------------------        
         mrp_ids = mrp_pool.search(cr, uid, [
             # State filter:
-            ('state', 'not in', ('done', 'cancel')),            
+            ('state', 'not in', ('cancel')),                   
             # Period filter (only up not down limit)
-            #('date_planned', '<=', limit_date),
+            ('date_planned', '>=', reference_date),
             ], context=context)
             
         # Generate MRP total componet report with totals:
@@ -210,7 +209,7 @@ class Parser(report_sxw.rml_parse):
                         # TODO Error not in bom
                         continue
                     hw_q = qty_maked * hw.product_qty
-                    self.hws[halfwork][1] += hw_q
+                    self.hws[halfwork][1] -= hw_q # - MRP
                     
         # ---------------------------------------------------------------------
         # Prepare report:

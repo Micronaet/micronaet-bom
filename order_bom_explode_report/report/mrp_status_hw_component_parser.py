@@ -231,10 +231,11 @@ class Parser(report_sxw.rml_parse):
         for parent in sorted(parent_todo):
             record = parent_todo[parent]
             item = (parent, record, [])
-            for hw in record[0].order_line_ids:
-                # append hw product:
-                if hw.product_id in self.hws: # hw in the list
-                    item[2].append(hw.product_id)
+            if record[0]:                    
+                for hw in record[0].bom_line_ids:
+                    # append hw product:
+                    if hw.product_id in self.hws: # hw in the list
+                        item[2].append(hw.product_id)
                     
             res.append(item)
         return res

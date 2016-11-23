@@ -51,7 +51,6 @@ class Parser(report_sxw.rml_parse):
             'get_filter': self.get_filter,
             'get_date': self.get_date,
             'get_hw': self.get_hw,
-            'get_component': self.get_component,
         })
 
     def get_hw(self, hw):
@@ -59,11 +58,6 @@ class Parser(report_sxw.rml_parse):
         '''
         return self.hws.get(hw, [])
 
-    def get_component(self, cmpt):
-        ''' get component
-        '''
-        return self.cmpts.get(cmpt, [])
-        
     def get_date(self, ):
         ''' Get filter selected
         '''
@@ -170,7 +164,6 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------        
         # Database
         self.hws = {}
-        self.cmpts = {}
         for parent, record in parent_todo.iteritems():
             parent_bom = record[0]
             if not parent_bom:
@@ -192,22 +185,6 @@ class Parser(report_sxw.rml_parse):
                 # Update total TODO * q. in BOM:
                 self.hws[halfwork][0] += todo * hw.product_qty
                 
-                # -------------------------------------------------------------
-                # Component from halfwork bom:
-                # -------------------------------------------------------------
-                for cmpt in product.half_bom_id:
-                    component = cmpt.product_id
-                    # XXX only pipe:
-                    if not component.is_pipe:
-                        continue
-                    if component not in self.cmpts: # component browse obj
-                        # update total:
-                        self.cmpts[component] = [
-                            component.mx_net_qty, # Stock + Production MM
-                            component.mx_of_in, # OF
-                            # XXX No production
-                            ]
-                            
         # ---------------------------------------------------------------------
         # Clean HW for unload production:
         # ---------------------------------------------------------------------        

@@ -80,7 +80,10 @@ class Parser(report_sxw.rml_parse):
 
         days = data.get('days', self.default_days)
         first_supplier_id = data.get('first_supplier_id')
-        reference_date = '2016-10-15 00:00:00' # TODO change used for now!!!!!!
+        
+        # TODO change used for now!!!!!!
+        reference_date = '2016-10-15 00:00:00' 
+        # TODO manage day range
         if days:
             limit_date = '%s 23:59:59' % (
                 datetime.now() + timedelta(days=days)).strftime(
@@ -98,13 +101,10 @@ class Parser(report_sxw.rml_parse):
             reference_date, limit_date or 'no limit'))
 
         # ---------------------------------------------------------------------        
-        # Databases:
-        # ---------------------------------------------------------------------        
-        parent_todo = {}
-        
-        # ---------------------------------------------------------------------        
         # To produce line in order open
         # ---------------------------------------------------------------------        
+        # Database
+        parent_todo = {}
         order_ids = company_pool.mrp_domain_sale_order_line(
             cr, uid, context=context)
 
@@ -115,146 +115,101 @@ class Parser(report_sxw.rml_parse):
                 product = line.product_id # readability
                 default_code = product.default_code
                 parent_code = default_code[:3]
-                if parent_code not in parant_db:
-                    # Stock, Order to produce, negative
-                    parent_todo[parent_code] = [0.0, 0.0, False]
+                if parent_code not in parent_todo:
+                    # Stock, Order to produce, has stock negative
+                    parent_todo[parent_code] = [
+                        False, # 0. Parent bom for explode
+                        0.0, # 1. Stock status net
+                        0.0, # 2. Order to produce
+                        0, # 3. Stock status negative (total)
+                        0, # 4. No parent bom (total)
+                        ]
                     
-                # TODO check negative stock:
-                parent_todo[parent_code][0] += product.mx_net_qty
-                parent_todo[parent_code][1] += self.mrp_order_line_to_produce(
+                # -------------------------------------------------------------    
+                # Populate database:
+                # -------------------------------------------------------------    
+                # Parent:
+                parent_bom = product.parent_bom_id
+                if parent_bom and not parent_todo[parent_code][0]: # only once
+                    parent_todo[parent_code][0] = parent_bom
+                else:
+                    if not parent_bom:
+                        # Check no parent
+                        parent_todo[parent_code][4] += 1
+                    
+                # Stock:    
+                stock_net = product.mx_net_qty
+                if stock_net < 0:
+                    parent_todo[parent_code][3] += 1
+
+                # Order to produce
+                parent_todo[parent_code][1] += stock_net
+                # Check negative
+                parent_todo[parent_code][
+                    2] += company_pool.mrp_order_line_to_produce(
                     line)
-            
+
+        # ---------------------------------------------------------------------        
+        # Explode bom
+        # ---------------------------------------------------------------------        
+        # Database
+        hws = {}
+        cmpts = {}
+        for record in parent_todo:
+            parent_bom = record[0]
+            total = record[2] - record[1] 
+            if hw in parent_bom:
+                halfwork = hw.product_id
+                if halfwork.relative_type != 'half':
+                    continue
+                if halfwork not in hws: # halfwork browse obj
+                    hws[halfwork] = [
+                        0.0, # 0. Stock
+                        0.0, # 1. Production,                        
+                        ]
+                    # TODO update total:
+                        
+                for cmpt in product.half_bom_id:
+                    # XXX only pipe:
+                    component = cmpt.product_id
+                    if not component.is_pipe:
+                        continue
+                    if component not in cmpts: # component browse obj
+                        cmpts[component] = [
+                            0.0, # Stock + Production MM
+                            0.0, # OF
+                            ]
+                        # TODO update total:
+                            
         # ---------------------------------------------------------------------
-        #                      PRODUCTION OPEN IN RANGE:
-        # ---------------------------------------------------------------------
-        # Prepare data for remain production component
-        # Update mrp stock with used halfword in productions
-        
+        # Clean HW for unload production:
+        # ---------------------------------------------------------------------        
         mrp_ids = mrp_pool.search(cr, uid, [
             # State filter:
-            ('state', 'not in', ('done', 'cancel')),
-            
+            ('state', 'not in', ('done', 'cancel')),            
             # Period filter (only up not down limit)
-            ('date_planned', '<=', limit_date),
-            ], order='date_planned, id', context=context)
+            #('date_planned', '<=', limit_date),
+            ], context=context)
             
         # Generate MRP total componet report with totals:
         for mrp in mrp_pool.browse(cr, uid, mrp_ids, context=context):
-            mrp_db[mrp] = {}
-            
             for sol in mrp.order_line_ids:
-                # Total elements:
-                qty = sol.product_uom_qty
+                product = sol.product_id                
                 qty_maked = sol.product_uom_maked_sync_qty 
-                todo = qty - qty_maked
-                
-                for component in sol.product_id.dynamic_bom_line_ids:                    
-                    product = component.product_id
-                        
-                    # Total todo product    
-                    if product not in mrp_db[mrp]: 
-                        mrp_db[mrp][product] = [0.0, 0.0] # this, previous MRP
-                    if component.id not in delta_stock:
-                        delta_stock[component.id] = 0.0
-                        
-                    # This order:
-                    this_qty = todo * component.product_qty
-                    mrp_db[mrp][product][0] += this_qty
+                # TODO betteruse dynamic_bom_line_ids ?
+                # TODO check existence
+                for hw in product.parent_bom_line_ids:
+                    halfwork = hw.product_id
+                    if halfwork.relative_type != 'half':
+                        continue
+                    if halfwork not in hws:
+                        # TODO Error not in bom
+                        continue
+                    hw_q = qty_maked * hw.product_qty
+                    hws[halfwork][1] += hw_q
                     
-                    # Update delta with this unload
-                    delta_stock[component.id] -= this_qty
-                    
-                    # Current delta stock saved in order component:
-                    mrp_db[mrp][product][1] = delta_stock[component.id]
-
         # ---------------------------------------------------------------------
-        #                           ALL PRODUCTION:
+        # Prepare report:
         # ---------------------------------------------------------------------
-        # Search in all production from reference date:
-        # 1. get produced element for unload stock
-        # 2. get order remain in open mrp for total needed
-        
-        sol_ids = sol_pool.search(cr, uid, [
-            # Linked to production # TODO remove?
-            ('mrp_id', '!=', False),
-            
-            # Date range production:
-            ('mrp_id.date_planned', '>=', reference_date),
-            ('mrp_id.date_planned', '<=', limit_date),
-            ], context=context)
-            
-        sol_proxy = sol_pool.browse(cr, uid, sol_ids, context=context)
-        for sol in sol_proxy:
-            qty = sol.product_uom_qty
-            qty_maked = sol.product_uom_maked_sync_qty
-            todo = qty - qty_maked
-            
-            for component in sol.product_id.dynamic_bom_line_ids:                    
-                product = component.product_id
-                
-                # Maked (unload stock)
-                if product.id not in mrp_unload:
-                    mrp_unload[product.id] = 0.0                    
-                mrp_unload[product.id] -= qty_maked * component.product_qty
-                
-                # Remain (todo order total)
-                if product.id not in mrp_order:
-                    mrp_order[product.id] = 0.0                
-                if sol.mrp_id.state not in ('done', 'cancel'): # only active
-                    mrp_order[product.id] -= todo * component.product_qty
-
-        # ---------------------------------------------------------------------
-        #                           PREPARE FOR REPORT:
-        # ---------------------------------------------------------------------
-        res = []
-        for mrp in sorted(mrp_db, key=lambda x: (x.date_planned, x.id)):
-            record = mrp_db[mrp]
-            components = []
-            mrp_status = 'green'
-            for component, qty in record.iteritems():
-                this_qty = qty[0]
-                delta_stock_qty = qty[1]
-                
-                # Current stock = stock - mrp (previous unload) - delta TODO
-                stock = component.mx_net_qty + mrp_unload.get(
-                    component.id, 0.0) + delta_stock_qty
-                oc_period = mrp_order.get(component.id, 0.0)   
-                of = component.mx_of_in
-                of_move = ''
-                for move in component.mx_of_ids:
-                    of_move += '%s (%s)\n' % (
-                        int(move.product_uom_qty or 0.0), 
-                        '%s-%s' % (
-                            move.date_expected[8:10],
-                             move.date_expected[5:7],
-                             ) if move.date_expected else '?',
-                        )
-                
-                if stock >= 0.0:
-                    status = 'green'
-                elif stock + of >= 0.0:
-                    status = 'yellow'
-                    if mrp_status == 'green':
-                        mrp_status = 'yellow'
-                else:    
-                    status = 'red'
-                    if mrp_status != 'red':
-                        mrp_status = 'red'
-                    
-                # component, need, stock, OC period, OF, status
-                components.append((
-                    component, # Component
-                    this_qty, # MRP net q.                    
-                    stock, # net stock after this order
-                    oc_period,
-                    of,
-                    status,
-                    of_move,             
-                    ))
-            res.append((
-                mrp, 
-                sorted(components, key=lambda x: report_order_component(x)), 
-                mrp_status),
-                )        
-        return res
+        return sorted(parent_todo.iteritems())
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

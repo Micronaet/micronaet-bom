@@ -71,9 +71,8 @@ class ResCompany(orm.Model):
         ''' Get order line to produce depend on OC-B-Delivery
         '''      
         if line.product_uom_maked_sync_qty >= line.delivered_qty:
-            return = \
-                line.product_uom_qty - line.product_uom_maked_sync_qty
+            return line.product_uom_qty - line.product_uom_maked_sync_qty
         else:    
-            return = line.product_uom_qty - line.delivered_qty
+            return line.product_uom_qty - line.delivered_qty
     
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

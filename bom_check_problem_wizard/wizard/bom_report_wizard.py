@@ -106,6 +106,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             'only': wiz_proxy.only,
             'modal': wiz_proxy.modal or False,
             'component': wiz_proxy.component,
+            'no_bom_product': wiz_proxy.no_bom_product,
             }
         
         if wiz_proxy.mode == 'order':
@@ -154,6 +155,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ('error', 'Only error'),
             ('override', 'Only error and overrided'),
             ], 'Only line', required=True),                
+        'no_bom_product': fields.boolean('No BOM product'),    
         }
 
     _defaults = {

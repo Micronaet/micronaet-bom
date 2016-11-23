@@ -114,6 +114,8 @@ class Parser(report_sxw.rml_parse):
                     continue
                 product = line.product_id # readability
                 default_code = product.default_code
+                if not default_code:
+                    continue # TODO raise error or log
                 parent_code = default_code[:3]
                 if parent_code not in parent_todo:
                     # Stock, Order to produce, has stock negative
@@ -155,7 +157,7 @@ class Parser(report_sxw.rml_parse):
         # Database
         hws = {}
         cmpts = {}
-        for record in parent_todo:
+        for parent, record in parent_todo.iteritems():
             parent_bom = record[0]
             total = record[2] - record[1] 
             if hw in parent_bom:

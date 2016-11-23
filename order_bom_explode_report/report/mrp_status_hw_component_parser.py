@@ -50,8 +50,20 @@ class Parser(report_sxw.rml_parse):
             'get_object': self.get_object,
             'get_filter': self.get_filter,
             'get_date': self.get_date,
+            'get_hw': self.get_hw,
+            'get_component': self.get_component,
         })
 
+    def get_hw(self, hw):
+        ''' get hw
+        '''
+        return self.hws.get(hw, [])
+
+    def get_component(self, cmpt):
+        ''' get component
+        '''
+        return self.cmpts.get(cmpt, [])
+        
     def get_date(self, ):
         ''' Get filter selected
         '''
@@ -155,17 +167,19 @@ class Parser(report_sxw.rml_parse):
         # Explode bom
         # ---------------------------------------------------------------------        
         # Database
-        hws = {}
-        cmpts = {}
+        self.hws = {}
+        self.cmpts = {}
         for parent, record in parent_todo.iteritems():
             parent_bom = record[0]
+            if not parent_bom:
+                continue # TODO raise error
             total = record[2] - record[1] 
-            if hw in parent_bom:
+            for hw in parent_bom:
                 halfwork = hw.product_id
                 if halfwork.relative_type != 'half':
                     continue
-                if halfwork not in hws: # halfwork browse obj
-                    hws[halfwork] = [
+                if halfwork not in self.hws: # halfwork browse obj
+                    self.hws[halfwork] = [
                         0.0, # 0. Stock
                         0.0, # 1. Production,                        
                         ]
@@ -176,8 +190,8 @@ class Parser(report_sxw.rml_parse):
                     component = cmpt.product_id
                     if not component.is_pipe:
                         continue
-                    if component not in cmpts: # component browse obj
-                        cmpts[component] = [
+                    if component not in self.cmpts: # component browse obj
+                        self.cmpts[component] = [
                             0.0, # Stock + Production MM
                             0.0, # OF
                             ]
@@ -200,18 +214,28 @@ class Parser(report_sxw.rml_parse):
                 qty_maked = sol.product_uom_maked_sync_qty 
                 # TODO betteruse dynamic_bom_line_ids ?
                 # TODO check existence
-                for hw in product.parent_bom_line_ids:
+                for hw in product.parent_bom_id.bom_line_ids:
                     halfwork = hw.product_id
                     if halfwork.relative_type != 'half':
                         continue
-                    if halfwork not in hws:
+                    if halfwork not in self.hws:
                         # TODO Error not in bom
                         continue
                     hw_q = qty_maked * hw.product_qty
-                    hws[halfwork][1] += hw_q
+                    self.hws[halfwork][1] += hw_q
                     
         # ---------------------------------------------------------------------
         # Prepare report:
         # ---------------------------------------------------------------------
-        return sorted(parent_todo.iteritems())
+        res = []
+        for parent in sorted(parent_todo):
+            record = parent_todo[parent]
+            item = (parent, record, [])
+            for hw in record[0].order_line_ids:
+                # append hw product:
+                if hw.product_id in self.hws: # hw in the list
+                    item[2].append(hw.product_id)
+                    
+            res.append(item)
+        return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -133,6 +133,7 @@ class Parser(report_sxw.rml_parse):
         debug_mm = open(debug_f_mm, 'w')
 
         # pool used:
+        company_pool = self.pool.get('res.company') # for utility
         product_pool = self.pool.get('product.product')
         pick_pool = self.pool.get('stock.picking')
         sale_pool = self.pool.get('sale.order')
@@ -341,20 +342,8 @@ class Parser(report_sxw.rml_parse):
         #    OC - B if B > Del.
         #    OC - Del if B < Del.
         
-        order_ids = sale_pool.search(cr, uid, [
-            ('state', 'not in', ('cancel', 'send', 'draft')),
-            ('pricelist_order', '=', False),
-            ('mx_closed', '=', False), # Only open orders (not all MRP after)
-            # Also forecasted order
-            # No filter date TODO use over data for reporting extra
-            # XXX no x axis filter!
-            ])
-        # Add forecasted draft order (not in closed production)
-        forecasted_ids = sale_pool.search(cr, uid, [
-            ('forecasted_production_id', '!=', False),
-            ('forecasted_production_id.state', 'not in', ('done', 'cancel')),
-            ])
-        order_ids.extend(forecasted_ids) # XXX no double FC is draft mode
+        order_ids = company_pool.mrp_domain_sale_order_line(
+            cr, uid, context=context)
             
         for order in sale_pool.browse(cr, uid, order_ids, context=context):
             # Search in order line:

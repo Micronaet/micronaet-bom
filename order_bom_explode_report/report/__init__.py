@@ -17,6 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+from . import common_part
 from . import explode_parser
 from . import mrp_parser
 

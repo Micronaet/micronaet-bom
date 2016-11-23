@@ -168,7 +168,6 @@ class Parser(report_sxw.rml_parse):
         # =====================================================================
         # Get parameters for search:
         # =====================================================================
-        company_pool = self.pool.get('res.company')
         company_ids = company_pool.search(cr, uid, [])
         company_proxy = company_pool.browse(cr, uid, company_ids)[0]
             
@@ -364,16 +363,9 @@ class Parser(report_sxw.rml_parse):
                         0, # XXX keep 0 (-OC)
                         0, 'OC NO PARCELS PRODUCT',
                         ))                      
-                    continue                    
+                    continue     
 
-                # -----------------------
-                # Check remain to produce
-                # -----------------------
-                if line.product_uom_maked_sync_qty >= line.delivered_qty:
-                    remain = \
-                        line.product_uom_qty - line.product_uom_maked_sync_qty
-                else:    
-                    remain = line.product_uom_qty - line.delivered_qty
+                remain = self.mrp_order_line_to_produce(line)
 
                 # --------------------------------
                 # OC direct halfwork or component:

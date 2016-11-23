@@ -74,41 +74,56 @@ class Parser(report_sxw.rml_parse):
         cr = self.cr
         uid = self.uid
         context = {}
-
-                
-        # Utility function:
-        def report_order_component(x):
-            ''' Order for component in reporting
-            ''' 
-            if x[5] == 'green':
-                return (1, x[0].default_code)
-            elif x[5] == 'yellow':
-                return (2, x[0].default_code)
-            else: # red
-                return (3, x[0].default_code)
                 
         if data is None:
             data = {}
+
         days = data.get('days', self.default_days)
         first_supplier_id = data.get('first_supplier_id')
+        reference_date = '2016-10-15 00:00:00' # TODO change used for now!!!!!!
+        if days:
+            limit_date = '%s 23:59:59' % (
+                datetime.now() + timedelta(days=days)).strftime(
+                    DEFAULT_SERVER_DATE_FORMAT)
+        else:
+            limite_date = False            
 
-        mrp_db = {}
-        
-        # pool used:
-        sol_pool = self.pool.get('sale.order.line') 
+        # Pool used:
+        company_pool = self.pool.get('res.company')
+        sale_pool = self.pool.get('sale.order')
+        #sol_pool = self.pool.get('sale.order.line') 
         mrp_pool = self.pool.get('mrp.production')
         
-        reference_date = '2016-10-15 00:00:00' # TODO change used for now!!!!!!
-        limit_date = '%s 23:59:59' % (
-            datetime.now() + timedelta(days=days)).strftime(
-                DEFAULT_SERVER_DATE_FORMAT)
         _logger.warning('Range period: MRP from %s, Max open MRP <= %s' % (
-            reference_date, limit_date))
+            reference_date, limit_date or 'no limit'))
+
+        # ---------------------------------------------------------------------        
+        # Databases:
+        # ---------------------------------------------------------------------        
+        parent_todo = {}
         
-        mrp_unload = {} # Stock unload from MRP
-        mrp_order = {} # Order opened
-        delta_stock = {} # Consumed component in stock (assume start is 0)
-        
+        # ---------------------------------------------------------------------        
+        # To produce line in order open
+        # ---------------------------------------------------------------------        
+        order_ids = company_pool.mrp_domain_sale_order_line(
+            cr, uid, context=context)
+
+        for order in sale_pool.browse(cr, uid, order_ids, context=context):
+            for line in order.order_line: # order line
+                if line.mx_closed:
+                    continue
+                product = line.product_id # readability
+                default_code = product.default_code
+                parent_code = default_code[:3]
+                if parent_code not in parant_db:
+                    # Stock, Order to produce, negative
+                    parent_todo[parent_code] = [0.0, 0.0, False]
+                    
+                # TODO check negative stock:
+                parent_todo[parent_code][0] += product.mx_net_qty
+                parent_todo[parent_code][1] += self.mrp_order_line_to_produce(
+                    line)
+            
         # ---------------------------------------------------------------------
         #                      PRODUCTION OPEN IN RANGE:
         # ---------------------------------------------------------------------

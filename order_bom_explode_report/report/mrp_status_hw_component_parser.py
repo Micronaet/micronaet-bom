@@ -125,13 +125,13 @@ class Parser(report_sxw.rml_parse):
                 default_code = product.default_code
                 if not default_code:
                     continue # TODO raise error or log
-                parent_code = default_code[:3]
-                if parent_code not in parent_todo:
+                parent = default_code[:3]
+                if parent not in parent_todo:
                     # Stock, Order to produce, has stock negative
-                    parent_todo[parent_code] = [
+                    parent_todo[parent] = [
                         False, # 0. Parent bom for explode
                         0.0, # 1. Stock status net
-                        0.0, # 2. Order to produce
+                        0.0, # 2. Order to produce # merge with 1?
                         0, # 3. Stock status negative (total)
                         0, # 4. No parent bom (total)
                         ]
@@ -141,25 +141,25 @@ class Parser(report_sxw.rml_parse):
                 # -------------------------------------------------------------    
                 # Parent:
                 parent_bom = product.parent_bom_id
-                if parent_bom and not parent_todo[parent_code][0]: 
+                if parent_bom and not parent_todo[parent][0]: 
                     # only once
-                    parent_todo[parent_code][0] = parent_bom
+                    parent_todo[parent][0] = parent_bom
                 else:
                     if not parent_bom:
                         # Check no parent
-                        parent_todo[parent_code][4] += 1
+                        parent_todo[parent][4] += 1
                     
                 # Stock:    
                 stock_net = product.mx_net_qty
                 if stock_net < 0:
-                    parent_todo[parent_code][3] += 1
+                    parent_todo[parent][3] += 1
 
                 # Order to produce
-                parent_todo[parent_code][1] += stock_net
+                parent_todo[parent][1] += stock_net
                 
                 # Check negative
                 oc_remain = company_pool.mrp_order_line_to_produce(line)
-                parent_todo[parent_code][2] += oc_remain
+                parent_todo[parent][2] += oc_remain
                 
                 # -------------------------------------------------------------    
                 # Populate halfwork database:
@@ -176,20 +176,20 @@ class Parser(report_sxw.rml_parse):
                         self.hws[halfwork] = [
                             0.0, # 0. Needed                            
                             halfwork.mx_net_qty, # 1. Net (after - MRP)
-                            {}, # total component
+                            {}, # 2. total component
                             # XXX No OF
                             ]
                     # Update total TODO * q. in BOM:
                     self.hws[halfwork][0] += todo * hw.product_qty
-                    self.hws[halfwork][2][(parent, halfwork)] = hw.product_qty
-                    
+                    self.hws[halfwork][2][
+                        (parent, halfwork)] = hw.product_qty
                 
         # ---------------------------------------------------------------------
         # Clean HW for unload production:
         # ---------------------------------------------------------------------        
         mrp_ids = mrp_pool.search(cr, uid, [
             # State filter:
-            ('state', 'not in', ('cancel')),                   
+            ('state', '!=', 'cancel'),                   
             # Period filter (only up not down limit)
             ('date_planned', '>=', reference_date),
             ], context=context)
@@ -199,15 +199,14 @@ class Parser(report_sxw.rml_parse):
             for sol in mrp.order_line_ids:
                 product = sol.product_id                
                 qty_maked = sol.product_uom_maked_sync_qty 
-                # TODO betteruse dynamic_bom_line_ids ?
-                # TODO check existence
+                # TODO better use dynamic_bom_line_ids ?
+                # check existence
                 for hw in product.parent_bom_id.bom_line_ids:
                     halfwork = hw.product_id
                     if halfwork.relative_type != 'half':
                         continue
-                    if halfwork not in self.hws:
-                        # TODO Error not in bom
-                        continue
+                    if halfwork not in self.hws:                        
+                        continue # TODO Error not in bom
                     hw_q = qty_maked * hw.product_qty
                     self.hws[halfwork][1] -= hw_q # - MRP
                     

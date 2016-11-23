@@ -95,6 +95,7 @@ class Parser(report_sxw.rml_parse):
         
         # TODO change used for now!!!!!!
         reference_date = '2016-10-15 00:00:00' 
+        
         # TODO manage day range
         if days:
             limit_date = '%s 23:59:59' % (
@@ -144,7 +145,8 @@ class Parser(report_sxw.rml_parse):
                 # -------------------------------------------------------------    
                 # Parent:
                 parent_bom = product.parent_bom_id
-                if parent_bom and not parent_todo[parent_code][0]: # only once
+                if parent_bom and not parent_todo[parent_code][0]: 
+                    # only once
                     parent_todo[parent_code][0] = parent_bom
                 else:
                     if not parent_bom:
@@ -158,10 +160,10 @@ class Parser(report_sxw.rml_parse):
 
                 # Order to produce
                 parent_todo[parent_code][1] += stock_net
+                
                 # Check negative
-                parent_todo[parent_code][
-                    2] += company_pool.mrp_order_line_to_produce(
-                    line)
+                parent_todo[parent_code][2] += \
+                    company_pool.mrp_order_line_to_produce(line)
 
         # ---------------------------------------------------------------------        
         # Explode bom
@@ -173,29 +175,38 @@ class Parser(report_sxw.rml_parse):
             parent_bom = record[0]
             if not parent_bom:
                 continue # TODO raise error
-            total = record[2] - record[1] 
+            todo = record[2] - record[1] 
+            # -----------------------------------------------------------------
+            # Halfwork from parent BOM
+            # -----------------------------------------------------------------
             for hw in parent_bom.bom_line_ids:
                 halfwork = hw.product_id
                 if halfwork.relative_type != 'half':
                     continue
                 if halfwork not in self.hws: # halfwork browse obj
                     self.hws[halfwork] = [
-                        0.0, # 0. Stock
                         0.0, # 1. Production,                        
+                        halfwork.mx_net_qty, # 0. Stock
+                        # XXX No OF
                         ]
-                    # TODO update total:
-                        
+                # Update total TODO * q. in BOM:
+                self.hws[halfwork][0] += todo * hw.product_qty
+                
+                # -------------------------------------------------------------
+                # Component from halfwork bom:
+                # -------------------------------------------------------------
                 for cmpt in product.half_bom_id:
-                    # XXX only pipe:
                     component = cmpt.product_id
+                    # XXX only pipe:
                     if not component.is_pipe:
                         continue
                     if component not in self.cmpts: # component browse obj
+                        # update total:
                         self.cmpts[component] = [
-                            0.0, # Stock + Production MM
-                            0.0, # OF
+                            component.mx_net_qty, # Stock + Production MM
+                            component.mx_of_in, # OF
+                            # XXX No production
                             ]
-                        # TODO update total:
                             
         # ---------------------------------------------------------------------
         # Clean HW for unload production:

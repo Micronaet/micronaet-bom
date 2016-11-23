@@ -238,6 +238,5 @@ class Parser(report_sxw.rml_parse):
                         item[2].append(hw.product_id)
                     
             res.append(item)
-        import pdb; pdb.set_trace()    
         return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

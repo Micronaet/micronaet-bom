@@ -110,7 +110,6 @@ class Parser(report_sxw.rml_parse):
 
         order_ids = company_pool.mrp_domain_sale_order_line(
             cr, uid, context=context)
-        order_ids = order_ids[1:2] # TODO remove
         for order in sale_pool.browse(cr, uid, order_ids, context=context):
             for line in order.order_line: # order line
                 if line.mx_closed:

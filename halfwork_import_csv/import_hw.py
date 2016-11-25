@@ -58,13 +58,17 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
         structure_id = 1 # XXX
 
         file_csv = '/home/administrator/photo/hw/hw.csv'    
+        file_log = '/home/administrator/photo/hw/hw.log'
+        
         try:
             csv = open(file_csv, 'r')
         except:
             raise osv.except_osv(
                 _('Open file'), 
                 _('Error opening file: %s' % file_csv),
-                )    
+                )
+        log = open(file_log, 'w')
+                
         ean13_auto = False # TODO
         
         # UOM database:
@@ -79,7 +83,7 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
             i += 1
             item = row.split('|')            
             if len(item) != 7:
-                _logger.error('Different colums')
+                log.write('%s. Different colums' % i)
                 continue
             
             # Read line parameter:
@@ -93,8 +97,8 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
             
             # Mandatory fields:
             if not cmpt_uom_id:
-                _logger.warning(
-                    '%s UOM non correct for component: %s' % item[5])
+                log.write('%s UOM non correct for component: %s' % (
+                    i, item[5]))
                 continue
             # -----------------------------------------------------------------
             #                      Create component:
@@ -104,10 +108,11 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
             if cmpt_ids:
                 cmpt_id = cmpt_ids[0]
                 if len(cmpt_ids) > 1:
-                    _logger.error('More than one cmpt: %s' % cmpt_code)
+                    log.write('%s More than one cmpt: %s %s' % (
+                        i, cmpt_code))
             else:
                 if not cmpt_code:
-                    _logger.error('%s Code component empty' % i)
+                    log.write('%s Code component empty' % i)
                     continue
                 cmpt_id = product_pool.create(cr, uid, {
                     'name': cmpt_name,
@@ -117,13 +122,13 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
                     'default_code': cmpt_code,
                     'ean13_auto': ean13_auto,
                     }, context=context)
-                _logger.warning('Create component: %s' % cmpt_code)
+                log.write('%s Create component: %s' % (i, cmpt_code))
                 
             # -----------------------------------------------------------------
             #                      Create HW element:
             # -----------------------------------------------------------------
             if not hw_code:
-                _logger.error('%s Code hw empty' % i)
+                log.write('%s Code hw empty' % i)
                 continue
             
             hw_ids = product_pool.search(cr, uid, [
@@ -133,7 +138,7 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
 
             if hw_ids:
                 if len(hw_ids) > 1:
-                    _logger.error('More than one hw_: %s' % hw_code)
+                    log.write('%s More than one hw: %s' % (i, hw_code))
                 hw_id = hw_ids[0]
             else:    
                 hw_id = product_pool.create(cr, uid, {
@@ -160,7 +165,7 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
             
             # Create HW Bom with button:
             if exist: 
-                _logger.warning('%s Esist: %s' % (i, cmpt_code))
+                log.write('%s Esist: %s' % (i, cmpt_code))
             else:
                 # Generate linked bom press the button:
                 product_pool.create_product_half_bom(
@@ -180,10 +185,11 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
                     'product_uom': cmpt_uom_id, 
                     'product_qty': product_qty,
                     }, context=context)
+                log.write('%s Create bom line: %s' % (i, cmpt_code))
 
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Product'),
+            'name': _('HW created'),
             'view_type': 'form',
             'view_mode': 'tree,form',
             #'res_id': 1,

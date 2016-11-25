@@ -38,14 +38,18 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
-class ImportHalfworkedProductComponent(orm.TransientModel):
-    """ Model name: Import wizard
+class MRPBom(orm.Model):
+    """ Model name: MRP Bom
     """    
-    _inherit = 'import.halfworked.product.component.wizard'
+    _inherit = 'mrp.bom'
 
-    def import_halfworked_product_and_component(self, cr, uid, ids, 
+    # EXTRA BLOCK -------------------------------------------------------------
+    def migrate_assign_product_bom_product_csv(self, cr, uid, ids, 
             context=None):
-        ''' Import halfworked wizard
+        ''' Migrate bom in dynamic way
+            Create half work element
+            Create BOM 
+            Create move in dynamic
         '''
         assert len(ids) == 1, 'Works only with one record a time'
 
@@ -53,14 +57,17 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
         line_pool = self.pool.get('mrp.bom.line')
         product_pool = self.pool.get('product.product')
 
-        csv = open('/home/administrator/photo/hw.csv', 'r')
+        csv = open('/home/administrator/photo/bom.csv', 'r')
+        #structure = bom_proxy.product_id.structure_id
         
         i = 0
-        #HW_codes = []
+        HW_codes = []
         fabric_uom = 8 # m.
         structure_id = 1 # TODO needed?
+        dynamic_bom_id = 7366 # bom_category = dynamic
         
         for row in csv:
+            #import pdb; pdb.set_trace()
             i += 1
             item = row.split('|')            
             if len(item) != 7:
@@ -68,15 +75,12 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
                 continue
             
             # Read line parameter:
-            hw_code = item[0].upper().strip()
-            hw_name = item[1].strip()
-            hw_uom_id = 1 # XXX
-            cmpt_code = item[2].upper().strip()
-            cmpt_name = item[3].strip()
-            cmpt_uom_id = item[4].strip()
-            
+            bom_id = int(item[0])
+            default_code = item[1].upper().strip()
+            #fabric_id = int(item[2]) # TODO Not used!!!!!!
+            fabric_code = item[3].upper().strip()
             product_qty = float(item[4].replace(',', '.'))
-            cmpt_component_code = item[5].strip()
+            component_code = item[5].strip()
             category_id = int(item[6]) # always present?
 
             fabric_ids = product_pool.search(cr, uid, [

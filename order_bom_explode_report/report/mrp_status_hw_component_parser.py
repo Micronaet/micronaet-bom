@@ -220,13 +220,11 @@ class Parser(report_sxw.rml_parse):
         for parent in sorted(parent_todo):
             record = parent_todo[parent]
             
-            item = [] # item total element
-            
             # -----------------------------------------------------------------
             #                             BLOCK A:
             # -----------------------------------------------------------------
             # Parent data:
-            item_A = [
+            data_A = [
                 parent, # Code
                 record[2], # OC
                 record[1], # Mag
@@ -237,68 +235,62 @@ class Parser(report_sxw.rml_parse):
                 ]
                 
             if not record[0]: # parent bom present:
-                # Generate empty block:
-                item.extend(empty_B)
-                item.expextendand(empty_C)                            
-                res.append(item)
+                res.append(data_A + empty_B + empty_C)
                 continue
 
             parent_first = True
             for hw in record[0].bom_line_ids:
                 if parent_first:
-                    parent_first = False
-                    item.extend(item_A)
+                    parent_first = False                    
                 else:    
-                    item.extend(empty_A)
+                    data_A = empty_A # reset A
 
+                if not hw.product_id in hws: # hw in the list
+                    continue # not in selected list create before
+                    
                 # ---------------------------------------------------------
                 #                           BLOCK B:
                 # ---------------------------------------------------------
-                if hw.product_id in hws: # hw in the list
-                    halfwork = hw.product_id # readability
-                    hw_data = hws.get(halfwork, [])
-                    if not hw_data:
-                        item.extend(empty_B)
-                        item.extend(empty_C)
-                        res.append(item)
-                        continue
-                    item_B = [
-                        hw_data[2].get(
-                            (parent, halfwork), '?'), # total
-                        halfwork.default_code, # hw code
-                        hw_data[0], # Todo halfwork
-                        hw_data[1], # Stock
-                        ]
-                    hw_first = True   
-                    for cmpt in halfwork.half_bom_ids:
-                        if hw_first:
-                            hw_first = False
-                            item.extend(item_B)
-                        else:
-                            item.extend(empty_B)
-                         
-                        # ---------------------------------------------
-                        #                  BLOCK C:
-                        # ---------------------------------------------
-                        for cmpt in halfwork.half_bom_ids:
-                            proposed = hw_data[0] * cmpt.product_qty -\
-                                cmpt.product_id.mx_net_qty -\
-                                cmpt.product_id.mx_of_in
+                halfwork = hw.product_id # readability
+                hw_data = hws.get(halfwork, False)
+                if not hw_data:
+                    res.append(data_A + empty_B + empty_C)
+                    continue
+                    
+                data_B = [
+                    hw_data[2].get(
+                        (parent, halfwork), '?'), # total
+                    halfwork.default_code, # hw code
+                    hw_data[0], # Todo halfwork
+                    hw_data[1], # Stock
+                    ]
+                
+                hw_first = True
+                for cmpt in halfwork.half_bom_ids:
+                    if hw_first:
+                        hw_first = False
+                        data_AB = data_A + data_B
+                    else:
+                        data_AB = data_A + empty_B
+                     
+                    # ---------------------------------------------
+                    #                  BLOCK C:
+                    # ---------------------------------------------
+                    proposed = hw_data[0] * cmpt.product_qty -\
+                        cmpt.product_id.mx_net_qty -\
+                        cmpt.product_id.mx_of_in
 
-                            # Add data block directly:
-                            item.extend([
-                                cmpt.product_qty, # total 
-                                cmpt.product_id.default_code, # code
-                                hw_data[0] * cmpt.product_qty,
-                                cmpt.product_id.mx_net_qty,
-                                cmpt.product_id.mx_of_in,
-                                proposed if proposed > 0.0 else 0.0,
-                                ])                                     
-                            res.append(item) # every record
-                                
-                    if hw_first: # no cmpt data (not in loop)
-                        item.extend(item_B)
-                        item.extend(empty_C)
-                        res.append(item)
+                    # Add data block directly:
+                    res.append(data_AB + [
+                        cmpt.product_qty, # total 
+                        cmpt.product_id.default_code, # code
+                        hw_data[0] * cmpt.product_qty,
+                        cmpt.product_id.mx_net_qty,
+                        cmpt.product_id.mx_of_in,
+                        proposed if proposed > 0.0 else 0.0,
+                        ])
+                            
+                if hw_first: # no cmpt data (not in loop)
+                    res.append(data_A + data_B + empty_C)
         return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

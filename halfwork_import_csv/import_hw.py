@@ -64,25 +64,31 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
         uom_db = {}
         import pdb; pdb.set_trace()
         for item in cr.fetchall():
-            uom_db[item[1]] = item[0]
+            uom_db[item[1].upper()] = item[0]
             
         i = 0
         for row in csv:
             i += 1
             item = row.split('|')            
-            if len(item) != 6:
+            if len(item) != 7:
                 _logger.error('Different colums')
                 continue
             
             # Read line parameter:
             hw_code = item[0].upper().strip()
             hw_name = item[1].strip()
-            hw_uom_id = 1 # XXX
-            cmpt_code = item[2].upper().strip()
-            cmpt_name = tem[3].strip()
-            cmpt_uom_id = item[4].strip()
-            product_qty = float(item[5].replace(',', '.'))
-
+            hw_uom_id = uom_db.get(item[2].upper(), 1) # XXX default 1
+            cmpt_code = item[3].upper().strip()
+            cmpt_name = tem[4].strip()
+            cmpt_uom_id = uom_db.get(item[5].upper(), 1) # XXX default 1
+            product_qty = float(item[6].replace(',', '.'))
+            
+            # Check mandatory fields:
+            if not cmpt_uom_id:
+                _logger.warning(
+                    '%s UOM non correct for component: %s' % item[5])
+                continue
+            
             # -----------------------------------------------------------------
             #                      Create component:
             # -----------------------------------------------------------------

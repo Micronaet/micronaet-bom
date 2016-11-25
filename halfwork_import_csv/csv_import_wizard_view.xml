@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+       <!-- import.halfworked.product.component.wizard -->       
+       <record id="import_halfworked_product_component_wizard_view" model="ir.ui.view">
+            <field name="name"></field>
+            <field name="model">import.halfworked.product.component.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Wizard" version="7.0">
+                   <header>
+                       <button string="Cancel" special="cancel" />
+                       <button name="import_halfworked_product_and_component" string="Import" type="object" icon="gtk-jump-to" class="oe_highlight" />
+                   </header>                   
+                   <group colspan="4" col="4">
+                        <!--<field name="file" />-->
+                   </group>
+                </form>
+            </field>
+      </record>
+      <record model="ir.actions.act_window" id="action_import_halfworked_product_component_wizard">
+          <field name="name">Import HW csv</field>
+          <field name="res_model">import.halfworked.product.component.wizard</field>
+          <field name="view_type">form</field>
+          <field name="view_mode">form</field>
+          <field name="target">new</field>
+          <field name="view_id" ref="import_halfworked_product_component_wizard_view"/>
+      </record>      
+      <menuitem 
+          parent="bom_half_worked.menu_halfwork_product" 
+          id="menu_import_halfworked_product_component_wizard" 
+          action="action_import_halfworked_product_component_wizard"
+          />
+      
+    </data>
+</openerp>

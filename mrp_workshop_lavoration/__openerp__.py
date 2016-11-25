@@ -30,7 +30,7 @@
     'depends': [
         'base',
         'menuitem_mrp_workshop',
-        'mrp',
+        'lavoration_cl_sl',
         ],
     'init_xml': [],
     'demo': [],

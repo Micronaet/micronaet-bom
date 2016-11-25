@@ -1,13 +1,21 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
-        <!--<menuitem 
-            parent="menuitem_mrp_workshop.menu_mrp_workshop_view"
-            id="menu_mrp_cut_purchase_view" 
-            name="Product in"
-            action="action_purchase_in_move"
-            sequence="10"
-            />-->
+        <menuitem 
+            parent="menuitem_mrp_workshop.menu_mrp_cut_view" 
+            id="menu_stock_picking_cl"
+            action="lavoration_cl_sl.action_stock_picking_cl_tree"
+            sequence="40"/>
+            <menuitem 
+                parent="menu_stock_picking_cl" 
+                id="menu_stock_picking_cl_closed_tree" 
+                action="lavoration_cl_sl.action_stock_picking_cl_closed_tree"
+                sequence="10"/>
+            <menuitem 
+                parent="menu_stock_picking_cl" 
+                id="menu_stock_picking_cl_configuration" 
+                action="lavoration_cl_sl.action_rec_company_parameter_tree"
+                sequence="90"/>
     </data>
 </openerp>
 

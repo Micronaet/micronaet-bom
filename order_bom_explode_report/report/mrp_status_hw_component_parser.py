@@ -216,7 +216,6 @@ class Parser(report_sxw.rml_parse):
         empty_B = ['' for n in range(0, 4)] # halfwork 4
         empty_C = ['' for n in range(0, 6)] # component 6
         
-        import pdb; pdb.set_trace()
         for parent in sorted(parent_todo):
             record = parent_todo[parent]
             
@@ -256,13 +255,15 @@ class Parser(report_sxw.rml_parse):
                 if not hw_data:
                     res.append(data_A + empty_B + empty_C)
                     continue
-                    
+                
+                proposed_hw = hw_data[0] - hw_data[1]
                 data_B = [
                     hw_data[2].get(
                         (parent, halfwork), '?'), # total
                     halfwork.default_code, # hw code
                     hw_data[0], # Todo halfwork
                     hw_data[1], # Stock
+                    #proposed_hw,
                     ]
                 
                 hw_first = True
@@ -276,7 +277,8 @@ class Parser(report_sxw.rml_parse):
                     # ---------------------------------------------
                     #                  BLOCK C:
                     # ---------------------------------------------
-                    proposed = hw_data[0] * cmpt.product_qty -\
+                    
+                    proposed = proposed_hw * cmpt.product_qty -\
                         cmpt.product_id.mx_net_qty -\
                         cmpt.product_id.mx_of_in
 
@@ -284,7 +286,7 @@ class Parser(report_sxw.rml_parse):
                     res.append(data_AB + [
                         cmpt.product_qty, # total 
                         cmpt.product_id.default_code, # code
-                        hw_data[0] * cmpt.product_qty,
+                        proposed_hw * cmpt.product_qty,
                         cmpt.product_id.mx_net_qty,
                         cmpt.product_id.mx_of_in,
                         proposed if proposed > 0.0 else 0.0,

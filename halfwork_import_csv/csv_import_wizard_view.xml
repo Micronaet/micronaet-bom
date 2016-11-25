@@ -9,7 +9,7 @@
                 <form string="Wizard" version="7.0">
                    <header>
                        <button string="Cancel" special="cancel" />
-                       <button name="import_halfworked_product_and_component" string="Import" type="object" icon="gtk-jump-to" class="oe_highlight" />
+                       <button name="import_halfworked_product_and_component" string="Import" type="object" icon="gtk-jump-to" class="oe_highlight" confirm="Confirm import HW with component?"/>
                    </header>                   
                    <group colspan="4" col="4">
                         <!--<field name="file" />-->

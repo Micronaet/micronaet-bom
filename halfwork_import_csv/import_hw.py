@@ -41,7 +41,7 @@ _logger = logging.getLogger(__name__)
 class ImportHalfworkedProductComponent(orm.TransientModel):
     """ Model name: Import wizard
     """    
-    _inherit = 'import.halfworked.product.component.wizard'
+    _name = 'import.halfworked.product.component.wizard'
 
     def import_halfworked_product_and_component(self, cr, uid, ids, 
             context=None):
@@ -55,18 +55,26 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
         # Pool used
         line_pool = self.pool.get('mrp.bom.line')
         product_pool = self.pool.get('product.product')
+        structure_id = 1 # XXX
 
-        csv = open('/home/administrator/photo/hw.csv', 'r')
-        ean_13_auto = False # TODO
+        file_csv = '/home/administrator/photo/hw/hw.csv'    
+        try:
+            csv = open(file_csv, 'r')
+        except:
+            raise osv.except_osv(
+                _('Open file'), 
+                _('Error opening file: %s' % file_csv),
+                )    
+        ean13_auto = False # TODO
         
         # UOM database:
         cr.execute('select min(id), name from product_uom group by name;')
         uom_db = {}
-        import pdb; pdb.set_trace()
         for item in cr.fetchall():
             uom_db[item[1].upper()] = item[0]
             
         i = 0
+        hw_selected = []
         for row in csv:
             i += 1
             item = row.split('|')            
@@ -79,23 +87,18 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
             hw_name = item[1].strip()
             hw_uom_id = uom_db.get(item[2].upper(), 1) # XXX default 1
             cmpt_code = item[3].upper().strip()
-            cmpt_name = tem[4].strip()
+            cmpt_name = item[4].strip()
             cmpt_uom_id = uom_db.get(item[5].upper(), 1) # XXX default 1
             product_qty = float(item[6].replace(',', '.'))
             
-            # Check mandatory fields:
+            # Mandatory fields:
             if not cmpt_uom_id:
                 _logger.warning(
                     '%s UOM non correct for component: %s' % item[5])
                 continue
-            
             # -----------------------------------------------------------------
             #                      Create component:
             # -----------------------------------------------------------------
-            if not cmpt_code:
-                _logger.error('%s Code component empty' % i)
-                continue
-
             cmpt_ids = product_pool.search(cr, uid, [
                 ('default_code', '=', cmpt_code)], context=context)
             if cmpt_ids:
@@ -103,13 +106,16 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
                 if len(cmpt_ids) > 1:
                     _logger.error('More than one cmpt: %s' % cmpt_code)
             else:
+                if not cmpt_code:
+                    _logger.error('%s Code component empty' % i)
+                    continue
                 cmpt_id = product_pool.create(cr, uid, {
                     'name': cmpt_name,
                     'uom_id': cmpt_uom_id,
-                    'uos_id': cmpt_uos_id,
-                    'uom_po_id': cmpt_uom_po_id,
+                    'uos_id': cmpt_uom_id,
+                    'uom_po_id': cmpt_uom_id,
                     'default_code': cmpt_code,
-                    'ean_13_auto': ean_13_auto,
+                    'ean13_auto': ean13_auto,
                     }, context=context)
                 _logger.warning('Create component: %s' % cmpt_code)
                 
@@ -126,22 +132,23 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
                 ], context=context)
 
             if hw_ids:
-                if len(hw__ids) > 1:
-                    _logger.error('More than one hw_: %s' % hw__code)
-                HW_id = component_ids[0]
+                if len(hw_ids) > 1:
+                    _logger.error('More than one hw_: %s' % hw_code)
+                hw_id = hw_ids[0]
             else:    
-                HW_id = product_pool.create(cr, uid, {
-                    'name': hw_code,
+                hw_id = product_pool.create(cr, uid, {
+                    'name': hw_name,
                     'default_code': hw_code,
                     'relative_type': 'half',       
                     'structure_id': structure_id,
                     'uom_id': hw_uom_id,
                     'ean13_auto': ean13_auto,
                     }, context=context)
-
+            hw_selected.append(hw_id) # for show esit
+            
             # Read current HW:
             HW_proxy = product_pool.browse(
-                cr, uid, HW_id, context=context)  
+                cr, uid, hw_id, context=context)  
          
             # Check yet present material:
             exist = line_pool.search(cr, uid, [
@@ -157,11 +164,11 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
             else:
                 # Generate linked bom press the button:
                 product_pool.create_product_half_bom(
-                    cr, uid, [HW_id], context=context)
+                    cr, uid, [hw_id], context=context)
                     
                 # Re-read record    
                 HW_proxy = product_pool.browse(
-                    cr, uid, HW_id, context=context)                
+                    cr, uid, hw_id, context=context)                
                     
                 line_pool.create(cr, uid, {
                     # Link:
@@ -173,5 +180,18 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
                     'product_uom': cmpt_uom_id, 
                     'product_qty': product_qty,
                     }, context=context)
-        return True
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Product'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            #'res_id': 1,
+            'res_model': 'product.product',
+            'views': [(False, 'tree'), (False, 'form')],
+            'domain': [('id', 'in', hw_selected)],
+            'context': context,
+            'target': 'current', # 'new'
+            'nodestroy': False,
+            }            
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

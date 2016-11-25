@@ -18,22 +18,24 @@
 ###############################################################################
 
 {
-    'name': '',
+    'name': 'Import HW component csv',
     'version': '0.1',
-    'category': '',
+    'category': 'CSV',
     'description': '''        
+        Import component CSV 
         ''',
     'author': 'Micronaet S.r.l. - Nicola Riolini',
     'website': 'http://www.micronaet.it',
     'license': 'AGPL-3',
     'depends': [
         'base',
+        'bom_half_worked',
+        'mrp',
         ],
     'init_xml': [],
     'demo': [],
     'data': [
-        #'security/ir.model.access.csv',    
-        #'_view.xml',
+        'csv_import_wizard_view.xml',
         ],
     'active': False,
     'installable': True,

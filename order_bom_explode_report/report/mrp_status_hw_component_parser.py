@@ -273,6 +273,10 @@ class Parser(report_sxw.rml_parse):
                                 #                  BLOCK C:
                                 # ---------------------------------------------
                                 for cmpt in halfwork.half_bom_ids:
+                                    proposed = hw_data[0] * cmpt.product_qty -\
+                                            cmpt.product_id.mx_net_qty -\
+                                            cmpt.product_id.mx_of_in
+
                                     # Add data block directly:
                                     item.extend([
                                         cmpt.product_qty, # total 
@@ -280,9 +284,7 @@ class Parser(report_sxw.rml_parse):
                                         hw_data[0] * cmpt.product_qty,
                                         cmpt.product_id.mx_net_qty,
                                         cmpt.product_id.mx_of_in,
-                                        hw_data[0] * cmpt.product_qty - \
-                                            cmpt.product_id.mx_net_qty - \
-                                            cmpt.product_id.mx_of_in
+                                        proposed if proposed > 0.0 else 0.0,
                                         ])                                     
                                     res.append(item) # every record
                                         

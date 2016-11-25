@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <!--<menuitem 
+            parent="menuitem_mrp_workshop.menu_mrp_workshop_view"
+            id="menu_mrp_cut_purchase_view" 
+            name="Product in"
+            action="action_purchase_in_move"
+            sequence="10"
+            />-->
+    </data>
+</openerp>
+

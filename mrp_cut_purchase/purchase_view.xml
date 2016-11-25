@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_mrp_cut_purchase_tree">
+            <field name="name">stock.move.purchase.cut.tree</field>
+            <field name="model">stock.move</field>
+            <field name="priority" eval="50" />
+            <field name="arch" type="xml">
+                <tree colors="grey:state == 'cancel'" string="Purchase">
+	                <field name="date" widget="date" readonly="1"/>
+	                <field name="origin" readonly="1"/>
+	                <field name="picking_id" string="Ref. int." readonly="1"/>
+	                <field name="product_id" readonly="1"/>
+	                <field name="product_uom_qty" readonly="1"/>
+	                <field name="product_uom" string="UOM" readonly="1"/>
+	                <field name="location_id" invisible="1" />
+	                <field name="location_dest_id" invisible="1" />
+	                <field name="create_date" invisible="1" />
+	                <field name="date_expected"  readonly="1"/>
+	                <field name="state" readonly="1"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_purchase_in_move">
+            <field name="name">Purchase in</field>
+            <field name="res_model">stock.move</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_mrp_cut_purchase_tree"/>
+            <field name="context">{}</field>
+            <field name="domain">[('state', '=', 'assigned'),('origin','=ilike','OF%')]</field>
+        </record>   
+        <menuitem 
+            parent="menuitem_mrp_cut.menu_mrp_cut_view"
+            id="menu_mrp_cut_purchase_view" 
+            name="Product in"
+            action="action_purchase_in_move"
+            sequence="10"
+            />
+    </data>
+</openerp>
+

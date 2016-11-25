@@ -51,7 +51,8 @@ class MRPBom(orm.Model):
             Create BOM 
             Create move in dynamic
         '''
-        assert len(ids) == 1, 'Works only with one record a time'
+        return True
+        """assert len(ids) == 1, 'Works only with one record a time'
 
         # Pool used
         line_pool = self.pool.get('mrp.bom.line')
@@ -192,5 +193,5 @@ class MRPBom(orm.Model):
             self.write(cr, uid, bom_id, {
                 'bom_category': 'remove',
                 }, context=context)
-        return
+        return"""
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

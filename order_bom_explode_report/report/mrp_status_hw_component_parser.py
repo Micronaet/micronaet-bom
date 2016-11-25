@@ -50,13 +50,7 @@ class Parser(report_sxw.rml_parse):
             'get_object': self.get_object,
             'get_filter': self.get_filter,
             'get_date': self.get_date,
-            'get_hw': self.get_hw,
         })
-
-    def get_hw(self, hw):
-        ''' get hw
-        '''
-        return self.hws.get(hw, [])
 
     def get_date(self, ):
         ''' Get filter selected
@@ -112,11 +106,11 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------        
         # Database
         parent_todo = {}
-        self.hws = {}
+        hws = {}
 
         order_ids = company_pool.mrp_domain_sale_order_line(
             cr, uid, context=context)
-
+        order_ids = order_ids[1:2] # TODO remove
         for order in sale_pool.browse(cr, uid, order_ids, context=context):
             for line in order.order_line: # order line
                 if line.mx_closed:
@@ -164,7 +158,8 @@ class Parser(report_sxw.rml_parse):
                 # -------------------------------------------------------------    
                 # Populate halfwork database:
                 # -------------------------------------------------------------    
-                todo = oc_remain - stock_net 
+                todo = oc_remain - stock_net
+                
                 # -----------------------------------------------------------------
                 # Halfwork from parent BOM
                 # -----------------------------------------------------------------
@@ -172,16 +167,17 @@ class Parser(report_sxw.rml_parse):
                     halfwork = hw.product_id
                     if halfwork.relative_type != 'half':
                         continue
-                    if halfwork not in self.hws: # halfwork browse obj
-                        self.hws[halfwork] = [
+                    if halfwork not in hws: # halfwork browse obj
+                        hws[halfwork] = [
                             0.0, # 0. Needed                            
                             halfwork.mx_net_qty, # 1. Net (after - MRP)
                             {}, # 2. total component
                             # XXX No OF
                             ]
                     # Update total TODO * q. in BOM:
-                    self.hws[halfwork][0] += todo * hw.product_qty
-                    self.hws[halfwork][2][
+                    hws[halfwork][0] += todo * hw.product_qty
+                    # Save total for this bom (parent and halfwork) = key
+                    hws[halfwork][2][
                         (parent, halfwork)] = hw.product_qty
                 
         # ---------------------------------------------------------------------
@@ -205,35 +201,20 @@ class Parser(report_sxw.rml_parse):
                     halfwork = hw.product_id
                     if halfwork.relative_type != 'half':
                         continue
-                    if halfwork not in self.hws:                        
+                    if halfwork not in hws:                        
                         continue # TODO Error not in bom
                     hw_q = qty_maked * hw.product_qty
-                    self.hws[halfwork][1] -= hw_q # - MRP
+                    hws[halfwork][1] -= hw_q # - MRP
                     
         # ---------------------------------------------------------------------
         # Prepare report:
         # ---------------------------------------------------------------------
         res = []
-        #for parent in sorted(parent_todo):
-        #    record = parent_todo[parent]
-        #    item = (parent, record, [])
-        #    if record[0]:                    
-        #        for hw in record[0].bom_line_ids:
-        #            # append hw product:
-        #            if hw.product_id in self.hws: # hw in the list
-        #                item[2].append(hw.product_id)
-        #            
-        #    res.append(item)
 
-        # Total for 3 part of block:
-        tot_A = 6 # record parent block
-        tot_B = 4 # record halfwork block
-        tot_C = 6 # record component block
-        
         # Empty record
-        empty_A = (' ' * len(tot_A)).split(' ')        
-        empty_B = (' ' * len(tot_B)).split(' ')        
-        empty_C = (' ' * len(tot_C)).split(' ')
+        empty_A = ['' for n in range(0, 6)] # parent 6
+        empty_B = ['' for n in range(0, 4)] # halfwork 4
+        empty_C = ['' for n in range(0, 6)] # component 6
         
         for parent in sorted(parent_todo):
             record = parent_todo[parent]
@@ -259,19 +240,19 @@ class Parser(report_sxw.rml_parse):
                 for hw in record[0].bom_line_ids:
                     if parent_first:
                         parent_first = False
-                        item.expand(item_A)
+                        item.extend(item_A)
                     else:    
-                        item.expand(empty_A)
+                        item.extend(empty_A)
 
                     # ---------------------------------------------------------
                     #                           BLOCK B:
                     # ---------------------------------------------------------
-                    if hw.product_id in self.hws: # hw in the list
+                    if hw.product_id in hws: # hw in the list
                         halfwork = hw.product_id # readability
-                        hw_data = self.hws.get(halfwork, [])
+                        hw_data = hws.get(halfwork, [])
                         if not hw_data:
-                            item.expand(empty_B)
-                            item.expand(empty_C)
+                            item.extend(empty_B)
+                            item.extend(empty_C)
                         else:                          
                             item_B = [
                                 hw_data[2].get(
@@ -283,16 +264,17 @@ class Parser(report_sxw.rml_parse):
                             hw_first = True   
                             for cmpt in halfwork.half_bom_ids:
                                 if hw_first:
-                                    item.expand(item_B)
+                                    hw_first = False
+                                    item.extend(item_B)
                                 else:
-                                    item.expand(empty_B)
+                                    item.extend(empty_B)
                                  
                                 # ---------------------------------------------
                                 #                  BLOCK C:
                                 # ---------------------------------------------
                                 for cmpt in halfwork.half_bom_ids:
                                     # Add data block directly:
-                                    item.expand([
+                                    item.extend([
                                         cmpt.product_qty, # total 
                                         cmpt.product_id.default_code, # code
                                         hw_data[0] * cmpt.product_qty,
@@ -302,14 +284,16 @@ class Parser(report_sxw.rml_parse):
                                             cmpt.product_id.mx_net_qty - \
                                             cmpt.product_id.mx_of_in
                                         ])                                     
-                             if hw_first: # no cmpt data (not in loop)
-                                item.expand(item_B)
-                                item.expand(empty_C)
+                                    res.append(item) # every record
+                                        
+                            if hw_first: # no cmpt data (not in loop)
+                                item.extend(item_B)
+                                item.extend(empty_C)
+                                res.append(item)
             else:
                 # Generate empty block:
-                item.expand(empty_B)
-                item.expand(empty_C)
-                            
-            res.append(item)
+                item.extend(empty_B)
+                item.expextendand(empty_C)                            
+                res.append(item)
         return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

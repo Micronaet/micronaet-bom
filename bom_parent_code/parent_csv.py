@@ -38,12 +38,12 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
-class ImportHalfworkedProductComponent(orm.TransientModel):
-    """ Model name: Import wizard
+class MRPBom(orm.Model):
+    """ Model name: MRP Bom
     """    
-    _inherit = 'import.halfworked.product.component.wizard'
+    _inherit = 'mrp.bom'
 
-    def import_halfworked_product_and_component(self, cr, uid, ids, 
+    def migrate_assign_product_bom_product_csv(self, cr, uid, ids, 
             context=None):
         ''' Import halfworked wizard
         '''

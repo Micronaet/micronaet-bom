@@ -38,121 +38,121 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
-class MRPBom(orm.Model):
-    """ Model name: MRP Bom
+class ImportHalfworkedProductComponent(orm.TransientModel):
+    """ Model name: Import wizard
     """    
-    _inherit = 'mrp.bom'
+    _inherit = 'import.halfworked.product.component.wizard'
 
-    # EXTRA BLOCK -------------------------------------------------------------
-    def migrate_assign_product_bom_product_csv(self, cr, uid, ids, 
+    def import_halfworked_product_and_component(self, cr, uid, ids, 
             context=None):
         ''' Migrate bom in dynamic way
             Create half work element
             Create BOM 
             Create move in dynamic
         '''
-        return True
-        """assert len(ids) == 1, 'Works only with one record a time'
+        assert len(ids) == 1, 'Works only with one record a time'
 
         # Pool used
         line_pool = self.pool.get('mrp.bom.line')
         product_pool = self.pool.get('product.product')
 
-        csv = open('/home/administrator/photo/bom.csv', 'r')
-        #structure = bom_proxy.product_id.structure_id
+        csv = open('/home/administrator/photo/hw.csv', 'r')
+        ean_13_auto = False # TODO
         
+        # UOM database:
+        cr.execute('select min(id), name from product_uom group by name;')
+        uom_db = {}
+        import pdb; pdb.set_trace()
+        for item in cr.fetchall():
+            uom_db[item[1]] = item[0]
+            
         i = 0
-        HW_codes = []
-        fabric_uom = 8 # m.
-        structure_id = 1 # TODO needed?
-        dynamic_bom_id = 7366 # bom_category = dynamic
-        
         for row in csv:
-            #import pdb; pdb.set_trace()
             i += 1
             item = row.split('|')            
-            if len(item) != 7:
+            if len(item) != 6:
                 _logger.error('Different colums')
                 continue
             
             # Read line parameter:
-            bom_id = int(item[0])
-            default_code = item[1].upper().strip()
-            #fabric_id = int(item[2]) # TODO Not used!!!!!!
-            fabric_code = item[3].upper().strip()
-            product_qty = float(item[4].replace(',', '.'))
-            component_code = item[5].strip()
-            category_id = int(item[6]) # always present?
-
-            fabric_ids = product_pool.search(cr, uid, [
-                ('default_code', '=', fabric_code)], context=context)
-            if fabric_ids:
-                fabric_id = fabric_ids[0]
-                if len(fabric_ids) > 1:
-                    _logger.error('More than one fabric: %s' % fabric_code)
-            else: 
-                _logger.error('Fabric not found!!!')
-                
-            # Mask for S or not S (same)
-            if default_code[12:13] == 'S':
-                dynamic_mask = default_code[:12] + '%'
-            else:
-                dynamic_mask = default_code + '%'
+            hw_code = item[0].upper().strip()
+            hw_name = item[1].strip()
+            hw_uom_id = 1 # XXX
+            cmpt_code = item[2].upper().strip()
+            cmpt_name = tem[3].strip()
+            cmpt_uom_id = item[4].strip()
+            product_qty = float(item[5].replace(',', '.'))
 
             # -----------------------------------------------------------------
-            # Create HW element:
+            #                      Create component:
             # -----------------------------------------------------------------
-            if not component_code:
+            if not cmpt_code:
                 _logger.error('%s Code component empty' % i)
                 continue
-            
-            # TODO Decidere se creare il solo semilavorato oppure continuare
-            #if component_code in HW_codes:
-            #    _logger.error('%s Code component yet present: %s' % (
-            #        i, component_code))
-            #    continue
 
-            component_ids = product_pool.search(cr, uid, [
-                ('default_code', '=', component_code),
-                #XXX('relative_type', '=', 'half'),
+            cmpt_ids = product_pool.search(cr, uid, [
+                ('default_code', '=', cmpt_code)], context=context)
+            if cmpt_ids:
+                cmpt_id = cmpt_ids[0]
+                if len(cmpt_ids) > 1:
+                    _logger.error('More than one cmpt: %s' % cmpt_code)
+            else:
+                cmpt_id = product_pool.create(cr, uid, {
+                    'name': cmpt_name,
+                    'uom_id': cmpt_uom_id,
+                    'uos_id': cmpt_uos_id,
+                    'uom_po_id': cmpt_uom_po_id,
+                    'default_code': cmpt_code,
+                    'ean_13_auto': ean_13_auto,
+                    }, context=context)
+                _logger.warning('Create component: %s' % cmpt_code)
+                
+            # -----------------------------------------------------------------
+            #                      Create HW element:
+            # -----------------------------------------------------------------
+            if not hw_code:
+                _logger.error('%s Code hw empty' % i)
+                continue
+            
+            hw_ids = product_pool.search(cr, uid, [
+                ('default_code', '=', hw_code),
+                ('relative_type', '=', 'half'),
                 ], context=context)
 
-            if component_ids:
-                _logger.warning('%s Code component yet present: %s' % (   
-                    i, component_code))
-                # Update as half    
-                product_pool.write(cr, uid, component_ids, {
-                    'relative_type': 'half',
-                    }, context=context)    
+            if hw_ids:
+                if len(hw__ids) > 1:
+                    _logger.error('More than one hw_: %s' % hw__code)
                 HW_id = component_ids[0]
-            else:
+            else:    
                 HW_id = product_pool.create(cr, uid, {
-                    'name': component_code,
-                    'default_code': component_code,
+                    'name': hw_code,
+                    'default_code': hw_code,
                     'relative_type': 'half',       
                     'structure_id': structure_id,
-                    'uom_id': 1, # XXX NR
-                    'ean13_auto': False,
+                    'uom_id': hw_uom_id,
+                    'ean13_auto': ean13_auto,
                     }, context=context)
 
-            #HW_codes.append(component_code)
+            # Read current HW:
             HW_proxy = product_pool.browse(
                 cr, uid, HW_id, context=context)  
          
-            # TODO check yet present material:
+            # Check yet present material:
             exist = line_pool.search(cr, uid, [
                 ('bom_id', '=', HW_proxy.half_bom_id.id),
                 ('halfwork_id', '=', HW_proxy.id),
-                ('product_id', '=', fabric_id),
+                ('product_id', '=', cmpt_id),
                 ('product_qty', '=', product_qty),
                 ], context=context)
             
             # Create HW Bom with button:
             if exist: 
-                _logger.warning('%s Esist: %s' % (i, fabric_code))
+                _logger.warning('%s Esist: %s' % (i, cmpt_code))
             else:
+                # Generate linked bom press the button:
                 product_pool.create_product_half_bom(
                     cr, uid, [HW_id], context=context)
+                    
                 # Re-read record    
                 HW_proxy = product_pool.browse(
                     cr, uid, HW_id, context=context)                
@@ -163,35 +163,9 @@ class MRPBom(orm.Model):
                     'halfwork_id': HW_proxy.id, # product link
                     
                     # Fabric data:
-                    'product_id': fabric_id, 
-                    'product_uom': fabric_uom, 
-                    #'type': line.type,
+                    'product_id': cmpt_id, 
+                    'product_uom': cmpt_uom_id, 
                     'product_qty': product_qty,
                     }, context=context)
-
-            # -------------------------------------------------------------
-            # Create / Update rule in dynamic:
-            # -------------------------------------------------------------
-            line_ids = line_pool.search(cr, uid, [
-                ('bom_id', '=', dynamic_bom_id), # dynamic bom for structure
-                ('dynamic_mask', '=', dynamic_mask), # mask
-                ('category_id', '=', category_id),
-                ('product_id', '=', HW_proxy.id),
-                ], context=context)
-            if not line_ids: # Update or check
-                line_pool.create(cr, uid, {
-                    'bom_id': dynamic_bom_id,
-                    'dynamic_mask': dynamic_mask,
-                    'category_id': category_id,
-                    'product_id': HW_proxy.id, 
-                    'product_uom': HW_proxy.uom_id.id, 
-                    'product_qty': 1, # always!
-                    'type': 'normal',
-                    }, context=context)
-                    
-            # Mark old BOM as to remove:
-            self.write(cr, uid, bom_id, {
-                'bom_category': 'remove',
-                }, context=context)
-        return"""
+        return True
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

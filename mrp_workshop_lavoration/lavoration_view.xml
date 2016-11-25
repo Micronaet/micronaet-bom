@@ -2,7 +2,7 @@
 <openerp>
     <data>
         <menuitem 
-            parent="menuitem_mrp_workshop.menu_mrp_cut_view" 
+            parent="menuitem_mrp_workshop.menu_mrp_workshop_view" 
             id="menu_stock_picking_cl"
             action="lavoration_cl_sl.action_stock_picking_cl_tree"
             sequence="40"/>

@@ -299,6 +299,8 @@ class MRPLavoration(orm.Model):
         # TODO check error on false
 
     _columns = {
+        'total_work': fields.float('Tot. H.', digits=(16, 3)),
+        'workers': fields.char('Workers', size=64),
         'is_mrp_lavoration': fields.boolean('Is Lavoration'),
         # Override:
         'picking_type_id': fields.many2one(

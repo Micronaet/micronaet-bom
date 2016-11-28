@@ -212,7 +212,7 @@ class Parser(report_sxw.rml_parse):
 
         # Empty record
         empty_A = ['' for n in range(0, 6)] # parent 6
-        empty_B = ['' for n in range(0, 4)] # halfwork 4
+        empty_B = ['' for n in range(0, 5)] # halfwork 4
         empty_C = ['' for n in range(0, 6)] # component 6
         
         for parent in sorted(parent_todo):
@@ -262,7 +262,7 @@ class Parser(report_sxw.rml_parse):
                     halfwork.default_code, # hw code
                     hw_data[0], # Todo halfwork
                     hw_data[1], # Stock
-                    #proposed_hw,
+                    proposed_hw,
                     ]
                 
                 hw_first = True

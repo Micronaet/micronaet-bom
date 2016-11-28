@@ -40,7 +40,7 @@
                             <field name="name" />
                             <field name="date" />
                             <field name="workers" />
-                            <field name="total_work" />
+                            <field name="total_work" widget="float_time"/>
                             <field name="linked_sl_id" invisible="1" />
                             <field name="is_mrp_lavoration" invisible="1"/>
                             <field name="picking_type_id" invisible="1" />

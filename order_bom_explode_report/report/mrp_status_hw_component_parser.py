@@ -25,6 +25,7 @@ import os
 import sys
 import logging
 import openerp
+import xlsxwriter # XLSX export
 import openerp.netsvc as netsvc
 import openerp.addons.decimal_precision as dp
 from openerp.osv import fields, osv, expression, orm
@@ -70,6 +71,57 @@ class Parser(report_sxw.rml_parse):
     def get_object(self, data):
         ''' Search all mpr elements                
         '''
+        # ---------------------------------------------------------------------
+        #                                Utility:
+        # ---------------------------------------------------------------------
+        def log_line(self, line):
+            ''' Utility for log in excel file:
+            '''
+            # -------------------------------------------------------------
+            # Write header:
+            # -------------------------------------------------------------
+            if not self.xls_counter:
+                
+                # Reference:
+                self.WS.write(self.xls_counter, 1, 'Parent')
+                self.WS.write(self.xls_counter, 2, 'Product')
+                self.WS.write(self.xls_counter, 3, 'Order ref.')
+                
+                # Order quantity:
+                #self.WS.write(self.xls_counter, 3, 'OC') # MA
+                #self.WS.write(self.xls_counter, 4, 'B' # B total
+                #self.WS.write(self.xls_counter, 5, 'Delivery') # BC
+                
+                # Quantity for accounting:
+                self.WS.write(self.xls_counter, 4, 'Remain to MRP') # OC
+                self.WS.write(self.xls_counter, 5, 'Ready') # B net
+                self.WS.write(self.xls_counter, 6, 'Stock') # Stock
+
+                # Calculated data
+                self.WS.write(self.xls_counter, 7, 'TODO')
+                
+                # Check
+                self.WS.write(self.xls_counter, 8, 'No BOM')
+                self.WS.write(self.xls_counter, 9, 'Negative')
+                
+                self.WS.write(self.xls_counter, 10, 'Comment')
+                
+                self.xls_counter += 1
+                
+            # -------------------------------------------------------------
+            # Write data line:
+            # -------------------------------------------------------------
+            col = 0
+            for item in line:
+                self.WS.write(self.xls_counter, col, item)
+                col += 1
+                
+            self.xls_counter += 1
+            return
+            
+        # ---------------------------------------------------------------------
+        #                                Procedure:
+        # ---------------------------------------------------------------------
         # Readability:    
         cr = self.cr
         uid = self.uid
@@ -77,6 +129,13 @@ class Parser(report_sxw.rml_parse):
                 
         if data is None:
             data = {}
+
+        # Log part
+        # TODO change:
+        filename = '/home/administrator/photo/log/parent_hw_pipe.xlsx' 
+        self.xls_counter = 0
+        WB = xlsxwriter.Workbook(filename)
+        self.WS = WB.add_worksheet()
 
         days = data.get('days', self.default_days)
         first_supplier_id = data.get('first_supplier_id')
@@ -90,7 +149,7 @@ class Parser(report_sxw.rml_parse):
                 datetime.now() + timedelta(days=days)).strftime(
                     DEFAULT_SERVER_DATE_FORMAT)
         else:
-            limite_date = False            
+            limit_date = False            
 
         # Pool used:
         company_pool = self.pool.get('res.company')
@@ -106,18 +165,25 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------        
         # Database
         parent_todo = {}
+        stock_used = []
         hws = {}
 
         order_ids = company_pool.mrp_domain_sale_order_line(
             cr, uid, context=context)
         for order in sale_pool.browse(cr, uid, order_ids, context=context):
             for line in order.order_line: # order line
+                comment = ''
                 if line.mx_closed:
                     continue
                 product = line.product_id # readability
                 default_code = product.default_code
                 if not default_code:
+                    log_line(self, [
+                        '', '', order.name, '', '', '', '', '', '',
+                        'no product code',
+                        ])
                     continue # TODO raise error or log
+                    
                 parent = default_code[:3]
                 if parent not in parent_todo:
                     # Stock, Order to produce, has stock negative
@@ -127,7 +193,7 @@ class Parser(report_sxw.rml_parse):
                         0.0, # 2. Order to produce # merge with 1?
                         0, # 3. Stock status negative (total)
                         0, # 4. No parent bom (total)
-                        0.0, # 5. Producet to delivery
+                        0.0, # 5. Produce to delivery
                         ]
                     
                 # -------------------------------------------------------------    
@@ -143,15 +209,24 @@ class Parser(report_sxw.rml_parse):
                         # Check no parent
                         parent_todo[parent][4] += 1
                     
-                # Stock:    
-                stock_net = product.mx_net_qty
-                if stock_net < 0:
-                    parent_todo[parent][3] += 1
-
-                # Stock net
-                parent_todo[parent][1] += stock_net
+                # ------------    
+                # Stock check:
+                # ------------    
+                if default_code not in stock_used:
+                    comment += 'stock used|'
+                    stock_used.append(default_code)
+                    stock_net = product.mx_net_qty
+                    if stock_net < 0:
+                        parent_todo[parent][3] += 1
+                    
+                    parent_todo[parent][1] += stock_net # Net in stock (once)
+                else:
+                    comment += 'stock not used|'
+                    stock_net = 0.0 # no used    
                 
+                # --------------
                 # Check negative
+                # --------------
                 (oc_remain, not_delivered) = \
                     company_pool.mrp_order_line_to_produce(line)
                 parent_todo[parent][2] += oc_remain
@@ -162,6 +237,20 @@ class Parser(report_sxw.rml_parse):
                 # -------------------------------------------------------------    
                 todo = oc_remain - stock_net + not_delivered
                 
+                # Log line operation:
+                log_line(self, [
+                    parent,
+                    default_code,
+                    order.name,
+                    oc_remain,
+                    not_delivered,
+                    stock_net,
+                    todo,
+                    '' if parent_bom else 'X',
+                    '' if stock_net >= 0 else 'X',      
+                    comment,              
+                    ])
+                    
                 # -----------------------------------------------------------------
                 # Halfwork from parent BOM
                 # -----------------------------------------------------------------

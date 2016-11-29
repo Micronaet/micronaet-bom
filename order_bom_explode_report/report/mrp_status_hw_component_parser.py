@@ -82,8 +82,8 @@ class Parser(report_sxw.rml_parse):
                 # -------------------------------------------------------------
                 # Write header:
                 # -------------------------------------------------------------
-                if not self.counter[mode]:
-                    counter = self.counter[mode]
+                if not self.counters[mode]:
+                    counter = self.counters[mode]
                     # Reference:
                     WS.write(counter, 1, 'Parent')
                     WS.write(counter, 2, 'Product')
@@ -108,18 +108,18 @@ class Parser(report_sxw.rml_parse):
                     
                     WS.write(counter, 10, 'Comment')
                     
-                    self.counter[mode] += 1
+                    self.counters[mode] += 1
                     
                 # -------------------------------------------------------------
                 # Write data line:
                 # -------------------------------------------------------------
                 col = 0
-                counter = self.counter[mode]
+                counter = self.counters[mode]
                 for item in line:
                     WS.write(counter, col, item)
                     col += 1
                     
-                self.counter[mode] += 1
+                self.counters[mode] += 1
             elif mode == 'halfwork':
                 pass
             elif mode == 'component':

@@ -127,6 +127,7 @@ class Parser(report_sxw.rml_parse):
                         0.0, # 2. Order to produce # merge with 1?
                         0, # 3. Stock status negative (total)
                         0, # 4. No parent bom (total)
+                        0.0, # 5. Producet to delivery
                         ]
                     
                 # -------------------------------------------------------------    
@@ -147,17 +148,19 @@ class Parser(report_sxw.rml_parse):
                 if stock_net < 0:
                     parent_todo[parent][3] += 1
 
-                # Order to produce
+                # Stock net
                 parent_todo[parent][1] += stock_net
                 
                 # Check negative
-                oc_remain = company_pool.mrp_order_line_to_produce(line)
+                (oc_remain, not_delivered) = \
+                    company_pool.mrp_order_line_to_produce(line)
                 parent_todo[parent][2] += oc_remain
+                parent_todo[parent][5] += not_delivered                
                 
                 # -------------------------------------------------------------    
                 # Populate halfwork database:
                 # -------------------------------------------------------------    
-                todo = oc_remain - stock_net
+                todo = oc_remain - stock_net + not_delivered
                 
                 # -----------------------------------------------------------------
                 # Halfwork from parent BOM
@@ -203,7 +206,7 @@ class Parser(report_sxw.rml_parse):
                     if halfwork not in hws:                        
                         continue # TODO Error not in bom
                     hw_q = qty_maked * hw.product_qty
-                    hws[halfwork][1] -= hw_q # - MRP
+                    hws[halfwork][1] -= hw_q # - MRP # TODO check same problem
                     
         # ---------------------------------------------------------------------
         # Prepare report:
@@ -211,7 +214,7 @@ class Parser(report_sxw.rml_parse):
         res = []
 
         # Empty record
-        empty_A = ['' for n in range(0, 6)] # parent 6
+        empty_A = ['' for n in range(0, 7)] # parent 7
         empty_B = ['' for n in range(0, 5)] # halfwork 4
         empty_C = ['' for n in range(0, 6)] # component 6
         
@@ -226,7 +229,8 @@ class Parser(report_sxw.rml_parse):
                 parent, # Code
                 record[2], # OC
                 record[1], # Mag
-                record[2] - record[1], # Todo
+                record[5], # Produced to delivery
+                record[2] - record[1] + record[5], # Todo (clean to delivery)
                 record[3], # tot. negative stock (for green-red light)
                 record[4], # tot. no bom (for green-red light)
                 # TODO

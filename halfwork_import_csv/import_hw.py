@@ -43,6 +43,10 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
     """    
     _name = 'import.halfworked.product.component.wizard'
 
+    _columns = {
+        'start_with': fields.boolean('Start with'),
+        }
+        
     def import_halfworked_product_and_component(self, cr, uid, ids, 
             context=None):
         ''' Migrate bom in dynamic way
@@ -52,6 +56,8 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
         '''
         assert len(ids) == 1, 'Works only with one record a time'
 
+        wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
+        
         # Pool used
         line_pool = self.pool.get('mrp.bom.line')
         product_pool = self.pool.get('product.product')
@@ -105,6 +111,7 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
             # -----------------------------------------------------------------
             cmpt_ids = product_pool.search(cr, uid, [
                 ('default_code', '=', cmpt_code)], context=context)
+                
             if cmpt_ids:
                 cmpt_id = cmpt_ids[0]
                 if len(cmpt_ids) > 1:
@@ -130,14 +137,23 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
             if not hw_code:
                 log.write('%s Code hw empty\n' % i)
                 continue
-            
-            hw_ids = product_pool.search(cr, uid, [
-                ('default_code', '=', hw_code),
+
+            domain = [
                 ('relative_type', '=', 'half'),
-                ], context=context)
+                ]
+            if wiz_proxy.start_with:
+                domain.append(
+                    ('default_code', '=ilike', '%s%%' % hw_code),
+                    )
+            else:        
+                domain.append(
+                    ('default_code', '=', hw_code),
+                    )
+            
+            hw_ids = product_pool.search(cr, uid, domain, context=context)
 
             if hw_ids:
-                if len(hw_ids) > 1:
+                if not wiz_proxy.start_with and len(hw_ids) > 1:
                     log.write('%s More than one hw: %s\n' % (i, hw_code))
                 hw_id = hw_ids[0]
             else:    

@@ -74,9 +74,12 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         #                                Utility:
         # ---------------------------------------------------------------------
-        def log_line(self, line, mode='product'):
+        def log_line(self, line, extra=None, mode='product'):
             ''' Utility for log in excel file:
             '''
+            if extra is None:
+                extra = {}
+                
             if mode == 'product':
                 WS = self.WS[mode] 
                 # -------------------------------------------------------------
@@ -85,9 +88,9 @@ class Parser(report_sxw.rml_parse):
                 if not self.counters[mode]:
                     counter = self.counters[mode]
                     # Reference:
-                    WS.write(counter, 1, 'Parent')
-                    WS.write(counter, 2, 'Product')
-                    WS.write(counter, 3, 'Order ref.')
+                    WS.write(counter, 0, 'Parent')
+                    WS.write(counter, 1, 'Product')
+                    WS.write(counter, 2, 'Order ref.')
                     
                     # Order quantity:
                     #WS.write(counter, 3, 'OC') # MA
@@ -95,18 +98,18 @@ class Parser(report_sxw.rml_parse):
                     #WS.write(counter, 5, 'Delivery') # BC
                     
                     # Quantity for accounting:
-                    WS.write(counter, 4, 'Remain to MRP') # OC
-                    WS.write(counter, 5, 'Ready') # B net
-                    WS.write(counter, 6, 'Stock') # Stock
+                    WS.write(counter, 3, 'Remain to MRP') # OC
+                    WS.write(counter, 4, 'Ready') # B net
+                    WS.write(counter, 5, 'Stock') # Stock
 
                     # Calculated data
-                    WS.write(counter, 7, 'TODO')
+                    WS.write(counter, 6, 'TODO')
                     
                     # Check
-                    WS.write(counter, 8, 'No BOM')
-                    WS.write(counter, 9, 'Negative')
+                    WS.write(counter, 7, 'No BOM')
+                    WS.write(counter, 8, 'Negative')
                     
-                    WS.write(counter, 10, 'Comment')
+                    WS.write(counter, 9, 'Comment')
                     
                     self.counters[mode] += 1
                     

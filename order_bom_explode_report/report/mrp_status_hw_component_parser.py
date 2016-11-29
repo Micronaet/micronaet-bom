@@ -69,54 +69,63 @@ class Parser(report_sxw.rml_parse):
         return _('Active production for %s days') % days
 
     def get_object(self, data):
-        ''' Search all mpr elements                
+        ''' Search all mrp elements                
         '''
         # ---------------------------------------------------------------------
         #                                Utility:
         # ---------------------------------------------------------------------
-        def log_line(self, line):
+        def log_line(self, line, mode='product'):
             ''' Utility for log in excel file:
             '''
-            # -------------------------------------------------------------
-            # Write header:
-            # -------------------------------------------------------------
-            if not self.xls_counter:
-                
-                # Reference:
-                self.WS.write(self.xls_counter, 1, 'Parent')
-                self.WS.write(self.xls_counter, 2, 'Product')
-                self.WS.write(self.xls_counter, 3, 'Order ref.')
-                
-                # Order quantity:
-                #self.WS.write(self.xls_counter, 3, 'OC') # MA
-                #self.WS.write(self.xls_counter, 4, 'B' # B total
-                #self.WS.write(self.xls_counter, 5, 'Delivery') # BC
-                
-                # Quantity for accounting:
-                self.WS.write(self.xls_counter, 4, 'Remain to MRP') # OC
-                self.WS.write(self.xls_counter, 5, 'Ready') # B net
-                self.WS.write(self.xls_counter, 6, 'Stock') # Stock
+            if mode == 'product':
+                WS = self.WS[mode] 
+                # -------------------------------------------------------------
+                # Write header:
+                # -------------------------------------------------------------
+                if not self.counter[mode]:
+                    counter = self.counter[mode]
+                    # Reference:
+                    WS.write(counter, 1, 'Parent')
+                    WS.write(counter, 2, 'Product')
+                    WS.write(counter, 3, 'Order ref.')
+                    
+                    # Order quantity:
+                    #WS.write(counter, 3, 'OC') # MA
+                    #WS.write(counter, 4, 'B' # B total
+                    #WS.write(counter, 5, 'Delivery') # BC
+                    
+                    # Quantity for accounting:
+                    WS.write(counter, 4, 'Remain to MRP') # OC
+                    WS.write(counter, 5, 'Ready') # B net
+                    WS.write(counter, 6, 'Stock') # Stock
 
-                # Calculated data
-                self.WS.write(self.xls_counter, 7, 'TODO')
-                
-                # Check
-                self.WS.write(self.xls_counter, 8, 'No BOM')
-                self.WS.write(self.xls_counter, 9, 'Negative')
-                
-                self.WS.write(self.xls_counter, 10, 'Comment')
-                
-                self.xls_counter += 1
-                
-            # -------------------------------------------------------------
-            # Write data line:
-            # -------------------------------------------------------------
-            col = 0
-            for item in line:
-                self.WS.write(self.xls_counter, col, item)
-                col += 1
-                
-            self.xls_counter += 1
+                    # Calculated data
+                    WS.write(counter, 7, 'TODO')
+                    
+                    # Check
+                    WS.write(counter, 8, 'No BOM')
+                    WS.write(counter, 9, 'Negative')
+                    
+                    WS.write(counter, 10, 'Comment')
+                    
+                    self.counter[mode] += 1
+                    
+                # -------------------------------------------------------------
+                # Write data line:
+                # -------------------------------------------------------------
+                col = 0
+                counter = self.counter[mode]
+                for item in line:
+                    WS.write(counter, col, item)
+                    col += 1
+                    
+                self.counter[mode] += 1
+            elif mode == 'halfwork':
+                pass
+            elif mode == 'component':
+                pass
+            else:
+                pass # error                
             return
             
         # ---------------------------------------------------------------------
@@ -132,10 +141,20 @@ class Parser(report_sxw.rml_parse):
 
         # Log part
         # TODO change:
-        filename = '/home/administrator/photo/log/parent_hw_pipe.xlsx' 
-        self.xls_counter = 0
+        filename = '/home/administrator/photo/log/parent_product.xlsx'
         WB = xlsxwriter.Workbook(filename)
-        self.WS = WB.add_worksheet()
+            
+        self.counters = {
+            'product': 0,
+            'halfwork': 0,
+            'component': 0,
+            }
+        
+        self.WS = {
+            'product': WB.add_worksheet(),
+            'halfwork': WB.add_worksheet(),
+            'component': WB.add_worksheet(),
+            }
 
         days = data.get('days', self.default_days)
         first_supplier_id = data.get('first_supplier_id')

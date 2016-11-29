@@ -85,6 +85,7 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
             
         i = 0
         hw_selected = []
+
         for row in csv:
             i += 1
             item = row.split('|')            
@@ -155,53 +156,65 @@ class ImportHalfworkedProductComponent(orm.TransientModel):
             if hw_ids:
                 if not wiz_proxy.start_with and len(hw_ids) > 1:
                     log.write('%s More than one hw: %s\n' % (i, hw_code))
-                hw_id = hw_ids[0]
-            else:    
-                hw_id = product_pool.create(cr, uid, {
+            else:
+                if wiz_proxy.start_with:
+                    # No creation
+                    continue
+                    
+                hw_ids = [product_pool.create(cr, uid, {
                     'name': hw_name,
                     'default_code': hw_code,
                     'relative_type': 'half',       
                     'structure_id': structure_id,
                     'uom_id': hw_uom_id,
                     'ean13_auto': ean13_auto,
-                    }, context=context)
-            hw_selected.append(hw_id) # for show esit
-            
-            # Read current HW:
-            HW_proxy = product_pool.browse(
-                cr, uid, hw_id, context=context)  
-         
-            # Check yet present material:
-            exist = line_pool.search(cr, uid, [
-                ('bom_id', '=', HW_proxy.half_bom_id.id),
-                ('halfwork_id', '=', HW_proxy.id),
-                ('product_id', '=', cmpt_id),
-                ('product_qty', '=', product_qty),
-                ], context=context)
-            
-            # Create HW Bom with button:
-            if exist: 
-                log.write('%s Esist: %s\n' % (i, cmpt_code))
-            else:
-                # Generate linked bom press the button:
-                product_pool.create_product_half_bom(
-                    cr, uid, [hw_id], context=context)
+                    }, context=context),
+                    ]
                     
-                # Re-read record    
+            _logger.warning('# product %s > %s: %s' % (
+                hw_code, cmpt_code, len(hw_ids)))
+            for hw_id in hw_ids:
+                if hw_id not in hw_selected:
+                    hw_selected.append(hw_id) # for show esit                    
+            
+                # Read current HW:
                 HW_proxy = product_pool.browse(
-                    cr, uid, hw_id, context=context)                
-                    
-                line_pool.create(cr, uid, {
-                    # Link:
-                    'bom_id': HW_proxy.half_bom_id.id, # bom link
-                    'halfwork_id': HW_proxy.id, # product link
-                    
-                    # Fabric data:
-                    'product_id': cmpt_id, 
-                    'product_uom': cmpt_uom_id, 
-                    'product_qty': product_qty,
-                    }, context=context)
-                log.write('%s Create bom line: %s\n' % (i, cmpt_code))
+                    cr, uid, hw_id, context=context)  
+                _logger.info('Manage product %s' % HW_proxy.default_code)    
+             
+                # Check yet present material:
+                exist = line_pool.search(cr, uid, [
+                    ('bom_id', '=', HW_proxy.half_bom_id.id),
+                    ('halfwork_id', '=', HW_proxy.id),
+                    ('product_id', '=', cmpt_id),
+                    ('product_qty', '=', product_qty),
+                    ], context=context)
+                
+                # Create HW Bom with button:
+                if exist:
+                    log.write('%s Exist: %s > %s\n' % (
+                        i, hw_code, cmpt_code))
+                else:
+                    # Generate linked bom press the button:
+                    product_pool.create_product_half_bom(
+                        cr, uid, [hw_id], context=context)
+                        
+                    # Re-read record    
+                    HW_proxy = product_pool.browse(
+                        cr, uid, hw_id, context=context)                
+                        
+                    line_pool.create(cr, uid, {
+                        # Link:
+                        'bom_id': HW_proxy.half_bom_id.id, # bom link
+                        'halfwork_id': HW_proxy.id, # product link
+                        
+                        # Fabric data:
+                        'product_id': cmpt_id, 
+                        'product_uom': cmpt_uom_id, 
+                        'product_qty': product_qty,
+                        }, context=context)
+                    log.write('%s Create bom line: %s > %s\n' % (
+                        i, hw_code, cmpt_code))
 
         return {
             'type': 'ir.actions.act_window',

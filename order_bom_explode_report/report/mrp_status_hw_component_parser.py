@@ -30,7 +30,7 @@ import openerp.netsvc as netsvc
 import openerp.addons.decimal_precision as dp
 from openerp.osv import fields, osv, expression, orm
 from datetime import datetime, timedelta
-from openerp import SUPERUSER_ID#, api
+from openerp import SUPERUSER_ID
 from openerp import tools
 from openerp.report import report_sxw
 from openerp.report.report_sxw import rml_parse

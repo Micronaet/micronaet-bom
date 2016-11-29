@@ -3,7 +3,7 @@
     <data>
        <!-- import.halfworked.product.component.wizard -->       
        <record id="import_halfworked_product_component_wizard_view" model="ir.ui.view">
-            <field name="name"></field>
+            <field name="name">Import HW csv</field>
             <field name="model">import.halfworked.product.component.wizard</field>
             <field name="arch" type="xml">
                 <form string="Wizard" version="7.0">

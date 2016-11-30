@@ -123,6 +123,7 @@ class Parser(report_sxw.rml_parse):
                 # -------------------------------------------------------------
                 col = 0
                 counter = self.counters[mode]
+                
                 # Write constant data:
                 for item in line:
                     WS.write(counter, col, item)
@@ -156,7 +157,10 @@ class Parser(report_sxw.rml_parse):
         # TODO change:
         filename = '/home/administrator/photo/log/parent_product.xlsx'
         WB = xlsxwriter.Workbook(filename)
-        extra = {}
+        extra = {
+            'code_check': '',
+            'stock_check': '',
+            }
             
         self.counters = {
             'product': 0,
@@ -205,16 +209,19 @@ class Parser(report_sxw.rml_parse):
             cr, uid, context=context)
         for order in sale_pool.browse(cr, uid, order_ids, context=context):
             for line in order.order_line: # order line
+                # Reset log:
                 extra['code_check'] = ''
+                extra['stock_check'] = ''
+                
                 if line.mx_closed:
                     continue
                 product = line.product_id # readability
                 default_code = product.default_code
                 if not default_code:
+                    extra['code_check'] = 'no product code'
                     log_line(self, [
-                        '', '', order.name, '', '', '', '', '', '',
-                        'no product code',
-                        ])
+                        '', '', order.name, '', '', '', '', '', '',                        
+                        ], extra)
                     continue # TODO raise error or log
                     
                 parent = default_code[:3]
@@ -246,7 +253,7 @@ class Parser(report_sxw.rml_parse):
                 # Stock check:
                 # ------------    
                 if default_code not in stock_used:
-                    extra['code_check'] += 'stock used'
+                    extra['stock_check'] += 'used'
                     stock_used.append(default_code)
                     stock_net = product.mx_net_qty
                     if stock_net < 0:
@@ -254,7 +261,7 @@ class Parser(report_sxw.rml_parse):
                     
                     parent_todo[parent][1] += stock_net # Net in stock (once)
                 else:
-                    extra['code_check'] += 'stock not used'
+                    extra['stock_check'] += 'not used'
                     stock_net = 0.0 # no used    
                 
                 # --------------

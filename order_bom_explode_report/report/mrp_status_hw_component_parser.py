@@ -87,30 +87,35 @@ class Parser(report_sxw.rml_parse):
                 # -------------------------------------------------------------
                 if not self.counters[mode]:
                     counter = self.counters[mode]
-                    # Reference:
-                    WS.write(counter, 0, 'Parent')
-                    WS.write(counter, 1, 'Product')
-                    WS.write(counter, 2, 'Order ref.')
+                    header = [
+                        # Reference:
+                        'Parent',
+                        'Product',
+                        'Order ref.',
                     
-                    # Order quantity:
-                    #WS.write(counter, 3, 'OC') # MA
-                    #WS.write(counter, 4, 'B' # B total
-                    #WS.write(counter, 5, 'Delivery') # BC
+                        # Order quantity:
+                        #'OC') # MA
+                        #'B' # B total
+                        #'Delivery') # BC
                     
-                    # Quantity for accounting:
-                    WS.write(counter, 3, 'Remain to MRP') # OC
-                    WS.write(counter, 4, 'Ready') # B net
-                    WS.write(counter, 5, 'Stock') # Stock
+                        # Quantity for accounting:
+                        'Remain to MRP', # OC
+                        'Ready', # B net
+                        'Stock', # Stock
 
-                    # Calculated data
-                    WS.write(counter, 6, 'TODO')
-                    
-                    # Check
-                    WS.write(counter, 7, 'No BOM')
-                    WS.write(counter, 8, 'Negative')
-                    
-                    WS.write(counter, 9, 'Comment')
-                    
+                        # Calculated data
+                        'TODO',
+                        
+                        # Check
+                        'No BOM',
+                        'Negative',
+                        ]
+                    header.extend(extra.keys())    
+                        
+                    col = 0
+                    for h in header:
+                        WS.write(counter, col, h)
+                        col += 1
                     self.counters[mode] += 1
                     
                 # -------------------------------------------------------------
@@ -118,8 +123,13 @@ class Parser(report_sxw.rml_parse):
                 # -------------------------------------------------------------
                 col = 0
                 counter = self.counters[mode]
+                # Write constant data:
                 for item in line:
                     WS.write(counter, col, item)
+                    col += 1
+                # Write extra data:    
+                for k in extra:
+                    WS.write(counter, col, extra[k])
                     col += 1
                     
                 self.counters[mode] += 1
@@ -146,6 +156,7 @@ class Parser(report_sxw.rml_parse):
         # TODO change:
         filename = '/home/administrator/photo/log/parent_product.xlsx'
         WB = xlsxwriter.Workbook(filename)
+        extra = {}
             
         self.counters = {
             'product': 0,
@@ -194,7 +205,7 @@ class Parser(report_sxw.rml_parse):
             cr, uid, context=context)
         for order in sale_pool.browse(cr, uid, order_ids, context=context):
             for line in order.order_line: # order line
-                comment = ''
+                extra['code_check'] = ''
                 if line.mx_closed:
                     continue
                 product = line.product_id # readability
@@ -235,7 +246,7 @@ class Parser(report_sxw.rml_parse):
                 # Stock check:
                 # ------------    
                 if default_code not in stock_used:
-                    comment += 'stock used|'
+                    extra['code_check'] += 'stock used'
                     stock_used.append(default_code)
                     stock_net = product.mx_net_qty
                     if stock_net < 0:
@@ -243,7 +254,7 @@ class Parser(report_sxw.rml_parse):
                     
                     parent_todo[parent][1] += stock_net # Net in stock (once)
                 else:
-                    comment += 'stock not used|'
+                    extra['code_check'] += 'stock not used'
                     stock_net = 0.0 # no used    
                 
                 # --------------
@@ -270,8 +281,7 @@ class Parser(report_sxw.rml_parse):
                     todo,
                     '' if parent_bom else 'X',
                     '' if stock_net >= 0 else 'X',      
-                    comment,              
-                    ])
+                    ], extra)
                     
                 # -----------------------------------------------------------------
                 # Halfwork from parent BOM

@@ -202,7 +202,7 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------        
         # Database
         parent_todo = {}
-        stock_used = []
+        stock_used = [] # for product and halfwork
         hws = {}
 
         order_ids = company_pool.mrp_domain_sale_order_line(

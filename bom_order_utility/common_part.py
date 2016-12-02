@@ -68,7 +68,7 @@ class ResCompany(orm.Model):
         order_ids.extend(forecasted_ids) # XXX no double FC is draft mode
         return order_ids 
 
-    def mrp_domain_sale_order_line_product(self, cr, uid, context=None):
+    def mrp_domain_sale_order_line_ids(self, cr, uid, context=None):
         ''' Active order line with production extend
         '''
         order_ids = self.mrp_domain_sale_order_line(cr, uid, context=context)

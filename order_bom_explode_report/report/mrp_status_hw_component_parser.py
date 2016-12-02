@@ -344,7 +344,7 @@ class Parser(report_sxw.rml_parse):
         # Empty record
         empty_A = ['' for n in range(0, 7)] # parent 7
         empty_B = ['' for n in range(0, 5)] # halfwork 4
-        empty_C = ['' for n in range(0, 6)] # component 6
+        empty_C = ['' for n in range(0, 7)] # component 6
         
         for parent in sorted(parent_todo):
             record = parent_todo[parent]
@@ -420,7 +420,8 @@ class Parser(report_sxw.rml_parse):
                         proposed_hw * cmpt.product_qty,
                         cmpt.product_id.mx_net_qty,
                         cmpt.product_id.mx_of_in,
-                        proposed if proposed > 0.0 else 0.0,
+                        proposed if proposed > 0.0 else '',
+                        proposed if proposed <= 0.0 else '',
                         ])
                             
                 if hw_first: # no cmpt data (not in loop)

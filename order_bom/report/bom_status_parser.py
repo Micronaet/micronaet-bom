@@ -53,12 +53,17 @@ class Parser(report_sxw.rml_parse):
 
         start_code = data.get('start_code', '')
         only = data.get('only', 'all')
+        from_order = data.get('from_order')
         
         description = _('Line: %s') % only
         if start_code:
-            description += _('Code start with: %s') % start_code
+            description += _('Code start with: %s ') % start_code
+
+        if from_order:
+            description += _('From open order ')
+
         if not description:    
-            description = _('All product')
+            description = _('All product ')
         return description
         
     def load_bom(self, data):
@@ -75,7 +80,7 @@ class Parser(report_sxw.rml_parse):
         start_code = data.get('start_code', '') # mandatory field
         only = data.get('only', 'all')
         from_order = data.get('from_order')
-        import pdb; pdb.set_trace()
+
         product_ids = product_pool.search(cr, uid, [
             ('default_code', '=ilike', '%s%%' % start_code),
             ], context=context)

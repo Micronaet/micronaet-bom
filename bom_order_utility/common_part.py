@@ -70,6 +70,7 @@ class ResCompany(orm.Model):
 
     def mrp_domain_sale_order_line_ids(self, cr, uid, context=None):
         ''' Active order line with production extend
+            return set for management operation on sets
         '''
         order_ids = self.mrp_domain_sale_order_line(cr, uid, context=context)
         sol_pool = self.pool.get('sale.order.line')
@@ -77,7 +78,10 @@ class ResCompany(orm.Model):
             ('order_id', 'in', order_ids),
             ('mx_closed', '=', False),
             ], context=context)
-        # TODO filter product return     
-        return sol_ids
+            
+        # Filter product
+        sol_proxy = self.browse(cr, uid, sol_ids, context=context)
+        product_set_ids = set([item.product_id.id for item in sol_proxy])
+        return product_set_ids
     
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -72,14 +72,22 @@ class Parser(report_sxw.rml_parse):
         context = {}
         
         product_pool = self.pool.get('product.product')
-        start_code = data.get('start_code', '')
+        start_code = data.get('start_code', '') # mandatory field
         only = data.get('only', 'all')
         from_order = data.get('from_order')
         
         product_ids = product_pool.search(cr, uid, [
             ('default_code', '=ilike', '%s%%' % start_code),
             ], context=context)
-        
+            
+        # Intersect with order for login AND operation
+        if from_order:
+            sol_product_ids = self.pool.get(
+                'res.company').mrp_domain_sale_order_line_ids(
+                    cr, uid, context=context)
+            product_ids = list(
+                sol_product_ids.intersection(
+                    set(product_ids)))
         res = []
         
         for item in product_pool.browse(cr, uid, product_ids, context=context):

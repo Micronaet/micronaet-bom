@@ -47,7 +47,7 @@ class ResCompany(orm.Model):
     # -------------------------------------------------------------------------
     # Utility for report generation:
     # -------------------------------------------------------------------------
-    """def mrp_domain_sale_order_line(self, cr, uid, context=None):
+    def mrp_domain_sale_order_line(self, cr, uid, context=None):
         ''' Active order line with production extend
         '''
         sale_pool = self.pool.get('sale.order')
@@ -66,7 +66,7 @@ class ResCompany(orm.Model):
             ('forecasted_production_id.state', 'not in', ('done', 'cancel')),
             ])
         order_ids.extend(forecasted_ids) # XXX no double FC is draft mode
-        return order_ids """
+        return order_ids 
          
     def mrp_order_line_to_produce(self, line):
         ''' Get order line to produce depend on OC-B-Delivery

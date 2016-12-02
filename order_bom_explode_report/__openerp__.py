@@ -34,6 +34,7 @@
         'mrp',
         'report_aeroo',
         'order_bom',
+        'bom_order_utility', # Utility for filter
         'bom_dynamic_structured', # for filter type category
         'textilene_status', # TODO remove when moved company parameters
         'production_accounting_external',

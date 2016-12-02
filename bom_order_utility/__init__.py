@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ###############################################################################
 #
 #    Copyright (C) 2001-2014 Micronaet SRL (<http://www.micronaet.it>).
@@ -16,36 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+from . import common_part
 
-{
-    'name': 'Order bom',
-    'version': '0.1',
-    'category': '',
-    'description': '''        
-        Utility for generate list of product - bom from order
-        Add also a report for documentation
-        ''',
-    'author': 'Micronaet S.r.l. - Nicola Riolini',
-    'website': 'http://www.micronaet.it',
-    'license': 'AGPL-3',
-    'depends': [
-        'base',
-        'sale',
-        'mrp',
-        'product',
-        'mx_close_order',
-        'product_speech_code',
-        'bom_order_utility', # Utility for order filter
-        'production_forecast_order', # for forecast check
-        'no_parcels_count', # exclude no parcels product
-        ],
-    'init_xml': [],
-    'demo': [],
-    'data': [
-        'bom_view.xml',
-        'report/status_report.xml',
-        ],
-    'active': False,
-    'installable': True,
-    'auto_install': False,
-    }
+
+# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

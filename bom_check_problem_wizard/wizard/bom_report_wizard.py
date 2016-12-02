@@ -103,6 +103,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             'from_date': wiz_proxy.from_date or False,
             'to_date': wiz_proxy.to_date or False,
             'start_code': wiz_proxy.start_code or '',
+            'from_order': wiz_proxy.from_order,
             'only': wiz_proxy.only,
             'modal': wiz_proxy.modal or False,
             'component': wiz_proxy.component,
@@ -139,6 +140,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ('pipe', 'Pipe in Halfworked'),
             ('line', 'Product presence bom'),
             ], 'Report mode', required=True),            
+            
+        'from_order': fields.boolean('From order'),    
         
         'modal': fields.selection([
             ('pipe', 'Pipe layout'),   

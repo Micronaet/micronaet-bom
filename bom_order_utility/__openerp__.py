@@ -18,12 +18,11 @@
 ###############################################################################
 
 {
-    'name': 'Order bom',
+    'name': 'Common filter for order',
     'version': '0.1',
-    'category': '',
-    'description': '''        
-        Utility for generate list of product - bom from order
-        Add also a report for documentation
+    'category': 'Filter',
+    'description': ''' 
+        Filter for active line product  
         ''',
     'author': 'Micronaet S.r.l. - Nicola Riolini',
     'website': 'http://www.micronaet.it',
@@ -35,16 +34,12 @@
         'product',
         'mx_close_order',
         'product_speech_code',
-        'bom_order_utility', # Utility for order filter
         'production_forecast_order', # for forecast check
         'no_parcels_count', # exclude no parcels product
         ],
     'init_xml': [],
     'demo': [],
-    'data': [
-        'bom_view.xml',
-        'report/status_report.xml',
-        ],
+    'data': [],
     'active': False,
     'installable': True,
     'auto_install': False,

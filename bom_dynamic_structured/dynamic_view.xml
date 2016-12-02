@@ -211,6 +211,7 @@
                             <field name="structure_id" />
                             <field name="relative_type" />
                             <field name="bom_placeholder" />
+                            <field name="bom_alternative" />
                             <newline/>
 
                             <group col="4" colspan="2">

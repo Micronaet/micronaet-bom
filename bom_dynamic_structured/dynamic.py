@@ -246,7 +246,10 @@ class ProductProduct(orm.Model):
         return res
 
     _columns = {
-        'bom_placeholder': fields.boolean('BOM placeholder'),
+        'bom_placeholder': fields.boolean('BOM placeholder', 
+            help='Mandatory fields for BOM, now not present!'),
+        'bom_alternative': fields.boolean('BOM alternative', 
+            help='Not mandatory but often present, alternative to other!'),
         'dynamic_bom_line_ids': fields.function(
             _get_dynamic_bom_line_ids, method=True, 
             type='one2many', relation='mrp.bom.line', 

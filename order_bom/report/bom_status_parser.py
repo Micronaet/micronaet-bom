@@ -75,7 +75,7 @@ class Parser(report_sxw.rml_parse):
         start_code = data.get('start_code', '') # mandatory field
         only = data.get('only', 'all')
         from_order = data.get('from_order')
-        
+        import pdb; pdb.set_trace()
         product_ids = product_pool.search(cr, uid, [
             ('default_code', '=ilike', '%s%%' % start_code),
             ], context=context)

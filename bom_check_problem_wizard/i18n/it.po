@@ -86,7 +86,7 @@ msgstr "Solo errori"
 #. module: bom_check_problem_wizard
 #: selection:mrp.bom.check.problem.wizard,only:0
 msgid "Only error and overrided"
-msgstr "Solo errori e sovrascizioni"
+msgstr "Solo errori e sovrascrizioni"
 
 #. module: bom_check_problem_wizard
 #: field:mrp.bom.check.problem.wizard,only:0

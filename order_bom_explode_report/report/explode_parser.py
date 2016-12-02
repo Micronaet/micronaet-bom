@@ -365,7 +365,8 @@ class Parser(report_sxw.rml_parse):
                         ))                      
                     continue     
 
-                (remain, not_delivered) = self.mrp_order_line_to_produce(line)
+                (remain, not_delivered) = \
+                    company_pool.mrp_order_line_to_produce(line)
 
                 # --------------------------------
                 # OC direct halfwork or component:

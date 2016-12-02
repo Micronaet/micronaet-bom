@@ -67,20 +67,17 @@ class ResCompany(orm.Model):
             ])
         order_ids.extend(forecasted_ids) # XXX no double FC is draft mode
         return order_ids 
-         
-    def mrp_order_line_to_produce(self, line):
-        ''' Get order line to produce depend on OC-B-Delivery
-        '''      
-        if line.product_uom_maked_sync_qty >= line.delivered_qty:
-            return (
-                line.product_uom_qty - line.product_uom_maked_sync_qty,
-                line.product_uom_maked_sync_qty - line.delivered_qty,
-                )
-                
-        else:    
-            return (
-                line.product_uom_qty - line.delivered_qty,
-                0.0,
-                )
+
+    def mrp_domain_sale_order_line_product(self, cr, uid, context=None):
+        ''' Active order line with production extend
+        '''
+        order_ids = self.mrp_domain_sale_order_line(cr, uid, context=context)
+        sol_pool = self.pool.get('sale.order.line')
+        sol_ids = sol_pool.search(cr, uid, [
+            ('order_id', 'in', order_ids),
+            ('mx_closed', '=', False),
+            ], context=context)
+        # TODO filter product return     
+        return sol_ids
     
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

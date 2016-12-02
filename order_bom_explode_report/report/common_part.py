@@ -46,28 +46,7 @@ class ResCompany(orm.Model):
     
     # -------------------------------------------------------------------------
     # Utility for report generation:
-    # -------------------------------------------------------------------------
-    """def mrp_domain_sale_order_line(self, cr, uid, context=None):
-        ''' Active order line with production extend
-        '''
-        sale_pool = self.pool.get('sale.order')
-        order_ids = sale_pool.search(cr, uid, [
-            ('state', 'not in', ('cancel', 'send', 'draft')),
-            ('pricelist_order', '=', False),
-            ('mx_closed', '=', False), # Only open orders (not all MRP after)
-            # Also forecasted order
-            # No filter date TODO use over data for reporting extra
-            # XXX no x axis filter!
-            ])
-            
-        # Add forecasted draft order (not in closed production)
-        forecasted_ids = sale_pool.search(cr, uid, [
-            ('forecasted_production_id', '!=', False),
-            ('forecasted_production_id.state', 'not in', ('done', 'cancel')),
-            ])
-        order_ids.extend(forecasted_ids) # XXX no double FC is draft mode
-        return order_ids """
-         
+    # -------------------------------------------------------------------------         
     def mrp_order_line_to_produce(self, line):
         ''' Get order line to produce depend on OC-B-Delivery
         '''      
@@ -76,7 +55,6 @@ class ResCompany(orm.Model):
                 line.product_uom_qty - line.product_uom_maked_sync_qty,
                 line.product_uom_maked_sync_qty - line.delivered_qty,
                 )
-                
         else:    
             return (
                 line.product_uom_qty - line.delivered_qty,

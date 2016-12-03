@@ -44,6 +44,18 @@ class ResCompany(orm.Model):
     _inherit = 'res.company'
 
     # Procedure:    
+    def check_bom_half_error_linked(self, cr, uid, ids, context=None):
+        ''' Check error during operation on bom
+        '''
+        product_pool = self.pool.get('product.product')
+        product_ids = product_pool.search(cr, uid, [
+            ('relative_type', '=', 'half')], context=context)
+        for product in product_pool.browse(
+                cr, uid, product_ids, context=context):
+            if product.half_bom_id.halfwork_id.id != product.id:
+                print product.default_code
+        return True
+        
     def generate_pipe_from_hw(self, cr, uid, ids, context=None):
         ''' Import hw component, output pipe
         '''

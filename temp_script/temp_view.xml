@@ -10,6 +10,7 @@
                     <page string="Temp script">
                         <group colspan="4" col="4">
                             <button name="generate_pipe_from_hw" string="Generate HW pipe" type="object" />
+                            <button name="check_bom_half_error_linked" string="Check BOM link in HW product" type="object" />
                         </group>
                     </page>
                 </xpath>

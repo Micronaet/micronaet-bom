@@ -130,14 +130,13 @@ class ProductProduct(orm.Model):
                 'half_bom_id': bom_id,
                 }, context=context)
         
-        
     _columns = {
         # TODO remove:
         'halfwork': fields.boolean('Halworked', 
             help='Manage BOM directly in product'),
             
         'half_bom_id': fields.many2one(
-            'mrp.bom', 'Half BOM'),
+            'mrp.bom', 'Half BOM', copy=False),
         'half_bom_ids': fields.one2many(
             'mrp.bom.line', 'halfwork_id', 
             'Halfwork component'),

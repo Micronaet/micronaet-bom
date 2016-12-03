@@ -43,6 +43,40 @@ class ProductProduct(orm.Model):
     """    
     _inherit = 'product.product'
     
+    # Button events:
+    def used_in_bom(self, cr, uid, ids, context=None):
+        ''' Product check bom
+        '''
+        line_pool = self.pool.get('mrp.bom.line')
+        bom_pool = self.pool.get('mrp.bom')
+        
+        line_ids = line_pool.search(cr, uid, [
+            ('product_id', '=', ids[0])], context=context)
+        bom_ids = list(set([item.bom_id.id for item in line_pool.browse(
+            cr, uid, line_ids, context=context)]))
+
+        if not bom_ids:
+            raise osv.except_osv(
+                _('Error'), 
+                _('No BOM found where this product was used!'),
+                )
+                
+        # TODO return also product?
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('BOM used'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            #'res_id': 1,
+            'res_model': 'mrp.bom',
+            #'view_id': view_id, # False
+            'views': [(False, 'tree'), (False, 'form')],
+            'domain': [('id', 'in', bom_ids)],
+            'context': context,
+            'target': 'current', # 'new'
+            'nodestroy': False,
+            }
+        
     _columns = {
         'relative_type': fields.selection([
             ('none', 'None'),

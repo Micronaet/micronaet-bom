@@ -10,6 +10,7 @@
                 <xpath expr="//notebook" position="before">
                     <group colspan="4" col="8">
                         <field name="relative_type" colspan="2"/>
+                        <button name="used_in_bom" string="Used in BOM" type="object" />
                     </group>    
                 </xpath>
                 <xpath expr="//page[2]" position="after">

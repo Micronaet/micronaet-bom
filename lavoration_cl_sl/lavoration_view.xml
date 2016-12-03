@@ -49,6 +49,7 @@
 		                        <tree string="Movement" editable="bottom">
 		                            <field name="product_id" on_change="onchange_product_id(product_id, location_id, location_dest_id, parent.partner_id)" domain="[('relative_type', '=', 'half')]"/>
 		                            <field name="product_uom_qty" string="Pieces"/>
+		                            <field name="product_fail_qty" string="Fail"/>
 		                            <field name="product_uom" invisible="1"/>
 		                            <field name="linked_sl_status" readonly="1" />
 		                            <field name="name" invisible="1"/>

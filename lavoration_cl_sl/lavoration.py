@@ -103,11 +103,15 @@ class StockMove(orm.Model):
                 for bom in item.product_id.half_bom_ids:
                     res[item.id] += '%s: %s\n' % (
                         bom.product_id.default_code or '??',
-                        item.product_uom_qty * bom.product_qty,
+                        bom.product_qty * (
+                            item.product_uom_qty + item.product_fail_qty),
                         )
         return res
 
     _columns = {
+        'product_fail_qty': fields.float('Damaged', 
+            digits_compute=dp.get_precision('Product Unit of Measure')),
+            
         'linked_sl_stock_move_id_ids': fields.one2many(
             'stock.move', 'linked_cl_stock_move_id', 
             'Linked SL movements'),
@@ -137,9 +141,12 @@ class MRPLavoration(orm.Model):
             
         sl_type = company_proxy.sl_mrp_lavoration_id
         sl_type_id = sl_type.id or False
+        
         stock_location = sl_type.default_location_src_id.id or False
         mrp_location = sl_type.default_location_dest_id.id or False 
+        
         origin = 'CL-LAV-%s' % pick_proxy.name
+        
         now = datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
         # TODO better MRP, now is procurements type?
 
@@ -169,6 +176,7 @@ class MRPLavoration(orm.Model):
         for load in pick_proxy.move_lines:
             product = load.product_id
             load_qty = load.product_qty
+            load_fail_qty = load_qty + load.product_fail_qty
             
             # Load quats materials:
             quant_pool.create(cr, uid, {
@@ -182,7 +190,7 @@ class MRPLavoration(orm.Model):
             
             for component in product.half_bom_ids:
                 product = component.product_id
-                unload_qty = component.product_qty * load_qty
+                unload_qty = component.product_qty * load_fail_qty
                 if unload_qty <= 0.0:
                     continue # jump line
 

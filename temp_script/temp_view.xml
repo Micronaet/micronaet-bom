@@ -15,8 +15,17 @@
                     </page>
                 </xpath>
             </field>
+        </record>        
+        <record model="ir.ui.view" id="view_temp_product_search">
+            <field name="name">product.product.temp.search</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_search_form_view"/>
+            <field name="arch" type="xml">
+                 <field name="name" position="after">
+                     <filter name="temp_selection_yes" string="Temp" domain="[('temp_selection','=',True)]"/>
+                 </field>
+            </field>
         </record>
-
     </data>
 </openerp>
 

@@ -47,14 +47,28 @@ class ResCompany(orm.Model):
     def check_bom_half_error_linked(self, cr, uid, ids, context=None):
         ''' Check error during operation on bom
         '''
+        # Pool used:
         product_pool = self.pool.get('product.product')
+
+        # Reset selection:
+        temp_ids = product_pool.search(cr, uid, [
+            ('temp_ids', '=', True)], context=context)
+        if temp_ids:  
+            product_pool.write(cr, uid, product_ids, {
+                'temp_selection': False}, context=context)
+            
+        # Check HW bon link:
         product_ids = product_pool.search(cr, uid, [
             ('relative_type', '=', 'half')], context=context)
+        temp_ids = []
         for product in product_pool.browse(
-                cr, uid, product_ids, context=context):
+                cr, uid, product_ids, context=context):                
             if product.half_bom_id.halfwork_id.id != product.id:
-                print product.default_code
-        return True
+                temp_ids.append(product.id)
+        
+        # Update temp selection
+        return product_pool.write(cr, uid, product_ids, {
+            'temp_selection': True}, context=context)
         
     def generate_pipe_from_hw(self, cr, uid, ids, context=None):
         ''' Import hw component, output pipe
@@ -104,5 +118,14 @@ class ResCompany(orm.Model):
                 ))
 
         _logger.info('End read: %s > %s' % (in_file, out_file))
+
+class ProductProduct(orm.Model):
+    """ Model name: ProductProduct
+    """
     
+    _inherit = 'product.product'
+    
+    _columns = {
+        'temp_selection': fields.boolean('Temp selection'),
+        }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

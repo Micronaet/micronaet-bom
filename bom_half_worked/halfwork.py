@@ -118,7 +118,7 @@ class ProductProduct(orm.Model):
         if not product_proxy.half_bom_id: # XXX just for sure behaviour!
             return True
             
-        if product_proxy.half_bom_id.halfwork_id == product_proxy.id:
+        if product_proxy.half_bom_id.halfwork_id.id == product_proxy.id:
             raise osv.except_osv(
                 _('Error'), 
                 _('Cannot unlink, correct assigned to bom also for back link'),

@@ -63,7 +63,8 @@ class ResCompany(orm.Model):
             ('relative_type', '=', 'half')], context=context)
         temp_ids = []
         for product in product_pool.browse(
-                cr, uid, product_ids, context=context):                
+                cr, uid, product_ids, context=context):        
+            # XXX Now also empty elements?        
             if product.half_bom_id.halfwork_id.id != product.id:
                 temp_ids.append(product.id)
         

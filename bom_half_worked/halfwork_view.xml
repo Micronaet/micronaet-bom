@@ -26,7 +26,6 @@
                         <field name="half_bom_id" attrs="{'invisible': [('half_bom_id','=',False)]}" readonly="1"/>
                         <button name="create_product_half_bom" string="Create halfworked BOM" type="object" attrs="{'invisible': [('half_bom_id','!=',False)]}"/>
                         <button name="relink_product_half_bom" string="Relink BOM" type="object" attrs="{'invisible': [('half_bom_id','=',False)]}"/>                        
-                        <!--TODO relink procedure!!!-->
                         
                         <separator string="Component" colspan="4"/>
                         <field name="half_bom_ids" attrs="{'invisible': [('half_bom_id','=',False)]}" colspan="4" context="{'default_bom_id': half_bom_id}" nolabel="1">

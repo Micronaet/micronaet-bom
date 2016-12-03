@@ -106,6 +106,24 @@ class ProductProduct(orm.Model):
     
     _inherit = 'product.product'
     
+    def relink_product_half_bom(self, cr, uid, ids, context=None):
+        ''' Relink if linked BOM has empty halfwork_id
+        ''' 
+        assert len(ids) == 1, 'Works only with one record a time'
+        bom_pool = self.pool.get('mrp.bom')
+        
+        product_proxy = self.browse(cr, uid, ids, context=context)[0]
+        
+        if not product_proxy.half_bom_id:
+            return True
+            
+        if product_proxy.half_bom_id.halfwork_id:
+            _logger.warning('No update, yet present')
+            return True           
+            
+        return bom_pool.write(cr, uid, product_proxy.half_bom_id.id, {
+            'halfwork_id': product_proxy.id}, context=context)    
+        
     def create_product_half_bom(self, cr, uid, ids, context=None):
         ''' Create BOM for halfworked         
         '''        

@@ -25,6 +25,8 @@
                     <group colspan="4" col="4" attrs="{'invisible': [('relative_type','!=','half')]}">
                         <field name="half_bom_id" attrs="{'invisible': [('half_bom_id','=',False)]}" readonly="1"/>
                         <button name="create_product_half_bom" string="Create halfworked BOM" type="object" attrs="{'invisible': [('half_bom_id','!=',False)]}"/>
+                        <button name="relink_product_half_bom" string="Relink BOM" type="object" attrs="{'invisible': [('half_bom_id','=',False)]}"/>                        
+                        <!--TODO relink procedure!!!-->
                         
                         <separator string="Component" colspan="4"/>
                         <field name="half_bom_ids" attrs="{'invisible': [('half_bom_id','=',False)]}" colspan="4" context="{'default_bom_id': half_bom_id}" nolabel="1">
@@ -46,7 +48,7 @@
             <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
             <field name="arch" type="xml">
                 <field name="product_tmpl_id" position="after">
-                   <field name="halfwork_id" invisible="1"/>  
+                   <field string="Linked HW" name="halfwork_id" readonly="1" />  <!--attrs="{'invisible': [('halfwork_id','=',False)]}"-->
                 </field>
                 <xpath expr="//field[@name='bom_line_ids']/tree/field[@name='product_id']" position="after">
                    <field name="halfwork_id" invisible="1"/>                    

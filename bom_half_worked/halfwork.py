@@ -106,6 +106,43 @@ class ProductProduct(orm.Model):
     
     _inherit = 'product.product'
     
+    def unlink_product_half_bom(self, cr, uid, ids, context=None):
+        ''' Remove BOM if linked is not for this product
+        '''
+        assert len(ids) == 1, 'Works only with one record a time'
+        line_pool = self.pool.get('mrp.bom.line')
+        
+        product_proxy = self.browse(cr, uid, ids, context=context)[0]
+
+        if not product_proxy.half_bom_id: # XXX just for sure behaviour!
+            return True
+            
+        if product_proxy.half_bom_id.halfwork_id == product_proxy.id:
+            raise osv.except_osv(
+                _('Error'), 
+                _('Cannot unlink, correct assigned to bom also for back link'),
+                )
+
+        # Clean BOM:
+        self.write(cr, uid, product_proxy.id, {
+            'half_bom_id': False,            
+            }, context=context)
+        
+        # Click regenerate button:
+        self.create_product_half_bom(cr, uid, ids, context=context)
+        
+        # Read record again:
+        product_proxy = self.browse(cr, uid, ids, context=context)[0]
+        
+        # Update Rows:
+        row_ids = [item.id for item in product_proxy.half_bom_ids]
+        if row_ids:
+            return line_pool.write(cr, uid, row_ids, {
+                'bom_id': product_proxy.half_bom_id.id,
+                }, context=context) 
+        
+        return True
+                
     def relink_product_half_bom(self, cr, uid, ids, context=None):
         ''' Relink if linked BOM has empty halfwork_id
         ''' 

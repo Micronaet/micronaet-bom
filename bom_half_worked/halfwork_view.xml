@@ -25,8 +25,8 @@
                     <group colspan="4" col="4" attrs="{'invisible': [('relative_type','!=','half')]}">
                         <field name="half_bom_id" attrs="{'invisible': [('half_bom_id','=',False)]}" readonly="1"/>
                         <button name="create_product_half_bom" string="Create halfworked BOM" type="object" attrs="{'invisible': [('half_bom_id','!=',False)]}"/>
-                        <button name="relink_product_half_bom" string="Relink BOM" type="object" attrs="{'invisible': [('half_bom_id','=',False)]}" confirm="Link BOM to this product if not present (for auto assign line to the product), confirm?"/>                        
-                        <button name="unlink_product_half_bom" string="Unlink BOM" type="object" attrs="{'invisible': [('half_bom_id','=',False)]}" confirm="Delete link to BOM (that still remain present), regenerate new bom, link below lines to new bom, confirm?"/>                        
+                        <button name="relink_product_half_bom" string="Relink BOM" colspan="1" type="object" attrs="{'invisible': [('half_bom_id','=',False)]}" confirm="Link BOM to this product if not present (for auto assign line to the product), confirm?"/>                        
+                        <button name="unlink_product_half_bom" string="Unlink BOM" colspan="1" type="object" attrs="{'invisible': [('half_bom_id','=',False)]}" confirm="Delete link to BOM (that still remain present), regenerate new bom, link below lines to new bom, confirm?"/>                        
                         
                         <separator string="Component" colspan="4"/>
                         <field name="half_bom_ids" attrs="{'invisible': [('half_bom_id','=',False)]}" colspan="4" context="{'default_bom_id': half_bom_id}" nolabel="1">

@@ -115,6 +115,9 @@ class ProductProduct(orm.Model):
         
         product_proxy = self.browse(cr, uid, ids, context=context)[0]
 
+        # History rows:
+        row_ids = [item.id for item in product_proxy.half_bom_ids]
+        
         if not product_proxy.half_bom_id: # XXX just for sure behaviour!
             return True
             
@@ -136,7 +139,6 @@ class ProductProduct(orm.Model):
         product_proxy = self.browse(cr, uid, ids, context=context)[0]
         
         # Update Rows:
-        row_ids = [item.id for item in product_proxy.half_bom_ids]
         if row_ids:
             return line_pool.write(cr, uid, row_ids, {
                 'bom_id': product_proxy.half_bom_id.id,

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-25 13:49+0000\n"
-"PO-Revision-Date: 2016-11-25 14:50+0100\n"
+"POT-Creation-Date: 2016-12-03 17:45+0000\n"
+"PO-Revision-Date: 2016-12-03 18:44+0100\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -39,6 +39,11 @@ msgid "Company lavoration parameter"
 msgstr "Parametri aziendali"
 
 #. module: lavoration_cl_sl
+#: field:stock.move,product_fail_qty:0
+msgid "Damaged"
+msgstr "Danneggiati"
+
+#. module: lavoration_cl_sl
 #: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
 msgid "Done"
 msgstr "Completato"
@@ -49,10 +54,15 @@ msgid "Enable lavoration"
 msgstr "Abilita lavorazione"
 
 #. module: lavoration_cl_sl
-#: code:addons/lavoration_cl_sl/lavoration.py:148
+#: code:addons/lavoration_cl_sl/lavoration.py:155
 #, python-format
 msgid "Error"
 msgstr "Errore"
+
+#. module: lavoration_cl_sl
+#: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
+msgid "Fail"
+msgstr "Danneggiati"
 
 #. module: lavoration_cl_sl
 #: field:stock.picking,is_mrp_lavoration:0
@@ -99,7 +109,7 @@ msgstr "Movimenti di Magazzino"
 #. module: lavoration_cl_sl
 #: model:ir.model,name:lavoration_cl_sl.model_stock_picking
 msgid "Picking List"
-msgstr "Documento di prelievo"
+msgstr "Prelievi"
 
 #. module: lavoration_cl_sl
 #: view:res.company:lavoration_cl_sl.view_res_company_cl_sl_picking_ref_tree
@@ -114,7 +124,7 @@ msgstr "Pezzi"
 #. module: lavoration_cl_sl
 #: model:ir.model,name:lavoration_cl_sl.model_stock_quant
 msgid "Quants"
-msgstr "Quant."
+msgstr "Quants"
 
 #. module: lavoration_cl_sl
 #: field:res.company,sl_mrp_lavoration_id:0
@@ -132,13 +142,13 @@ msgid "SL movement"
 msgstr "SL movimenti"
 
 #. module: lavoration_cl_sl
-#: code:addons/lavoration_cl_sl/lavoration.py:202
+#: code:addons/lavoration_cl_sl/lavoration.py:210
 #, python-format
 msgid "SL-LAV-%s"
 msgstr "SL-LAV-%s"
 
 #. module: lavoration_cl_sl
-#: code:addons/lavoration_cl_sl/lavoration.py:149
+#: code:addons/lavoration_cl_sl/lavoration.py:156
 #, python-format
 msgid "Set up in company location for stock and mrp1!"
 msgstr "Imposta "
@@ -154,6 +164,16 @@ msgid "String"
 msgstr "Stringa"
 
 #. module: lavoration_cl_sl
+#: field:stock.picking,total_work:0
+msgid "Tot. H."
+msgstr "Tot. H."
+
+#. module: lavoration_cl_sl
 #: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
 msgid "Unlock"
 msgstr "Sblocca"
+
+#. module: lavoration_cl_sl
+#: field:stock.picking,workers:0
+msgid "Workers"
+msgstr "Addetti"

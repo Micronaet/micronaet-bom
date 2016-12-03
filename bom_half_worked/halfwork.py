@@ -109,6 +109,7 @@ class ProductProduct(orm.Model):
     def unlink_product_half_bom(self, cr, uid, ids, context=None):
         ''' Remove BOM if linked is not for this product
         '''
+        import pdb; pdb.set_trace()
         assert len(ids) == 1, 'Works only with one record a time'
         line_pool = self.pool.get('mrp.bom.line')
         

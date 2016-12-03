@@ -52,10 +52,11 @@ class ResCompany(orm.Model):
 
         # Reset selection:
         temp_ids = product_pool.search(cr, uid, [
-            ('temp_ids', '=', True)], context=context)
+            ('temp_selection', '=', True)], context=context)
         if temp_ids:  
-            product_pool.write(cr, uid, product_ids, {
+            product_pool.write(cr, uid, temp_ids, {
                 'temp_selection': False}, context=context)
+            _logger.warning('Uncheck %s product record' % len(temp_ids))
             
         # Check HW bon link:
         product_ids = product_pool.search(cr, uid, [
@@ -67,7 +68,8 @@ class ResCompany(orm.Model):
                 temp_ids.append(product.id)
         
         # Update temp selection
-        return product_pool.write(cr, uid, product_ids, {
+        _logger.warning('Check %s product record' % len(temp_ids))
+        return product_pool.write(cr, uid, temp_ids, {
             'temp_selection': True}, context=context)
         
     def generate_pipe_from_hw(self, cr, uid, ids, context=None):

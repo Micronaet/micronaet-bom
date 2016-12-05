@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-##############################################################################
+###############################################################################
 #
 #   Copyright (C) 2010-2012 Associazione OpenERP Italia
 #   (<http://www.openerp-italia.org>).
@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-##############################################################################
+###############################################################################
 import os
 import sys
 import logging
@@ -290,9 +290,9 @@ class Parser(report_sxw.rml_parse):
                     '' if stock_net >= 0 else 'X',      
                     ], extra)
                     
-                # -----------------------------------------------------------------
+                # -------------------------------------------------------------
                 # Halfwork from parent BOM
-                # -----------------------------------------------------------------
+                # -------------------------------------------------------------
                 for hw in parent_bom.bom_line_ids:
                     halfwork = hw.product_id
                     if halfwork.relative_type != 'half':
@@ -385,9 +385,9 @@ class Parser(report_sxw.rml_parse):
                 if not hw.product_id in hws: # hw in the list
                     continue # not in selected list create before
                     
-                # ---------------------------------------------------------
+                # -------------------------------------------------------------
                 #                           BLOCK B:
-                # ---------------------------------------------------------
+                # -------------------------------------------------------------
                 halfwork = hw.product_id # readability
                 hw_data = hws.get(halfwork, False)
                 if not hw_data:
@@ -413,10 +413,9 @@ class Parser(report_sxw.rml_parse):
                     else:
                         data_AB = data_A + empty_B
                      
-                    # ---------------------------------------------
+                    # ---------------------------------------------------------
                     #                  BLOCK C:
-                    # ---------------------------------------------
-                    
+                    # ---------------------------------------------------------        
                     proposed = proposed_hw * cmpt.product_qty -\
                         cmpt.product_id.mx_net_qty -\
                         cmpt.product_id.mx_of_in

@@ -355,13 +355,13 @@ class Parser(report_sxw.rml_parse):
             # -----------------------------------------------------------------
             # Parent data:
             data_A = [
-                parent, # Code
-                record[2], # OC
-                record[1], # Mag
-                record[5], # Produced to delivery
-                record[2] - record[1] + record[5], # Todo (clean to delivery)
-                record[3], # tot. negative stock (for green-red light)
-                record[4], # tot. no bom (for green-red light)
+                parent, # 0. Code
+                record[2], # 1. OC
+                record[1], # 2. Mag
+                record[5], # 3. Produced to delivery
+                record[2], # XXX ex.: - record[1] + record[5], # 4. TODO
+                record[3], # 5. tot. negative stock (for green-red light)
+                record[4], # 6. tot. no bom (for green-red light)
                 # TODO
                 ]
                 

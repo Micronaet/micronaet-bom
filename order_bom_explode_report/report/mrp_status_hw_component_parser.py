@@ -275,7 +275,7 @@ class Parser(report_sxw.rml_parse):
                 # -------------------------------------------------------------    
                 # Populate halfwork database:
                 # -------------------------------------------------------------    
-                todo = oc_remain - stock_net + not_delivered
+                todo = oc_remain # XXX - stock_net + not_delivered
                 
                 # Log line operation:
                 log_line(self, [
@@ -359,7 +359,7 @@ class Parser(report_sxw.rml_parse):
                 record[2], # 1. OC
                 record[1], # 2. Mag
                 record[5], # 3. Produced to delivery
-                record[2], # XXX ex.: - record[1] + record[5], # 4. TODO
+                record[2], # XXX ex.: - record[1] + record[5], # 4. todo
                 record[3], # 5. tot. negative stock (for green-red light)
                 record[4], # 6. tot. no bom (for green-red light)
                 # TODO

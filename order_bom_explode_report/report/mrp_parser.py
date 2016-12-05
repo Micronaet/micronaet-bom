@@ -200,8 +200,8 @@ class Parser(report_sxw.rml_parse):
                 delta_stock_qty = qty[1]
                 
                 # Current stock = stock - mrp (previous unload) - delta TODO
-                stock = component.mx_net_qty + mrp_unload.get(
-                    component.id, 0.0) + delta_stock_qty
+                stock_today = mrp_unload.get(component.id, 0.0)
+                stock = component.mx_net_qty + stock_today + delta_stock_qty
                 oc_period = mrp_order.get(component.id, 0.0)   
                 of = component.mx_of_in
                 of_move = ''
@@ -227,13 +227,14 @@ class Parser(report_sxw.rml_parse):
                     
                 # component, need, stock, OC period, OF, status
                 components.append((
-                    component, # Component
-                    this_qty, # MRP net q.                    
-                    stock, # net stock after this order
-                    oc_period,
-                    of,
-                    status,
-                    of_move,             
+                    component, # 0. Component
+                    this_qty, # 1. MRP net q.                    
+                    stock, # 2. net stock after this order
+                    oc_period, # 3. 
+                    of, # 4. 
+                    status, # 5. 
+                    of_move, # 6.
+                    stock_today, # 7. Stock net
                     ))
             res.append((
                 mrp, 

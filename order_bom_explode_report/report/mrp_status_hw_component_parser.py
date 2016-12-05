@@ -371,7 +371,7 @@ class Parser(report_sxw.rml_parse):
 
             parent_first = True
             for hw in record[0].bom_line_ids:
-                if hw.product_id.id in hw_present:
+                if not hw.product_id or hw.product_id.id in hw_present:
                     yet_write = True # yet write in report before
                 else:
                     hw_present.append(hw.product_id.id)

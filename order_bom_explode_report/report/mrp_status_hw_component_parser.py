@@ -343,9 +343,10 @@ class Parser(report_sxw.rml_parse):
 
         # Empty record
         empty_A = ['' for n in range(0, 7)] # parent 7
-        empty_B = ['' for n in range(0, 5)] # halfwork 4
-        empty_C = ['' for n in range(0, 7)] # component 6
+        empty_B = ['' for n in range(0, 6)] # halfwork 6
+        empty_C = ['' for n in range(0, 7)] # component 7
         
+        hw_present = []
         for parent in sorted(parent_todo):
             record = parent_todo[parent]
             
@@ -370,6 +371,12 @@ class Parser(report_sxw.rml_parse):
 
             parent_first = True
             for hw in record[0].bom_line_ids:
+                if hw.product_id.id in hw_present:
+                    yet_write = True # yet write in report before
+                else:
+                    hw_present.append(hw.product_id.id)
+                    yet_write = False # yet write in report before
+                 
                 if parent_first:
                     parent_first = False                    
                 else:    
@@ -395,6 +402,7 @@ class Parser(report_sxw.rml_parse):
                     hw_data[0], # Todo halfwork
                     hw_data[1], # Stock
                     proposed_hw,
+                    yet_write, # yet write status
                     ]
                 
                 hw_first = True

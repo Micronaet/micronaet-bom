@@ -108,12 +108,12 @@
                 </form>
             </field>
         </record>
-        <record model="ir.ui.view" id="action_stock_picking_cl_tree">
+        <record model="ir.ui.view" id="view_stock_picking_cl_tree">
             <field name="name">stock.picking.tree</field>
             <field name="model">stock.picking</field>
             <field name="priority" eval="50" />
             <field name="arch" type="xml">
-                <tree string="String" color="red:total_stop&gt;0">
+                <tree string="String" colors="red:total_stop&gt;0">
                     <field name="name" />
                     <field name="date" />
                     <field name="device_id" />

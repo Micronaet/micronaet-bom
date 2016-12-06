@@ -151,7 +151,8 @@ class Parser(report_sxw.rml_parse):
             for item in product.dynamic_bom_line_ids:
                 if mode == 'halfwork':
                     if first_supplier_id and \
-                            first_supplier_id != item.first_supplier_id.id:
+                            first_supplier_id != \
+                                item.product_id.first_supplier_id.id:
                         continue # Jump not supplier present    
                     if type_category and \
                             type_category != item.category_id.type_id.id:

@@ -348,7 +348,7 @@ class Parser(report_sxw.rml_parse):
         empty_B = ['' for n in range(0, 6)] # halfwork 6
         empty_C = ['' for n in range(0, 7)] # component 7
         
-        hw_present = []
+        hw_present = [] # for highlight only first total in report (for orders)
         for parent in sorted(parent_todo):
             record = parent_todo[parent]
             
@@ -379,13 +379,13 @@ class Parser(report_sxw.rml_parse):
                     hw_present.append(hw.product_id.id)
                     yet_write = False # yet write in report before
                  
+                if not hw.product_id in hws: # hw in the list selection
+                    continue # not in selected list create before
+
                 if parent_first:
                     parent_first = False                    
                 else:    
                     data_A = empty_A # reset A
-
-                if not hw.product_id in hws: # hw in the list
-                    continue # not in selected list create before
                     
                 # -------------------------------------------------------------
                 #                           BLOCK B:

@@ -108,7 +108,7 @@
                 </form>
             </field>
         </record>
-        <record model="ir.ui.view" id="view_stock_picking_cl_form">
+        <record model="ir.ui.view" id="action_stock_picking_cl_tree">
             <field name="name">stock.picking.tree</field>
             <field name="model">stock.picking</field>
             <field name="priority" eval="50" />

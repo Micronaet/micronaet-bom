@@ -1,6 +1,43 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+        <!--stock.picking.device-->
+        <record model="ir.ui.view" id="view_stock_picking_device_form">
+            <field name="name">stock.picking.device.form</field>
+            <field name="model">stock.picking.device</field>
+            <field name="arch" type="xml">
+                <form string="Device" version="7.0">        
+                    <sheet>
+                        <group col="4" colspan="4">
+                            <field name="name" />
+                            <separator string="Note" colspan="4" />
+                            <field name="note" colspan="4" nolabel="1" />
+                        </group>
+                    </sheet>        
+                </form>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_stock_picking_device_tree">
+            <field name="name">stock.picking.device.tree</field>
+            <field name="model">stock.picking.device</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <tree string="Device" editable="bottom">        
+                    <field name="name" />
+                    <field name="note" />
+                </tree>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_open_stock_picking_device">
+            <field name="name">Lavoration device</field>
+            <field name="res_model">stock.picking.device</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_stock_picking_device_tree"/>
+            <field name="context">{}</field>
+            <field name="domain">[]</field>
+        </record>
+        
         <record model="ir.ui.view" id="view_res_company_cl_sl_picking_ref_tree">
             <field name="name">res.company.form</field>
             <field name="model">res.company</field>
@@ -39,8 +76,13 @@
                         <group col="4" colspan="4">
                             <field name="name" />
                             <field name="date" />
+                            <field name="device_id" />
                             <field name="workers" />
+                            
                             <field name="total_work" widget="float_time"/>
+                            <field name="total_prepare" widget="float_time"/>
+                            <field name="total_stop" widget="float_time"/>
+
                             <field name="linked_sl_id" invisible="1" />
                             <field name="is_mrp_lavoration" invisible="1"/>
                             <field name="picking_type_id" invisible="1" />
@@ -98,6 +140,11 @@
                 id="menu_stock_picking_cl_configuration" 
                 action="action_rec_company_parameter_tree"
                 sequence="90"/>
+                <menuitem 
+                    parent="menu_stock_picking_cl_configuration" 
+                    id="menu_open_stock_picking_device" 
+                    action="action_open_stock_picking_device"/>
+                 
         
     </data>
 </openerp>

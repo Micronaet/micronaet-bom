@@ -38,6 +38,19 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+class StockPickingDevice(orm.Model):
+    """ Model name: StockPickingDevice
+    """
+    
+    _name = 'stock.picking.device'
+    _description = 'Lavoration device'
+    
+    _columns = {
+        'name': fields.char('Device', size=64, required=True),
+        'note': fields.text('Note'),
+        }
+    
+
 class ResCompany(orm.Model):
     """ Model name: ResCompany
     """
@@ -307,9 +320,13 @@ class MRPLavoration(orm.Model):
         # TODO check error on false
 
     _columns = {
-        'total_work': fields.float('Tot. H.', digits=(16, 3)),
+        'total_work': fields.float('Tot. work H.', digits=(16, 3)),
+        'total_prepare': fields.float('Tot. prepare H.', digits=(16, 3)),
+        'total_stop': fields.float('Tot. stop H.', digits=(16, 3)),
         'workers': fields.char('Workers', size=64),
         'is_mrp_lavoration': fields.boolean('Is Lavoration'),
+        'device_id': fields.many2one('stock.picking.device', 'Device'),
+        
         # Override:
         'picking_type_id': fields.many2one(
             'stock.picking.type', 'Picking Type', 

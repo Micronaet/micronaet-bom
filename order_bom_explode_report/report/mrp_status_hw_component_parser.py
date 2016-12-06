@@ -90,6 +90,7 @@ class Parser(report_sxw.rml_parse):
                     header = [
                         # Reference:
                         'Parent',
+                        'DB padre',
                         'Product',
                         'Order ref.',
                     
@@ -220,7 +221,7 @@ class Parser(report_sxw.rml_parse):
                 if not default_code:
                     extra['code_check'] = 'no product code'
                     log_line(self, [
-                        '', '', order.name, '', '', '', '', '', '',                        
+                        '', '', '', order.name, '', '', '', '', '', '',                        
                         ], extra)
                     continue # TODO raise error or log
                     
@@ -280,6 +281,7 @@ class Parser(report_sxw.rml_parse):
                 # Log line operation:
                 log_line(self, [
                     parent,
+                    parent_bom.code or '???',
                     default_code,
                     order.name,
                     oc_remain,

@@ -20,7 +20,6 @@
         <record model="ir.ui.view" id="view_stock_picking_device_tree">
             <field name="name">stock.picking.device.tree</field>
             <field name="model">stock.picking.device</field>
-            <field name="type">form</field>
             <field name="arch" type="xml">
                 <tree string="Device" editable="bottom">        
                     <field name="name" />
@@ -109,11 +108,29 @@
                 </form>
             </field>
         </record>
+        <record model="ir.ui.view" id="view_stock_picking_cl_form">
+            <field name="name">stock.picking.tree</field>
+            <field name="model">stock.picking</field>
+            <field name="priority" eval="50" />
+            <field name="arch" type="xml">
+                <tree string="String" color="red:total_stop&gt;0">
+                    <field name="name" />
+                    <field name="date" />
+                    <field name="device_id" />
+                    <field name="workers" />
+                    <field name="total_work" />
+                    <field name="total_prepare" />
+                    <field name="total_stop" />                    
+                    <field name="state" />                    
+                </tree>
+            </field>
+        </record>
         <record model="ir.actions.act_window" id="action_stock_picking_cl_tree">
             <field name="name">Lavoration list (open)</field>
             <field name="res_model">stock.picking</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_stock_picking_cl_tree"/>
             <field name="context">{'open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form', 'default_is_mrp_lavoration': True}</field>
             <field name="domain">[('is_mrp_lavoration', '=', True),('state', '=', 'draft')]</field>
         </record>
@@ -121,6 +138,7 @@
             <field name="name">Lavoration list (all)</field>
             <field name="res_model">stock.picking</field>
             <field name="view_type">form</field>
+            <field name="view_id" ref="view_stock_picking_cl_tree"/>
             <field name="view_mode">tree,form</field>
             <field name="context">{'open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form', 'default_is_mrp_lavoration': True}</field>
             <field name="domain">[('is_mrp_lavoration', '=', True)]</field>

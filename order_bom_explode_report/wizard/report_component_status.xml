@@ -15,7 +15,7 @@
                         <field name="mode" />
                         <newline/>
                         <field name="days" attrs="{'required': [('mode','=','mrp')], 'invisible': [('mode','!=','mrp')]}" />
-                        <field name="first_supplier_id" attrs="{'invisible': [('mode','!=','mrp')]}" />                        
+                        <field name="first_supplier_id" attrs="{'invisible': [('mode','not in',('mrp', 'halfwork'))]}" />                        
                         <field name="type_id" />
                    </group>
                 </form>

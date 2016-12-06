@@ -87,7 +87,7 @@ class Parser(report_sxw.rml_parse):
             data = {}
         mode = data.get('mode', 'halfwork')
         type_category = data.get('type_id', False)
-        fist_supplier = data.get('type_id', False)
+        first_supplier_id = data.get('first_supplier_id', False)
         
         # ---------------------------------------------------------------------
         # Utility function embedded:
@@ -150,6 +150,9 @@ class Parser(report_sxw.rml_parse):
         for product in product_data['product']:
             for item in product.dynamic_bom_line_ids:
                 if mode == 'halfwork':
+                    if first_supplier_id and \
+                            first_supplier_id != item.first_supplier_id.id:
+                        continue # Jump not supplier present    
                     if type_category and \
                             type_category != item.category_id.type_id.id:
                         continue # Jump not in category selected

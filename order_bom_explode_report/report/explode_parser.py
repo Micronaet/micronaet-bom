@@ -149,18 +149,21 @@ class Parser(report_sxw.rml_parse):
         y_axis = {}
         for product in product_data['product']:
             for item in product.dynamic_bom_line_ids:
+                # XXX Filter category always in hw not component!
+                if type_category and \
+                        type_category != item.category_id.type_id.id:
+                    continue # Jump not in category selected
+                    
                 if mode == 'halfwork':
                     if first_supplier_id and \
                             first_supplier_id != \
                                 item.product_id.first_supplier_id.id:
                         continue # Jump not supplier present    
-                    if type_category and \
-                            type_category != item.category_id.type_id.id:
-                        continue # Jump not in category selected
                     category = item.category_id.type_id.name if \
                         item.category_id and item.category_id.type_id else \
                             _('No category')
                     add_x_item(y_axis, item, category)
+                    
                 else: # mode = 'component' 
                     # TODO log halfcomponent with empty list
                     # relative_type = 'half'

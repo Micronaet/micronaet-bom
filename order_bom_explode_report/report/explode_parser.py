@@ -169,8 +169,9 @@ class Parser(report_sxw.rml_parse):
                     # relative_type = 'half'
                     for component in item.product_id.half_bom_ids:
                         # TODO change category for half component?                        
-                        category = _('Pipes') if component.product_id.is_pipe \
-                            else _('Fabric') # TODO correct?
+                        category = ''
+                        #category = _('Pipes') if component.product_id.is_pipe \
+                        #    else _('Fabric') # TODO correct?
                         add_x_item(y_axis, component, category)
 
         debug_file.write('\n\nComponent / Halfworked selected:\n%s\n\n'% (

@@ -58,9 +58,13 @@ class CcomponentStatusReportWizard(orm.TransientModel):
         wiz_browse = self.browse(cr, uid, ids, context=context)[0]        
         datas = {
             'mode': wiz_browse.mode,
-            'type_id': wiz_browse.type_id.id or False,
             'days': wiz_browse.days,
             'first_supplier_id': wiz_browse.first_supplier_id.id or False,
+            'type_id': wiz_browse.type_id.id or False, # TODO remove
+            'with_type_ids': 
+                [item.id for item in wiz_browse.with_type_ids],
+            'without_type_ids': 
+                [item.id for item in wiz_browse.without_type_ids],
             }
             
         if wiz_browse.mode == 'mrp':
@@ -86,6 +90,18 @@ class CcomponentStatusReportWizard(orm.TransientModel):
         'days': fields.integer('Days', help='Production scheduled now + days'),
         'first_supplier_id': fields.many2one(
             'res.partner', 'First supplier'),
+        'type_id': fields.many2one(
+            'mrp.bom.structure.category.type', 'Component category type'),
+        'with_type_ids': fields.many2many(
+            'mrp.bom.structure.category.type', 
+            'with_mrp_bom_structure_category_type_rel', 
+            'wiz_id', 'type_id', 
+            'With type'),    
+        'without_type_ids': fields.many2many(
+            'mrp.bom.structure.category.type', 
+            'without_mrp_bom_structure_category_type_rel', 
+            'wiz_id', 'type_id', 
+            'Without type'),    
         'type_id': fields.many2one(
             'mrp.bom.structure.category.type', 'Component category type'),
         }

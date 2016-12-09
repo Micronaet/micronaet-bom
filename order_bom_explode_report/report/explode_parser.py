@@ -86,8 +86,9 @@ class Parser(report_sxw.rml_parse):
         if data is None:
             data = {}
         mode = data.get('mode', 'halfwork')
-        type_category = data.get('type_id', False)
         first_supplier_id = data.get('first_supplier_id', False)
+        with_type_ids = data.get('with_type_ids', [])
+        without_type_ids = data.get('without_type_ids', [])
         
         # ---------------------------------------------------------------------
         # Utility function embedded:
@@ -150,8 +151,11 @@ class Parser(report_sxw.rml_parse):
         for product in product_data['product']:
             for item in product.dynamic_bom_line_ids:
                 # XXX Filter category always in hw not component!
-                if type_category and \
-                        type_category != item.category_id.type_id.id:
+                if with_type_ids and \
+                        item.category_id.type_id.id not in with_type_ids:
+                    continue # Jump not in category selected
+                if without_type_ids and \
+                        item.category_id.type_id.id in without_type_ids:
                     continue # Jump not in category selected
                     
                 if mode == 'halfwork':

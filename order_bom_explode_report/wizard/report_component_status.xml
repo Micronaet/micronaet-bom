@@ -16,7 +16,10 @@
                         <newline/>
                         <field name="days" attrs="{'required': [('mode','=','mrp')], 'invisible': [('mode','!=','mrp')]}" />
                         <field name="first_supplier_id" attrs="{'invisible': [('mode','not in',('mrp', 'halfwork'))]}" domain="[('is_company', '=', True), ('supplier', '=', True)]"/>
-                        <field name="type_id" />
+                        <field name="type_id" invisible="1"/>
+                        <newline/>
+                        <field name="with_type_ids" widget="many2many_tags" />
+                        <field name="without_type_ids" widget="many2many_tags" />
                    </group>
                 </form>
             </field>

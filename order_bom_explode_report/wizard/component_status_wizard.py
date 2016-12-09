@@ -60,7 +60,7 @@ class CcomponentStatusReportWizard(orm.TransientModel):
             'mode': wiz_browse.mode,
             'days': wiz_browse.days,
             'first_supplier_id': wiz_browse.first_supplier_id.id or False,
-            'negative_start': wiz_browse.negative_start,
+            #'negative_start': wiz_browse.negative_start,
             'type_id': False, # TODO remove ex. wiz_browse.type_id.id or
             'with_type_ids': 
                 [item.id for item in wiz_browse.with_type_ids],

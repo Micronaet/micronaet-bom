@@ -89,7 +89,7 @@ class Parser(report_sxw.rml_parse):
         first_supplier_id = data.get('first_supplier_id', False)
         with_type_ids = data.get('with_type_ids', [])
         without_type_ids = data.get('without_type_ids', [])
-        negative_start = data.get('negative_start', False) # TODO
+        #negative_start = data.get('negative_start', False) # TODO
         
         # ---------------------------------------------------------------------
         # Utility function embedded:

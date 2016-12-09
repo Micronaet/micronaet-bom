@@ -89,6 +89,7 @@ class Parser(report_sxw.rml_parse):
         first_supplier_id = data.get('first_supplier_id', False)
         with_type_ids = data.get('with_type_ids', [])
         without_type_ids = data.get('without_type_ids', [])
+        negative_start = data.get('negative_start', False) # TODO
         
         # ---------------------------------------------------------------------
         # Utility function embedded:
@@ -557,9 +558,10 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         res = []
         self.jumped = []
-
-        for key in sorted(y_axis, key=lambda code:    
-                (y_axis[code][8], code[0:3], code[6:12], code[3:6])):
+    
+        # TODO textilene sort block:
+        # (y_axis[code][8], code[0:3], code[6:12], code[3:6])
+        for key in sorted(y_axis, key=lambda code: (y_axis[code][8], code)):
             current = y_axis[key] # readability:
             total = 0.0 # INV 0.0
             
@@ -567,6 +569,7 @@ class Parser(report_sxw.rml_parse):
             # inv_pos = 3 # December
             inv_pos = 0 # September
             jumped = False
+            #check_negative = True # switch
             for i in range(0, 12):
                 #if i == inv_pos:
                 #    current[3][i] += round(current[0], 0) # add inv.
@@ -590,6 +593,12 @@ class Parser(report_sxw.rml_parse):
                 total += round(
                     current[3][i] + current[4][i] + current[5][i], 0)
                 current[6][i] = int(total)
+                
+                # Negative check part:
+                #if current[6][i] > 0:
+                #    check_negative = False # found one positive
+                #if negative_start and not check_negative and current[6][i] < 0:
+                #    continue 
 
             # Append progress totals:
             if not jumped:

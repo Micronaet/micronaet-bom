@@ -60,7 +60,8 @@ class CcomponentStatusReportWizard(orm.TransientModel):
             'mode': wiz_browse.mode,
             'days': wiz_browse.days,
             'first_supplier_id': wiz_browse.first_supplier_id.id or False,
-            'type_id': wiz_browse.type_id.id or False, # TODO remove
+            'negative_start': wiz_browse.negative_start,
+            'type_id': False, # TODO remove ex. wiz_browse.type_id.id or
             'with_type_ids': 
                 [item.id for item in wiz_browse.with_type_ids],
             'without_type_ids': 
@@ -88,6 +89,8 @@ class CcomponentStatusReportWizard(orm.TransientModel):
             ('todo', 'TODO hw and component'),
             ], 'Report mode', required=True),
         'days': fields.integer('Days', help='Production scheduled now + days'),
+        'negative_start': fields.boolean('Negative start', 
+            help='Total check month for negative start'),
         'first_supplier_id': fields.many2one(
             'res.partner', 'First supplier'),
         'type_id': fields.many2one(

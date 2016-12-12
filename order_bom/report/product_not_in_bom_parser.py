@@ -74,6 +74,13 @@ class Parser(report_sxw.rml_parse):
         res = []
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
+                
+            # Jump product code start with 3 number    
+            default_code = product.default_code
+            if default_code[:3].isalnum():
+                continue
+                
+            # Jump no stock product:    
             net = product.mx_net_qty
             if net:
                 res.append((product, net, product.mx_lord_qty))

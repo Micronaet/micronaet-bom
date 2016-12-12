@@ -76,9 +76,9 @@ class Parser(report_sxw.rml_parse):
                 cr, uid, product_ids, context=context):
                 
             # Jump product code start with 3 number    
-            default_code = product.default_code
-            if not default_code or default_code[:3].isalnum():
-                continue
+            #default_code = product.default_code
+            #if not default_code or default_code[:3].isalnum():
+            #    continue
                 
             # Jump no stock product:    
             net = product.mx_net_qty

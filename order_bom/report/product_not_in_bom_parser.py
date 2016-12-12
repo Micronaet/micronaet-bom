@@ -65,7 +65,7 @@ class Parser(report_sxw.rml_parse):
                     SELECT l.product_id 
                     FROM mrp_bom_line l JOIN mrp_bom b ON (l.bom_id = b.id)
                     WHERE 
-                        b.bom_category NOT IN ('half', 'dynamic', 'parent')
+                        b.bom_category IN ('half', 'dynamic', 'parent')
                     )
             ORDER BY 
                 default_code;

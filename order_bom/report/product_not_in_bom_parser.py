@@ -66,9 +66,9 @@ class Parser(report_sxw.rml_parse):
                     FROM mrp_bom_line l JOIN mrp_bom b ON (l.bom_id = b.id)
                     WHERE 
                         b.bom_category NOT IN ('half', 'dynamic', 'parent')
-                    );
+                    )
             ORDER BY 
-                default_code        
+                default_code;
             ''')
         product_ids = [item[0] for item in cr.fetchall()]
         res = []
@@ -76,7 +76,7 @@ class Parser(report_sxw.rml_parse):
                 cr, uid, product_ids, context=context):
             net = product.mx_net_qty
             if net:
-                res.append(product, net, product.mx_lord_qty)
+                res.append((product, net, product.mx_lord_qty))
         return res
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

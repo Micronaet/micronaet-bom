@@ -77,7 +77,7 @@ class Parser(report_sxw.rml_parse):
                 
             # Jump product code start with 3 number    
             default_code = product.default_code
-            if default_code[:3].isalnum():
+            if not default_code or default_code[:3].isalnum():
                 continue
                 
             # Jump no stock product:    

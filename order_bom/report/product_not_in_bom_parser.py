@@ -67,8 +67,16 @@ class Parser(report_sxw.rml_parse):
                     WHERE 
                         b.bom_category NOT IN ('half', 'dynamic', 'parent')
                     );
+            ORDER BY 
+                default_code        
             ''')
         product_ids = [item[0] for item in cr.fetchall()]
-        return product_pool.browse(cr, uid, product_ids, context=context)
+        res = []
+        for product in product_pool.browse(
+                cr, uid, product_ids, context=context):
+            net = product.mx_net_qty
+            if net:
+                res.append(product, net, product.mx_lord_qty)
+        return res
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

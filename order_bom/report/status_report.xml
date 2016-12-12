@@ -133,6 +133,28 @@
             <field eval="True" name="replace"/>
         </ir_set>
 
+        <record id="aeroo_product_not_in_bom_report_check" model="ir.actions.report.xml">
+            <field name="name">Product not in bom</field>
+            <field name="type">ir.actions.report.xml</field>
+            <field name="model">mrp.bom</field>
+            <field name="report_name">aeroo_product_not_in_bom_report</field>
+            <field name="report_type">aeroo</field>
+            <field name="in_format">oo-odt</field>
+            <field name="parser_loc">order_bom/report/product_not_in_bom_parser.py</field>
+            <field name="report_rml">order_bom/report/product_not_in_bom.odt</field>
+            <field name="parser_state">loc</field>
+            <field name="tml_source">file</field>
+        </record>
+        <ir_set>
+            <field eval="'action'" name="key"/>
+            <field eval="'client_print_multi'" name="key2"/>
+            <field eval="['mrp.bom']" name="models"/>
+            <field name="name">action_aeroo_product_not_in_bom_report_check</field>
+            <field eval="'ir.actions.report.xml,'+str(aeroo_product_not_in_bom_report_check)" name="value"/>
+            <field eval="True" name="isobject"/>
+            <field eval="True" name="replace"/>
+        </ir_set>
+
     </data>
 </openerp>
 

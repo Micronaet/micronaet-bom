@@ -65,45 +65,51 @@ class ClassNameCamelCase(orm.Model):
         # ---------------------------------------------------------------------
         fullname = current_proxy.fullname
         max_line = current_proxy.max_line
-
-        # ---------------------------------------------------------------------
-        # Generate movement database:
-        # ---------------------------------------------------------------------
-        # Call report for halfwork:
-        data = {
-            'mode': 'halfwork',
-            'for_inventory_delta': True,
-            }
         
-        _logger.info('Read halfworked data type')    
-        product_movement = mrp_pool.get_explode_report_object(
-            cr, uid, data=data, context=context)
-        import pdb; pdb.set_trace()
-
-        # Call report for component:
-        _logger.info('Read component data type')    
-        data['type'] = 'component'
-        product_movement.update(
-            mrp_pool.get_explode_report_object(
-                cr, uid, data=data, context=context))
-        import pdb; pdb.set_trace()
- 
-        # TODO remove after debugged
+        # Pickle part for speedup during debug:
+        use_pickle = True # TODO change
         pickle_file = '/home/administrator/pickle.store'
-        
-        #pickle.load(open(pickle_file, 'wb'))    
-        pickle.dump(
-            product_movement, 
-            open(pickle_file, 'wb'),
-            )
 
-        # Log activity:
+        # Init check:
         if not fullname:
             raise osv.except_osv(
                 _('Import error'), 
                 _('Need a file name to import in path %s' % fullname),
                 )
+        
+        # Log activity:        
         _logger.info('Start import delta product form: %s' % self.filename)
+
+        # ---------------------------------------------------------------------
+        # Generate movement database:
+        # ---------------------------------------------------------------------
+        if use_pickle:            
+            product_movement = pickle.load(
+                open(pickle_file, 'wb'))
+        else:
+            
+            _logger.info('Read halfworked data type')    
+            
+            # Call report for halfwork:
+            data = {
+                'mode': 'halfwork',
+                'for_inventory_delta': True,
+                }
+            
+            product_movement = mrp_pool.get_explode_report_object(
+                cr, uid, data=data, context=context)
+
+            # Call report for component:
+            _logger.info('Read component data type')    
+            data['type'] = 'component'
+            product_movement.update(
+                mrp_pool.get_explode_report_object(
+                    cr, uid, data=data, context=context))
+     
+            pickle.dump(
+                product_movement, 
+                open(pickle_file, 'wb'),
+                )
 
         # Read excel filename:
         try:

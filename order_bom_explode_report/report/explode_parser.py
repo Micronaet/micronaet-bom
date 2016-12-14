@@ -64,7 +64,7 @@ class MrpProduction(orm.Model):
             
         if data is None:
             data = {}
-            
+
         mode = data.get('mode', 'halfwork')
         first_supplier_id = data.get('first_supplier_id', False)
         with_type_ids = data.get('with_type_ids', [])
@@ -546,11 +546,14 @@ class MrpProduction(orm.Model):
     
         # TODO textilene sort block:
         # (y_axis[code][8], code[0:3], code[6:12], code[3:6])
+        import pdb; pdb.set_trace()
         for key in sorted(y_axis, key=lambda code: (y_axis[code][8], code)):
             # -----------------------------------------------------------------    
             # Normal report block:
             # -----------------------------------------------------------------    
             current = y_axis[key] # readability:
+            product = current[7]
+
             total = 0.0 # INV 0.0
             
             # XXX NOTE: INV now is 31/12 next put Sept.
@@ -597,13 +600,12 @@ class MrpProduction(orm.Model):
             # Append progress totals:
             if not jumped:
                 res.append(current)
-                
+
         # Return depend on request inventory or report        
         if for_inventory_delta:
             return inventory_delta
         else:    
-            return res
-    
+            return res    
     
 class Parser(report_sxw.rml_parse):
     counters = {}

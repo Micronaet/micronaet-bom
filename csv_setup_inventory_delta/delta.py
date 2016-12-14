@@ -115,7 +115,6 @@ class ClassNameCamelCase(orm.Model):
                 )
 
         # Read excel filename:
-        import pdb; pdb.set_trace()
         try:
             filename = os.path.join(self.filename, fullname)
             wb = xlrd.open_workbook(filename)
@@ -168,14 +167,17 @@ class ClassNameCamelCase(orm.Model):
                             i, default_code)
                 record = product_movement.get(default_code, False)
                 if record:                            
-                    inventory_delta = product_qty - sum((
-                        record[3], # SAL value
-                        - record[1], # negative OC value
-                        - record[2], # positive OF value
-                        - record[0], # inventory start 
-                        ))          
+                    inventory_delta = product_qty + product.inventory_delta -\
+                        sum((
+                            record[3], # SAL value
+                            - record[1], # negative OC value
+                            - record[2], # positive OF value                        
+                            + record[4], # yet present delta
+                            #- record[0], # XXX no inventory start (yet delta)
+                            ))                              
                     note += '%s | %s | %s\n' % (
                         i, default_code, inventory_delta)
+                        
                 else:
                     note += '%s | %s | %s NO EXTRACT DATA !!!\n' % (
                         i, default_code, 0)

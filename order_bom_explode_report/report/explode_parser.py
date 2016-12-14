@@ -590,10 +590,11 @@ class MrpProduction(orm.Model):
             if for_inventory_delta and \
                     product.default_code not in inventory_delta:
                 inventory_delta[product.default_code] = (
-                    product.inventory_start, # INV
-                    sum(current[4][0: inventory_pos]), # Current OC
-                    sum(current[5][0: inventory_pos]), # Current OF
-                    current[6][inventory_pos], # Current SAL
+                    product.inventory_start, # 0. INV
+                    sum(current[4][0: inventory_pos]), # 1. Current OC
+                    sum(current[5][0: inventory_pos]), # 2. Current OF
+                    current[6][inventory_pos], # 3. Current SAL
+                    product.inventory_delta, # 4. Delta
                     )
 
             # Append progress totals:

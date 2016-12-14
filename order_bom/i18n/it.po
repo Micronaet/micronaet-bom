@@ -1,0 +1,97 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* order_bom
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-12-14 07:38+0000\n"
+"PO-Revision-Date: 2016-12-14 08:39+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: it\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#. module: order_bom
+#: code:addons/order_bom/report/hw_status_parser.py:63
+#, python-format
+msgid "All"
+msgstr "Tutti"
+
+#. module: order_bom
+#: code:addons/order_bom/report/pipe_status_parser.py:60
+#, python-format
+msgid "All halfwork"
+msgstr "Tutti semilavorati"
+
+#. module: order_bom
+#: code:addons/order_bom/report/bom_status_parser.py:66
+#, python-format
+msgid "All product "
+msgstr "Tutti i prodotti"
+
+#. module: order_bom
+#: model:ir.actions.report.xml,name:order_bom.aeroo_hw_product_component_bom_product_component_check_report_id
+msgid "Bom HW"
+msgstr "DB Semilavorati"
+
+#. module: order_bom
+#: model:ir.actions.report.xml,name:order_bom.aeroo_product_component_bom_product_component_check_report_id
+msgid "Bom explode all"
+msgstr "Esplodi tutte DB"
+
+#. module: order_bom
+#: model:ir.actions.report.xml,name:order_bom.aeroo_pipe_product_cmp_bom_product_cmp_check
+#: model:ir.actions.report.xml,name:order_bom.aeroo_pipe_product_component_bom_product_component_check_report_id
+msgid "Bom pipe explode all"
+msgstr "DB tubi esplosa"
+
+#. module: order_bom
+#: code:addons/order_bom/report/product_in_bom_parser.py:58
+#, python-format
+msgid "Code start with: %s"
+msgstr "Codice inizia per: %s"
+
+#. module: order_bom
+#: code:addons/order_bom/report/bom_status_parser.py:60
+#, python-format
+msgid "Code start with: %s "
+msgstr "Codice inizia per: %s "
+
+#. module: order_bom
+#: code:addons/order_bom/report/bom_status_parser.py:63
+#, python-format
+msgid "From open order "
+msgstr "Da ordini aperti"
+
+#. module: order_bom
+#: code:addons/order_bom/report/bom_status_parser.py:58
+#, python-format
+msgid "Line: %s"
+msgstr "Linea: %s"
+
+#. module: order_bom
+#: model:ir.actions.report.xml,name:order_bom.aeroo_final_component_bom_product_component_check_report_id
+#: model:ir.actions.report.xml,name:order_bom.aeroo_order_bom_product_component_check_report_id
+msgid "Order bom component check"
+msgstr "Controllo componenti DB su ordinato"
+
+#. module: order_bom
+#: model:ir.actions.report.xml,name:order_bom.aeroo_product_in_bom_report_check
+msgid "Product in bom"
+msgstr "Prodotti in DB"
+
+#. module: order_bom
+#: model:ir.actions.report.xml,name:order_bom.aeroo_product_not_in_bom_report_check
+msgid "Product not in bom"
+msgstr "Prodotti non in DB"
+
+#. module: order_bom
+#: model:ir.model,name:order_bom.model_sale_order
+msgid "Sales Order"
+msgstr "Ordine di vendita"

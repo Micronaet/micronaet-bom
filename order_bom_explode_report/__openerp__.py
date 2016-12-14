@@ -34,6 +34,7 @@
         'mrp',
         'report_aeroo',
         'order_bom',
+        'inventory_field', # for inventory field
         'bom_order_utility', # Utility for filter
         'bom_dynamic_structured', # for filter type category
         'textilene_status', # TODO remove when moved company parameters

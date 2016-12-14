@@ -335,6 +335,8 @@ class MRPLavoration(orm.Model):
                 'cancel': [('readonly', True)],
                 }, required=True),
         'linked_sl_id': fields.many2one('stock.picking', 'SL linked'),
+        'sl_quants_ids': fields.one2many(
+            'stock.quant', 'lavoration_link_id', 'Stock quants',),
         }       
     
     _defaults = {

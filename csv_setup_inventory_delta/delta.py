@@ -67,7 +67,7 @@ class ClassNameCamelCase(orm.Model):
         max_line = current_proxy.max_line
         
         # Pickle part for speedup during debug:
-        use_pickle = True # TODO change
+        use_pickle = False # TODO change
         pickle_file = '/home/administrator/pickle.store'
 
         # Init check:
@@ -112,6 +112,7 @@ class ClassNameCamelCase(orm.Model):
                 )
 
         # Read excel filename:
+        import pdb; pdb.set_trace()
         try:
             filename = os.path.join(self.filename, fullname)
             wb = xlrd.open_workbook(filename)
@@ -120,7 +121,8 @@ class ClassNameCamelCase(orm.Model):
             error = 'Error opening XLS file: %s' % (sys.exc_info(), )
             raise osv.except_osv(
                 _('Open file error'), 
-                _('Cannot found file: %s' % filename),
+                _('Cannot found file: %s (or file not in correct format' % \
+                    filename),
                 )  
 
         # Loop on line:

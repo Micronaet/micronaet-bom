@@ -546,7 +546,6 @@ class MrpProduction(orm.Model):
     
         # TODO textilene sort block:
         # (y_axis[code][8], code[0:3], code[6:12], code[3:6])
-        import pdb; pdb.set_trace()
         for key in sorted(y_axis, key=lambda code: (y_axis[code][8], code)):
             # -----------------------------------------------------------------    
             # Normal report block:

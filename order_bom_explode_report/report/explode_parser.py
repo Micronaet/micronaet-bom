@@ -85,11 +85,17 @@ class Parser(report_sxw.rml_parse):
         
         if data is None:
             data = {}
+            
         mode = data.get('mode', 'halfwork')
         first_supplier_id = data.get('first_supplier_id', False)
         with_type_ids = data.get('with_type_ids', [])
         without_type_ids = data.get('without_type_ids', [])
         #negative_start = data.get('negative_start', False) # TODO
+        
+        # Add inventory check block:
+        for_inventory_delta = data.get('for_inventory_delta', False)
+        inventory_delta = {}
+        inventory_pos = get_position_season(self.get_date())        
         
         # ---------------------------------------------------------------------
         # Utility function embedded:
@@ -105,7 +111,7 @@ class Parser(report_sxw.rml_parse):
                 return # yet present (for component check)
             y_axis[default_code] = [ # halfworked of component
                 # Reset counter for this product    
-                product.inventory_start or 0.0, # inv
+                product.inventory_start + product.inventory_delta, # inv+delta
                 0.0, # tcar
                 0.0, # tscar
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # MM  (+ extra per.)
@@ -115,7 +121,7 @@ class Parser(report_sxw.rml_parse):
                 product, # product or halfworked
                 category,
                 ]
-            return    
+            return
             
         def get_position_season(date):
             ''' Return position in array for correct season month:

@@ -58,6 +58,8 @@ class ClassNameCamelCase(orm.Model):
         # Pool used:
         product_pool = self.pool.get('product.product')
         mrp_pool = self.pool.get('mrp.production')
+        error = ''
+        note = ''
         
         current_proxy = self.browse(cr, uid, ids, context=context)[0]
         
@@ -119,7 +121,6 @@ class ClassNameCamelCase(orm.Model):
             wb = xlrd.open_workbook(filename)
             ws = wb.sheet_by_index(0)
         except:
-            error = 'Error opening XLS file: %s' % (sys.exc_info(), )
             raise osv.except_osv(
                 _('Open file error'), 
                 _('Cannot found file: %s (or file not in correct format' % \
@@ -165,17 +166,25 @@ class ClassNameCamelCase(orm.Model):
                     error += _(
                         '%s. Warning more code (take first), code: %s\n') % (
                             i, default_code)
-                            
-                inventory_delta = 0.0 # TODO
+                record = product_movement.get(default_code, False)
+                if record:                            
+                    inventory_delta = product_qty - sum((
+                        record[3], # SAL value
+                        - record[1], # negative OC value
+                        - record[2], # positive OF value
+                        - record[0], # inventory start 
+                        ))          
+                    note += '%s | %s | %s\n' % (
+                        i, default_code, inventory_delta)
+                else:
+                    note += '%s | %s | %s NO EXTRACT DATA !!!\n' % (
+                        i, default_code, 0)
+                    continue    
+                           
                 product_pool.write(cr, uid, product_ids[0], {
                     'inventory_delta': inventory_delta,
                     }, context=context)                              
                     
-                note += '%s | %s | %s\n' % (
-                    i, 
-                    default_code,
-                    inventory_delta,
-                    )
             except:
                 error += _('%s. Import error code: %s [%s]\n') % (
                     i, default_code, sys.exc_info())

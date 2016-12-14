@@ -6,7 +6,7 @@
             <field name="model">product.product.import.inventory</field>
             <field name="inherit_id" ref="csv_import_inventory_movement.view_import_inventory_tree"/>
             <field name="arch" type="xml">
-                <button name="action_import_product_from_csv" position="before"/>
+                <button name="action_import_product_from_csv" position="before">
                     <button name="action_correct_delta_from_csv" string="Correct Delta" type="object" />
                 </button>
             </field>

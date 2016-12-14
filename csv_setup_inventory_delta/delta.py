@@ -71,7 +71,7 @@ class ClassNameCamelCase(orm.Model):
         # ---------------------------------------------------------------------
         # Call report for halfwork:
         data = {
-            'type': 'halfwork',
+            'mode': 'halfwork',
             'for_inventory_delta': True,
             }
         
@@ -89,10 +89,12 @@ class ClassNameCamelCase(orm.Model):
         import pdb; pdb.set_trace()
  
         # TODO remove after debugged
-        #pickle.load(open('/home/administrator/pickle.store', 'wb'))    
+        pickle_file = '/home/administrator/pickle.store'
+        
+        #pickle.load(open(pickle_file, 'wb'))    
         pickle.dump(
             product_movement, 
-            open('/home/administrator/pickle.store', 'wb'),
+            open(pickle_file, 'wb'),
             )
 
         # Log activity:

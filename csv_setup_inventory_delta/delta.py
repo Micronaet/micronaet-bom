@@ -167,21 +167,21 @@ class ClassNameCamelCase(orm.Model):
                             i, default_code)
                 record = product_movement.get(default_code, False)
                 if record:                            
-                    inventory_delta = product_qty + product.inventory_delta -\
+                    inventory_delta = product_qty - \
                         sum((
                             record[3], # SAL value
                             - record[1], # negative OC value
                             - record[2], # positive OF value                        
-                            + record[4], # yet present delta
+                            
                             #- record[0], # XXX no inventory start (yet delta)
-                            ))                              
+                            )) + record[4] # Delta yet present        
                     note += '%s | %s | %s (previous: %s)\n' % (
                         i, default_code, inventory_delta, 
-                        product.inventory_delta)
+                        record[4])
                         
                 else:
                     note += '%s | %s | %s (previous: %s) NO DATA!!!\n' % (
-                        i, default_code, 0, product.inventory_delta)
+                        i, default_code, 0, record[4])
                     continue    
                            
                 product_pool.write(cr, uid, product_ids[0], {

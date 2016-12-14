@@ -82,7 +82,7 @@
                             <field name="total_prepare" widget="float_time"/>
                             <field name="total_stop" widget="float_time"/>
 
-                            <field name="linked_sl_id"  /> <!--invisible="1"-->
+                            <field name="linked_sl_id" states="done"/> <!--invisible="1"-->
                             <field name="is_mrp_lavoration" invisible="1"/>
                             <field name="picking_type_id" invisible="1" />
 		                    <separator string="Movimenti di Magazzino" colspan="4"/>

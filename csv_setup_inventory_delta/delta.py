@@ -74,11 +74,14 @@ class ClassNameCamelCase(orm.Model):
             'type': 'halfwork',
             'for_inventory_delta': True,
             }
+        
+        _logger.info('Read halfworked data type')    
         product_movement = mrp_pool.get_explode_report_object(
             cr, uid, data=data, context=context)
         import pdb; pdb.set_trace()
 
         # Call report for component:
+        _logger.info('Read component data type')    
         data['type'] = 'component'
         product_movement.update(
             mrp_pool.get_explode_report_object(

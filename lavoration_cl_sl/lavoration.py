@@ -193,7 +193,7 @@ class MRPLavoration(orm.Model):
             
             # Load quats materials:
             quant_pool.create(cr, uid, {
-                'in_date': now,
+                'in_date': now, # TODO document date??
                 'cost': 0.0, # TODO
                 'location_id': stock_location,
                 'product_id': product.id,

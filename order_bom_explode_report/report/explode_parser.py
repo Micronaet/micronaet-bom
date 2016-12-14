@@ -26,6 +26,7 @@ import sys
 import logging
 import erppeek
 import pickle
+from openerp.osv import fields, osv, expression, orm
 from datetime import datetime
 from openerp.report import report_sxw
 from openerp.report.report_sxw import rml_parse
@@ -38,36 +39,14 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
-class Parser(report_sxw.rml_parse):
-    counters = {}
-    headers = {}
+class MrpProduction(orm.Model):
+    """ Model name: MrpProduction
+    """    
+    _inherit = 'mrp.production'
     
-    def __init__(self, cr, uid, name, context):        
-        super(Parser, self).__init__(cr, uid, name, context)
-        self.localcontext.update({
-            'get_object': self.get_object,
-            'get_jumped': self.get_jumped,
-            'get_filter': self.get_filter,
-            'get_date': self.get_date,
-            })
 
-    def get_jumped(self, ):
-        ''' Get filter selected
-        '''
-        return self.jumped
-
-    def get_date(self, ):
-        ''' Get filter selected
-        '''
-        return datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
-
-    def get_filter(self, data):
-        ''' Get filter selected
-        '''
-        data = data or {}
-        return data.get('partner_name', '')
-    
-    def get_object(self, data):
+    # Moved here utility for call externally:
+    def get_explode_report_object(self, cr, uid, data=None, context=None):
         ''' Search all product elements
             data: 
                 mode: use (product), halfwork, component for choose row
@@ -78,11 +57,11 @@ class Parser(report_sxw.rml_parse):
                 period: number of period for columns, max 12
                 
         '''
-        # Readability:    
-        cr = self.cr
-        uid = self.uid
-        context = {}
-        
+        def get_date():
+            ''' Get filter selected
+            '''
+            return datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+            
         if data is None:
             data = {}
             
@@ -90,12 +69,10 @@ class Parser(report_sxw.rml_parse):
         first_supplier_id = data.get('first_supplier_id', False)
         with_type_ids = data.get('with_type_ids', [])
         without_type_ids = data.get('without_type_ids', [])
-        #negative_start = data.get('negative_start', False) # TODO
         
         # Add inventory check block:
         for_inventory_delta = data.get('for_inventory_delta', False)
         inventory_delta = {}
-        inventory_pos = get_position_season(self.get_date())        
         
         # ---------------------------------------------------------------------
         # Utility function embedded:
@@ -152,6 +129,8 @@ class Parser(report_sxw.rml_parse):
         # Get product BOM dyamic lines (from active order):
         product_data = sale_pool.get_component_in_product_order_open(
             cr, uid, context=context)
+
+        inventory_pos = get_position_season(get_date())
 
         # Load Y axis for report (halfwork or component):
         y_axis = {}
@@ -624,5 +603,53 @@ class Parser(report_sxw.rml_parse):
             return inventory_delta
         else:    
             return res
+    
+    
+class Parser(report_sxw.rml_parse):
+    counters = {}
+    headers = {}
+    
+    def __init__(self, cr, uid, name, context):        
+        super(Parser, self).__init__(cr, uid, name, context)
+        self.localcontext.update({
+            'get_object': self.get_object,
+            'get_jumped': self.get_jumped,
+            'get_filter': self.get_filter,
+            'get_date': self.get_date,
+            })
 
+    def get_jumped(self, ):
+        ''' Get filter selected
+        '''
+        return self.jumped
+
+    def get_date(self, ):
+        ''' Get filter selected
+        '''
+        return datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+
+    def get_filter(self, data):
+        ''' Get filter selected
+        '''
+        data = data or {}
+        return data.get('partner_name', '')
+
+    def get_object(self, data):
+        ''' Search all product elements
+            data: 
+                mode: use (product), halfwork, component for choose row
+                elements
+                
+                # TODO:
+                period: period type week, month
+                period: number of period for columns, max 12
+                
+        '''
+        # Readability:    
+        cr = self.cr
+        uid = self.uid
+        context = {}
+        
+        return self.pool.get('mrp.production').get_explode_report_object(
+            cr, uid, data=data, context=context)
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

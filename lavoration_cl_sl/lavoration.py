@@ -182,7 +182,7 @@ class MRPLavoration(orm.Model):
                 'is_mrp_lavoration': False, # SL is hidden
                 # TODO no more fields?
                 }, context=context)
-                
+
         # ---------------------------------------------------------------------
         # (Re) create movement for SL depend on CL:
         # ---------------------------------------------------------------------

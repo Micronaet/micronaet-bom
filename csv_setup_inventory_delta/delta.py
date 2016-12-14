@@ -175,12 +175,13 @@ class ClassNameCamelCase(orm.Model):
                             + record[4], # yet present delta
                             #- record[0], # XXX no inventory start (yet delta)
                             ))                              
-                    note += '%s | %s | %s\n' % (
-                        i, default_code, inventory_delta)
+                    note += '%s | %s | %s (previous: %s)\n' % (
+                        i, default_code, inventory_delta, 
+                        product.inventory_delta)
                         
                 else:
-                    note += '%s | %s | %s NO EXTRACT DATA !!!\n' % (
-                        i, default_code, 0)
+                    note += '%s | %s | %s (previous: %s) NO DATA!!!\n' % (
+                        i, default_code, 0, product.inventory_delta)
                     continue    
                            
                 product_pool.write(cr, uid, product_ids[0], {

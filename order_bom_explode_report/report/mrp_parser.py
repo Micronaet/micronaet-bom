@@ -84,8 +84,9 @@ class Parser(report_sxw.rml_parse):
             '''
             col = 0
             for item in log:
-                self.WS[mode].write(self.counter['mode'], col, item)
-            self.counter['mode'] += 1
+                self.WS[mode].write(self.counter[mode], col, item)
+                col += 1
+            self.counter[mode] += 1
             return
         
         # ---------------------------------------------------------------------
@@ -139,7 +140,7 @@ class Parser(report_sxw.rml_parse):
             }
             
         # Row counters:
-        self.counters = {'mrp': 1, 'order': 1}
+        self.counter = {'mrp': 1, 'order': 1}
             
         # Header line:    
         headers = {
@@ -157,7 +158,7 @@ class Parser(report_sxw.rml_parse):
         for mode, header in headers.iteritems():
             col = 0
             for h in header:
-                WS[mode].write(1, col, h)
+                self.WS[mode].write(1, col, h)
                 col += 1
 
         # ---------------------------------------------------------------------
@@ -216,7 +217,7 @@ class Parser(report_sxw.rml_parse):
                     mrp_db[mrp][product][1] = delta_stock[component.id]
                     
                     write_xls_log('mrp', [
-                        mrp.name, 
+                        '%s [%s]' % (mrp.name, mrp.id), 
                         mrp.date_planned,
                         sol.order_id.name,
                         sol.product_id.default_code,
@@ -270,9 +271,12 @@ class Parser(report_sxw.rml_parse):
                 # Remain (todo order total)
                 if product.id not in mrp_order:
                     mrp_order[product.id] = 0.0                
+                    
                 if sol.mrp_id.state not in ('done', 'cancel'): # only active
                     component_qty = todo * component.product_qty
                     mrp_order[product.id] -= component_qty
+                else:
+                    component_qty = 0.0
 
                 write_xls_log('order', [
                     sol.mrp_id.name, 

@@ -231,6 +231,7 @@ class Parser(report_sxw.rml_parse):
                         delta_stock[component.id],
                         comment,                  
                         ])
+                        
         # ---------------------------------------------------------------------
         #                           ALL PRODUCTION:
         # ---------------------------------------------------------------------
@@ -260,10 +261,14 @@ class Parser(report_sxw.rml_parse):
             else:    
                 todo = qty - qty_delivered
                 
-            if sol.mx_closed:
-                todo = 0.0 # closed
-                comment += 'Chiuso non consegnato'
-
+            if todo < 0.0:
+                comment += 'Consegnato di più'
+            elif not todo:    
+                comment += 'Consegnato tutto'
+            elif sol.mx_closed:
+                todo = 0.0 # closed    
+                comment += 'Forzato chiusura'
+                
             for component in sol.product_id.dynamic_bom_line_ids:                    
                 product = component.product_id
                 

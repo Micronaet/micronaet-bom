@@ -27,6 +27,7 @@ import logging
 import openerp
 import openerp.netsvc as netsvc
 import openerp.addons.decimal_precision as dp
+import xlsxwriter # XLSX export
 from openerp.osv import fields, osv, expression, orm
 from datetime import datetime, timedelta
 from openerp import SUPERUSER_ID#, api
@@ -74,8 +75,22 @@ class Parser(report_sxw.rml_parse):
         cr = self.cr
         uid = self.uid
         context = {}
-        
+
+        # ---------------------------------------------------------------------
         # Utility function:
+        # ---------------------------------------------------------------------
+        def write_xls_log(mode, log):
+            ''' Write log in WS updating counter
+            '''
+            col = 0
+            for item in log:
+                self.WS[mode].write(self.counter['mode'], col, item)
+            self.counter['mode'] += 1
+            return
+        
+        # ---------------------------------------------------------------------
+        # Utility function:
+        # ---------------------------------------------------------------------
         def report_order_component(x):
             ''' Order for component in reporting
             ''' 
@@ -86,13 +101,14 @@ class Parser(report_sxw.rml_parse):
             else: # red
                 return (3, x[0].default_code)
                 
+        # ---------------------------------------------------------------------        
+        # Read parameters:        
+        # ---------------------------------------------------------------------        
         if data is None:
             data = {}
         days = data.get('days', self.default_days)
         first_supplier_id = data.get('first_supplier_id')
 
-        mrp_db = {}
-        
         # pool used:
         sol_pool = self.pool.get('sale.order.line') 
         mrp_pool = self.pool.get('mrp.production')
@@ -103,11 +119,47 @@ class Parser(report_sxw.rml_parse):
                 DEFAULT_SERVER_DATE_FORMAT)
         _logger.warning('Range period: MRP from %s, Max open MRP <= %s' % (
             reference_date, limit_date))
-        
+
+        # Database used:        
+        mrp_db = {}
         mrp_unload = {} # Stock unload from MRP
         mrp_order = {} # Order opened
         delta_stock = {} # Consumed component in stock (assume start is 0)
-        
+
+        # ---------------------------------------------------------------------
+        # XLS log export:        
+        # ---------------------------------------------------------------------
+        filename = '/home/administrator/photo/log/mrp_product.xlsx'
+        WB = xlsxwriter.Workbook(filename)
+
+        # Work Sheet:
+        self.WS = {
+            'mrp': WB.add_worksheet(),
+            'order': WB.add_worksheet(),
+            }
+            
+        # Row counters:
+        self.counters = {'mrp': 1, 'order': 1}
+            
+        # Header line:    
+        headers = {
+            'mrp': [
+                'MRP', 'Data', 'Ordine', 'Product', 'TODO', 'Componente', 
+                'Q. TODO', 'Delta', 'Commento',
+                ],
+            'order': [ # TODO
+                'MRP', 'Ordine', 'Product', 'TODO', 'Componente', 'Q. TODO', 
+                'Delta', 'Commento',
+                ],
+            )
+
+        # Write header:    
+        for mode, header in headers.iteritems():
+            col = 0
+            for h in header:
+                WS[mode].write(1, col, h)
+                col += 1
+
         # ---------------------------------------------------------------------
         #                      PRODUCTION OPEN IN RANGE:
         # ---------------------------------------------------------------------
@@ -127,17 +179,29 @@ class Parser(report_sxw.rml_parse):
             mrp_db[mrp] = {}
             
             for sol in mrp.order_line_ids:
+                comment = ''
+                
                 # Total elements:
                 qty = sol.product_uom_qty
                 qty_maked = sol.product_uom_maked_sync_qty 
-                todo = qty - qty_maked
+                qty_delivered = sol.delivered_qty
+                
+                # Depend on maked or delivery check:
+                if qty_maked >= qty_delivered:
+                    todo = qty - qty_maked
+                else:    
+                    todo = qty - qty_delivered
+                if sol.mx_closed:
+                    todo = 0.0 # closed    
+                    comment += 'Chiuso non consegnato'
                 
                 for component in sol.product_id.dynamic_bom_line_ids:                    
                     product = component.product_id
                         
                     # Total todo product    
                     if product not in mrp_db[mrp]: 
-                        mrp_db[mrp][product] = [0.0, 0.0] # this, previous MRP
+                        # This, Delta previous MRP
+                        mrp_db[mrp][product] = [0.0, 0.0] 
                     if component.id not in delta_stock:
                         delta_stock[component.id] = 0.0
                         
@@ -150,7 +214,18 @@ class Parser(report_sxw.rml_parse):
                     
                     # Current delta stock saved in order component:
                     mrp_db[mrp][product][1] = delta_stock[component.id]
-
+                    
+                    write_xls_log('mrp', [
+                        mrp.name, 
+                        mrp.date_planned,
+                        sol.order_id.name,
+                        sol.product_id.default_code,
+                        todo, # Product TODO 
+                        product.default_code, # Component
+                        this_qty,      
+                        delta_stock[component.id],
+                        comment,                  
+                        ])
         # ---------------------------------------------------------------------
         #                           ALL PRODUCTION:
         # ---------------------------------------------------------------------
@@ -163,16 +238,27 @@ class Parser(report_sxw.rml_parse):
             ('mrp_id', '!=', False),
             
             # Date range production:
-            ('mrp_id.date_planned', '>=', reference_date),
+            ('mrp_id.date_planned', '>=', reference_date), # XXX correct
             ('mrp_id.date_planned', '<=', limit_date),
             ], context=context)
             
         sol_proxy = sol_pool.browse(cr, uid, sol_ids, context=context)
         for sol in sol_proxy:
+            comment = ''
             qty = sol.product_uom_qty
             qty_maked = sol.product_uom_maked_sync_qty
-            todo = qty - qty_maked
+            qty_delivered = sol.delivered_qty
             
+            # Depend on maked or delivery check:
+            if qty_maked >= qty_delivered:
+                todo = qty - qty_maked
+            else:    
+                todo = qty - qty_delivered
+                
+            if sol.mx_closed:
+                todo = 0.0 # closed
+                comment += 'Chiuso non consegnato'
+
             for component in sol.product_id.dynamic_bom_line_ids:                    
                 product = component.product_id
                 
@@ -185,7 +271,19 @@ class Parser(report_sxw.rml_parse):
                 if product.id not in mrp_order:
                     mrp_order[product.id] = 0.0                
                 if sol.mrp_id.state not in ('done', 'cancel'): # only active
-                    mrp_order[product.id] -= todo * component.product_qty
+                    component_qty = todo * component.product_qty
+                    mrp_order[product.id] -= component_qty
+
+                write_xls_log('order', [
+                    sol.mrp_id.name, 
+                    sol.mrp_id.date_planned,
+                    sol.order_id.name,
+                    sol.product_id.default_code,
+                    todo, # Product TODO 
+                    product.default_code, # Component
+                    component_qty,      
+                    comment,                  
+                    ])
 
         # ---------------------------------------------------------------------
         #                           PREPARE FOR REPORT:

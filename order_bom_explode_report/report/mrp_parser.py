@@ -158,7 +158,7 @@ class Parser(report_sxw.rml_parse):
         for mode, header in headers.iteritems():
             col = 0
             for h in header:
-                self.WS[mode].write(1, col, h)
+                self.WS[mode].write(0, col, h)
                 col += 1
 
         # ---------------------------------------------------------------------

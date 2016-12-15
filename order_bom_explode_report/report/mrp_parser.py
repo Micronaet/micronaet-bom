@@ -192,9 +192,11 @@ class Parser(report_sxw.rml_parse):
                     todo = qty - qty_maked
                 else:    
                     todo = qty - qty_delivered
-                if sol.mx_closed:
+                if todo <= 0.0:
+                    comment += 'Consegnato tutto'                   
+                elif sol.mx_closed:
                     todo = 0.0 # closed    
-                    comment += 'Chiuso non consegnato'
+                    comment += 'Forzato chiusura'
                 
                 for component in sol.product_id.dynamic_bom_line_ids:                    
                     product = component.product_id

@@ -257,16 +257,16 @@ class Parser(report_sxw.rml_parse):
             
             # Depend on maked or delivery check:
             if qty_maked >= qty_delivered:
-                todo = qty - qty_maked
+                order_remain = qty - qty_maked
             else:    
-                todo = qty - qty_delivered
+                order_remain = qty - qty_delivered
                 
-            if todo < 0.0:
+            if order_remain < 0.0:
                 comment += 'Consegnato di più'
-            elif not todo:    
+            elif not order_remain:    
                 comment += 'Consegnato tutto'
             elif sol.mx_closed:
-                todo = 0.0 # closed    
+                order_remain = 0.0 # closed    
                 comment += 'Forzato chiusura'
                 
             for component in sol.product_id.dynamic_bom_line_ids:                    
@@ -277,12 +277,12 @@ class Parser(report_sxw.rml_parse):
                     mrp_unload[product.id] = 0.0                    
                 mrp_unload[product.id] -= qty_maked * component.product_qty
                 
-                # Remain (todo order total)
+                # Remain (order total)
                 if product.id not in mrp_order:
                     mrp_order[product.id] = 0.0                
                     
                 if sol.mrp_id.state not in ('done', 'cancel'): # only active
-                    component_qty = todo * component.product_qty
+                    component_qty = order_remain * component.product_qty
                     mrp_order[product.id] -= component_qty
                 else:
                     component_qty = 0.0
@@ -292,7 +292,7 @@ class Parser(report_sxw.rml_parse):
                     sol.mrp_id.date_planned,
                     sol.order_id.name,
                     sol.product_id.default_code,
-                    todo, # Product TODO 
+                    order_remain, # Product order remain 
                     product.default_code, # Component
                     component_qty,      
                     comment,                  

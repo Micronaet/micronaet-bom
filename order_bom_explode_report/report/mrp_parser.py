@@ -192,8 +192,10 @@ class Parser(report_sxw.rml_parse):
                     todo = qty - qty_maked
                 else:    
                     todo = qty - qty_delivered
-                if todo <= 0.0:
-                    comment += 'Consegnato tutto'                   
+                if todo < 0.0:
+                    comment += 'Consegnato di più'
+                elif not todo:    
+                    comment += 'Consegnato tutto'
                 elif sol.mx_closed:
                     todo = 0.0 # closed    
                     comment += 'Forzato chiusura'

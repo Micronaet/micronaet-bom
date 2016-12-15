@@ -149,9 +149,9 @@ class Parser(report_sxw.rml_parse):
                 ],
             'order': [ # TODO
                 'MRP', 'Ordine', 'Product', 'TODO', 'Componente', 'Q. TODO', 
-                'Delta', 'Commento',
+                'Commento',
                 ],
-            )
+            }
 
         # Write header:    
         for mode, header in headers.iteritems():

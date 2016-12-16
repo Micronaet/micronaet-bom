@@ -180,9 +180,9 @@ class ClassNameCamelCase(orm.Model):
                         record[4])
                         
                 else:
-                    note += '%s | %s | %s (previous: %s) NO DATA!!!\n' % (
-                        i, default_code, 0, record[4])
-                    continue    
+                    inventory_delta = product_qty 
+                    note += '%s. %s NO DATA (set as start)!!!\n' % (
+                        i, default_code)
                            
                 product_pool.write(cr, uid, product_ids[0], {
                     'inventory_delta': inventory_delta,

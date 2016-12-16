@@ -167,7 +167,6 @@ class ClassNameCamelCase(orm.Model):
                             i, default_code)
                 record = product_movement.get(default_code, False)
                 if record:                  
-                    import pdb; pdb.set_trace()          
                     inventory_delta = product_qty - \
                         sum((
                             record[3], # SAL value

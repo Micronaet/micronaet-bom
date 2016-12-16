@@ -591,8 +591,8 @@ class MrpProduction(orm.Model):
                     product.default_code not in inventory_delta:
                 inventory_delta[product.default_code] = (
                     product.inventory_start, # 0. INV
-                    sum(current[4][0: inventory_pos]), # 1. Current OC
-                    sum(current[5][0: inventory_pos]), # 2. Current OF
+                    sum(current[4][0: inventory_pos + 1]), # 1. Current OC
+                    sum(current[5][0: inventory_pos + 1]), # 2. Current OF
                     current[6][inventory_pos], # 3. Current SAL
                     product.inventory_delta, # 4. Delta
                     )

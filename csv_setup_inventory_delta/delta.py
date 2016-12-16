@@ -166,7 +166,8 @@ class ClassNameCamelCase(orm.Model):
                         '%s. Warning more code (take first), code: %s\n') % (
                             i, default_code)
                 record = product_movement.get(default_code, False)
-                if record:                            
+                if record:                  
+                    import pdb; pdb.set_trace()          
                     inventory_delta = product_qty - \
                         sum((
                             record[3], # SAL value

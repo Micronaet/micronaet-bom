@@ -71,7 +71,7 @@ class ClassNameCamelCase(orm.Model):
         
         # Pickle part for speedup during debug:
         use_pickle = False # TODO change
-        pickle_file = '/home/administrator/pickle.store'
+        pickle_file = os.path.expanduser('~/pickle.store')
 
         # Init check:
         if not fullname:

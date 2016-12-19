@@ -57,7 +57,7 @@ class Parser(report_sxw.rml_parse):
     def get_parent_oc_period(self, parent):
         res = ''
         
-        for date, value in self.order_month.get(parent, {}).iteritems:
+        for date, value in self.order_month.get(parent, {}).iteritems():
             res += '[%s %s] ' % (date, value)
         return res
         

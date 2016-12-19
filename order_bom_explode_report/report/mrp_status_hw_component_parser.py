@@ -51,8 +51,14 @@ class Parser(report_sxw.rml_parse):
             'get_object': self.get_object,
             'get_filter': self.get_filter,
             'get_date': self.get_date,
+            'get_parent_oc_period': self.get_parent_oc_period,
         })
-
+        
+    def get_parent_oc_period(self, parent):
+        res = self.order_month.get(parent, {})
+        return '%s' % (res, )
+        
+        
     def get_date(self, ):
         ''' Get filter selected
         '''
@@ -151,6 +157,8 @@ class Parser(report_sxw.rml_parse):
         cr = self.cr
         uid = self.uid
         context = {}
+
+        self.order_month = {} # Parent distribution for month
                 
         if data is None:
             data = {}
@@ -237,7 +245,7 @@ class Parser(report_sxw.rml_parse):
                         0, # 4. No parent bom (total)
                         0.0, # 5. Produce to delivery
                         ]
-                    
+
                 # -------------------------------------------------------------    
                 # Populate parent database:
                 # -------------------------------------------------------------    
@@ -293,6 +301,22 @@ class Parser(report_sxw.rml_parse):
                     '' if stock_net >= 0 else 'X',      
                     ], extra)
                     
+                # -------------------------------------------------------------    
+                # Deadline calendar:
+                # -------------------------------------------------------------    
+                if parent not in self.order_month:
+                    self.order_month[parent] = {}
+                    
+                if line.date_deadline:
+                    deadline_period = line.date_deadline[:7]
+                else:        
+                    deadline_period = '???'
+                    
+                if deadline_period in self.order_month[parent]:
+                    self.order_month[parent][deadline_period] += todo
+                else:    
+                    self.order_month[parent][deadline_period] = todo
+
                 # -------------------------------------------------------------
                 # Halfwork from parent BOM
                 # -------------------------------------------------------------
@@ -342,7 +366,7 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         # Prepare report:
         # ---------------------------------------------------------------------
-        res = []
+        res = []        
 
         # Empty record
         empty_A = ['' for n in range(0, 7)] # parent 7

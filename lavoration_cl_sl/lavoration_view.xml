@@ -75,12 +75,12 @@
                         <group col="4" colspan="4">
                             <field name="name" />
                             <field name="date" />
-                            <field name="device_id" />
-                            <field name="workers" />
+                            <field name="device_id" invisible="context.get('open_lavoration_cut',False)"/>
+                            <field name="workers" invisible="context.get('open_lavoration_cut',False)"/>
                             
-                            <field name="total_work" widget="float_time"/>
-                            <field name="total_prepare" widget="float_time"/>
-                            <field name="total_stop" widget="float_time"/>
+                            <field name="total_work" widget="float_time" invisible="context.get('open_lavoration_cut',False)"/>
+                            <field name="total_prepare" widget="float_time" invisible="context.get('open_lavoration_cut',False)"/>
+                            <field name="total_stop" widget="float_time" invisible="context.get('open_lavoration_cut',False)"/>
 
                             <field name="linked_sl_id" states="done"/> <!--invisible="1"-->
                             <field name="is_mrp_lavoration" invisible="1"/>
@@ -128,35 +128,72 @@
             </field>
         </record>
         <record model="ir.actions.act_window" id="action_stock_picking_cl_tree">
-            <field name="name">Lavoration list (open)</field>
+            <field name="name">Lavoration workshop list (open)</field>
             <field name="res_model">stock.picking</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_stock_picking_cl_tree"/>
-            <field name="context">{'open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form', 'default_is_mrp_lavoration': True}</field>
+            <field name="context">{'open_lavoration_workshop':True,'open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form', 'default_is_mrp_lavoration': True}</field>
             <field name="domain">[('is_mrp_lavoration', '=', True),('state', '=', 'draft')]</field>
         </record>
         <record model="ir.actions.act_window" id="action_stock_picking_cl_closed_tree">
-            <field name="name">Lavoration list (all)</field>
+            <field name="name">Lavoration workshop list (all)</field>
             <field name="res_model">stock.picking</field>
             <field name="view_type">form</field>
             <field name="view_id" ref="view_stock_picking_cl_tree"/>
             <field name="view_mode">tree,form</field>
-            <field name="context">{'open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form', 'default_is_mrp_lavoration': True}</field>
+            <field name="context">{'open_lavoration_workshop':True,'open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form', 'default_is_mrp_lavoration': True}</field>
+            <field name="domain">[('is_mrp_lavoration', '=', True)]</field>
+        </record>
+        <record model="ir.actions.act_window" id="action_stock_picking_cut_cl_tree">
+            <field name="name">Lavoration cut list (open)</field>
+            <field name="res_model">stock.picking</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_stock_picking_cl_tree"/>
+            <field name="context">{'open_lavoration_cut':True,'open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form', 'default_is_mrp_lavoration': True}</field>
+            <field name="domain">[('is_mrp_lavoration', '=', True),('state', '=', 'draft')]</field>
+        </record>
+        <record model="ir.actions.act_window" id="action_stock_picking_cut_cl_closed_tree">
+            <field name="name">Lavoration cut list (all)</field>
+            <field name="res_model">stock.picking</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="view_stock_picking_cl_tree"/>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'open_lavoration_cut':True,'open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form', 'default_is_mrp_lavoration': True}</field>
             <field name="domain">[('is_mrp_lavoration', '=', True)]</field>
         </record>
         <menuitem 
             parent="mrp.menu_mrp_manufacturing" 
-            id="menu_stock_picking_cl" 
-            action="action_stock_picking_cl_tree"
+            id="menu_stock_picking_lavoration_area_root" 
+            name="Lavoration area"
             sequence="40"/>
+        
             <menuitem 
-                parent="menu_stock_picking_cl" 
-                id="menu_stock_picking_cl_closed_tree" 
-                action="action_stock_picking_cl_closed_tree"
+                parent="menu_stock_picking_lavoration_area_root" 
+                id="menu_stock_picking_cl" 
+                action="action_stock_picking_cl_tree"
                 sequence="10"/>
+                <menuitem 
+                    parent="menu_stock_picking_cl" 
+                    id="menu_stock_picking_cl_closed_tree" 
+                    action="action_stock_picking_cl_closed_tree"
+                    sequence="10"/>
+
+
             <menuitem 
-                parent="menu_stock_picking_cl" 
+                parent="menu_stock_picking_lavoration_area_root" 
+                id="menu_stock_picking_cut_cl" 
+                action="action_stock_picking_cut_cl_tree"
+                sequence="20"/>
+                <menuitem 
+                    parent="menu_stock_picking_cut_cl" 
+                    id="menu_stock_picking_cut_cl_closed_tree" 
+                    action="action_stock_picking_cut_cl_closed_tree"
+                    sequence="10"/>
+
+            <menuitem 
+                parent="menu_stock_picking_lavoration_area_root" 
                 id="menu_stock_picking_cl_configuration" 
                 action="action_rec_company_parameter_tree"
                 sequence="90"/>

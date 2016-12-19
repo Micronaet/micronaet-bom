@@ -57,8 +57,8 @@ class Parser(report_sxw.rml_parse):
     def get_parent_oc_period(self, parent):
         res = ''
         
-        for date, value in self.order_month.get(parent, {}).iteritems():
-            res += '[%s %s] ' % (date, value)
+        for date in sorted(self.order_month.get(parent, {})):
+            res += '[%s %s] ' % (date, period[date])
         return res
         
     def get_date(self, ):
@@ -307,7 +307,7 @@ class Parser(report_sxw.rml_parse):
                 # -------------------------------------------------------------    
                 # Deadline calendar:
                 # -------------------------------------------------------------    
-                if with_deadline:
+                if with_deadline and todo:
                     if parent not in self.order_month:
                         self.order_month[parent] = {}
                         

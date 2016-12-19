@@ -98,27 +98,19 @@ class Parser(report_sxw.rml_parse):
                     counter = self.counters[mode]
                     header = [
                         # Reference:
-                        'Parent',
-                        'DB padre',
-                        'Product',
-                        'Order ref.',
-                    
+                        'Parent', 'DB padre', 'Product', 'Order ref.',                    
                         # Order quantity:
                         #'OC') # MA
                         #'B' # B total
-                        #'Delivery') # BC
-                    
+                        #'Delivery') # BC                    
                         # Quantity for accounting:
                         'Remain to MRP', # OC
                         'Ready', # B net
                         'Stock', # Stock
-
                         # Calculated data
-                        'TODO',
-                        
+                        'TODO',                        
                         # Check
-                        'No BOM',
-                        'Negative',
+                        'No BOM', 'Negative',
                         ]
                     header.extend(extra.keys())    
                         
@@ -148,6 +140,35 @@ class Parser(report_sxw.rml_parse):
                 pass
             elif mode == 'component':
                 pass
+            elif mode == 'mrp':
+                WS = self.WS[mode]                 
+                # -------------------------------------------------------------
+                # Write header:
+                # -------------------------------------------------------------
+                if not self.counters[mode]:
+                    counter = self.counters[mode]
+                    header = [
+                        # Reference:
+                        'MRP', 'OC', 'Code', 'Maked',
+                        ]
+                        
+                    col = 0
+                    for h in header:
+                        WS.write(counter, col, h)
+                        col += 1
+                    self.counters[mode] += 1
+                    
+                # -------------------------------------------------------------
+                # Write data line:
+                # -------------------------------------------------------------
+                col = 0
+                counter = self.counters[mode]
+                
+                # Write constant data:
+                for item in line:
+                    WS.write(counter, col, item)
+                    col += 1                    
+                self.counters[mode] += 1
             else:
                 pass # error                
             return
@@ -178,12 +199,14 @@ class Parser(report_sxw.rml_parse):
             'product': 0,
             'halfwork': 0,
             'component': 0,
+            'mrp': 0,
             }
         
         self.WS = {
             'product': WB.add_worksheet(),
             'halfwork': WB.add_worksheet(),
             'component': WB.add_worksheet(),
+            'mrp': WB.add_worksheet(),
             }
 
         days = data.get('days', self.default_days)
@@ -292,20 +315,13 @@ class Parser(report_sxw.rml_parse):
                 
                 # Log line operation:
                 log_line(self, [
-                    parent,
-                    parent_bom.code or '???',
-                    default_code,
-                    order.name,
-                    oc_remain,
-                    not_delivered,
-                    stock_net,
-                    todo,
-                    '' if parent_bom else 'X',
-                    '' if stock_net >= 0 else 'X',      
+                    parent, parent_bom.code or '???', default_code,
+                    order.name, oc_remain, not_delivered, stock_net, todo,
+                    '' if parent_bom else 'X', '' if stock_net >= 0 else 'X',      
                     ], extra)
                     
                 # -------------------------------------------------------------    
-                # Deadline calendar:
+                # Deadline calendar (depend on wizard):
                 # -------------------------------------------------------------    
                 if with_deadline and todo:
                     if parent not in self.order_month:
@@ -351,13 +367,18 @@ class Parser(report_sxw.rml_parse):
             ('date_planned', '>=', reference_date),
             ], context=context)
             
-        # Generate MRP total componet report with totals:
+        # Generate MRP total component report with totals:
         for mrp in mrp_pool.browse(cr, uid, mrp_ids, context=context):
             for sol in mrp.order_line_ids:
                 product = sol.product_id                
                 qty_maked = sol.product_uom_maked_sync_qty 
                 # TODO better use dynamic_bom_line_ids ?
-                # check existence
+                # check existence                
+                # Log product extract as MRP
+                log_line(self, (
+                    mrp.name, sol.order_id.name, product.default_code, 
+                    qty_maked), mode='mrp')
+                    
                 for hw in product.parent_bom_id.bom_line_ids:
                     halfwork = hw.product_id
                     if halfwork.relative_type != 'half':

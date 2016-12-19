@@ -66,6 +66,7 @@ class CcomponentStatusReportWizard(orm.TransientModel):
                 [item.id for item in wiz_browse.with_type_ids],
             'without_type_ids': 
                 [item.id for item in wiz_browse.without_type_ids],
+            'with_deadline': wiz_browse.with_deadline,    
             }
             
         if wiz_browse.mode == 'mrp':
@@ -89,6 +90,8 @@ class CcomponentStatusReportWizard(orm.TransientModel):
             ('todo', 'TODO hw and component'),
             ], 'Report mode', required=True),
         'days': fields.integer('Days', help='Production scheduled now + days'),
+        'with_deadline': fields.boolean('With deadline period', 
+            help='Add line with parent distribution of remain to produce OC'),
         'negative_start': fields.boolean('Negative start', 
             help='Total check month for negative start'),
         'first_supplier_id': fields.many2one(

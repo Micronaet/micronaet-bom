@@ -21,6 +21,7 @@
                         <newline/>
                         <field name="with_type_ids" widget="many2many_tags" />
                         <field name="without_type_ids" widget="many2many_tags" />
+                        <field name="with_deadline" attrs="{'invisible': [('mode','!=','todo')]}" />
                    </group>
                 </form>
             </field>

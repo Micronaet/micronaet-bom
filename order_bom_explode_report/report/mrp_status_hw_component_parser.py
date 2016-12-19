@@ -55,9 +55,11 @@ class Parser(report_sxw.rml_parse):
         })
         
     def get_parent_oc_period(self, parent):
-        res = self.order_month.get(parent, {})
-        return '%s' % (res, )
+        res = ''
         
+        for date, value in self.order_month.get(parent, {}).iteritems:
+            res += '[%s %s] ' % (date, value)
+        return res
         
     def get_date(self, ):
         ''' Get filter selected
@@ -186,6 +188,7 @@ class Parser(report_sxw.rml_parse):
 
         days = data.get('days', self.default_days)
         first_supplier_id = data.get('first_supplier_id')
+        with_deadline = data.get('with_deadline', False) # create deadline per.
         
         # TODO change used for now!!!!!!
         reference_date = '2016-10-15 00:00:00' 
@@ -304,18 +307,19 @@ class Parser(report_sxw.rml_parse):
                 # -------------------------------------------------------------    
                 # Deadline calendar:
                 # -------------------------------------------------------------    
-                if parent not in self.order_month:
-                    self.order_month[parent] = {}
-                    
-                if line.date_deadline:
-                    deadline_period = line.date_deadline[:7]
-                else:        
-                    deadline_period = '???'
-                    
-                if deadline_period in self.order_month[parent]:
-                    self.order_month[parent][deadline_period] += todo
-                else:    
-                    self.order_month[parent][deadline_period] = todo
+                if with_deadline:
+                    if parent not in self.order_month:
+                        self.order_month[parent] = {}
+                        
+                    if line.date_deadline:
+                        deadline_period = line.date_deadline[2:7]
+                    else:        
+                        deadline_period = '???'
+                        
+                    if deadline_period in self.order_month[parent]:
+                        self.order_month[parent][deadline_period] += todo
+                    else:    
+                        self.order_month[parent][deadline_period] = todo
 
                 # -------------------------------------------------------------
                 # Halfwork from parent BOM

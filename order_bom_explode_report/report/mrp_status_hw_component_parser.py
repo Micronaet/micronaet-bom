@@ -251,6 +251,7 @@ class Parser(report_sxw.rml_parse):
                 
                 if line.mx_closed:
                     continue
+                
                 product = line.product_id # readability
                 default_code = product.default_code
                 if not default_code:
@@ -330,7 +331,7 @@ class Parser(report_sxw.rml_parse):
                     if line.date_deadline:
                         deadline_period = line.date_deadline[2:7]
                     else:        
-                        deadline_period = '???'
+                        deadline_period = '??'
                         
                     if deadline_period in self.order_month[parent]:
                         self.order_month[parent][deadline_period] += todo
@@ -409,7 +410,7 @@ class Parser(report_sxw.rml_parse):
             data_A = [
                 parent, # 0. Code
                 record[2], # 1. OC
-                record[1], # 2. Mag
+                record[1], # 2. Mag (Net stock - MRP calculated)
                 record[5], # 3. Produced to delivery
                 record[2], # XXX ex.: - record[1] + record[5], # 4. todo
                 record[3], # 5. tot. negative stock (for green-red light)

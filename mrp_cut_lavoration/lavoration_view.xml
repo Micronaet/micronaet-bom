@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <menuitem 
+            parent="menuitem_mrp_cut.menu_mrp_cut_view" 
+            id="menu_stock_picking_cut_cl"
+            action="lavoration_cl_sl.action_stock_picking_cut_cl_tree"
+            sequence="40"/>
+            <menuitem 
+                parent="menu_stock_picking_cut_cl" 
+                id="menu_stock_picking_cl_closed_tree" 
+                action="lavoration_cl_sl.action_stock_picking_cut_cl_closed_tree"
+                sequence="10"/>
+    </data>
+</openerp>
+

@@ -75,22 +75,22 @@
                         <group col="4" colspan="4">
                             <field name="name" />
                             <field name="date" />
-                            <field name="device_id" invisible="context.get('open_lavoration_cut',False)"/>
-                            <field name="workers" invisible="context.get('open_lavoration_cut',False)"/>
+                            <field name="device_id" attrs="{'invisible': [('dep_mode','!=','workshop')]}"/>
+                            <field name="workers" attrs="{'invisible': [('dep_mode','!=','workshop')]}"/>
+                            <field name="dep_mode" invisible="1" />
                             
-                            <field name="total_work" widget="float_time" invisible="context.get('open_lavoration_cut',False)"/>
-                            <field name="total_prepare" widget="float_time" invisible="context.get('open_lavoration_cut',False)"/>
-                            <field name="total_stop" widget="float_time" invisible="context.get('open_lavoration_cut',False)"/>
+                            <field name="total_work" widget="float_time" attrs="{'invisible': [('dep_mode','!=','workshop')]}" />
+                            <field name="total_prepare" widget="float_time" attrs="{'invisible': [('dep_mode','!=','workshop')]}" />
+                            <field name="total_stop" widget="float_time" attrs="{'invisible': [('dep_mode','!=','workshop')]}"/>
 
                             <field name="linked_sl_id" states="done"/> <!--invisible="1"-->
-                            <field name="is_mrp_lavoration" invisible="1"/>
                             <field name="picking_type_id" invisible="1" />
 		                    <separator string="Movimenti di Magazzino" colspan="4"/>
 		                    <field name="move_lines" context="{'default_picking_type_id': picking_type_id}" colspan="4" nolabel="1">
 		                        <tree string="Movement" editable="bottom">
 		                            <field name="product_id" on_change="onchange_product_id(product_id, location_id, location_dest_id, parent.partner_id)" domain="[('relative_type', '=', 'half')]"/>
 		                            <field name="product_uom_qty" string="Pieces"/>
-		                            <field name="product_fail_qty" string="Fail"/>
+		                            <field name="product_fail_qty" string="Fail" invisible="context.get('default_dep_mode', False) != 'workshop'"/>
 		                            <field name="product_uom" invisible="1"/>
 		                            <field name="linked_sl_status" readonly="1" />
 		                            <field name="name" invisible="1"/>
@@ -133,8 +133,8 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_stock_picking_cl_tree"/>
-            <field name="context">{'open_lavoration_workshop':True,'open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form', 'default_is_mrp_lavoration': True}</field>
-            <field name="domain">[('is_mrp_lavoration', '=', True),('state', '=', 'draft')]</field>
+            <field name="context">{'default_dep_mode': 'workshop','open_mrp_lavoration':True,'form_view_ref':'lavoration_cl_sl.view_stock_picking_cl_form'}</field>
+            <field name="domain">[('dep_mode','=','workshop'),('state','=','draft')]</field>
         </record>
         <record model="ir.actions.act_window" id="action_stock_picking_cl_closed_tree">
             <field name="name">Lavoration workshop list (all)</field>
@@ -142,8 +142,8 @@
             <field name="view_type">form</field>
             <field name="view_id" ref="view_stock_picking_cl_tree"/>
             <field name="view_mode">tree,form</field>
-            <field name="context">{'open_lavoration_workshop':True,'open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form', 'default_is_mrp_lavoration': True}</field>
-            <field name="domain">[('is_mrp_lavoration', '=', True)]</field>
+            <field name="context">{'default_dep_mode': 'workshop','open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form'}</field>
+            <field name="domain">[('dep_mode','=','workshop')]</field>
         </record>
         <record model="ir.actions.act_window" id="action_stock_picking_cut_cl_tree">
             <field name="name">Lavoration cut list (open)</field>
@@ -151,8 +151,8 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_stock_picking_cl_tree"/>
-            <field name="context">{'open_lavoration_cut':True,'open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form', 'default_is_mrp_lavoration': True}</field>
-            <field name="domain">[('is_mrp_lavoration', '=', True),('state', '=', 'draft')]</field>
+            <field name="context">{'default_dep_mode': 'cut','open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form'}</field>
+            <field name="domain">[('dep_mode','=','cut'),('state', '=', 'draft')]</field>
         </record>
         <record model="ir.actions.act_window" id="action_stock_picking_cut_cl_closed_tree">
             <field name="name">Lavoration cut list (all)</field>
@@ -160,8 +160,8 @@
             <field name="view_type">form</field>
             <field name="view_id" ref="view_stock_picking_cl_tree"/>
             <field name="view_mode">tree,form</field>
-            <field name="context">{'open_lavoration_cut':True,'open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form', 'default_is_mrp_lavoration': True}</field>
-            <field name="domain">[('is_mrp_lavoration', '=', True)]</field>
+            <field name="context">{'default_dep_mode': 'cut','open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form'}</field>
+            <field name="domain">[('dep_mode','=','cut')]</field>
         </record>
         <menuitem 
             parent="mrp.menu_mrp_manufacturing" 
@@ -179,7 +179,6 @@
                     id="menu_stock_picking_cl_closed_tree" 
                     action="action_stock_picking_cl_closed_tree"
                     sequence="10"/>
-
 
             <menuitem 
                 parent="menu_stock_picking_lavoration_area_root" 

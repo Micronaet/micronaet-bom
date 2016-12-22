@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_stock_picking_cl_mrp_form">
+            <field name="name">stock.picking.cl.mrp.lavoration.form</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="lavoration_cl_sl.view_stock_picking_cl_form"/>
+            <field name="arch" type="xml">
+                <field name="dep_mode" position="after">
+                    <field name="linked_mrp_id" attrs="{'invisible': [('dep_mode','!=','cut')]}"/>                    
+                </field>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="default_mrp_production_form_cl_mrp_view">
+            <field name="name">Production form custom</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_form_view" />
+            <field name="arch" type="xml">
+                <xpath expr="/form/sheet/notebook/page[1]" position="after">
+                    <page string="Lavoration">
+                        <field name="cl_sl_ids" readonly="1" context="{'form_view_ref':'lavoration_cl_sl.view_stock_picking_cl_form'}">
+                            <tree string="Lavoration">
+                                <field name="name" />                    
+                                <field name="date" />
+                                <field name="note" />
+                                <field name="state" />
+                            </tree>
+                        </field>
+                    </page>
+                </xpath>
+            </field>
+        </record>    
+        
+    </data>
+</openerp>
+

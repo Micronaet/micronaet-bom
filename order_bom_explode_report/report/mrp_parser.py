@@ -69,7 +69,7 @@ class Parser(report_sxw.rml_parse):
         return _('Active production for %s days') % days
 
     def get_object(self, data):
-        ''' Search all mpr elements                
+        ''' Search all MRP elements                
         '''
         # Readability:    
         cr = self.cr

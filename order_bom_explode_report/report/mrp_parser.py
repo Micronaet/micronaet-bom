@@ -323,7 +323,8 @@ class Parser(report_sxw.rml_parse):
                 
                 # Current stock = stock - mrp (previous unload) - delta TODO
                 stock_today = mrp_unload.get(component.id, 0.0)
-                stock = component.mx_net_qty + stock_today + delta_stock_qty
+                stock_net_qty = component.mx_net_qty # XXX without mrp unload!
+                stock = stock_net_qty + stock_today + delta_stock_qty
                 oc_period = mrp_order.get(component.id, 0.0)   
                 of = component.mx_of_in
                 of_move = ''
@@ -357,11 +358,13 @@ class Parser(report_sxw.rml_parse):
                     status, # 5. 
                     of_move, # 6.
                     stock_today, # 7. Stock net
+                    stock_net_qty, # 8. Stock without mrp unload
                     ))
             res.append((
                 mrp, 
                 sorted(components, key=lambda x: report_order_component(x)), 
-                mrp_status),
+                mrp_status,
+                ),
                 )
         WB.close()         
         return res

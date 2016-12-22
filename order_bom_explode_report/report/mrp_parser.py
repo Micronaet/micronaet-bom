@@ -147,12 +147,14 @@ class Parser(report_sxw.rml_parse):
         # ------------------
         headers = {
             'mrp': [
-                'MRP', 'Data', 'Ordine', 'Product', 'TODO', 'Componente', 
+                'MRP', 'Data', 'Ordine', 'Prodotto', 'TODO', 'Componente', 
                 'Q. TODO', 'Delta', 'Commento',
                 ],
             'order': [ 
-                'MRP', 'Data', 'Ordine', 'Product', 'TODO', 'Componente', 
-                'Q. Usata prod.', 'Q. TODO prod.', 'Commento',
+                'MRP', 'Data', 'Ordine', 
+                'Prodotto', 'Q. Usata prod.', 'Q. TODO prod.',
+                'Componente', 'Q. Usata comp.', 'Q. TODO comp.', 
+                'Commento',
                 ],
             }
         for mode, header in headers.iteritems():
@@ -227,7 +229,7 @@ class Parser(report_sxw.rml_parse):
                         sol.product_id.default_code,
                         todo, # Product TODO 
                         product.default_code, # Component
-                        this_qty,      
+                        this_qty,
                         delta_stock[product.id],
                         comment,                  
                         ])
@@ -274,8 +276,9 @@ class Parser(report_sxw.rml_parse):
                 
                 # Maked (unload stock)
                 if product.id not in mrp_unload:
-                    mrp_unload[product.id] = 0.0                    
-                mrp_unload[product.id] -= qty_maked * component.product_qty
+                    mrp_unload[product.id] = 0.0    
+                qty_maked_cmpt = qty_maked * component.product_qty           
+                mrp_unload[product.id] -= qty_maked_cmpt
                 
                 # Remain (order total)
                 if product.id not in mrp_order:
@@ -292,12 +295,17 @@ class Parser(report_sxw.rml_parse):
                     sol.mrp_id.name, 
                     sol.mrp_id.date_planned,
                     sol.order_id.name,
+
+                    # Product:
                     sol.product_id.default_code,
                     qty_maked, # Maked / Used
-                    order_remain, # Product order remain 
-                    # TODO maked, used for component
+                    order_remain, # Remain order to produce
+                    
+                    # Component:
                     product.default_code, # Component
-                    component_qty,      
+                    qty_maked_cmpt,
+                    component_qty,
+
                     comment,
                     ])
 

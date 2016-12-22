@@ -162,7 +162,7 @@ class Parser(report_sxw.rml_parse):
                 col += 1
 
         # ---------------------------------------------------------------------
-        #                      PRODUCTION OPEN IN RANGE:
+        # BLOCK A: PRODUCTION OPEN IN RANG: TODO production needed
         # ---------------------------------------------------------------------
         # Prepare data for remain production component
         # Update mrp stock with used halfword in productions
@@ -233,7 +233,7 @@ class Parser(report_sxw.rml_parse):
                         ])
                         
         # ---------------------------------------------------------------------
-        #                           ALL PRODUCTION:
+        # BLOCK B: ALL PRODUCTION: OC Total and unload maked
         # ---------------------------------------------------------------------
         # Search in all production from reference date:
         # 1. get produced element for unload stock
@@ -244,7 +244,7 @@ class Parser(report_sxw.rml_parse):
             ('mrp_id', '!=', False),
             
             # Date range production:
-            ('mrp_id.date_planned', '>=', reference_date), # XXX correct
+            ('mrp_id.date_planned', '>=', reference_date),#XXX correct for now!
             ('mrp_id.date_planned', '<=', limit_date),
             ], context=context)
             
@@ -281,11 +281,12 @@ class Parser(report_sxw.rml_parse):
                 if product.id not in mrp_order:
                     mrp_order[product.id] = 0.0                
                     
-                if sol.mrp_id.state not in ('done', 'cancel'): # only active
+                # Done and cancel means no OC remain:    
+                if sol.mrp_id.state in ('done', 'cancel'):
+                    component_qty = 0.0 # for log
+                else:    
                     component_qty = order_remain * component.product_qty
                     mrp_order[product.id] -= component_qty
-                else:
-                    component_qty = 0.0
 
                 write_xls_log('order', [
                     sol.mrp_id.name, 
@@ -295,11 +296,11 @@ class Parser(report_sxw.rml_parse):
                     order_remain, # Product order remain 
                     product.default_code, # Component
                     component_qty,      
-                    comment,                  
+                    comment,
                     ])
 
         # ---------------------------------------------------------------------
-        #                           PREPARE FOR REPORT:
+        # BLOCK C: PREPARE FOR REPORT
         # ---------------------------------------------------------------------
         res = []
         for mrp in sorted(mrp_db, key=lambda x: (x.date_planned, x.id)):

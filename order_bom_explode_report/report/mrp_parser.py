@@ -137,12 +137,13 @@ class Parser(report_sxw.rml_parse):
         self.WS = {
             'mrp': WB.add_worksheet(),
             'order': WB.add_worksheet(),
-            }
-            
+            }            
         # Row counters:
         self.counter = {'mrp': 1, 'order': 1}
             
-        # Header line:    
+        # ------------------
+        # Write Header line:
+        # ------------------
         headers = {
             'mrp': [
                 'MRP', 'Data', 'Ordine', 'Product', 'TODO', 'Componente', 
@@ -153,8 +154,6 @@ class Parser(report_sxw.rml_parse):
                 'Commento',
                 ],
             }
-
-        # Write header:    
         for mode, header in headers.iteritems():
             col = 0
             for h in header:
@@ -193,12 +192,12 @@ class Parser(report_sxw.rml_parse):
                 else:    
                     todo = qty - qty_delivered
                 if todo < 0.0:
-                    comment += 'Consegnato di più'
+                    comment += 'Over delivered'
                 elif not todo:    
-                    comment += 'Consegnato tutto'
+                    comment += 'All delivered'
                 elif sol.mx_closed:
                     todo = 0.0 # closed    
-                    comment += 'Forzato chiusura'
+                    comment += 'Forced closed'
                 
                 for component in sol.product_id.dynamic_bom_line_ids:                    
                     product = component.product_id
@@ -262,12 +261,12 @@ class Parser(report_sxw.rml_parse):
                 order_remain = qty - qty_delivered
                 
             if order_remain < 0.0:
-                comment += 'Consegnato di più'
+                comment += 'Over delivered'
             elif not order_remain:    
-                comment += 'Consegnato tutto'
+                comment += 'All delivered'
             elif sol.mx_closed:
                 order_remain = 0.0 # closed    
-                comment += 'Forzato chiusura'
+                comment += 'Forced closed'
                 
             for component in sol.product_id.dynamic_bom_line_ids:                    
                 product = component.product_id
@@ -352,6 +351,7 @@ class Parser(report_sxw.rml_parse):
                 mrp, 
                 sorted(components, key=lambda x: report_order_component(x)), 
                 mrp_status),
-                )        
+                )       
+        WB.close()         
         return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

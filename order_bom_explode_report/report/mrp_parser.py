@@ -71,6 +71,7 @@ class Parser(report_sxw.rml_parse):
     def get_object(self, data):
         ''' Search all MRP elements                
         '''
+        _logger.info('START REPORT STOCK UNLOAD PRODUCTION')
         # Readability:    
         cr = self.cr
         uid = self.uid
@@ -206,18 +207,18 @@ class Parser(report_sxw.rml_parse):
                     if product not in mrp_db[mrp]: 
                         # This, Delta previous MRP
                         mrp_db[mrp][product] = [0.0, 0.0] 
-                    if component.id not in delta_stock:
-                        delta_stock[component.id] = 0.0
+                    if product.id not in delta_stock:
+                        delta_stock[product.id] = 0.0
                         
                     # This order:
                     this_qty = todo * component.product_qty
                     mrp_db[mrp][product][0] += this_qty
                     
                     # Update delta with this unload
-                    delta_stock[component.id] -= this_qty
+                    delta_stock[product.id] -= this_qty
                     
                     # Current delta stock saved in order component:
-                    mrp_db[mrp][product][1] = delta_stock[component.id]
+                    mrp_db[mrp][product][1] = delta_stock[product.id]
                     
                     write_xls_log('mrp', [
                         '%s [%s]' % (mrp.name, mrp.id), 
@@ -227,7 +228,7 @@ class Parser(report_sxw.rml_parse):
                         todo, # Product TODO 
                         product.default_code, # Component
                         this_qty,      
-                        delta_stock[component.id],
+                        delta_stock[product.id],
                         comment,                  
                         ])
                         
@@ -351,7 +352,7 @@ class Parser(report_sxw.rml_parse):
                 mrp, 
                 sorted(components, key=lambda x: report_order_component(x)), 
                 mrp_status),
-                )       
+                )
         WB.close()         
         return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

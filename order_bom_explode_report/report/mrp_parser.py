@@ -150,9 +150,9 @@ class Parser(report_sxw.rml_parse):
                 'MRP', 'Data', 'Ordine', 'Product', 'TODO', 'Componente', 
                 'Q. TODO', 'Delta', 'Commento',
                 ],
-            'order': [ # TODO
-                'MRP', 'Ordine', 'Product', 'TODO', 'Componente', 'Q. TODO', 
-                'Commento',
+            'order': [ 
+                'MRP', 'Data', 'Ordine', 'Product', 'TODO', 'Componente', 
+                'Q. Usata prod.', 'Q. TODO prod.', 'Commento',
                 ],
             }
         for mode, header in headers.iteritems():
@@ -293,7 +293,9 @@ class Parser(report_sxw.rml_parse):
                     sol.mrp_id.date_planned,
                     sol.order_id.name,
                     sol.product_id.default_code,
+                    qty_maked, # Maked / Used
                     order_remain, # Product order remain 
+                    # TODO maked, used for component
                     product.default_code, # Component
                     component_qty,      
                     comment,

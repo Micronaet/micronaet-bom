@@ -136,8 +136,8 @@ class Parser(report_sxw.rml_parse):
 
         # Work Sheet:
         self.WS = {
-            'mrp': WB.add_worksheet(),
-            'order': WB.add_worksheet(),
+            'mrp': WB.add_worksheet('MRP'),
+            'order': WB.add_worksheet('Order'),
             }            
         # Row counters:
         self.counter = {'mrp': 1, 'order': 1}

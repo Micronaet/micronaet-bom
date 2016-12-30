@@ -468,18 +468,19 @@ class Parser(report_sxw.rml_parse):
                      
                     # ---------------------------------------------------------
                     #                  BLOCK C:
-                    # ---------------------------------------------------------        
-                    proposed = proposed_hw * cmpt.product_qty -\
-                        cmpt.product_id.mx_net_qty -\
-                        cmpt.product_id.mx_of_in
+                    # ---------------------------------------------------------
+                    cmpt_net = cmpt.product_id.mx_net_qty
+                    cmpt_of = cmpt.product_id.mx_of_in       
+                    proposed = \
+                        proposed_hw * cmpt.product_qty - cmpt_net - cmpt_of
 
                     # Add data block directly:
                     res.append(data_AB + [
                         cmpt.product_qty, # total 
                         cmpt.product_id.default_code, # code
                         proposed_hw * cmpt.product_qty,
-                        cmpt.product_id.mx_net_qty,
-                        cmpt.product_id.mx_of_in,
+                        cmpt_net,
+                        cmpt_of,
                         proposed if proposed > 0.0 else '',
                         proposed if proposed <= 0.0 else '',
                         ])

@@ -214,7 +214,9 @@ class Parser(report_sxw.rml_parse):
         with_deadline = data.get('with_deadline', False) # create deadline per.
         
         # TODO change used for now!!!!!!
-        reference_date = '2016-10-15 00:00:00' 
+        #reference_date = '2016-10-15 00:00:00' 
+        # 04/01/2017 Change after inventory
+        reference_date = '2017-01-01 00:00:00' # TODO keep in parameter
         
         # TODO manage day range
         if days:

@@ -72,6 +72,7 @@ class Parser(report_sxw.rml_parse):
         ''' Search all MRP elements                
         '''
         _logger.info('START REPORT STOCK UNLOAD PRODUCTION')
+        
         # Readability:    
         cr = self.cr
         uid = self.uid
@@ -115,7 +116,10 @@ class Parser(report_sxw.rml_parse):
         sol_pool = self.pool.get('sale.order.line') 
         mrp_pool = self.pool.get('mrp.production')
         
-        reference_date = '2016-10-15 00:00:00' # TODO change used for now!!!!!!
+        #reference_date = '2016-10-15 00:00:00' 
+        # 04/01/2017 Change after inventory
+        reference_date = '2017-01-01 00:00:00' # TODO keep in parameter
+        
         limit_date = '%s 23:59:59' % (
             datetime.now() + timedelta(days=days)).strftime(
                 DEFAULT_SERVER_DATE_FORMAT)
@@ -164,7 +168,7 @@ class Parser(report_sxw.rml_parse):
                 col += 1
 
         # ---------------------------------------------------------------------
-        # BLOCK A: PRODUCTION OPEN IN RANG: TODO production needed
+        # BLOCK A: PRODUCTION OPEN IN RANGE: TODO production needed
         # ---------------------------------------------------------------------
         # Prepare data for remain production component
         # Update mrp stock with used halfword in productions
@@ -173,7 +177,7 @@ class Parser(report_sxw.rml_parse):
             # State filter:
             ('state', 'not in', ('done', 'cancel')),
             
-            # Period filter (only up not down limit)
+            # XXX Period filter (only up not down limit), correct?
             ('date_planned', '<=', limit_date),
             ], order='date_planned, id', context=context)
             

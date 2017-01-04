@@ -88,7 +88,10 @@ class MrpProduction(orm.Model):
                 return # yet present (for component check)
             y_axis[default_code] = [ # halfworked of component
                 # Reset counter for this product    
-                product.inventory_start + product.inventory_delta, # inv+delta
+                # 04/01/2017: change inventory with new
+                product.mx_start_qty,
+                #product.inventory_start + product.inventory_delta, # inv+delta
+                
                 0.0, # tcar
                 0.0, # tscar
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # MM  (+ extra per.)
@@ -185,9 +188,11 @@ class MrpProduction(orm.Model):
         year = datetime.now().year
         if month >= 9:
             period_from = '%s-09-01' % year
+            mm_from = '%s-09-01' % year # From 01/09 > ALL (so 31/12)
             period_to = '%s-08-31' % (year + 1)
         else:
-            period_from = '%s-09-01' % (year - 1)
+            period_from = '%s-09-01' % (year - 1) # for OC and OF
+            mm_from = '%s-01-01' % (year - 1) # From 1/1 
             period_to = '%s-08-31' % year
             
         debug_file.write('\n\nExclude partner list:\n%s\n\n'% (
@@ -268,7 +273,9 @@ class MrpProduction(orm.Model):
                     pos = get_position_season(date)
                 
                     # USE order data:
-                    if date > period_to or date < period_from: # extra range
+                    # Change for jump year 04/01/2017 (for year change 1/1)
+                    #if date > period_to or date < period_from: # extra range
+                    if date > period_to or date < mm_from: # extra range
                         debug_mm.write(mask % (
                             block, 'NOT USED', pick.name, pick.origin,
                             date, pos, '', # product_code                                
@@ -304,7 +311,8 @@ class MrpProduction(orm.Model):
             ('partner_id', 'not in', exclude_partner_ids), # current company
             
             # Only in period # TODO remove if check extra data
-            ('date', '>=', period_from), 
+            # 04/01/2017 Changed for clean vefore 1/1
+            ('date', '>=', mm_from), # XXX 01/09 or 1/1 
             ('date', '<=', period_to), 
             ])
             
@@ -359,7 +367,7 @@ class MrpProduction(orm.Model):
                 # OC exclude no parcels product:                
                 if product.exclude_parcels:
                     debug_mm.write(mask % (
-                        block, 'NOT USED', order.name, '', date, pos, '', # code
+                        block, 'NOT USED', order.name, '', date, pos, '', #code
                         product_code, # Direct component
                         '', 0, # +MM
                         0, # XXX keep 0 (-OC)
@@ -425,6 +433,8 @@ class MrpProduction(orm.Model):
                     continue
                 
                 # USE order data:
+                # Note: Remain period_from instead of mm_from exclude extra 
+                # period order always 1/9
                 if date > period_to or date < period_from: # extra range
                     debug_mm.write(mask % (
                         block, 'NOT USED', order.name, '', date, pos,
@@ -480,13 +490,14 @@ class MrpProduction(orm.Model):
         if mode == 'halfwork': # only half explode MRP (comp > lavoration)
             mrp_ids = mrp_pool.search(cr, uid, [        
                 # State filter:
-                ('state', '!=', 'cancel'),
+                ('state', '!=', 'cancel'), # TODO correct? for unload element?
                 
                 # Period filter:
-                ('date_planned', '>=', period_from), 
+                # 04/01/2017 MRP from 1/9 or 1/1 depend on change year
+                ('date_planned', '>=', mm_from), # 1/9 or 1/1
                 ('date_planned', '<=', period_to), 
                 
-                # No customer excklude filter
+                # No customer exclude filter
                 ])
             
             for order in mrp_pool.browse(cr, uid, mrp_ids, context=context):
@@ -555,9 +566,9 @@ class MrpProduction(orm.Model):
 
             total = 0.0 # INV 0.0
             
-            # XXX NOTE: INV now is 31/12 next put Sept.
-            # inv_pos = 3 # December
-            inv_pos = 0 # September
+            # XXX NOTE: INV now is 31/12 next put Sept. (old information)
+            # inv_pos = 3 # December # TODO never use this!!!
+            inv_pos = 0 # September (always append here inventory)
             jumped = False
 
             for i in range(0, 12):
@@ -586,7 +597,8 @@ class MrpProduction(orm.Model):
                 
             # -----------------------------------------------------------------    
             # Inventory managenent block:
-            # -----------------------------------------------------------------    
+            # -----------------------------------------------------------------  
+            # XXX maybe remove:  
             if for_inventory_delta and \
                     product.default_code not in inventory_delta:
                 inventory_delta[product.default_code] = (

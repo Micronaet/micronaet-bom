@@ -192,9 +192,9 @@ class MrpProduction(orm.Model):
             period_to = '%s-08-31' % (year + 1)
         else:
             period_from = '%s-09-01' % (year - 1) # for OC and OF
-            mm_from = '%s-01-01' % (year - 1) # From 1/1 
+            mm_from = '%s-01-01' % year # From 1/1 
             period_to = '%s-08-31' % year
-            
+
         debug_file.write('\n\nExclude partner list:\n%s\n\n'% (
             exclude_partner_ids, ))
 
@@ -275,7 +275,7 @@ class MrpProduction(orm.Model):
                     # USE order data:
                     # Change for jump year 04/01/2017 (for year change 1/1)
                     #if date > period_to or date < period_from: # extra range
-                    if date > period_to or date < mm_from: # extra range
+                    if (date < mm_from) or (date > period_to): # extra range
                         debug_mm.write(mask % (
                             block, 'NOT USED', pick.name, pick.origin,
                             date, pos, '', # product_code                                

@@ -47,6 +47,8 @@ class ResCompany(orm.Model):
     def create_dynamic_rule(self, cr, uid, ids, context=None):
         ''' Create rule for MT MS
         '''
+        log_file = '/home/administrator/photo/log/materassini_MT_MS.log'
+        
         # Search dynamic BOM:
         bom_pool = self.pool.get('mrp.bom')
         line_pool = self.pool.get('mrp.bom.line')
@@ -60,19 +62,31 @@ class ResCompany(orm.Model):
                 )    
         dynamic_id = bom_ids[0]        
 
+        # Search category:
+        category = 'Materassino'
+        category_pool = self.pool.get('mrp.bom.structure.category')
+        category_ids = category_pool.search(cr, uid, [
+            ('name', '=', category)
+            ], context=context)
+        if not category_ids:
+            raise osv.except_osv(
+                _('BOM Error'), 
+                _('No category %s' % category),
+                )    
+        category_id = category_ids[0]        
                 
         # Search all MT product    
         product_pool = self.pool.get('product.product')
         product_ids = product_pool.search(cr, uid, [
             ('default_code', '=ilike', 'MT%')], context=context)        
-        comment = ''
-        import pdb; pdb.set_trace()
+        comment = _('Product|Component|Mask|Note\n')
+
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):   
             # Generate code:    
             default_code = product.default_code
             dynamic_mask = '%s%%' % default_code[:12] # no 13 char (S)
-            hw_code = 'MA%s' % default_code[2:]
+            hw_code = 'MS%s' % default_code[2:]
             
             # Search HW code
             product_ids = product_pool.search(cr, uid, [
@@ -86,7 +100,6 @@ class ResCompany(orm.Model):
                     _('No HW component found!'),
                     )
                 continue
-                
             product_id = product_ids[0]    
             # more than one raise?    
                 
@@ -111,7 +124,8 @@ class ResCompany(orm.Model):
                     'product_id': product_id,
                     'dynamic_mask': dynamic_mask,
                     'product_uom': 1, # XXX
-                    'product_qty': 1.0,                    
+                    'product_qty': 1.0,     
+                    'category_id': category_id,               
                     }, context=context)
                 
                 comment += '%s|%s|%s|%s\n' % (

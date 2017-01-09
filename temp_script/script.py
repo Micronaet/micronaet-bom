@@ -44,6 +44,88 @@ class ResCompany(orm.Model):
     _inherit = 'res.company'
 
     # Procedure:    
+    def create_dynamic_rule(self, cr, uid, ids, context=None):
+        ''' Create rule for MT MS
+        '''
+        # Search dynamic BOM:
+        bom_pool = self.pool.get('mrp.bom')
+        line_pool = self.pool.get('mrp.bom.line')
+        bom_ids = bom_pool.search(cr, uid, [
+            ('bom_category', '=', 'dynamic')
+            ], context=context)
+        if not bom_ids:
+            raise osv.except_osv(
+                _('BOM Error'), 
+                _('No dynamic bom'),
+                )    
+        dynamic_id = bom_ids[0]        
+
+                
+        # Search all MT product    
+        product_pool = self.pool.get('product.product')
+        product_ids = product_pool.search(cr, uid, [
+            ('default_code', '=ilike', 'MT%')], context=context)        
+        comment = ''
+        import pdb; pdb.set_trace()
+        for product in product_pool.browse(
+                cr, uid, product_ids, context=context):   
+            # Generate code:    
+            default_code = product.default_code
+            dynamic_mask = '%s%%' % default_code[:12] # no 13 char (S)
+            hw_code = 'MA%s' % default_code[2:]
+            
+            # Search HW code
+            product_ids = product_pool.search(cr, uid, [
+                ('default_code', '=', hw_code)], context=context)
+            
+            if not product_ids: # Product HW not found!
+                comment += '%s|%s|%s|%s\n' % (
+                    default_code,
+                    hw_code,
+                    dynamic_mask,
+                    _('No HW component found!'),
+                    )
+                continue
+                
+            product_id = product_ids[0]    
+            # more than one raise?    
+                
+            # Search dynamic rule for product-component:
+            line_ids = line_pool.search(cr, uid, [
+                ('bom_id', '=', dynamic_id),
+                ('dynamic_mask', '=', dynamic_mask),
+                ('product_id', '=', product_id),
+                ], context=context)
+            if line_ids: 
+                # rule present
+                comment += '%s|%s|%s|%s\n' % (
+                    default_code,
+                    hw_code,
+                    dynamic_mask,
+                    _('Yet present!'),
+                    )
+            else:
+                # Create rule
+                line_pool.create(cr, uid, {
+                    'bom_id': dynamic_id,
+                    'product_id': product_id,
+                    'dynamic_mask': dynamic_mask,
+                    'product_uom': 1, # XXX
+                    'product_qty': 1.0,                    
+                    }, context=context)
+                
+                comment += '%s|%s|%s|%s\n' % (
+                    default_code,
+                    hw_code,
+                    dynamic_mask,
+                    _('New rule'),
+                    )
+                    
+        # Write log:            
+        f_log = open(log_file, 'w')        
+        f_log.write(comment)
+        return True
+        
     def check_bom_half_error_linked(self, cr, uid, ids, context=None):
         ''' Check error during operation on bom
         '''

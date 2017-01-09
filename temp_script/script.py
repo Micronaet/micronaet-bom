@@ -79,6 +79,8 @@ class ResCompany(orm.Model):
             ]
              
         for category, log_file, from_code, to_code, in loop:
+            _logger.warning('Start block: %s [log: %s]' % (category, log_file))
+            
             # Search category:
             category_ids = category_pool.search(cr, uid, [
                 ('name', '=', category)

@@ -13,18 +13,6 @@
                 </field>
             </field>
         </record>
-        <!--<record model="ir.ui.view" id="view_product_product_pipes_tree">
-            <field name="name">product.product.pipe.form</field>
-            <field name="model">product.product</field>
-            <field name="inherit_id" ref="product_pipes.view_product_product_pipes_tree"/>
-            <field name="priority" eval="50" />
-            <field name="arch" type="xml">
-                <field name="pipe_min_order" position="after">
-                    <button name="generate_pipe_data_from_code" string="Is pipe" type="object" icon="gtk-ok" attrs="{'invisible': [('is_pipe','=',False),('default_code','!=',False)]}"/>
-                </field>
-            </field>
-        </record>-->
-        
         <record model="ir.ui.view" id="view_product_is_pipe_form">
             <field name="name">product.product.form</field>
             <field name="model">product.product</field>

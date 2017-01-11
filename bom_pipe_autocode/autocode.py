@@ -44,28 +44,19 @@ class ProductProduct(orm.Model):
     
     _inherit = 'product.product'
 
-    def is_pipe_generate_pipe_data_from_code(
-            self, cr, uid, ids, field, context=None):
-        ''' from name generate code
-        '''    
-        return self.generate_pipe_data_from_code(
-            cr, uid, ids, 'name', context=context)
-            
-    def yet_pipe_generate_pipe_data_from_code(
-            self, cr, uid, ids, field, context=None):
-        ''' from default_code re-generate code
-        '''    
-        return self.generate_pipe_data_from_code(
-            cr, uid, ids, 'default_code', context=context)
     
-    def generate_pipe_data_from_code(self, cr, uid, ids, field, context=None):
+    def generate_pipe_data_from_code(self, cr, uid, ids, context=None):
         ''' Extract data from code:
         '''
         assert len(ids) == 1, 'Works only with one record a time'
         
         part = 4
         product_proxy = self.browse(cr, uid, ids, context=context)
-        default_code = product_proxy.__getattribute__(field).upper()        
+        if product_proxy.default_code:
+            default_code = product_proxy.default_code.upper()
+        else:
+            default_code = product_proxy.name.upper()
+            
         code = default_code.split('X')
 
         if len(code) != 3:

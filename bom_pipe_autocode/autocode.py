@@ -44,7 +44,6 @@ class ProductProduct(orm.Model):
     
     _inherit = 'product.product'
 
-    
     def generate_pipe_data_from_code(self, cr, uid, ids, context=None):
         ''' Extract data from code:
         '''

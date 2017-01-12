@@ -136,6 +136,8 @@ class Parser(report_sxw.rml_parse):
         # XLS log export:        
         # ---------------------------------------------------------------------
         filename = '/home/administrator/photo/log/mrp_product.xlsx'
+        _logger.warning('Log file: %s' % filename)
+        
         WB = xlsxwriter.Workbook(filename)
 
         # Work Sheet:
@@ -250,7 +252,7 @@ class Parser(report_sxw.rml_parse):
             ('mrp_id', '!=', False),
             
             # Date range production:
-            ('mrp_id.date_planned', '>=', reference_date),#XXX correct for now!
+            ('mrp_id.date_planned', '>=', reference_date),
             ('mrp_id.date_planned', '<=', limit_date),
             ], context=context)
             
@@ -280,7 +282,7 @@ class Parser(report_sxw.rml_parse):
                 
                 # Maked (unload stock)
                 if product.id not in mrp_unload:
-                    mrp_unload[product.id] = 0.0    
+                    mrp_unload[product.id] = 0.0
                 qty_maked_cmpt = qty_maked * component.product_qty           
                 mrp_unload[product.id] -= qty_maked_cmpt
                 

@@ -334,6 +334,7 @@ class MRPLavoration(orm.Model):
                 'done': [('readonly', True)], 
                 'cancel': [('readonly', True)],
                 }, required=True),
+        'linked_mrp_id': fields.many2one('mrp.production', 'MRP linked'),
         'linked_sl_id': fields.many2one('stock.picking', 'SL linked'),
         'sl_quants_ids': fields.one2many(
             'stock.quant', 'lavoration_link_id', 'Stock quants',),
@@ -347,4 +348,17 @@ class MRPLavoration(orm.Model):
         'picking_type_id': lambda s, cr, uid, ctx: s._get_picking_type_id(
             cr, uid, ctx),
         }
+
+class MrpProduction(orm.Model):
+    """ Model name: MrpProduction
+    """
+    
+    _inherit = 'mrp.production'
+    
+    _columns = {
+        'linked_picking_ids': fields.one2many(
+            'stock.picking', 'linked_mrp_id', 
+            'Lavoration', readonly=True),
+    }
+    
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

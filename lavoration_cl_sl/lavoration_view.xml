@@ -1,6 +1,25 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+        <record model="ir.ui.view" id="default_mrp_production_form_view">
+            <field name="name">Production form custom</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_form_view" />
+            <field name="arch" type="xml">
+                <xpath expr="//notebook/page[1]" position="after">
+                    <page string="Lavoration">
+                        <field name="linked_picking_ids">
+                            <tree string="Cut" editable="bottom" readonly="1">
+                                <field name="date" />
+                                <field name="name" />
+                                <field name="note" />
+                                <field name="state" />
+                            </tree>
+                        </field>
+                    </page>
+                </xpath>                
+            </field>
+        </record>    
         <!--stock.picking.device-->
         <record model="ir.ui.view" id="view_stock_picking_device_form">
             <field name="name">stock.picking.device.form</field>
@@ -75,6 +94,7 @@
                         <group col="4" colspan="4">
                             <field name="name" />
                             <field name="date" />
+                            <field name="linked_mrp_id" attrs="{'invisible': [('dep_mode','!=','cut')]}" domain="[('state', 'not in', ('cancel', 'done'))]"/>
                             <field name="device_id" attrs="{'invisible': [('dep_mode','!=','workshop')]}"/>
                             <field name="workers" attrs="{'invisible': [('dep_mode','!=','workshop')]}"/>
                             <field name="dep_mode" invisible="1" />

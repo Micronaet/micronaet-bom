@@ -1,25 +1,6 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
-        <record model="ir.ui.view" id="default_mrp_production_form_view">
-            <field name="name">Production form custom</field>
-            <field name="model">mrp.production</field>
-            <field name="inherit_id" ref="mrp.mrp_production_form_view" />
-            <field name="arch" type="xml">
-                <xpath expr="//notebook/page[1]" position="after">
-                    <page string="Lavoration">
-                        <field name="linked_picking_ids">
-                            <tree string="Cut" editable="bottom" readonly="1">
-                                <field name="date" />
-                                <field name="name" />
-                                <field name="note" />
-                                <field name="state" />
-                            </tree>
-                        </field>
-                    </page>
-                </xpath>                
-            </field>
-        </record>    
         <!--stock.picking.device-->
         <record model="ir.ui.view" id="view_stock_picking_device_form">
             <field name="name">stock.picking.device.form</field>
@@ -147,6 +128,27 @@
                 </tree>
             </field>
         </record>
+
+        <record model="ir.ui.view" id="default_mrp_production_form_view">
+            <field name="name">Production form custom</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_form_view" />
+            <field name="arch" type="xml">
+                <xpath expr="//notebook/page[1]" position="after">
+                    <page string="Lavoration">
+                        <field name="linked_picking_ids" context="{'default_dep_mode': 'cut','open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form'}">
+                            <tree string="Cut">
+                                <field name="date" readonly="1"/>
+                                <field name="name" readonly="1" />
+                                <field name="note" readonly="1" />
+                                <field name="state" readonly="1" />
+                            </tree>
+                        </field>
+                    </page>
+                </xpath>                
+            </field>
+        </record>    
+
         <record model="ir.actions.act_window" id="action_stock_picking_cl_tree">
             <field name="name">Lavoration workshop list (open)</field>
             <field name="res_model">stock.picking</field>

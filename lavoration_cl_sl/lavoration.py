@@ -358,7 +358,7 @@ class MrpProduction(orm.Model):
     _columns = {
         'linked_picking_ids': fields.one2many(
             'stock.picking', 'linked_mrp_id', 
-            'Lavoration', readonly=True),
+            'Lavoration'),
     }
     
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

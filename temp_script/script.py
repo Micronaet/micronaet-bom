@@ -21,6 +21,7 @@ import os
 import sys
 import logging
 import openerp
+import xlsxwriter
 import openerp.netsvc as netsvc
 import openerp.addons.decimal_precision as dp
 from openerp.osv import fields, osv, expression, orm
@@ -44,6 +45,70 @@ class ResCompany(orm.Model):
     _inherit = 'res.company'
 
     # Procedure:    
+    def pipe_status_export(self, cr, uid, ids, context=None):
+        ''' Extract pipe status for inventory check
+        '''
+        stock_id = 12 # XXX
+        
+        # ---------------------------------------------------------------------
+        # Create and open Workbook:
+        # ---------------------------------------------------------------------
+        xls_file = '/home/administrator/photo/output/pipe_stock.xlsx'
+        
+        WB = xlsxwriter.Workbook(xls_file)
+        WS = WB.add_worksheet('Inventario tubi')
+        
+        product_pool = self.pool.get('product.product')
+        move_pool = self.pool.get('stock.move')
+        
+        pipe_ids = product_pool.search(cr, uid, [
+            ('is_pipe', '=', True)], context=context)
+        
+        move_ids = move_pool.search(cr, uid, [
+            ('product_id', 'in', pipe_ids)
+            ], order='product_id, date', context=context)
+        move_proxy = move_pool.browse(cr, uid, move_ids, context=context)
+        
+        status = {} # progress status
+        res = []
+        old_product = False
+        row = 0
+        for move in move_proxy:
+            row += 1
+            product = move.product_id
+            
+            # Control sign of operation
+            if move.location_dest_id.id == stock_id: # IN
+                move_sign = +1
+            else:
+                move_sign = -1
+                
+            # Relative total:    
+            qty = move_sign * move.product_qty
+            
+            if product not in status:
+                row += 1 # jump line
+                status[product] = 0.0
+                
+            if move.state == 'done':
+                status[product] += qty
+                of = False
+            else:
+                of = True
+
+            # TODO check negative status            
+            WS.write(row, 0, product.default_code)
+            WS.write(row, 1, product.mx_start_qty)
+            WS.write(row, 2, move.date)
+            WS.write(row, 3, move.origin)
+            WS.write(row, 4, 'OF' if of else (
+                'IN' if move_sign > 0 else 'OUT'))
+            WS.write(row, 5, '' if of else qty)
+            WS.write(row, 6, status[product])
+            WS.write(row, 7, 'NEGATIVO' if status[product] < 0 else '')
+            
+        return True
+            
     def create_dynamic_rule(self, cr, uid, ids, context=None):
         ''' Create rule for MT MS
         '''

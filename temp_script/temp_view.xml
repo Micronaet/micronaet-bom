@@ -13,6 +13,7 @@
                             <button name="check_bom_half_error_linked" string="Check BOM link in HW product" type="object" />
                             <button name="inventory_to_reset" string="Inventory to reset" type="object" />
                             <button name="create_dynamic_rule" string="Create dynamic rule" type="object" />
+                            <button name="pipe_status_export" string="Pipe status" type="object" />                            
                         </group>
                     </page>
                 </xpath>

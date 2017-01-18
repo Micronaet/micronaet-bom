@@ -70,13 +70,29 @@ class ResCompany(orm.Model):
         move_proxy = move_pool.browse(cr, uid, move_ids, context=context)
         
         status = {} # progress status
+        inventory = {} # for check start with old movement
         res = []
         old_product = False
         row = 0
+        WS.write(row, 0, 'Codice')
+        WS.write(row, 1, 'Inventario')
+        WS.write(row, 2, 'Data')
+        WS.write(row, 3, 'Documento')
+        WS.write(row, 4, 'Movimento')
+        WS.write(row, 5, 'Quantita')
+        WS.write(row, 6, 'Saldo')
+        WS.write(row, 7, 'Negativo')
+        WS.write(row, 8, 'Inventario')
+        
         for move in move_proxy:
             row += 1
             product = move.product_id
+            date = move.date
             
+            # Save inventory:
+            if product not in inventory:
+                inventory[product] = product.mx_start_qty
+
             # Control sign of operation
             if move.location_dest_id.id == stock_id: # IN
                 move_sign = +1
@@ -89,23 +105,35 @@ class ResCompany(orm.Model):
             if product not in status:
                 row += 1 # jump line
                 status[product] = 0.0
+                            
+            if date >= '2017' and status[product] != inventory[product]:
+                error = 'X'
+            else:
+                error = ''
                 
             if move.state == 'done':
                 status[product] += qty
                 of = False
             else:
                 of = True
+            
+            if move.picking_id:
+                picking = move.picking_id.name
+            else:
+                picking = ''  
 
             # TODO check negative status            
             WS.write(row, 0, product.default_code)
             WS.write(row, 1, product.mx_start_qty)
             WS.write(row, 2, move.date)
-            WS.write(row, 3, move.origin)
+            WS.write(row, 3, '%s %s' % (move.origin or '', picking))
             WS.write(row, 4, 'OF' if of else (
                 'IN' if move_sign > 0 else 'OUT'))
             WS.write(row, 5, '' if of else qty)
             WS.write(row, 6, status[product])
-            WS.write(row, 7, 'NEGATIVO' if status[product] < 0 else '')
+            WS.write(row, 7, 'X' if status[product] < 0 else '')
+            WS.write(row, 8, error)
+            
             
         return True
             

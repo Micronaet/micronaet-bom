@@ -129,8 +129,8 @@ class ResCompany(orm.Model):
             WS.write(row, 3, '%s %s' % (move.origin or '', picking))
             WS.write(row, 4, 'OF' if of else (
                 'IN' if move_sign > 0 else 'OUT'))
-            WS.write(row, 5, '' if of else qty)
-            WS.write(row, 6, status[product])
+            WS.write(row, 5, qty)
+            WS.write(row, 6, '' if of else status[product])
             WS.write(row, 7, 'X' if status[product] < 0 else '')
             WS.write(row, 8, error)
             

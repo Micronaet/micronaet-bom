@@ -175,12 +175,21 @@ class MRPLavoration(orm.Model):
         # ---------------------------------------------------------------------
         if pick_proxy.linked_sl_id:
             sl_id = pick_proxy.linked_sl_id.id
+            sl_id = self.write(cr, uid, sl_id, {
+                'picking_type_id': sl_type_id,
+                'state': 'done',
+                'date': cl_date,
+                'origin': _('SL from %s') % origin,
+                'is_mrp_lavoration': False, # SL is hidden
+                # TODO no more fields?
+                }, context=context)
+
         else:
             sl_id = self.create(cr, uid, {
                 'picking_type_id': sl_type_id,
                 'state': 'done',
                 'date': cl_date,
-                'origin': origin,    
+                'origin': _('SL from %s') % origin,
                 'is_mrp_lavoration': False, # SL is hidden
                 # TODO no more fields?
                 }, context=context)

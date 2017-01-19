@@ -79,6 +79,15 @@ class Parser(report_sxw.rml_parse):
     def get_object(self, data):
         ''' Search all mrp elements                
         '''
+        # Readability:    
+        cr = self.cr
+        uid = self.uid
+        context = {}
+
+        user_pool = self.pool.get('res.users')
+        previous_status = user_pool.set_no_inventory_status(
+            cr, uid, value=False, context=context)
+            
         # ---------------------------------------------------------------------
         #                                Utility:
         # ---------------------------------------------------------------------
@@ -176,10 +185,6 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         #                                Procedure:
         # ---------------------------------------------------------------------
-        # Readability:    
-        cr = self.cr
-        uid = self.uid
-        context = {}
 
         self.order_month = {} # Parent distribution for month
                 
@@ -489,5 +494,7 @@ class Parser(report_sxw.rml_parse):
                             
                 if hw_first: # no cmpt data (not in loop)
                     res.append(data_A + data_B + empty_C)
+        user_pool.set_no_inventory_status(
+            cr, uid, value=previous_status, context=context)            
         return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

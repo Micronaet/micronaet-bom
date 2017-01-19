@@ -160,7 +160,9 @@ class MRPLavoration(orm.Model):
         
         origin = 'CL-LAV-%s' % pick_proxy.name
         
-        now = datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+        cl_date = pick_proxy.date # XXX use CL date for all!
+        #datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+        
         # TODO better MRP, now is procurements type?
 
         if not(mrp_location and stock_location):
@@ -177,7 +179,7 @@ class MRPLavoration(orm.Model):
             sl_id = self.create(cr, uid, {
                 'picking_type_id': sl_type_id,
                 'state': 'done',
-                'date': now,
+                'date': cl_date,
                 'origin': origin,    
                 'is_mrp_lavoration': False, # SL is hidden
                 # TODO no more fields?
@@ -193,7 +195,7 @@ class MRPLavoration(orm.Model):
             
             # Load quats materials:
             quant_pool.create(cr, uid, {
-                'in_date': now, # TODO document date??
+                'in_date': cl_date, # TODO document date??
                 'cost': 0.0, # TODO
                 'location_id': stock_location,
                 'product_id': product.id,
@@ -219,7 +221,8 @@ class MRPLavoration(orm.Model):
                     'product_uom': product.uom_id.id,
                     'state': 'done', # confirmed, available
                     'origin': origin, # CL lavoration
-                    'date_expected': now,
+                    'date': cl_date,
+                    'date_expected': cl_date,
                     'name': _('SL-LAV-%s') % pick_proxy.name,
                     'linked_cl_stock_move_id': load.id, # link CL move
                     #'display_name': 'SL: %s' % line_proxy.product_id.name,
@@ -230,7 +233,7 @@ class MRPLavoration(orm.Model):
                     
                 # Unload quats materials:
                 quant_pool.create(cr, uid, {
-                    'in_date': now,
+                    'in_date': cl_date,
                     'cost': 0.0, # TODO
                     'location_id': stock_location,
                     'product_id': product.id,

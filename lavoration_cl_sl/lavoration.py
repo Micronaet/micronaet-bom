@@ -179,6 +179,7 @@ class MRPLavoration(orm.Model):
                 'picking_type_id': sl_type_id,
                 'state': 'done',
                 'date': cl_date,
+                'min_date': cl_date,
                 'origin': _('SL from %s') % origin,
                 'is_mrp_lavoration': False, # SL is hidden
                 # TODO no more fields?
@@ -189,6 +190,7 @@ class MRPLavoration(orm.Model):
                 'picking_type_id': sl_type_id,
                 'state': 'done',
                 'date': cl_date,
+                'min_date': cl_date,
                 'origin': _('SL from %s') % origin,
                 'is_mrp_lavoration': False, # SL is hidden
                 # TODO no more fields?

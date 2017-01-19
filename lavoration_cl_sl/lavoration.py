@@ -175,7 +175,7 @@ class MRPLavoration(orm.Model):
         # ---------------------------------------------------------------------
         if pick_proxy.linked_sl_id:
             sl_id = pick_proxy.linked_sl_id.id
-            sl_id = self.write(cr, uid, sl_id, {
+            self.write(cr, uid, sl_id, {
                 'picking_type_id': sl_type_id,
                 'state': 'done',
                 'date': cl_date,

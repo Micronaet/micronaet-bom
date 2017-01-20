@@ -414,7 +414,7 @@ class Parser(report_sxw.rml_parse):
             for parent_cmpt, qty in record[2].iteritems():
                 db_hw = parent_cmpt[1]
                 for element in db_hw.half_bom_ids:
-                    check = (halfwork.product_id, element.product_id)
+                    check = (halfwork.id, element.product_id)
                     if check in check_used:
                         continue
                     else:

@@ -407,8 +407,8 @@ class Parser(report_sxw.rml_parse):
                     hws[halfwork][1] -= hw_q # - MRP # TODO check same problem
                     # TODO check if is bouble - MRP!!!
                     
-        import pdb; pdb.set_trace() 
         # TODO generate here component database for pipes (from hws):
+        import pdb; pdb.set_trace()
         for halfwork, record in hws.iteritems():
             needed = record[0]
             for parent_cmpt, qty in record[2].iteritems():
@@ -427,12 +427,13 @@ class Parser(report_sxw.rml_parse):
         # Empty record
         empty_A = ['' for n in range(0, 7)] # parent 7
         empty_B = ['' for n in range(0, 6)] # halfwork 6
-        empty_C = ['' for n in range(0, 7)] # component 7
+        empty_C = ['' for n in range(0, 8)] # component 7
         
         # TODO remove use cmpt_present instead:
         hw_present = [] # for highlight only first total in report (for orders)
         
         cmpt_present = [] # for remove double orders        
+        import pdb; pdb.set_trace()
         for parent in sorted(parent_todo):
             record = parent_todo[parent]
             
@@ -457,13 +458,6 @@ class Parser(report_sxw.rml_parse):
 
             parent_first = True
             for hw in record[0].bom_line_ids:
-                # Check for pipes
-                if not hw.product_id or hw.product_id.id in hw_present:
-                    yet_write = True # yet write in report before
-                else:
-                    hw_present.append(hw.product_id.id)
-                    yet_write = False # yet write in report before
-                 
                 if not hw.product_id in hws: # hw in the list selection
                     continue # not in selected list create before
 
@@ -489,7 +483,7 @@ class Parser(report_sxw.rml_parse):
                     hw_data[0], # Todo halfwork
                     hw_data[1], # Stock
                     proposed_hw,
-                    yet_write, # yet write status
+                    False, # XXX no more used #yet_write, # yet write status
                     ]
                 
                 hw_first = True
@@ -503,25 +497,41 @@ class Parser(report_sxw.rml_parse):
                     # ---------------------------------------------------------
                     #                  BLOCK C:
                     # ---------------------------------------------------------
-                    # TODO Change bloc C composition!
-                    cmpt_net = cmpt.product_id.mx_net_qty
-                    cmpt_of = cmpt.product_id.mx_of_in       
-                    proposed = \
-                        proposed_hw * cmpt.product_qty - cmpt_net - cmpt_of
-
+                    cp = cmpt.product_id # readability
+                    # Check for pipes
+                    if not cp or cp.id in cmpt_present:
+                        yet_write = True # yet write in report before
+                    else:
+                        cmpt_present.append(cp.id)
+                        yet_write = False # yet write in report before
+                    
+                    cmpt_net = cp.mx_net_qty
+                    cmpt_of = cp.mx_of_in       
+                    
+                    # TODO check if not present error
+                    if cp not in cmpts:
+                        # raise error?
+                        _logger.error('Component not present: %s' % (
+                            cp.default_code or ''))
+                    
+                    proposed_cmpt = cmpts.get(cp, 0.0) 
+                    proposed = proposed_cmpt - cmpt_net - cmpt_of
+                    
                     # Add data block directly:
                     res.append(data_AB + [
                         cmpt.product_qty, # total 
-                        cmpt.product_id.default_code, # code
-                        proposed_hw * cmpt.product_qty,
+                        cp.default_code, # code
+                        proposed_cmpt,
                         cmpt_net,
                         cmpt_of,
                         proposed if proposed > 0.0 else '',
                         proposed if proposed <= 0.0 else '',
+                        yet_write,
                         ])
                             
                 if hw_first: # no cmpt data (not in loop)
                     res.append(data_A + data_B + empty_C)
+        import pdb; pdb.set_trace()    
         user_pool.set_no_inventory_status(
             cr, uid, value=previous_status, context=context)            
         return res

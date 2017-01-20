@@ -85,7 +85,9 @@
                             <field name="total_stop" widget="float_time" attrs="{'invisible': [('dep_mode','!=','workshop')]}"/>
 
                             <field name="linked_sl_id" states="done"/> <!--invisible="1"-->
+                            <field name="origin" />
                             <field name="picking_type_id" invisible="1" />
+                            
 		                    <separator string="Movimenti di Magazzino" colspan="4"/>
 		                    <field name="move_lines" context="{'default_picking_type_id': picking_type_id}" colspan="4" nolabel="1">
 		                        <tree string="Movement" editable="bottom">

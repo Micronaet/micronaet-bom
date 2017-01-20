@@ -271,7 +271,10 @@ class Parser(report_sxw.rml_parse):
                         ], extra)
                     continue # TODO raise error or log
                     
-                parent = default_code[:3] # XXX TODO this could be a problem
+                # Cannot use parent as first 3 char!!!    
+                #parent = default_code[:3]
+                parent = product.parent_bom_id.code or _('NODBERROR')
+                
                 if parent not in parent_todo:
                     # Stock, Order to produce, has stock negative
                     parent_todo[parent] = [

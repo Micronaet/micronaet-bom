@@ -244,10 +244,12 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------        
         # To produce line in order open
         # ---------------------------------------------------------------------        
-        # Database
+        # Database:
         parent_todo = {}
         stock_used = [] # for product and halfwork
-        hws = {}
+        
+        hws = {} # Halfworked database for collect HW informations
+        cmpts = {} # Component database for collect needed pipe
 
         order_ids = company_pool.mrp_domain_sale_order_line(
             cr, uid, context=context)
@@ -269,7 +271,7 @@ class Parser(report_sxw.rml_parse):
                         ], extra)
                     continue # TODO raise error or log
                     
-                parent = default_code[:3]
+                parent = default_code[:3] # XXX TODO this could be a problem
                 if parent not in parent_todo:
                     # Stock, Order to produce, has stock negative
                     parent_todo[parent] = [
@@ -284,7 +286,7 @@ class Parser(report_sxw.rml_parse):
                 # -------------------------------------------------------------    
                 # Populate parent database:
                 # -------------------------------------------------------------    
-                # Setup parent bom fist time only (and check when not present):
+                # Setup parent bom first time only (and check when not present)
                 parent_bom = product.parent_bom_id
                 if parent_bom and not parent_todo[parent][0]: 
                     # only once
@@ -298,7 +300,7 @@ class Parser(report_sxw.rml_parse):
                 # Stock check (use stock qty only once!):
                 # ---------------------------------------
                 if default_code not in stock_used:
-                    extra['stock_check'] += 'used'
+                    extra['stock_check'] += 'used' # XXX +=?
                     stock_used.append(default_code)
                     stock_net = product.mx_net_qty
                     # Check negative stock for highlight:
@@ -307,7 +309,7 @@ class Parser(report_sxw.rml_parse):
                     
                     parent_todo[parent][1] += stock_net # Net in stock (once)
                 else:
-                    extra['stock_check'] += 'not used'
+                    extra['stock_check'] += 'not used' # XXX +=?
                     stock_net = 0.0 # no used    
                 
                 # ---------------
@@ -359,7 +361,7 @@ class Parser(report_sxw.rml_parse):
                         hws[halfwork] = [
                             0.0, # 0. Needed                            
                             halfwork.mx_net_qty, # 1. Net (after - MRP) # TODO remove MRP ? 
-                            {}, # 2. XXX total component for check double order?
+                            {}, # 2. # compt (HW could be diff. depend on BOM)
                             # XXX No OF
                             ]
 
@@ -405,6 +407,18 @@ class Parser(report_sxw.rml_parse):
                     hws[halfwork][1] -= hw_q # - MRP # TODO check same problem
                     # TODO check if is bouble - MRP!!!
                     
+        import pdb; pdb.set_trace() 
+        # TODO generate here component database for pipes (from hws):
+        for halfwork, record in hws.iteritems():
+            needed = record[0]
+            for parent_cmpt, qty in record[2].iteritems():
+                #bom = parent_cmpt[0]
+                cmpt = parent_cmpt[1]
+                if cmpt in cmpts:
+                    cmpts[cmpt] += needed * qty
+                else:    
+                    cmpts[cmpt] = needed * qty
+                    
         # ---------------------------------------------------------------------
         # Prepare report:
         # ---------------------------------------------------------------------
@@ -415,7 +429,10 @@ class Parser(report_sxw.rml_parse):
         empty_B = ['' for n in range(0, 6)] # halfwork 6
         empty_C = ['' for n in range(0, 7)] # component 7
         
+        # TODO remove use cmpt_present instead:
         hw_present = [] # for highlight only first total in report (for orders)
+        
+        cmpt_present = [] # for remove double orders        
         for parent in sorted(parent_todo):
             record = parent_todo[parent]
             
@@ -440,6 +457,7 @@ class Parser(report_sxw.rml_parse):
 
             parent_first = True
             for hw in record[0].bom_line_ids:
+                # Check for pipes
                 if not hw.product_id or hw.product_id.id in hw_present:
                     yet_write = True # yet write in report before
                 else:
@@ -485,6 +503,7 @@ class Parser(report_sxw.rml_parse):
                     # ---------------------------------------------------------
                     #                  BLOCK C:
                     # ---------------------------------------------------------
+                    # TODO Change bloc C composition!
                     cmpt_net = cmpt.product_id.mx_net_qty
                     cmpt_of = cmpt.product_id.mx_of_in       
                     proposed = \

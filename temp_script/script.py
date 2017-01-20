@@ -21,6 +21,7 @@ import os
 import sys
 import logging
 import openerp
+import xlrd
 import xlsxwriter
 import openerp.netsvc as netsvc
 import openerp.addons.decimal_precision as dp
@@ -45,6 +46,24 @@ class ResCompany(orm.Model):
     _inherit = 'res.company'
 
     # Procedure:    
+    def correct_inventory_category(self, cr, uid, ids, context=None):
+        ''' Read XLS file for reassociate inventory category
+        ''' 
+        filename = '/home/administrator/photo/xls/inventory/category.xlsx'
+        try:
+            WB = xlrd.open_workbook(filename)
+        except:
+            raise osv.except_osv(
+                _('Error XLSX'), 
+                _('Cannot read XLS file: %s' % filename),
+                )
+        WS = xl_workbook.sheet_by_index(0)
+        for row in range(0, WS.nrows):
+            default_code = WS.cell(row_idx, 0)
+            category_name = WS.cell(row_idx, 1)
+            print default_code, category_name
+        return True
+        
     def pipe_status_export(self, cr, uid, ids, context=None):
         ''' Extract pipe status for inventory check
         '''

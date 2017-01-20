@@ -408,16 +408,24 @@ class Parser(report_sxw.rml_parse):
                     # TODO check if is bouble - MRP!!!
                     
         # TODO generate here component database for pipes (from hws):
-        import pdb; pdb.set_trace()
+        check_used = []
         for halfwork, record in hws.iteritems():
-            needed = record[0]
+            needed = record[0] - record[1] # proposed net (- stock)
             for parent_cmpt, qty in record[2].iteritems():
-                #bom = parent_cmpt[0]
-                cmpt = parent_cmpt[1]
-                if cmpt in cmpts:
-                    cmpts[cmpt] += needed * qty
-                else:    
-                    cmpts[cmpt] = needed * qty
+                db_hw = parent_cmpt[1]
+                for element in db_hw.half_bom_ids:
+                    check = (halfwork.product_id, element.product_id)
+                    if check in check_used:
+                        continue
+                    else:
+                        check_used.append(check)
+                            
+                    if element.product_id in cmpts:
+                        cmpts[element.product_id] += \
+                            needed * element.product_qty
+                    else:    
+                        cmpts[element.product_id] = \
+                            needed * element.product_qty
                     
         # ---------------------------------------------------------------------
         # Prepare report:
@@ -433,7 +441,6 @@ class Parser(report_sxw.rml_parse):
         hw_present = [] # for highlight only first total in report (for orders)
         
         cmpt_present = [] # for remove double orders        
-        import pdb; pdb.set_trace()
         for parent in sorted(parent_todo):
             record = parent_todo[parent]
             
@@ -531,7 +538,6 @@ class Parser(report_sxw.rml_parse):
                             
                 if hw_first: # no cmpt data (not in loop)
                     res.append(data_A + data_B + empty_C)
-        import pdb; pdb.set_trace()    
         user_pool.set_no_inventory_status(
             cr, uid, value=previous_status, context=context)            
         return res

@@ -59,21 +59,23 @@ class ResCompany(orm.Model):
             ], context=context)
             
         f_log.write(
-            'Codice|Cat. Stat.|Costo fornitore|Azienda|Cliente\n')
+            'Codice|Cat. Stat.|Costo fornitore|Azienda Da|A|Cliente Da|A\n')
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
-            product_pool.write(cr, uid, product.id, {
-                'company_cost': product.cost_in_stock,
-                'customer_cost': product.cost_for_sale,
-                }, context=context)
             f_log.write(
-                '%s|%s|%s|%s|%s\n' % (
+                '%s|%s|%s|%s|%s|%s|%s\n' % (
                     product.default_code,
                     product.statistic_category,
                     product.standard_price,
                     product.cost_in_stock,
+                    product.company_cost,
                     product.cost_for_sale,
+                    product.customer_cost,
                 )                
+            #product_pool.write(cr, uid, product.id, {
+            #    'company_cost': product.cost_in_stock,
+            #    'customer_cost': product.cost_for_sale,
+            #    }, context=context)
             
     def inventory_to_reset(self, cr, uid, ids, context=None):
         ''' Check error during operation on bom

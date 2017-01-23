@@ -91,31 +91,39 @@ class ResCompany(orm.Model):
        
         # Create database list for product:
         _logger.warning('Start export product')
-        f_log.write('Codice|Costo azienda|OF|MM\n')
+        f_log.write('Codice|INV|Costo azienda|Prezzo diff.|OF|MM\n')
         
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
             # OF status    
             of_status = ''
+            price_unit = 0.0        
+            price_difference = False
             for line in line_db.get(product.id, []):
-                of_status += '[%s creazione %s ordine %s]' % (
+                if not price_unit:
+                    price_unit = line.price_unit
+                elif price_unit != line.price_unit:
+                    price_difference = True
+                        
+                of_status += '[ %s doc. %s ]' % (
                     line.price_unit,
-                    line.create_date,
                     line.order_id.date_order,
                     )
             
             # MM status
             mm_status = ''
+            move_date = '' # TODO
             for line in move_db.get(product.id, []):
-                mm_status += '[%s creazione %s ordine %s]' % (
-                    line.price_unit,
+                mm_status += '[ %s doc. %s ]' % (
                     line.create_date,
-                    line.picking_id.date, # date_done
+                    line.picking_id.name, # date_done
                     )
             
-            f_log.write('%s|%s|%s|%s\n' % (
+            f_log.write('%s|%s|%s|%s|%s\n' % (
                 product.default_code, 
+                product.mx_start_qty,
                 product.company_cost,
+                'X' if price_difference else '',
                 of_status,
                 mm_status,
                 ))
@@ -138,7 +146,7 @@ class ResCompany(orm.Model):
             ], context=context)
             
         f_log.write(
-            'Codice|Cat. Stat.|Costo fornitore|Azienda Da|A|Cliente Da|A\n')
+            'Codice|INV|Cat. Stat.|Costo fornitore|Azienda Da|A|Cliente Da|A\n')
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
             f_log.write(

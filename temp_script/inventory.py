@@ -45,6 +45,36 @@ class ResCompany(orm.Model):
     _inherit = 'res.company'
 
     # Procedure:    
+    def save_cost_in_cost_method(self, cr, uid, ids, context=None):
+        ''' Migrate 3 cost from old part in new cost management
+        '''
+        # Log operation
+        log_file = '/home/administrator/photo/output/indoor_cost_migration.csv'
+        f_log = open(log_file, 'w')
+        
+        product_pool = self.pool.get('product.product')
+        product_ids = product_pool.search(cr, uid, [
+            ('statistic_category', 'in', (
+                'I01', 'I02', 'I03', 'I04', 'I05', 'I06')),
+            ], context=context)
+            
+        f_log.write(
+            'Codice|Cat. Stat.|Costo fornitore|Azienda|Cliente\n')
+        for product in product_pool.browse(
+                cr, uid, product_ids, context=context):
+            product_pool.write(cr, uid, product.id, {
+                'company_cost': product.cost_in_stock,
+                'customer_cost': product.cost_for_sale,
+                }, context=context)
+            f_log.write(
+                '%s|%s|%s|%s|%s\n' % (
+                    product.default_code,
+                    product.statistic_category,
+                    product.standard_price,
+                    product.cost_in_stock,
+                    product.cost_for_sale,
+                )                
+            
     def inventory_to_reset(self, cr, uid, ids, context=None):
         ''' Check error during operation on bom
         '''

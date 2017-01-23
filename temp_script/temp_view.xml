@@ -15,6 +15,7 @@
                             <button name="create_dynamic_rule" string="Create dynamic rule" type="object" />
                             <button name="pipe_status_export" string="Pipe status" type="object" />                            
                             <button name="correct_inventory_category" string="Correct inventory category" type="object" />                            
+                            <button name="save_cost_in_cost_method" string="Migrate cost company2" type="object" />                            
                         </group>
                     </page>
                 </xpath>

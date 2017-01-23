@@ -49,7 +49,8 @@ class ResCompany(orm.Model):
     def correct_inventory_category(self, cr, uid, ids, context=None):
         ''' Read XLS file for reassociate inventory category
         ''' 
-        filename = '/home/administrator/photo/xls/inventory/category.xlsx'
+        filename = '/home/administrator/photo/xls/inventory/category.xls'
+        #product.product.inventory.category
         try:
             WB = xlrd.open_workbook(filename)
         except:

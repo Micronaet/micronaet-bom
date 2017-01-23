@@ -60,31 +60,37 @@ class ResCompany(orm.Model):
         line_db = {}
         
         # Search only product in cat. stat: C01:
+        _logger.warning('Start select product')
         product_ids = product_pool.search(cr, uid, [
             ('statistic_category', '=', 'C01'),
             ], context=context)
-        product_ids = product_ids[:30] # DEMO Run
+        _logger.warning('End select, total: %s' len(product_ids))
         
         # Check purchase line for price:    
+        _logger.warning('Start select product')
         line_ids = line_pool.search(cr, uid, [
             ('product_id', 'in', product_ids),
             ('order_id.state', 'not in', ('draft', 'cancel')),
             ], context=context)
+        _logger.warning('End select purchase, total: %s' len(line_ids))
         for line in line_pool.browse(cr, uid, line_ids, context=context):
             if line.product_id.id not in line_db:
                 line_db[line.product_id.id] = []
             line_db[line.product_id.id].append(line)
             
         # Check stock move for sold in year    
+        _logger.warning('Start select product')
         move_ids = move_pool.search(cr, uid, [
             ('product_id', 'in', product_ids),
             ], context=context)
+        _logger.warning('End select move, total: %s' len(move_ids))
         for move in move_pool.browse(cr, uid, move_ids, context=context):
             if move.product_id.id not in move_db:
                 move_db[move.product_id.id] = []
             move_db[move.product_id.id].append(move)
        
         # Create database list for product:
+        _logger.warning('Start export product')
         f_log.write('Codice|Costo azienda|OF|MM\n')
         
         for product in product_pool.browse(
@@ -115,6 +121,7 @@ class ResCompany(orm.Model):
                 ))
                 
         f_log.close()
+        _logger.warning('End export product')
         return True
     
     def save_cost_in_cost_method(self, cr, uid, ids, context=None):

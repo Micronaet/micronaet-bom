@@ -176,7 +176,7 @@ class ResCompany(orm.Model):
                 'customer_cost': product.cost_for_sale,
                 }
                 
-        for product_id, data in res.iteritems:
+        for product_id, data in res.iteritems():
             product_pool.write(cr, uid, product_id, data, context=context)
         _logger.info('Migrated data!')
         return True        

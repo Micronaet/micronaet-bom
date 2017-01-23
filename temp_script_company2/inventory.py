@@ -179,5 +179,6 @@ class ResCompany(orm.Model):
         for product_id, data in res.iteritems():
             product_pool.write(cr, uid, product_id, data, context=context)
         _logger.info('Migrated data!')
+        f_log.close()
         return True        
     

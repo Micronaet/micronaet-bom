@@ -116,6 +116,9 @@ class ResCompany(orm.Model):
             move_date = '' # TODO
             moved = False
             for line in move_db.get(product.id, []):
+                if line.picking_id.name.startswith('WH/IN/00005'):
+                    continue
+            
                 if not line.picking_id.name.startswith('WH/IN'):
                     continue
                 if line.create_date > '2016-01-01':

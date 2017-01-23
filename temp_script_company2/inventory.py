@@ -135,7 +135,7 @@ class ResCompany(orm.Model):
                 product.default_code, 
                 product.mx_start_qty,
                 product.company_cost,
-                '%s' % ([item.quantity for item in product.transport_ids], )
+                '%s' % ([item.quantity for item in product.transport_ids], ),
                 'X' if price_difference else '',
                 'X' if moved else '',
                 of_name,

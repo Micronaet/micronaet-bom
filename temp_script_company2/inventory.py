@@ -107,7 +107,7 @@ class ResCompany(orm.Model):
                         
                 of_status += '[ %s doc. %s ]' % (
                     line.price_unit,
-                    line.order_id.date_order,
+                    line.order_id.date_order[:10],
                     )
             
             # MM status
@@ -120,7 +120,7 @@ class ResCompany(orm.Model):
                 if line.create_date > '2016-01-01':
                     moved = True    
                 mm_status += '[ %s doc. %s ]' % (
-                    line.create_date,
+                    line.create_date[:10],
                     line.picking_id.name, # date_done
                     )
             

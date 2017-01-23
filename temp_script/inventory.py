@@ -65,7 +65,7 @@ class ResCompany(orm.Model):
                     # Line:
                     line.product_id.default_code,
                     line.qty,
-                    )                    
+                    ))
         return True
     
     def inventory_to_reset(self, cr, uid, ids, context=None):

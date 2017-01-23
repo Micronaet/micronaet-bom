@@ -57,7 +57,7 @@ class ResCompany(orm.Model):
         out_f.write('Doc.|Create|Write|Date|Code|Qty|INV.\n')
         for pick in pick_pool.browse(cr, uid, pick_ids, context=context):
             for line in pick.sl_quants_ids:
-                out_f.write('%s|%s|%s|%s|%s|%s|%s\n' % (
+                row = '%s|%s|%s|%s|%s|%s|%s\n' % (
                     # Header:
                     pick.name,
                     pick.create_date,
@@ -68,7 +68,8 @@ class ResCompany(orm.Model):
                     line.product_id.default_code,
                     line.qty,                    
                     line.product_id.mx_start_qty,
-                    ))
+                    )
+                out_f.write(row.replace('.', ',')
         _logger.warning('End export lavoration')
         out_f.close()
         return True

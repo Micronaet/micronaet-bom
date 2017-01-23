@@ -148,6 +148,7 @@ class ResCompany(orm.Model):
         # Log operation
         log_file = '/home/administrator/photo/output/indoor_cost_migration.csv'
         f_log = open(log_file, 'w')
+        _logger.warning('Start migrate cost log on: %s' % log_file)
         
         product_pool = self.pool.get('product.product')
         product_ids = product_pool.search(cr, uid, [
@@ -177,6 +178,6 @@ class ResCompany(orm.Model):
                 
         for product_id, data in res.iteritems:
             product_pool.write(cr, uid, product_id, data, context=context)
-        _logger.info('Correct data!')
+        _logger.info('Migrated data!')
         return True        
     

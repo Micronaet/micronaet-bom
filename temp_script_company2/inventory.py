@@ -157,6 +157,7 @@ class ResCompany(orm.Model):
             
         f_log.write(
             'Codice|INV|Cat. Stat.|Costo fornitore|Azienda Da|A|Cliente Da|A\n')
+        res = {}    
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
             f_log.write(
@@ -169,8 +170,13 @@ class ResCompany(orm.Model):
                     product.cost_for_sale,
                     product.customer_cost,
                 ))
-            product_pool.write(cr, uid, product.id, {
+            res[product.id] = {
                 'company_cost': product.cost_in_stock,
                 'customer_cost': product.cost_for_sale,
-                }, context=context)
+                }
+                
+        for product_id, data in res.iteritems:
+            product_pool.write(cr, uid, product_id, data, context=context)
+        _logger.info('Correct data!')
+        return True        
     

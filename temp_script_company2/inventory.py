@@ -91,7 +91,7 @@ class ResCompany(orm.Model):
        
         # Create database list for product:
         _logger.warning('Start export product')
-        f_log.write('Codice|INV|Costo azienda|Prezzo diff.|OF|MM\n')
+        f_log.write('Codice|INV|Costo azienda|Prezzo diff.|Movimentato 2016|OF|MM\n')
         
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
@@ -113,17 +113,23 @@ class ResCompany(orm.Model):
             # MM status
             mm_status = ''
             move_date = '' # TODO
+            moved = False
             for line in move_db.get(product.id, []):
+                if not line.picking_id.name.startswith('WH/IN'):
+                    continue
+                if line.create_date > '2016-01-01':
+                    moved = True    
                 mm_status += '[ %s doc. %s ]' % (
                     line.create_date,
                     line.picking_id.name, # date_done
                     )
             
-            f_log.write('%s|%s|%s|%s|%s|%s\n' % (
+            f_log.write('%s|%s|%s|%s|%s|%s|%s\n' % (
                 product.default_code, 
                 product.mx_start_qty,
                 product.company_cost,
                 'X' if price_difference else '',
+                'X' if moved else '',
                 of_status,
                 mm_status,
                 ))

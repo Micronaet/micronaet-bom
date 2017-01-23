@@ -53,7 +53,8 @@ class ResCompany(orm.Model):
         pick_pool = self.pool.get('stock.picking')
         pick_ids = pick_pool.search(cr, uid, [
             ('create_date', '>=', '2017-01-01 00:00:00'),
-            ('date', '<=', '2017-31-12 23:59:59'], context=context)
+            ('date', '<=', '2017-31-12 23:59:59'),
+            ], context=context)
         for pick in pick_pool.browse(cr, uid, pick_ids, context=context):
             for line in pick.sl_quants_ids:
                 out_f.write('%s|%s|%s|%s|%s' % (

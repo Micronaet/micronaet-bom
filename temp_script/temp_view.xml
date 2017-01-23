@@ -15,6 +15,7 @@
                             <button name="create_dynamic_rule" string="Create dynamic rule" type="object" />
                             <button name="pipe_status_export" string="Pipe status" type="object" />                            
                             <button name="correct_inventory_category" string="Correct inventory category" type="object" />                            
+                            <button name="lavoration_inventory_modification" string="Lavoration problem 2016" type="object" />
                         </group>
                     </page>
                 </xpath>

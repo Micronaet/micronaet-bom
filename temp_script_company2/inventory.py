@@ -44,31 +44,36 @@ class ResCompany(orm.Model):
     """
     _inherit = 'res.company'
 
-
-    def inventory_to_reset(self, cr, uid, ids, context=None):
-        ''' Check error during operation on bom
+    # Procedure:    
+    def save_cost_in_cost_method(self, cr, uid, ids, context=None):
+        ''' Migrate 3 cost from old part in new cost management
         '''
-        out_file = '/home/administrator/photo/log/product_to_reset'
-        out_file_jump = '/home/administrator/photo/log/product_to_reset_jumped'
+        # Log operation
+        log_file = '/home/administrator/photo/output/indoor_cost_migration.csv'
+        f_log = open(log_file, 'w')
         
-        out_f = open(out_file, 'w')
-        out_jump = open(out_file_jump, 'w')
-        
-        # Pool used:
         product_pool = self.pool.get('product.product')
-
-        # Check HW bon link:
         product_ids = product_pool.search(cr, uid, [
-            ('default_code', 'not in', product_present),                     
+            ('statistic_category', 'in', (
+                'I01', 'I02', 'I03', 'I04', 'I05', 'I06')),
             ], context=context)
-
+            
+        f_log.write(
+            'Codice|Cat. Stat.|Costo fornitore|Azienda Da|A|Cliente Da|A\n')
         for product in product_pool.browse(
-                cr, uid, product_ids, context=context):                
-            if not product.default_code or product.default_code[:1] not in \
-                    '1234567890G':                    
-                out_jump.write('%s|0\n' % product.default_code)
-                continue     
-                    
-            out_f.write('%s|0\n' % product.default_code)
-        out_f.close()
-        out_jump.close()        
+                cr, uid, product_ids, context=context):
+            f_log.write(
+                '%s|%s|%s|%s|%s|%s|%s\n' % (
+                    product.default_code,
+                    product.statistic_category,
+                    product.standard_price,
+                    product.cost_in_stock,
+                    product.company_cost,
+                    product.cost_for_sale,
+                    product.customer_cost,
+                )                
+            #product_pool.write(cr, uid, product.id, {
+            #    'company_cost': product.cost_in_stock,
+            #    'customer_cost': product.cost_for_sale,
+            #    }, context=context)
+    

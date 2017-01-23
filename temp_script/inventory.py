@@ -56,9 +56,10 @@ class ResCompany(orm.Model):
             ('create_date', '>=', '2017-01-01 00:00:00'),
             ('date', '<', '2017-01-01'),
             ], context=context)
+            
         for pick in pick_pool.browse(cr, uid, pick_ids, context=context):
             for line in pick.sl_quants_ids:
-                out_f.write('%s|%s|%s|%s|%s' % (
+                out_f.write('%s|%s|%s|%s|%s\n' % (
                     # Header:
                     pick.name,
                     pick.create_date,

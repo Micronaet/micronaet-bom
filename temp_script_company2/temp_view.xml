@@ -10,6 +10,7 @@
                     <page string="Temp script">
                         <group colspan="4" col="4">
                             <button name="save_cost_in_cost_method" string="Migrate cost company2" type="object" />                            
+                            <button name="export_product_status_for_inventory" string="Export C01" type="object" />
                         </group>
                     </page>
                 </xpath>

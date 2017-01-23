@@ -64,7 +64,7 @@ class ResCompany(orm.Model):
         product_ids = product_pool.search(cr, uid, [
             ('statistic_category', '=', 'C01'),
             ], context=context)
-        _logger.warning('End select, total: %s' len(product_ids))
+        _logger.warning('End select, total: %s' % len(product_ids))
         
         # Check purchase line for price:    
         _logger.warning('Start select product')
@@ -72,7 +72,7 @@ class ResCompany(orm.Model):
             ('product_id', 'in', product_ids),
             ('order_id.state', 'not in', ('draft', 'cancel')),
             ], context=context)
-        _logger.warning('End select purchase, total: %s' len(line_ids))
+        _logger.warning('End select purchase, total: %s' % len(line_ids))
         for line in line_pool.browse(cr, uid, line_ids, context=context):
             if line.product_id.id not in line_db:
                 line_db[line.product_id.id] = []
@@ -83,7 +83,7 @@ class ResCompany(orm.Model):
         move_ids = move_pool.search(cr, uid, [
             ('product_id', 'in', product_ids),
             ], context=context)
-        _logger.warning('End select move, total: %s' len(move_ids))
+        _logger.warning('End select move, total: %s' % len(move_ids))
         for move in move_pool.browse(cr, uid, move_ids, context=context):
             if move.product_id.id not in move_db:
                 move_db[move.product_id.id] = []

@@ -82,6 +82,7 @@ class ResCompany(orm.Model):
         _logger.warning('Start select product')
         move_ids = move_pool.search(cr, uid, [
             ('product_id', 'in', product_ids),
+            ('state', '=', 'done'),
             ], context=context)
         _logger.warning('End select move, total: %s' % len(move_ids))
         for move in move_pool.browse(cr, uid, move_ids, context=context):

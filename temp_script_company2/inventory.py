@@ -92,7 +92,7 @@ class ResCompany(orm.Model):
        
         # Create database list for product:
         _logger.warning('Start export product')
-        f_log.write('Codice|INV|Costo azienda|Fatt.|Prezzo diff.|Movimentato 2016|OF|MM\n')
+        f_log.write('Codice|INV|Costo azienda|Pz. camion|Prezzo diff.|Movimentato 2016|Fatt.|OF|MM\n')
         
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
@@ -135,9 +135,10 @@ class ResCompany(orm.Model):
                 product.default_code, 
                 product.mx_start_qty,
                 product.company_cost,
-                of_name,
+                '%s' % ([item.quantity for item in product.transport_ids], )
                 'X' if price_difference else '',
                 'X' if moved else '',
+                of_name,
                 of_status,
                 mm_status,
                 ))

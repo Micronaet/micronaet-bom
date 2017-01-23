@@ -52,7 +52,7 @@ class ResCompany(orm.Model):
         _logger.warning('Export lavoration problem: %s' % out_file)
         
         pick_pool = self.pool.get('stock.picking')
-        pick_ids = pick_pool.search(cr, uid, [], context=context)
+        pick_ids = pick_pool.search(cr, uid, [], order='name', context=context)
         
     out_f.write('Doc.|Create|Write|Date|Code|Qty\n')
         for pick in pick_pool.browse(cr, uid, pick_ids, context=context):
@@ -63,6 +63,7 @@ class ResCompany(orm.Model):
                     pick.create_date,
                     pick.write_date,
                     pick.date,
+                    
                     # Line:
                     line.product_id.default_code,
                     line.qty,                    

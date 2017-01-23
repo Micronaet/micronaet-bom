@@ -102,6 +102,8 @@ class ResCompany(orm.Model):
             price_difference = False
             of_name = ''
             for line in line_db.get(product.id, []):
+                if line.order_id.name.startswith('INV'):
+                    continue
                 if not price_unit:
                     price_unit = line.price_unit
                 elif price_unit != line.price_unit:

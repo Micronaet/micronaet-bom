@@ -54,10 +54,10 @@ class ResCompany(orm.Model):
         pick_pool = self.pool.get('stock.picking')
         pick_ids = pick_pool.search(cr, uid, [], order='name', context=context)
         
-        out_f.write('Doc.|Create|Write|Date|Code|Qty\n')
+        out_f.write('Doc.|Create|Write|Date|Code|Qty|INV.\n')
         for pick in pick_pool.browse(cr, uid, pick_ids, context=context):
             for line in pick.sl_quants_ids:
-                out_f.write('%s|%s|%s|%s|%s|%s\n' % (
+                out_f.write('%s|%s|%s|%s|%s|%s|%s\n' % (
                     # Header:
                     pick.name,
                     pick.create_date,
@@ -67,6 +67,7 @@ class ResCompany(orm.Model):
                     # Line:
                     line.product_id.default_code,
                     line.qty,                    
+                    line.product_id.mx_start_qty,
                     ))
         _logger.warning('End export lavoration')
         out_f.close()

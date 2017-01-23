@@ -67,6 +67,7 @@ class ResCompany(orm.Model):
                     line.qty,
                     ))
         _logger.warning('End export lavoration')
+        out_f.close()
         return True
     
     def inventory_to_reset(self, cr, uid, ids, context=None):

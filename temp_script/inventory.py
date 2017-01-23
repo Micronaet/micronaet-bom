@@ -44,7 +44,29 @@ class ResCompany(orm.Model):
     """
     _inherit = 'res.company'
 
-
+    def lavoration_inventory_modification(self, cr, uid, ids, context=None):
+        ''' Export data from lavoration
+        '''
+        out_file = '/home/administrator/photo/log/product_to_reset'
+        out_f = open(out_file, 'w')
+        
+        pick_pool = self.pool.get('stock.picking')
+        pick_ids = pick_pool.search(cr, uid, [
+            ('create_date', '>=', '2017-01-01 00:00:00'),
+            ('date', '<=', '2017-31-12 23:59:59'], context=context)
+        for pick in pick_pool.browse(cr, uid, pick_ids, context=context):
+            for line in pick.sl_quants_ids:
+                out_f.write('%s|%s|%s|%s|%s' % (
+                    # Header:
+                    pick.name,
+                    pick.create_date,
+                    pick.date,
+                    # Line:
+                    line.product_id.default_code,
+                    line.qty,
+                    )                    
+        return True
+    
     def inventory_to_reset(self, cr, uid, ids, context=None):
         ''' Check error during operation on bom
         '''

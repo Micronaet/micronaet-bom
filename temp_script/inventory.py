@@ -69,7 +69,7 @@ class ResCompany(orm.Model):
                     line.qty,                    
                     line.product_id.mx_start_qty,
                     )
-                out_f.write(row.replace('.', ',')
+                out_f.write(row.replace('.', ','))
         _logger.warning('End export lavoration')
         out_f.close()
         return True

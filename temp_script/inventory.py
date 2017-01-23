@@ -47,8 +47,9 @@ class ResCompany(orm.Model):
     def lavoration_inventory_modification(self, cr, uid, ids, context=None):
         ''' Export data from lavoration
         '''
-        out_file = '/home/administrator/photo/log/product_to_reset'
+        out_file = '/home/administrator/photo/output/lavoration_problem.csv'
         out_f = open(out_file, 'w')
+        _logger.warning('Export lavoration problem: %s' % out_file)
         
         pick_pool = self.pool.get('stock.picking')
         pick_ids = pick_pool.search(cr, uid, [
@@ -66,6 +67,7 @@ class ResCompany(orm.Model):
                     line.product_id.default_code,
                     line.qty,
                     ))
+        _logger.warning('End export lavoration')
         return True
     
     def inventory_to_reset(self, cr, uid, ids, context=None):

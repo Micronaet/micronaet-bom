@@ -131,7 +131,7 @@ class ResCompany(orm.Model):
                     line.picking_id.name, # date_done
                     )
             
-            f_log.write('%s|%s|%s|%s|%s|%s|%s|%s\n' % (
+            f_log.write('%s|%s|%s|%s|%s|%s|%s|%s|%s\n' % (
                 product.default_code, 
                 product.mx_start_qty,
                 product.company_cost,

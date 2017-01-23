@@ -71,7 +71,7 @@ class ResCompany(orm.Model):
                     product.company_cost,
                     product.cost_for_sale,
                     product.customer_cost,
-                )                
+                ))
             #product_pool.write(cr, uid, product.id, {
             #    'company_cost': product.cost_in_stock,
             #    'customer_cost': product.cost_for_sale,

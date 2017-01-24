@@ -46,6 +46,58 @@ class ResCompany(orm.Model):
     _inherit = 'res.company'
 
     # Procedure:    
+    def get_excel_evaluation_supplier(self, cr, uid, ids, context=None):
+        ''' Import code, export extra data for purchase
+        '''
+        filename = '/home/administrator/photo/xls/inventory/product.csv'
+        data = '/home/administrator/photo/xls/inventory/product_with_data.csv'
+        
+        product_pool = self.pool.get('product.product')
+        codes = []   
+        try:     
+            f_in = open(filename, 'r')
+        except:
+            raise osv.except_osv(
+                _('Error open file'), 
+                _('Not found: %s' % filename),
+                ) 
+                         
+        for item in f_in:
+            code = item.strip()
+            codes.append(code)
+        
+        product_ids = product_pool.search(cr, uid, [
+            ('default_code', 'in', codes),
+            ], context=context)    
+        
+        f_out = open(data, 'w')
+        for product in product_pool.browse(
+                cr, uid, product_ids, context=context):
+                
+            cost = 0.0
+            supplier = ''
+            old_date = False
+            not_found = True
+            for seller in product.seller_ids:
+                for pl in seller.pricelist_ids:
+                    current_date = pl.write_date
+                    if not old_date or old_date < current_date:
+                        old_date = current_date
+                        not_found = False
+                        cost = pl.price
+                        supplier = seller.name.name
+            cost = ('%s' % cost).replace('.', ',')
+            row = '%s|%s|%s|%s|%s\n' % (
+                product.default_code,
+                cost,
+                supplier,
+                old_date,
+                '?' if not_found else '',
+                )
+            f_out.write(row)
+        return True
+        
+        
     def correct_inventory_category(self, cr, uid, ids, context=None):
         ''' Read XLS file for reassociate inventory category
         ''' 

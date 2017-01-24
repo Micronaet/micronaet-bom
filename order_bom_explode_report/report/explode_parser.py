@@ -132,14 +132,17 @@ class MrpProduction(orm.Model):
         # Get product BOM dyamic lines (from active order):
         product_data = sale_pool.get_component_in_product_order_open(
             cr, uid, context=context)
+        # TODO manage all product for particular category? 
+        # SO: filter product in category instead of ordered product    
 
         inventory_pos = get_position_season(get_date())
 
         # Load Y axis for report (halfwork or component):
         y_axis = {}
-        for product in product_data['product']:
-            for item in product.dynamic_bom_line_ids:
-                # XXX Filter category always in hw not component!
+        for product in product_data['product']: # XXX Product ordered for now
+            for item in product.dynamic_bom_line_ids: # XXX All Halfworked:
+                
+                # XXX NOTE: Filter category always in hw not component!
                 if with_type_ids and \
                         item.category_id.type_id.id not in with_type_ids:
                     continue # Jump not in category selected
@@ -180,6 +183,7 @@ class MrpProduction(orm.Model):
         exclude_partner_ids = []
 
         # Append also this company partner for inventory that need to be excl.    
+        # TODO check if is correct the remove of company:
         exclude_partner_ids.append(company_proxy.partner_id.id)
         
         # From date:

@@ -60,20 +60,55 @@ class StockPicking(orm.Model):
             for hw in product.dynamic_bom_line_ids:
                 _logger.info('Category: %s' % hw.category_id.name)
                 if hw.category_id.department == 'cut':
-                    info += '%s %s %s %s\n' % (    
-                        product.default_code,
-                        hw.category_id.name,
-                        hw.product_id.default_code,
-                        qty,
-                        )
-            
+                    info += '''
+                        <tr class='table_bf'>
+                            <td>%s</td>
+                            <td>%s</td>
+                            <td>%s</td>
+                            <td>%s</td>
+                        </tr>
+                        ''' % (    
+                            product.default_code,
+                            qty,
+                            hw.category_id.name,
+                            hw.product_id.default_code,
+                            )
+        info = _('''
+            <style>
+                    .table_mrp {
+                         border:1px 
+                         padding: 3px;
+                         solid black;
+                     }
+                    .table_mrp td {
+                         border:1px 
+                         solid black;
+                         padding: 3px;
+                         text-align: center;
+                     }
+                    .table_mrp th {
+                         border:1px 
+                         solid black;
+                         padding: 3px;
+                         text-align: center;
+                         background-color: grey;
+                         color: white;
+                     }
+                </style>
+            <table class='table_mrp'>
+                <tr class='table_bf'>
+                    <th>Code</th>
+                    <th>Q.</th>
+                    <th>Category</th>
+                    <th>Component</th>                    
+                </tr>%s</table>''') % info
         return self.write(cr, uid, ids, {
             'mrp_material_info': info,
             }, context=context)
     _columns = {
         'linked_mrp_id': fields.many2one(
             'mrp.production', 'Linked MRP'),
-        'mrp_material_info': fields.text('MRP material info'),
+        'mrp_material_info': fields.text('MRP material info', readonly=True),
         }
 
 class MrpProduction(orm.Model):

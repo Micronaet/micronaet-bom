@@ -75,7 +75,6 @@
                         <group col="4" colspan="4">
                             <field name="name" />
                             <field name="date" />
-                            <field name="linked_mrp_id" attrs="{'invisible': [('dep_mode','!=','cut')]}" domain="[('state', 'not in', ('cancel', 'done'))]"/>
                             <field name="device_id" attrs="{'invisible': [('dep_mode','!=','workshop')]}"/>
                             <field name="workers" attrs="{'invisible': [('dep_mode','!=','workshop')]}"/>
                             <field name="dep_mode" invisible="1" />
@@ -87,24 +86,30 @@
                             <field name="linked_sl_id" states="done"/> <!--invisible="1"-->
                             <field name="origin" />
                             <field name="picking_type_id" invisible="1" />
-                            
-		                    <separator string="Movimenti di Magazzino" colspan="4"/>
-		                    <field name="move_lines" context="{'default_picking_type_id': picking_type_id}" colspan="4" nolabel="1">
-		                        <tree string="Movement" editable="bottom">
-		                            <field name="product_id" on_change="onchange_product_id(product_id, location_id, location_dest_id, parent.partner_id)" domain="[('relative_type', '=', 'half')]"/>
-		                            <field name="product_uom_qty" string="Pieces"/>
-		                            <field name="product_fail_qty" string="Fail" invisible="context.get('default_dep_mode', False) != 'workshop'"/>
-		                            <field name="product_uom" invisible="1"/>
-		                            <field name="linked_sl_status" readonly="1" />
-		                            <field name="name" invisible="1"/>
-		                            <field name="date" invisible="1" />				                            
-		                            <field name="location_id" invisible="1" />
-		                            <field name="location_dest_id" invisible="1" />
-		                            <field name="invoice_state" invisible="1" />
-		                            <field name="date_expected" invisible="1" />
-		                            <field name="state" invisible="1" />				                            
-		                        </tree>
-		                    </field>
+                            <notebook colspan="4">
+                                <page string="Stock">
+                                    <group col="4" colspan="4">
+		                                <separator string="Movimenti di Magazzino" colspan="4"/>
+		                                <field name="move_lines" context="{'default_picking_type_id': picking_type_id}" colspan="4" nolabel="1">
+		                                    <tree string="Movement" editable="bottom">
+		                                        <field name="product_id" on_change="onchange_product_id(product_id, location_id, location_dest_id, parent.partner_id)" domain="[('relative_type', '=', 'half')]"/>
+		                                        <field name="product_uom_qty" string="Pieces"/>
+		                                        <field name="product_fail_qty" string="Fail" invisible="context.get('default_dep_mode', False) != 'workshop'"/>
+		                                        <field name="product_uom" invisible="1"/>
+		                                        <field name="linked_sl_status" readonly="1" />
+		                                        <field name="name" invisible="1"/>
+		                                        <field name="date" invisible="1" />				                            
+		                                        <field name="location_id" invisible="1" />
+		                                        <field name="location_dest_id" invisible="1" />
+		                                        <field name="invoice_state" invisible="1" />
+		                                        <field name="date_expected" invisible="1" />
+		                                        <field name="state" invisible="1" />				                            
+		                                    </tree>
+		                                </field>
+		                            </group>
+                                </page>
+                            </notebook>
+                            <field name="linked_mrp_id" attrs="{'invisible': [('dep_mode','!=','cut')]}" domain="[('state', 'not in', ('cancel', 'done'))]"/>
 		                    <separator string="Q. Magazzino" colspan="4"/>
 		                    <field name="sl_quants_ids" states="done" colspan="4" nolabel="1"/>
 		                    <field name="note" placeholder="Add lavoration internal note..." colspan="4" nolabel="1"/>

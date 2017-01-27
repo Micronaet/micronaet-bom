@@ -65,6 +65,13 @@ class MrpBomCategoryStructureCategory(orm.Model):
             help='Category element (for BOM structure)'),
         'type_id': fields.many2one(
             'mrp.bom.structure.category.type', 'Type'),# required=True),    
+        'important': fields.boolean('Important'),    
+        'department': fields.selection([
+            ('cut', 'Cut'),
+            ('ware', 'Ware'),
+            ('plastic', 'Plastic'),
+            ], 'Department' ),
+            
         'note': fields.text('Note'),        
         }
 

@@ -7,8 +7,10 @@
             <field name="model">mrp.bom.structure.category</field>
             <field name="arch" type="xml">
                 <tree string="BOM structure category" editable="bottom">
+                    <field name="important" />
                     <field name="name" />
                     <field name="type_id" />
+                    <field name="department" />
                     <field name="note" />
                 </tree>
             </field>
@@ -20,8 +22,10 @@
                 <form string="BOM structure category" version="7.0">
                     <sheet>
                         <group colspan="4" col="4">
+                            <field name="important" />
                             <field name="name" />
                             <field name="type_id" />
+                            <field name="department" />
                             <separator string="Note" colspan="4"/>
                             <field name="note" colspan="4" nolabel="1"/>
                         </group>    

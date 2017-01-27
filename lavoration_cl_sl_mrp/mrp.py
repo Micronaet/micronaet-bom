@@ -40,13 +40,40 @@ _logger = logging.getLogger(__name__)
 
 class StockPicking(orm.Model):
     """ Model name: Stock Picking extra link to MRP
-    """
-    
+    """    
     _inherit = 'stock.picking'
     
+    def get_material_info_from_mrp(self, cr, uid, ids, context=None):
+        ''' Extract info from MRP linked
+        ''' 
+        info = ''
+        current_proxy = self.browse(cr, uid, ids, context=context)[0]
+        
+        res = {}
+        for line in current_proxy.linked_mrp_id.order_line_ids:
+            product = line.product_id
+            if product in res:
+                res[product] += line.product_uom_qty
+            else:
+                res[product] = line.product_uom_qty
+        for product, qty in res.iteritems():
+            for hw in product.dynamic_bom_line_ids:
+                _logger.info('Category: %s' % hw.category_id.name)
+                if hw.category_id.department == 'cut':
+                    info += '%s %s %s %s\n' % (    
+                        product.default_code,
+                        hw.category_id.name,
+                        hw.product_id.default_code,
+                        qty,
+                        )
+            
+        return self.write(cr, uid, ids, {
+            'mrp_material_info': info,
+            }, context=context)
     _columns = {
         'linked_mrp_id': fields.many2one(
             'mrp.production', 'Linked MRP'),
+        'mrp_material_info': fields.text('MRP material info'),
         }
 
 class MrpProduction(orm.Model):

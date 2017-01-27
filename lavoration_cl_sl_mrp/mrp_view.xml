@@ -7,7 +7,12 @@
             <field name="inherit_id" ref="lavoration_cl_sl.view_stock_picking_cl_form"/>
             <field name="arch" type="xml">
                 <field name="dep_mode" position="after">
-                    <field name="linked_mrp_id" attrs="{'invisible': [('dep_mode','!=','cut')]}"/>                    
+                    <field name="linked_mrp_id" attrs="{'invisible': [('dep_mode','!=','cut')]}"/>
+                    <button name="get_material_info_from_mrp" string="MRP info" type="object" attrs="{'invisible':[('linked_mrp_id','=',False)]}"/>                  
+                </field>
+                <field name="note" position="after">  
+                    <separator string="MRP info" colspan="4"/>
+                    <field name="mrp_material_info" nolabel="1" colspan="4" />
                 </field>
             </field>
         </record>
@@ -29,8 +34,7 @@
                     </page>
                 </xpath>
             </field>
-        </record>    
-        
+        </record>        
     </data>
 </openerp>
 

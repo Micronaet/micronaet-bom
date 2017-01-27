@@ -470,6 +470,10 @@ class MRPBom(orm.Model):
     _columns = {
         'structure_id': fields.many2one('structure.structure', 'Structure', 
             help='Structure reference'),
+        'min_optional': fields.integer('Min. Optional', 
+            help='Min number of optional placeholdeer element'),
+        'max_optional': fields.integer('Max. Optional',
+            help='Max number of optional placeholdeer element'),
         }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

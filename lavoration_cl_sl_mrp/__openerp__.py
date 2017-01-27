@@ -18,7 +18,7 @@
 ###############################################################################
 
 {
-    'name': 'Link lavoration with MRP',
+    'name': 'NOT USED: Link lavoration with MRP',
     'version': '0.1',
     'category': 'MRP',
     'description': '''        

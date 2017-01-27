@@ -99,6 +99,8 @@
 		                    <field name="code" />
 		                    <field name="type"  required="1"/>
 		                    <field name="bom_category" />
+		                    <field name="min_optional" attrs="{'invisible': [('bom_category','!=','parent')]}" />
+		                    <field name="max_optional" attrs="{'invisible': [('bom_category','!=','parent')]}" />
 		                    <field name="company_id" widget="selection" invisible="1" />
 	                    </group>
                         <notebook colspan="4">

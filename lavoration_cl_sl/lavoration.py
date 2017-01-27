@@ -138,7 +138,70 @@ class MRPLavoration(orm.Model):
     """ Manage lavoration as a new object
     """
     _inherit = 'stock.picking'
-    
+
+    def get_material_info_from_mrp(self, cr, uid, ids, context=None):
+        ''' Extract info from MRP linked
+        ''' 
+        info = ''
+        current_proxy = self.browse(cr, uid, ids, context=context)[0]
+        
+        res = {}
+        for line in current_proxy.linked_mrp_id.order_line_ids:
+            product = line.product_id
+            if product in res:
+                res[product] += line.product_uom_qty
+            else:
+                res[product] = line.product_uom_qty
+        for product, qty in res.iteritems():
+            for hw in product.dynamic_bom_line_ids:
+                _logger.info('Category: %s' % hw.category_id.name)
+                if hw.category_id.department == 'cut':
+                    info += '''
+                        <tr class='table_bf'>
+                            <td>%s</td>
+                            <td>%s</td>
+                            <td>%s</td>
+                            <td>%s</td>
+                        </tr>
+                        ''' % (    
+                            product.default_code,
+                            qty,
+                            hw.category_id.name,
+                            hw.product_id.default_code,
+                            )
+        info = _('''
+            <style>
+                    .table_mrp {
+                         border:1px 
+                         padding: 3px;
+                         solid black;
+                     }
+                    .table_mrp td {
+                         border:1px 
+                         solid black;
+                         padding: 3px;
+                         text-align: center;
+                     }
+                    .table_mrp th {
+                         border:1px 
+                         solid black;
+                         padding: 3px;
+                         text-align: center;
+                         background-color: grey;
+                         color: white;
+                     }
+                </style>
+            <table class='table_mrp'>
+                <tr class='table_bf'>
+                    <th>Code</th>
+                    <th>Q.</th>
+                    <th>Category</th>
+                    <th>Component</th>                    
+                </tr>%s</table>''') % info
+        return self.write(cr, uid, ids, {
+            'mrp_material_info': info,
+            }, context=context)
+                
     def force_done(self, cr, uid, ids, context=None):
         ''' Confirm lavoration
         '''
@@ -349,6 +412,7 @@ class MRPLavoration(orm.Model):
                 'cancel': [('readonly', True)],
                 }, required=True),
         'linked_mrp_id': fields.many2one('mrp.production', 'MRP linked'),
+        'mrp_material_info': fields.text('MRP material info', readonly=True),
         'linked_sl_id': fields.many2one('stock.picking', 'SL linked'),
         'sl_quants_ids': fields.one2many(
             'stock.quant', 'lavoration_link_id', 'Stock quants',),

@@ -110,6 +110,10 @@
                                 </page>
                             </notebook>
                             <field name="linked_mrp_id" attrs="{'invisible': [('dep_mode','!=','cut')]}" domain="[('state', 'not in', ('cancel', 'done'))]"/>
+                            <button name="get_material_info_from_mrp" string="MRP info" type="object" attrs="{'invisible':[('linked_mrp_id','=',False)]}"/>                  
+                            <separator string="MRP info" colspan="4" attrs="{'invisible':[('linked_mrp_id','=',False)]}"/>
+                            <field name="mrp_material_info" nolabel="1" colspan="4"  attrs="{'invisible':[('linked_mrp_id','=',False)]}" widget="html"/>
+                            
 		                    <separator string="Q. Magazzino" colspan="4"/>
 		                    <field name="sl_quants_ids" states="done" colspan="4" nolabel="1"/>
 		                    <field name="note" placeholder="Add lavoration internal note..." colspan="4" nolabel="1"/>

@@ -125,6 +125,17 @@
                 </form>
             </field>
         </record>
+        <record model="ir.ui.view" id="view_bom_category_code_form">
+            <field name="name">mrp.bom.category.code.form</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="bom_category.view_bom_category_code_form"/>
+            <field name="arch" type="xml">
+                <field name="bom_category" position="after">
+                    <field name="min_optional" attrs="{'invisible': [('bom_category','!=','parent')]}" />
+                    <field name="max_optional" attrs="{'invisible': [('bom_category','!=','parent')]}" />
+                </field>
+            </field>
+        </record>
         
         <!--mrp.bom.line-->
         <record model="ir.ui.view" id="view_mrp_bom_line_search">

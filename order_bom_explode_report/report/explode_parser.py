@@ -135,7 +135,8 @@ class MrpProduction(orm.Model):
         # TODO manage all product for particular category? 
         # SO: filter product in category instead of ordered product    
 
-        inventory_pos = get_position_season(get_date())
+        # Maybe removed:
+        inventory_pos = get_position_season(get_date()) # for inventory mangm.1
 
         # Load Y axis for report (halfwork or component):
         y_axis = {}
@@ -207,13 +208,15 @@ class MrpProduction(orm.Model):
         mask = '%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n'    
 
         # =====================================================================
-        # 1. LOAD PICKING (CUSTOMER ORDER AND PICK IN )
+        # 1. LOAD PICKING (CUSTOMER ORDER AND PICK IN)
         # =====================================================================
-        block = 'OF and BF' # CL, CL lav., CL inv.
+        block = 'OF, BF, CL, CL prod., CL lav., CL inv.'
+        # Keep exclude_partner_ids for CL production esclusion?
         # XXX Note: first for creation of new elements if not present in OC
         
         in_picking_type_ids = []
-        # XXX Note: use textilene data fields:
+
+        # Use textilene company page:
         for item in company_proxy.stock_report_tx_load_in_ids:
             in_picking_type_ids.append(item.id)
             
@@ -273,7 +276,8 @@ class MrpProduction(orm.Model):
                 # -------------------------------------------------------------
                 # Order delivered so picking in movement
                 elif line.state == 'done':
-                    date = pick.date_done or pick.min_date or pick.date
+                    date = pick.date or pick.date_done or pick.min_date
+                    # 28 gen. 2017 data is now first, after is the last!
                     pos = get_position_season(date)
                 
                     # USE order data:

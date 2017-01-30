@@ -536,6 +536,18 @@ class MrpProduction(orm.Model):
                     for comp in product.dynamic_bom_line_ids:
                         comp_code = comp.product_id.default_code
                         comp_qty = qty * comp.product_qty 
+
+                        # Check placehoder:
+                        if comp.product_id.bom_placeholder:#TODO bom_alternative
+                            debug_mm.write(mask % (
+                                block, 'NOT USED', order.name, '', date, pos, 
+                                product_code,
+                                comp_code, # MP
+                                '', ('%s' % -comp_qty).replace('.', ','),
+                                0, 0, 'MRP PRESENTE UN [DA ASSEGNARE]',
+                                ))                       
+                            continue
+                            
                         if comp_code in y_axis: # OC out component (no prod.):
                             y_axis[comp_code][3][pos] -= comp_qty # MM block
                             y_axis[comp_code][2] -= comp_qty #TSCAR for MRP

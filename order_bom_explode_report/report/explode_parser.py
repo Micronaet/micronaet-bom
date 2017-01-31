@@ -26,6 +26,7 @@ import sys
 import logging
 import erppeek
 import pickle
+import xlsxwriter
 from openerp.osv import fields, osv, expression, orm
 from datetime import datetime
 from openerp.report import report_sxw

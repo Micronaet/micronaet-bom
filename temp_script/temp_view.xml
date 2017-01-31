@@ -18,6 +18,7 @@
                             <button name="lavoration_inventory_modification" string="Lavoration problem 2016" type="object" />
                             <button name="get_excel_evaluation_supplier" string="Supplier cost info" type="object" />
                             <button name="export_mailing_list" string="Export mailing list" type="object" />
+                            <button name="force_first_supplier" string="Force first supplier" type="object" />
                         </group>
                     </page>
                 </xpath>

@@ -44,6 +44,31 @@ class ResCompany(orm.Model):
     """
     _inherit = 'res.company'
 
+    def force_first_supplier(self, cr, uid, ids, context=None):
+        ''' Force first supplier
+        '''
+        product_pool = self.pool.get('product.product')        
+        product_ids = product_pool.search(cr, uid, [], context=context)            
+        first_supplier = {}
+        for product in product_pool.browse(
+                cr, uid, product_ids, context=context):
+            old_date = False
+            supplier_id = False
+            for seller in product.seller_ids:
+                for pl in seller.pricelist_ids:
+                    current_date = pl.write_date
+                    if not old_date or old_date < current_date:
+                        old_date = current_date
+                        supplier_id = seller.name.id
+            if supplier_id:
+                first_supplier[product.id] = supplier_id
+        # Loop for write:
+        for product_id, seller_id in first_supplier.iteritems():
+            product_pool.write(cr, uid, product_id, {
+                'first_suppplier_id': seller_id,
+                }, context=context)                
+        return True
+        
     def export_mailing_list(self, cr, uid, ids, context=None):
         ''' Export mailing list
         '''

@@ -129,6 +129,16 @@ class MrpProduction(orm.Model):
             self.counter[mode] += 1 # row update
             return 
             
+        def has_mandatory_placeholder(default_code, product_id):
+            ''' Check if the product: default_code has a component that is
+                mandatory (placeholder set and rule if present)
+            '''
+            if not product_id.bom_placeholder:
+                return False
+            if product_id.bom_placeholder_rule:
+                return eval(product_id.bom_placeholder_rule)
+            return True # Mandatory if not rule
+                        
         # ---------------------------------------------------------------------
         # XLS Log file: 
         # ---------------------------------------------------------------------
@@ -598,15 +608,16 @@ class MrpProduction(orm.Model):
                         comp_qty = qty * comp.product_qty 
 
                         # Check placehoder:
-                        if comp.product_id.bom_placeholder:#TODO bom_alternative
+                        if has_mandatory_placeholder(
+                                product_code, comp.product_id):# bom_alternative?
                             write_xls_line('move', (
-                                block, 'NOT USED', order.name, '', date, pos, 
-                                product_code,
+                                block, 'NOT USED', order.name, '', date, 
+                                pos, product_code,
                                 comp_code, # MP
                                 '', -comp_qty,
                                 0, 0, 'MRP PRESENTE UN [DA ASSEGNARE]',
-                                comp.category_id.name if comp.category_id else\
-                                    'NO CATEGORY',
+                                comp.category_id.name if comp.category_id\
+                                     else 'NO CATEGORY',
                                 ))                       
                             continue
                             

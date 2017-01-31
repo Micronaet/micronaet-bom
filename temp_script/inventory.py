@@ -65,7 +65,7 @@ class ResCompany(orm.Model):
         # Loop for write:
         for product_id, seller_id in first_supplier.iteritems():
             product_pool.write(cr, uid, product_id, {
-                'first_suppplier_id': seller_id,
+                'first_supplier_id': seller_id,
                 }, context=context)                
         return True
         

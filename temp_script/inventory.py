@@ -21,6 +21,7 @@ import os
 import sys
 import logging
 import openerp
+import xlsxwriter
 import openerp.netsvc as netsvc
 import openerp.addons.decimal_precision as dp
 from openerp.osv import fields, osv, expression, orm
@@ -47,19 +48,44 @@ class ResCompany(orm.Model):
     def export_mailing_list(self, cr, uid, ids, context=None):
         ''' Export mailing list
         '''
-        filename = '/home/administrator/photo/output/mailing.csv'
-        f_out = open(filename)
+        def write_xls_line(line):
+            ''' Write line in correct WS with mode selection
+            '''
+            col = 0
+            for item in line:
+                self.WS.write(self.counter, col, item)
+                col += 1
+        
+            self.counter += 1
+            return 
+        
+        # XLS generate file:
+        xls = '/home/administrator/photo/output/mailing.xlsx'
+        _logger.warning('Log file: %s' % xls)
+        WB = xlsxwriter.Workbook(xls)
+
+        self.WS = WB.add_worksheet('Partner')
+        self.counter = 0
+            
+        # Write Header line:
+        write_xls_line((
+            'Ciente', 'Fornitore', 'Azienda', 'Indirizzo', 'Camcard', 'Email',
+            'Nome', 'Citta', 'Nazione', 'Email', 'Sito', 'Telefono',
+            'Cat. Stat.', 'Newsletter', 'Tipo', 'Zona',
+            ))
         
         partner_pool = self.pool.get('res.partner')
-        partner_ids = partner_pool.search(cr, uid, [], context=context)
+        partner_ids = partner_pool.search(cr, uid, 
+            [], order='name', context=context)
         for partner in partner_pool.browse(
                 cr, uid, partner_ids, context=context):
-            f_out.write('%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|\n' % (
+            write_xls_line((
                 'X' if partner.customer else '',
                 'X' if partner.supplier else '',
                 'X' if partner.is_company else '',
                 'X' if partner.is_address else '',
                 'X' if partner.camcard_text else '',
+                'X' if partner.email else '',
                 partner.name,
                 partner.city,
                 partner.country_id.name,

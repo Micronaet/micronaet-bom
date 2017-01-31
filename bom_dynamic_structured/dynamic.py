@@ -255,7 +255,7 @@ class ProductProduct(orm.Model):
     _columns = {
         'bom_placeholder': fields.boolean('BOM placeholder', 
             help='Mandatory fields for BOM, now not present!'),
-        'bom_placeholder_rule': fields.boolean('BOM placeholder rule', 
+        'bom_placeholder_rule': fields.char('BOM placeholder rule', size=80,
             help='Mandatory if respect rule, es.: '
                 'default_code[3:4].upper()=="S"'),
         'bom_alternative': fields.boolean('BOM alternative', 

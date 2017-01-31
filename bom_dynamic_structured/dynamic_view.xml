@@ -209,14 +209,14 @@
                         <button name="open_dynamic_bom" string="Dynamic BOM rule" type="object" attrs="{'invisible': [('structure_id','=',False)]}" />
                         <button name="open_current_dynamic_bom" string="Dynamic BOM" type="object" attrs="{'invisible': [('structure_id','=',False)]}" class="oe_highlight"/>
                     </header>    
-                    <field name="default_code" position="after">
-                        <group name="placeholder_group">
-                            <field name="bom_placeholder" />
-                            <field name="bom_placeholder_rule" />
-                            <field name="bom_alternative" />
-                        </group>
-                    </field>
                 </xpath>                
+                <field name="default_code" position="after">
+                    <group name="placeholder_group">
+                        <field name="bom_placeholder" />
+                        <field name="bom_placeholder_rule" />
+                        <field name="bom_alternative" />
+                    </group>
+                </field>
             </field>
         </record>        
 

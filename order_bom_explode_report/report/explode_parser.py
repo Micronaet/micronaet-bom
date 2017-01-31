@@ -132,7 +132,7 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         # XLS Log file: 
         # ---------------------------------------------------------------------
-        xls_log = '/home/administrator/photo/log/report_explode.xlsx'
+        xls_log = '/home/administrator/photo/log/report_explode_%s.xlsx' % mode
         _logger.warning('Log file: %s' % xls_log)        
         WB = xlsxwriter.Workbook(xls_log)
 
@@ -200,10 +200,11 @@ class MrpProduction(orm.Model):
                     # TODO log halfcomponent with empty list
                     # relative_type = 'half'
                     for component in item.product_id.half_bom_ids:
-                        # TODO change category for half component?                        
-                        category = ''
-                        #category = _('Pipes') if component.product_id.is_pipe \
-                        #    else _('Fabric') # TODO correct?
+                        # Create ad hoc category:
+                        if component.product_id.is_pipe:
+                            category = _('Pipes')
+                        else:    
+                            category = _('Fabric (or extra)')
                         add_x_item(y_axis, component, category)
 
         write_xls_line('extra', (

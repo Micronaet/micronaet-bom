@@ -618,7 +618,7 @@ class MrpProduction(orm.Model):
                                 0, 0, 'MRP PRESENTE UN [DA ASSEGNARE]',
                                 comp.category_id.name if comp.category_id\
                                      else 'NO CATEGORY',
-                                ))                       
+                                ))                 
                             continue
                             
                         if comp_code in y_axis: # OC out component (no prod.):

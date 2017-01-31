@@ -50,6 +50,7 @@ class ResCompany(orm.Model):
         product_pool = self.pool.get('product.product')        
         product_ids = product_pool.search(cr, uid, [], context=context)            
         first_supplier = {}
+        import pdb; pdb.set_trace()
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
             old_date = False
@@ -62,7 +63,9 @@ class ResCompany(orm.Model):
                         supplier_id = seller.name.id
             if supplier_id:
                 first_supplier[product.id] = supplier_id
+        
         # Loop for write:
+        import pdb; pdb.set_trace()
         for product_id, seller_id in first_supplier.iteritems():
             product_pool.write(cr, uid, product_id, {
                 'first_supplier_id': seller_id,

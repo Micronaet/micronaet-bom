@@ -484,14 +484,24 @@ class MrpProduction(orm.Model):
                                 '', 0, # +MM
                                 ('%s' % item_remain).replace('.', ','), # -OC
                                 0, 'OC HALFWORKED REMAIN',
-                                ''
+                                item.category_id.name if item.category_id \
+                                    else 'NO CATEGORY',
                                 ))                      
                         # else: TODO log not used        
                     else: # mode = 'component'
                         for comp in item.product_id.half_bom_ids:
                             comp_code = comp.product_id.default_code
                             if comp_code not in y_axis: # OC out item (no prod.):
-                                # TODO log component not used
+                                debug_mm.write(mask % (
+                                    block, 'NOT USED', order.name, '', date, pos, 
+                                    item_code, # Code
+                                    comp_code, # component
+                                    '', 0, # +MM
+                                    ('%s' % comp_remain).replace('.', ','),#-OC
+                                    0, 'COMPONENT NOT IN FILTER X LIST' ,
+                                    comp.category_id.name if comp.category_id\
+                                        else 'NO CATEGORY',
+                                    ))
                                 continue
                             comp_remain = item_remain * comp.product_qty
                             y_axis[comp_code][4][pos] -= comp_remain # OC

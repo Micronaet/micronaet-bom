@@ -44,6 +44,35 @@ class ResCompany(orm.Model):
     """
     _inherit = 'res.company'
 
+    def export_mailing_list(self, cr, uid, ids, context=None):
+        ''' Export mailing list
+        '''
+        filename = '/home/administrator/photo/output/mailing.csv'
+        f_out = open(filename)
+        
+        partner_pool = self.pool.get('res.partner')
+        partner_ids = partner_pool.search(cr, uid, [], context=context)
+        for partner in partner_pool.browse(
+                cr, uid, partner_ids, context=context):
+            f_out.write('%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|\n' % (
+                'X' if partner.customer else '',
+                'X' if partner.supplier else '',
+                'X' if partner.is_company else '',
+                'X' if partner.is_address else '',
+                'X' if partner.camcard_text else '',
+                partner.name,
+                partner.city,
+                partner.country_id.name,
+                partner.email,
+                partner.website,
+                partner.phone,
+                partner.statistic_category_id.name,
+                partner.newsletter_category_id.name,
+                partner.type_id.name,
+                partner.zone_id.name,                
+                ))
+            
+        return True
     def lavoration_inventory_modification(self, cr, uid, ids, context=None):
         ''' Export data from lavoration
         '''

@@ -17,6 +17,7 @@
                             <button name="correct_inventory_category" string="Correct inventory category" type="object" />                            
                             <button name="lavoration_inventory_modification" string="Lavoration problem 2016" type="object" />
                             <button name="get_excel_evaluation_supplier" string="Supplier cost info" type="object" />
+                            <button name="export_mailing_list" string="Export mailing list" type="object" />
                         </group>
                     </page>
                 </xpath>

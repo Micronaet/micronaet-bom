@@ -205,8 +205,8 @@ class MrpProduction(orm.Model):
             exclude_partner_ids, ))
 
         debug_mm.write(
-            'Block|State|Doc.|Origin|Date|Pos.|Prod.|MP|Calc.|MM|OC|OF|Note\n')
-        mask = '%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n'    
+            'Block|State|Doc.|Origin|Date|Pos.|Prod.|MP|Calc.|MM|OC|OF|Note|Category\n')
+        mask = '%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n'    
 
         # =====================================================================
         # 1. LOAD PICKING (CUSTOMER ORDER AND PICK IN)
@@ -242,6 +242,7 @@ class MrpProduction(orm.Model):
                         pos, '', # product_code
                         default_code, '', 0, 0, 0,
                         'OF / BF WARNING CODE NOT IN SELECTED LIST (X)',
+                        ''
                         )) 
                     continue
 
@@ -259,6 +260,7 @@ class MrpProduction(orm.Model):
                             '', # product_code                                
                             default_code, '', 0, 0, 0,
                             'OF date expected extra range!: Q.: %s' % qty,
+                            ''
                             )) 
                         continue
 
@@ -269,6 +271,7 @@ class MrpProduction(orm.Model):
                         line.date_expected, pos, '', # product_code                                
                         default_code, '', 0, 0,
                         ('%s' % qty).replace('.', ','), 'OF',
+                        ''
                         ))                      
                     continue
 
@@ -290,6 +293,7 @@ class MrpProduction(orm.Model):
                             date, pos, '', # product_code                                
                             default_code, '', 0, 0, 0,
                             'BF date doc extra range!!: Q.: %s' % qty,
+                            ''
                             )) 
                         continue
                     
@@ -301,6 +305,7 @@ class MrpProduction(orm.Model):
                         default_code, '',
                         ('%s' % qty).replace('.', ','), # +MM
                         0, 0, 'BF ADD IN TCAR',
+                        ''
                         ))                      
                     continue
 
@@ -336,6 +341,7 @@ class MrpProduction(orm.Model):
                         block, 'NOT USED', pick.name, pick.origin, pick.date, 
                         pos, product_code, '', '', 0, 0, 0,
                         'BC MOVE State not in done (jumped)',
+                        ''
                         ))
                     continue    
                     
@@ -349,6 +355,7 @@ class MrpProduction(orm.Model):
                         pick.date, pos, '', product_code, # Prod is MP
                         '', ('%s' % -qty).replace('.', ','), # MM
                         0, 0, 'BC MOVE Direct sale of component (ADD IN TSCAR)',
+                        ''
                         ))
                     continue    
                 
@@ -381,6 +388,7 @@ class MrpProduction(orm.Model):
                         '', 0, # +MM
                         0, # XXX keep 0 (-OC)
                         0, 'OC NO PARCELS PRODUCT',
+                        ''
                         ))                      
                     continue     
 
@@ -406,6 +414,8 @@ class MrpProduction(orm.Model):
                             '', 0, # +MM
                             ('%s' % comp_remain).replace('.', ','),#-OC
                             0, 'OC DIRECT SALE HW SO COMPONENT UNLOAD',
+                            comp.category_id.name if comp.category_id else\
+                                'NO CATEGORY',
                             ))
                         # go ahead for download component    
 
@@ -418,6 +428,7 @@ class MrpProduction(orm.Model):
                         '', 0, # +MM
                         ('%s' % remain).replace('.', ','), # -OC
                         0, 'OC DIRECT SALE HALFWORK OR COMPONENT',
+                        ''
                         ))                      
                     continue                          
                  
@@ -428,6 +439,7 @@ class MrpProduction(orm.Model):
                         '', 0, # +MM
                         0, # -OC
                         0, 'OC PRODUCT WITHOUT BOM, Q.: %s' % remain,
+                        ''
                         ))                      
                     continue
 
@@ -438,6 +450,7 @@ class MrpProduction(orm.Model):
                         product_code, '', # MP
                         '', 0, # +MM
                         0, 0, 'OC ALL DELIVERED OR NEGATIVE DELIVER',
+                        ''
                         ))  
                     continue
                 
@@ -450,6 +463,7 @@ class MrpProduction(orm.Model):
                         product_code, '', # MP
                         '', 0, # +MM
                         0, 0, 'OC EXTRA RANGE, qty: %s' % remain,
+                        ''
                         ))                      
                     continue
 
@@ -470,6 +484,7 @@ class MrpProduction(orm.Model):
                                 '', 0, # +MM
                                 ('%s' % item_remain).replace('.', ','), # -OC
                                 0, 'OC HALFWORKED REMAIN',
+                                ''
                                 ))                      
                         # else: TODO log not used        
                     else: # mode = 'component'
@@ -487,6 +502,8 @@ class MrpProduction(orm.Model):
                                 '', 0, # +MM
                                 ('%s' % comp_remain).replace('.', ','),#-OC
                                 0, 'OC COMPONENT REMAIN',
+                                comp.category_id.name if comp.category_id else\
+                                    'NO CATEGORY',
                                 ))
                         continue                
                     
@@ -528,6 +545,7 @@ class MrpProduction(orm.Model):
                             '', 0, # +MM
                             0, # -OC
                             0, 'MRP PRODUCT WITHOUT BOM, Q.: %s' % qty,
+                            '',
                             ))                      
                         continue
 
@@ -546,6 +564,8 @@ class MrpProduction(orm.Model):
                                 comp_code, # MP
                                 '', ('%s' % -comp_qty).replace('.', ','),
                                 0, 0, 'MRP PRESENTE UN [DA ASSEGNARE]',
+                                comp.category_id.name if comp.category_id else\
+                                    'NO CATEGORY',
                                 ))                       
                             continue
                             
@@ -558,6 +578,8 @@ class MrpProduction(orm.Model):
                                 comp_code, # MP
                                 '', ('%s' % -comp_qty).replace('.', ','), # -MM
                                 0, 0, 'MRP COMPONENT UNLOAD (ADD in TSCAR)',
+                                comp.category_id.name if comp.category_id else\
+                                    'NO CATEGORY',
                                 ))                       
                             continue
                         else:
@@ -567,6 +589,8 @@ class MrpProduction(orm.Model):
                                 comp_code, # MP
                                 '', ('%s' % -comp_qty).replace('.', ','), # -MM
                                 0, 0, 'MRP COMPONENT NOT IN LIST',
+                                comp.category_id.name if comp.category_id else\
+                                    'NO CATEGORY',
                                 ))  
                             continue                         
 

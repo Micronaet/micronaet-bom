@@ -241,21 +241,22 @@ class MrpProduction(orm.Model):
                     # TODO log halfcomponent with empty list
                     # relative_type = 'half'
                     for component in item.product_id.half_bom_ids:
-                        if mp_mode == 'fabric':
-                            if component.product_id.id not in fabric_ids:
-                                continue
-                            # else:    
-                            #    XXX jump no fabric element (not necessary!)
-                            #    add_x_item(y_axis, component, category)
-                            #else:     
-                            #    continue 
+                        #if mp_mode == 'fabric':
+                        #    if component.product_id.id not in fabric_ids:
+                        #        continue
+                        #    # else:    
+                        #    #    XXX jump no fabric element (not necessary!)
+                        #    #    add_x_item(y_axis, component, category)
+                        #    #else:     
+                        #    #    continue 
+                        #else:    
+                        
+                        # Create ad hoc category:
+                        if component.product_id.is_pipe:
+                            category = _('Pipes')
                         else:    
-                            # Create ad hoc category:
-                            if component.product_id.is_pipe:
-                                category = _('Pipes')
-                            else:    
-                                category = _('Fabric (or extra)')
-                            add_x_item(y_axis, component, category)
+                            category = _('Fabric (or extra)')
+                        add_x_item(y_axis, component, category)
 
         write_xls_line('extra', (
             'Component / Halfworked selected: %s'% (y_axis.keys(), ),
@@ -572,10 +573,12 @@ class MrpProduction(orm.Model):
                     else: # mode = 'component'
                         for comp in item.product_id.half_bom_ids:
                             comp_code = comp.product_id.default_code
+                            comp_remain = item_remain * comp.product_qty
+                            y_axis[comp_code][4][pos] -= comp_remain # OC
                             if comp_code not in y_axis: # OC out item (no prod.):
                                 write_xls_line('move', (
-                                    block, 'NOT USED', order.name, '', date, pos, 
-                                    item_code, # Code
+                                    block, 'NOT USED', order.name, '', date, 
+                                    pos, item_code, # Code
                                     comp_code, # component
                                     '', 0, # +MM
                                     comp_remain,#-OC
@@ -584,8 +587,6 @@ class MrpProduction(orm.Model):
                                         else 'NO CATEGORY',
                                     ))
                                 continue
-                            comp_remain = item_remain * comp.product_qty
-                            y_axis[comp_code][4][pos] -= comp_remain # OC
                             write_xls_line('move', (
                                 block, 'USED', order.name, '', date, pos, 
                                 item_code, # Code

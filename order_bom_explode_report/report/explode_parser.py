@@ -242,9 +242,11 @@ class MrpProduction(orm.Model):
                     # relative_type = 'half'
                     for component in item.product_id.half_bom_ids:
                         if mp_mode == 'fabric':
-                            if component.product_id.id in fabric_ids:
-                                # XXX jump no fabric element (not necessary!)
-                                add_x_item(y_axis, component, category)
+                            if component.product_id.id not in fabric_ids:
+                                continue
+                            # else:    
+                            #    XXX jump no fabric element (not necessary!)
+                            #    add_x_item(y_axis, component, category)
                             #else:     
                             #    continue 
                         else:    

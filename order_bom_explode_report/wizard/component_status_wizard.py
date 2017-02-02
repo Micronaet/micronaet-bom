@@ -58,6 +58,7 @@ class CcomponentStatusReportWizard(orm.TransientModel):
         wiz_browse = self.browse(cr, uid, ids, context=context)[0]        
         datas = {
             'mode': wiz_browse.mode,
+            'mp_mode': wiz_browse.mp_mode,
             'days': wiz_browse.days,
             'first_supplier_id': wiz_browse.first_supplier_id.id or False,
             #'negative_start': wiz_browse.negative_start,
@@ -89,6 +90,11 @@ class CcomponentStatusReportWizard(orm.TransientModel):
             ('mrp', 'Scheduled production'),
             ('todo', 'TODO hw and component'),
             ], 'Report mode', required=True),
+        'mp_mode': fields.selection([
+            ('pipe', 'Pipe *'),
+            ('extra', 'Extra material (all) *'),
+            ('fabric', 'Fabric'),
+            ], 'MP mode'),
         'days': fields.integer('Days', help='Production scheduled now + days'),
         'with_deadline': fields.boolean('With deadline period', 
             help='Add line with parent distribution of remain to produce OC'),

@@ -67,23 +67,32 @@ class MrpProduction(orm.Model):
             data = {}
 
         mode = data.get('mode', 'halfwork')
+        mp_mode = data.get('mp_mode', False)
         first_supplier_id = data.get('first_supplier_id', False)
         with_type_ids = data.get('with_type_ids', [])
         without_type_ids = data.get('without_type_ids', [])
         
         # Add inventory check block:
         for_inventory_delta = data.get('for_inventory_delta', False)
+        
         inventory_delta = {}
         
         # ---------------------------------------------------------------------
         # Utility function embedded:
         # ---------------------------------------------------------------------
-        def add_x_item(y_axis, item, category):
+        def add_x_item(y_axis, item, category, mode='line'):
             ''' Add new item to record
                 y_axis: list of records
                 item: bom browse obj
+                mode: 
+                    'line' = item > sale order line
+                    'product' = item > product
             '''
-            product = item.product_id
+            if mode == 'line':
+                product = item.product_id
+            else: # 'product'
+                product = item
+                
             default_code = product.default_code or ''            
             if default_code in y_axis:
                 return # yet present (for component check)
@@ -174,18 +183,40 @@ class MrpProduction(orm.Model):
         bom_pool = self.pool.get('mrp.bom')
         mrp_pool = self.pool.get('mrp.production')
         
+        # Load Y axis for report (halfwork or component):
+        y_axis = {}
+        category_fabric = _('Fabric')
+        
+        # ADD all fabrici in axis before all check:
+        if mp_mode == 'fabric': # fabric
+            fabric_list = (
+                'T3D', 'TES', 'TEX', 'TGT', 'TIO', 'TJO', 'TSK', 'TSQ', 'TWH', 
+                'TWL', 'TWM', 'TXM', 'TXI', 'TXR',
+                )
+            # TODO add also not_in_report check!!!  and not_in_report='f'  
+            query = '''
+                SELECT id from product_product 
+                WHERE substring(default_code, 1, 3) IN ('%s');
+                ''' % "','".join(fabric_list)                
+                
+            cr.execute(query)  
+            fabric_ids = [item[0] for item in cr.fetchall()] # eliminabile            
+            for fabric in product_pool.browse(
+                    cr, uid, fabric_ids, context=context):
+                add_x_item(y_axis, fabric, category_fabric, mode='product')
+                
         # Get product BOM dyamic lines (from active order):
         product_data = sale_pool.get_component_in_product_order_open(
             cr, uid, context=context)
+        product_proxy = product_data['product']
+    
         # TODO manage all product for particular category? 
         # SO: filter product in category instead of ordered product    
 
         # Maybe removed:
         inventory_pos = get_position_season(get_date()) # for inventory mangm.1
 
-        # Load Y axis for report (halfwork or component):
-        y_axis = {}
-        for product in product_data['product']: # XXX Product ordered for now
+        for product in product_proxy: # XXX Product ordered for now
             for item in product.dynamic_bom_line_ids: # XXX All Halfworked:
                 
                 # XXX NOTE: Filter category always in hw not component!
@@ -210,12 +241,19 @@ class MrpProduction(orm.Model):
                     # TODO log halfcomponent with empty list
                     # relative_type = 'half'
                     for component in item.product_id.half_bom_ids:
-                        # Create ad hoc category:
-                        if component.product_id.is_pipe:
-                            category = _('Pipes')
+                        if mp_mode == 'fabric':
+                            if component.product_id.id in fabric_ids:
+                                # XXX jump no fabric element (not necessary!)
+                                add_x_item(y_axis, component, category)
+                            #else:     
+                            #    continue 
                         else:    
-                            category = _('Fabric (or extra)')
-                        add_x_item(y_axis, component, category)
+                            # Create ad hoc category:
+                            if component.product_id.is_pipe:
+                                category = _('Pipes')
+                            else:    
+                                category = _('Fabric (or extra)')
+                            add_x_item(y_axis, component, category)
 
         write_xls_line('extra', (
             'Component / Halfworked selected: %s'% (y_axis.keys(), ),

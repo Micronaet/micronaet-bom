@@ -15,6 +15,7 @@
                         <field name="mode" />
                         <newline/>
                         <field name="days" attrs="{'required': [('mode','=','mrp')], 'invisible': [('mode','!=','mrp')]}" />
+                        <field name="mp_mode" attrs="{'invisible': [('mode','!=','component'), ]}"/>
                         <field name="first_supplier_id" attrs="{'invisible': [('mode','not in',('mrp', 'halfwork'))]}" domain="[('is_company', '=', True), ('supplier', '=', True)]"/>
                         <field name="type_id" invisible="1"/>
                         <!--field name="negative_start" /-->
@@ -22,7 +23,6 @@
                         <field name="with_type_ids" widget="many2many_tags" />
                         <field name="without_type_ids" widget="many2many_tags" />
                         <field name="with_deadline" attrs="{'invisible': [('mode','!=','todo')]}" />
-                        <field name="mp_mode" attrs="{'invisible': [('mode','!=','component'), ]}"/>
                    </group>
                 </form>
             </field>

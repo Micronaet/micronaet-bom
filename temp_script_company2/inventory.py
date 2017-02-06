@@ -43,6 +43,29 @@ class ResCompany(orm.Model):
     _inherit = 'res.company'
 
     # Procedure:    
+    def export_partner_pricelist(self, cr, uid, ids, context=None):
+        ''' Export property pricelist for partner
+        '''
+        pricelist_file = '/home/administrator/photo/output/partner_pricelist.csv'
+        pl_file = open(log_file, 'w')
+
+        partner_pool = self.pool.get('res.partner')
+        partner_ids = partner_pool.search(cr, uid, [
+            ('is_address', '=', False)
+            ], context=None)
+        for partner in partner_pool.browse(
+                cr, uid, partner_ids, context=context):
+            pl__file.write('%s|%s|%s|%s|%s|%s' % (
+                'X' if partner.customer else '',
+                'X' if partner.supplier else '',
+                partner.name,
+                partner.city,
+                partner.country_id.name if partner.country_id else '',
+                partner.property_product_pricelist.name if \
+                    partner.property_product_pricelist else ''
+                )    
+        pl_file.close()
+        return True        
     def export_product_status_for_inventory(self, cr, uid, ids, context=None):
         ''' Export inventory data from order and picking
         '''

@@ -46,8 +46,21 @@ class ResCompany(orm.Model):
     def export_partner_pricelist(self, cr, uid, ids, context=None):
         ''' Export property pricelist for partner
         '''
+        def clean_ascii(value):
+            ''' Clean non ascii char
+            '''
+            res = ''
+            if not value:
+                return res               
+            for c in value:
+                if ord(c) < 128:
+                    res += c
+                else:
+                    res += '*'
+            return res
+
         pricelist_file = '/home/administrator/photo/output/partner_pricelist.csv'
-        pl_file = open(log_file, 'w')
+        pl_file = open(pricelist_file, 'w')
 
         partner_pool = self.pool.get('res.partner')
         partner_ids = partner_pool.search(cr, uid, [
@@ -55,17 +68,19 @@ class ResCompany(orm.Model):
             ], context=None)
         for partner in partner_pool.browse(
                 cr, uid, partner_ids, context=context):
-            pl__file.write('%s|%s|%s|%s|%s|%s' % (
+            pl_file.write('%s|%s|%s|%s|%s|%s\n' % (
                 'X' if partner.customer else '',
                 'X' if partner.supplier else '',
-                partner.name,
-                partner.city,
-                partner.country_id.name if partner.country_id else '',
+                clean_ascii(partner.name),
+                clean_ascii(partner.city),
+                clean_ascii(partner.country_id.name if \
+                    partner.country_id else ''),
                 partner.property_product_pricelist.name if \
                     partner.property_product_pricelist else ''
                 ))    
         pl_file.close()
         return True        
+        
     def export_product_status_for_inventory(self, cr, uid, ids, context=None):
         ''' Export inventory data from order and picking
         '''

@@ -63,7 +63,7 @@ class ResCompany(orm.Model):
                 partner.country_id.name if partner.country_id else '',
                 partner.property_product_pricelist.name if \
                     partner.property_product_pricelist else ''
-                )    
+                ))    
         pl_file.close()
         return True        
     def export_product_status_for_inventory(self, cr, uid, ids, context=None):

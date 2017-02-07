@@ -258,7 +258,7 @@ class MrpProduction(orm.Model):
                             category = _('Fabric (or extra)')
                         add_x_item(y_axis, component, category)
 
-        write_xls_line('extra', 'Component / Halfworked selected:')            
+        write_xls_line('extra', ('Component / Halfworked selected:', ))            
         for code in y_axis.keys():    
             write_xls_line('extra', (code, ))
         

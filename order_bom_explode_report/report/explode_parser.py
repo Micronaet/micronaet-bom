@@ -724,7 +724,7 @@ class MrpProduction(orm.Model):
                     #_logger.warning('Jumped: %s %s %s' % current
                     self.jumped.append(current[7]) # product proxy
                     jumped = True
-                    write_xls_line('extra', (product.default_code, ))
+                    # XXX Maybe optimize: Repeat loop for nothing?
                     continue    
                 
                 if i == inv_pos:
@@ -753,6 +753,8 @@ class MrpProduction(orm.Model):
             # Append progress totals:
             if not jumped:
                 res.append(current)
+            else:    
+                write_xls_line('extra', (product.default_code, ))
 
         # Return depend on request inventory or report        
         if for_inventory_delta:

@@ -200,7 +200,7 @@ class MrpProduction(orm.Model):
                 ''' % "','".join(fabric_list)                
                 
             cr.execute(query)  
-            fabric_ids = [item[0] for item in cr.fetchall()] # eliminabile            
+            fabric_ids = [item[0] for item in cr.fetchall()]
             for fabric in product_pool.browse(
                     cr, uid, fabric_ids, context=context):
                 add_x_item(y_axis, fabric, category_fabric, mode='product')
@@ -258,9 +258,9 @@ class MrpProduction(orm.Model):
                             category = _('Fabric (or extra)')
                         add_x_item(y_axis, component, category)
 
-        write_xls_line('extra', (
-            'Component / Halfworked selected: %s'% (y_axis.keys(), ),
-            ))
+        write_xls_line('extra', 'Component / Halfworked selected:')            
+        for code in y_axis.keys():    
+            write_xls_line('extra', (code, ))
         
         # =====================================================================
         # Get parameters for search:
@@ -695,6 +695,8 @@ class MrpProduction(orm.Model):
     
         # TODO textilene sort block:
         # (y_axis[code][8], code[0:3], code[6:12], code[3:6])
+        write_xls_line('extra', ('Remove lines:', ))
+
         for key in sorted(y_axis, key=lambda code: (y_axis[code][8], code)):
             # -----------------------------------------------------------------    
             # Normal report block:
@@ -722,6 +724,7 @@ class MrpProduction(orm.Model):
                     #_logger.warning('Jumped: %s %s %s' % current
                     self.jumped.append(current[7]) # product proxy
                     jumped = True
+                    write_xls_line('extra', (product.default_code, ))
                     continue    
                 
                 if i == inv_pos:

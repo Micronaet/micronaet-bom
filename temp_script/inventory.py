@@ -22,6 +22,7 @@ import sys
 import logging
 import openerp
 import xlsxwriter
+import xlrd
 import openerp.netsvc as netsvc
 import openerp.addons.decimal_precision as dp
 from openerp.osv import fields, osv, expression, orm
@@ -44,6 +45,215 @@ class ResCompany(orm.Model):
     """
     _inherit = 'res.company'
 
+    def check_ean_easylabel(self, cr, uid, ids, context=None):
+        ''' Check file XLS for double
+        '''
+        # ---------------------------------------------------------------------
+        # Utility:
+        # ---------------------------------------------------------------------
+        def generate_code(value):
+            ''' Add extra char
+            '''
+            import barcode
+            EAN = barcode.get_barcode_class('ean13')
+            if len(value) != 12:
+                raise osv.except_osv(
+                    _('Error'),
+                    _('EAN before control must be 12 char!'))
+            ean13 = EAN(value)
+            return ean13.get_fullcode()
+
+        # Pool used:
+        product_pool = self.pool.get('product.product')        
+        
+        # ---------------------------------------------------------------------
+        #                Open XLS document (first WorkSheet):
+        # ---------------------------------------------------------------------
+        # Parameters:
+        filename = '/home/administrator/photo/xls/barcode.xls'                
+        filelog = '/home/administrator/photo/xls/barcode_log.xlsx'
+        max_check = 10000
+        
+        _logger.info('Start import from path: %s' % filename)
+        
+        try:
+            WB = xlrd.open_workbook(filename)
+            WS = WB.sheet_by_index(0)
+        except:
+            raise osv.except_osv(
+                _('Import file: %s') % filename, 
+                _('Error opening XLS file: %s' % (sys.exc_info(), )),
+                )
+
+        # ---------------------------------------------------------------------
+        #                Read barcode database
+        # ---------------------------------------------------------------------
+        ean_db = {} # XLS read database
+        ean13_db = {} # Database for write in product
+        
+        # Check database:
+        ean1_db = []
+        ean4_db =  []
+        
+        # Error database:
+        error = {
+            'yet_present': [],
+            'double_code': [],
+            'ean1_not_present': [],
+            'ean4_not_present': [],
+            'double_ean_1_4': [],
+            'double_ean1': [],
+            'double_ean4': [],
+            'different_1_4': [],
+            'different_4_1': [],
+            'odoo_product_not_present': [],
+            'odoo_product_double_code': [],
+            }
+
+        for line in range(1, max_check): # jump header
+            try:                
+                row = WS.row(line)
+            except:
+                _logger.info('Break read at line: %s' % line)
+                break
+            
+            try:    
+                # Read data:
+                default_code = row[0].value
+                if default_code in ean_db:
+                    error['yet_present'].append(default_code)
+                    continue
+
+                try:
+                    ean1 = generate_code('%s' % int(row[1].value))
+                except:
+                    ean1 = False                    
+                try:
+                    ean4 = generate_code('%s' % int(row[2].value))
+                except:
+                    ean4 = False    
+                
+                # Create ean13 database single or pack (1 code only):
+                if default_code[12:13] == 'S':
+                    if not ean1:
+                        error['ean1_not_present'].append(default_code)
+                    single = True
+                    ean13 = ean1
+                else:
+                    if not ean4:
+                        error['ean4_not_present'].append(default_code)
+                    single = False
+                    ean13 = ean4
+                
+                # 0. Check double ean for 1 and 4 code!    
+                if ean13 in ean13_db.values():
+                    error['double_ean_1_4'].append(ean13)
+                else:    
+                    ean13_db[default_code] = ean13
+                
+                # 1. check double code:
+                
+                if default_code in ean_db:
+                    error['double_code'].append(default_code)
+                else:    
+                    ean_db[default_code] = (ean1, ean4) # save 2 ean code
+                                    
+                if single:
+                    # 2. check double ean 1
+                    if ean1 in ean1_db:
+                        error['double_ean1'].append(ean1)
+                    else:
+                        ean1_db.append(ean1)                    
+                else:
+                    # 3. check double ean 4
+                    if ean4 in ean4_db:
+                        error['double_ean4'].append(ean4)
+                    else:
+                        ean4_db.append(ean4)
+            except:
+                _logger.error('Error: %s [%s]' % (
+                    default_code, sys.exc_info()))
+
+        # 4. Check difference code in 1 for pack and 4 for single        
+        for default_code, eans in ean_db.iteritems():
+            # Is single:
+            if default_code[12:13] == 'S':
+                pack = default_code[:12].strip()
+                if pack in ean_db:                
+                    if eans[0] != ean_db[pack][0]:
+                        error['different_1_4'].append(default_code)                    
+            # Is pack:
+            else:
+                single = ean_db.get('%-12sS' % default_code)
+                if single in ean_db:                
+                    if eans[0] != ean_db[single][0]:
+                        error['different_4_1'].append(default_code)
+
+        # ---------------------------------------------------------------------                
+        # Write EAN in database (check also presence and double)
+        # ---------------------------------------------------------------------
+        WB = xlsxwriter.Workbook(filelog)
+        WS = WB.add_worksheet('ODOO')
+        WS.write(0, 0, 'Codice')
+        WS.write(0, 1, 'Q. x pack')
+        WS.write(0, 2, 'Uso')
+        WS.write(0, 3, 'Commento')
+        WS.write(0, 4, 'EAN singolo')
+        WS.write(0, 5, 'EAN pack')
+
+        counter = 1
+        for default_code, eans in ean_db.iteritems():
+            (ean1, ean4) = eans
+            
+            product_ids = product_pool.search(cr, uid, [
+                ('default_code', '=', default_code)], context=context)	
+            if product_ids:            
+                if len(product_ids) > 1:
+                    error['odoo_product_double_code'].append(default_code)
+                    
+                product_proxy = product_pool.browse(
+                    cr, uid, product_ids, context=context)[0]
+                q_x_pack = product_proxy.q_x_pack
+                if q_x_pack == 1:
+                    ean13 = ean1
+                    comment = 'Singolo'
+                    if default_code[12:13] != 'S':
+                        comment = 'Singolo (errore codice senza S)'
+                else:
+                    ean13 = ean4
+                    comment = 'Pacco'
+                    if default_code[12:13] == 'S':
+                        comment = 'Pacco (errore codice con S)'
+
+                # Write log:                    
+                WS.write(counter, 0, default_code) 
+                WS.write(counter, 1, q_x_pack)
+                WS.write(counter, 2, ean13)
+                WS.write(counter, 3, comment)
+                WS.write(counter, 4, ean1)
+                WS.write(counter, 5, ean4)
+                counter += 1        
+                    
+                # TODO enable when correct:   
+                #product_pool.write(cr, uid, product_ids, {
+                #    'ean13': ean13,
+                #    }, context=context)
+            else:
+                error['odoo_product_not_present'].append(default_code)
+
+        # ---------------------------------------------------------------------                
+        # Log error:
+        # ---------------------------------------------------------------------                
+        for page, log in error.iteritems():
+            WS = WB.add_worksheet(page)
+            if not log:
+                continue
+            counter = 0
+            for item in log:
+                WS.write(counter, 0, item)
+                counter += 1        
+        return True
+        
     def force_first_supplier(self, cr, uid, ids, context=None):
         ''' Force first supplier
         '''

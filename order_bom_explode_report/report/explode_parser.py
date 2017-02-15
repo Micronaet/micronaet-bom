@@ -71,6 +71,7 @@ class MrpProduction(orm.Model):
         first_supplier_id = data.get('first_supplier_id', False)
         with_type_ids = data.get('with_type_ids', [])
         without_type_ids = data.get('without_type_ids', [])
+        only_negative = data.get('only_negative', False)
         
         # Add inventory check block:
         for_inventory_delta = data.get('for_inventory_delta', False)
@@ -710,6 +711,7 @@ class MrpProduction(orm.Model):
             # inv_pos = 3 # December # TODO never use this!!!
             inv_pos = 0 # September (always append here inventory)
             jumped = False
+            negative = False # Check if there's negavtive SAL
 
             for i in range(0, 12):
                 #if i == inv_pos:
@@ -735,6 +737,8 @@ class MrpProduction(orm.Model):
                 total += round(
                     current[3][i] + current[4][i] + current[5][i], 0)
                 current[6][i] = int(total)
+                if only_negative and current[6][i] < 0.0:
+                    negative = True
                 
             # -----------------------------------------------------------------    
             # Inventory managenent block:
@@ -751,10 +755,13 @@ class MrpProduction(orm.Model):
                     )
 
             # Append progress totals:
-            if not jumped:
-                res.append(current)
-            else:    
+            if jumped:
                 write_xls_line('extra', (product.default_code, ))
+            else:            
+                if only_negative and negative:
+                    pass # jump negative block:
+                else:
+                    res.append(current)
 
         # Return depend on request inventory or report        
         if for_inventory_delta:

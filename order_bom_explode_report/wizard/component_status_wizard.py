@@ -68,6 +68,7 @@ class CcomponentStatusReportWizard(orm.TransientModel):
             'without_type_ids': 
                 [item.id for item in wiz_browse.without_type_ids],
             'with_deadline': wiz_browse.with_deadline,    
+            'only_negative': wiz_browse.only_negative,
             }
             
         if wiz_browse.mode == 'mrp':
@@ -95,6 +96,7 @@ class CcomponentStatusReportWizard(orm.TransientModel):
             ('extra', 'Extra material (all) *'),
             ('fabric', 'Fabric'),
             ], 'MP mode'),
+        'only_negative': fields.boolean('Only negative'),
         'days': fields.integer('Days', help='Production scheduled now + days'),
         'with_deadline': fields.boolean('With deadline period', 
             help='Add line with parent distribution of remain to produce OC'),

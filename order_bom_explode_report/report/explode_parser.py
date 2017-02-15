@@ -757,10 +757,11 @@ class MrpProduction(orm.Model):
             # Append progress totals:
             if jumped:
                 write_xls_line('extra', (product.default_code, ))
-            else:            
-                if only_negative and negative:
-                    pass # jump negative block:
-                else:
+            else:  
+                if only_negative:
+                    if negative:
+                        res.append(current)
+                else:    
                     res.append(current)
 
         # Return depend on request inventory or report        

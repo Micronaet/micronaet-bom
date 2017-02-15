@@ -44,8 +44,45 @@ class ResCompany(orm.Model):
     """ Model name: ResCompany
     """
     _inherit = 'res.company'
-
+    
     # Procedure:    
+    def import_barcode(self, cr, uid, ids, context=None):
+        ''' Import barcode
+        '''
+        ''' Read XLS file for reassociate inventory category
+        ''' 
+        product_pool = self.pool.get('product.product')
+
+        filename = '/home/administrator/photo/xls/barcode.xls'
+
+        try:
+            WB = xlrd.open_workbook(filename)
+        except:
+            raise osv.except_osv(
+                _('Error XLSX'), 
+                _('Cannot read XLS file: %s' % filename),
+                )
+                
+        WS = xl_workbook.sheet_by_index(0)
+        for row in range(0, WS.nrows):
+            default_code = WS.cell(row_idx, 0)
+            ean13 = WS.cell(row_idx, 2)
+            ean13_s = WS.cell(row_idx, 4)
+            ean13_p = WS.cell(row_idx, 5)
+            
+            product_ids = product_pool.search(cr, uid, [
+                ('default_code', '=', default_code),
+                ], context=context)
+            if product_id:
+                product_pool.write(cr, uid, product_ids, {
+                    ('ean13', '=', ean13),
+                    #('ean13_single', '=', ean13_s),
+                    #('ean13_pack', '=', ean13_p),
+                    }, context=context)
+            print default_code, category_name
+        
+        return True
+        
     def get_excel_evaluation_supplier(self, cr, uid, ids, context=None):
         ''' Import code, export extra data for purchase
         '''

@@ -20,6 +20,7 @@
                             <button name="export_mailing_list" string="Export mailing list" type="object" />
                             <button name="force_first_supplier" string="Force first supplier" type="object" />
                             <button name="check_ean_easylabel" string="Check EAN easylabel" type="object" />
+                            <button name="import_barcode" string="Import barcode" type="object" />
                         </group>
                     </page>
                 </xpath>

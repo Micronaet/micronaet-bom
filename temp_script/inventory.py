@@ -45,6 +45,25 @@ class ResCompany(orm.Model):
     """
     _inherit = 'res.company'
 
+    def update_product_extra_label_field(self, cr, uid, ids, context=None):
+        ''' Update extra fields product
+        '''
+        product_pool = self.pool.get('product.product')
+        product_ids = product_pool.search(cr, uid, [
+            ('structure_id', '!=', False),
+            ('default_code', '!=', False),
+            ], context=context)
+        
+        ctx = context.copy()
+        ctx['update_only_field'] = ('label_frame', 'label_fabric_color')
+
+        for product in product_pool.browse(
+                cr, uid, product_ids, context=context):   
+            product_pool.generate_name_from_code(
+                cr, uid, [product.id], context=ctx)
+            _logger.info('Update label field: %s' % product.default_code)
+            
+        return True
     def import_exclude_list(self, cr, uid, ids, context=None):
         ''' Import exclude list from file easy
         '''

@@ -22,6 +22,7 @@
                             <button name="check_ean_easylabel" string="Check EAN easylabel" type="object" />
                             <button name="import_barcode" string="Import barcode" type="object" />
                             <button name="import_exclude_list" string="Import exclude list" type="object" />
+                            <button name="update_product_extra_label_field" string="Update extra label" type="object" />
                         </group>
                     </page>
                 </xpath>

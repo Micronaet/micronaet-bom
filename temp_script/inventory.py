@@ -56,6 +56,7 @@ class ResCompany(orm.Model):
         
         ctx = context.copy()
         ctx['update_only_field'] = ('label_frame', 'label_fabric_color')
+        ctx['log_file'] = '/home/administrator/photo/log/speech.csv'
 
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):   

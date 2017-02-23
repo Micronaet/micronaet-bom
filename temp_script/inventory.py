@@ -71,6 +71,8 @@ class ResCompany(orm.Model):
         for row in range(1, WS.nrows):
             parent = WS.cell(row, 0).value            
             price = WS.cell(row, 1).value
+            if row == 2:
+                break
             
             if type(parent) == float:
                 parent = '%s' % int(parent)
@@ -86,9 +88,10 @@ class ResCompany(orm.Model):
             product_pool.write(cr, uid, product_ids, {
                 'lst_price': price,
                 }, context=context)
-            
-        total_ids = set(total_ids)
-        total_ids = tuple(total_ids)
+        
+        import pdb; pdb.set_trace()    
+        total_ids = tuple(set(total_ids))
+
         log_f = open(log, 'w')
         for product in product_pool.search(
                 cr, uid, total_ids, context=context):    

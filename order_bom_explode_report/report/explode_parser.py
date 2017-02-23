@@ -699,7 +699,6 @@ class MrpProduction(orm.Model):
         # Fabric has different sort block:
         if mp_mode == 'fabric':
             order_mode = lambda code: (
-                y_axis[code][8], 
                 code[0:3], 
                 code[6:12], 
                 code[3:6],

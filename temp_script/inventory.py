@@ -71,8 +71,6 @@ class ResCompany(orm.Model):
         for row in range(1, WS.nrows):
             parent = WS.cell(row, 0).value            
             price = WS.cell(row, 1).value
-            if row == 2:
-                break
             
             if type(parent) == float:
                 parent = '%s' % int(parent)
@@ -94,7 +92,7 @@ class ResCompany(orm.Model):
         log_f = open(log, 'w')
         for product in product_pool.browse(
                 cr, uid, total_ids, context=context):    
-            log_f.write('%s|%s' % (
+            log_f.write('%s|%s\n' % (
                 product.default_code, 
                 product.lst_price,
                 ))    

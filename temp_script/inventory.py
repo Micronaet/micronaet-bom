@@ -89,11 +89,10 @@ class ResCompany(orm.Model):
                 'lst_price': price,
                 }, context=context)
         
-        import pdb; pdb.set_trace()    
         total_ids = tuple(set(total_ids))
 
         log_f = open(log, 'w')
-        for product in product_pool.search(
+        for product in product_pool.browse(
                 cr, uid, total_ids, context=context):    
             log_f.write('%s|%s' % (
                 product.default_code, lst_price))    

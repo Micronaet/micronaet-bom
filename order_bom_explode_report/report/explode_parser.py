@@ -575,7 +575,7 @@ class MrpProduction(orm.Model):
                         for comp in item.product_id.half_bom_ids:
                             comp_code = comp.product_id.default_code
                             comp_remain = item_remain * comp.product_qty
-                            y_axis[comp_code][4][pos] -= comp_remain # OC
+                            
                             if comp_code not in y_axis: # OC out item (no prod.):
                                 write_xls_line('move', (
                                     block, 'NOT USED', order.name, '', date, 
@@ -588,6 +588,8 @@ class MrpProduction(orm.Model):
                                         else 'NO CATEGORY',
                                     ))
                                 continue
+                                
+                            y_axis[comp_code][4][pos] -= comp_remain # OC
                             write_xls_line('move', (
                                 block, 'USED', order.name, '', date, pos, 
                                 item_code, # Code

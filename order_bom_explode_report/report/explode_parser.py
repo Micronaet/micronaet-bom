@@ -696,11 +696,24 @@ class MrpProduction(orm.Model):
         res = []
         self.jumped = []
     
-        # TODO textilene sort block:
-        # (y_axis[code][8], code[0:3], code[6:12], code[3:6])
+        # Fabric has different sort block:
+        if mp_mode == 'fabric':
+            order_mode = lambda code: (
+                y_axis[code][8], 
+                code[0:3], 
+                code[6:12], 
+                code[3:6],
+                )
+        else:
+            order_mode = lambda code: (
+                y_axis[code][8], 
+                code,
+                )
+        
+        
         write_xls_line('extra', ('Remove lines:', ))
 
-        for key in sorted(y_axis, key=lambda code: (y_axis[code][8], code)):
+        for key in sorted(y_axis, key=order_mode):
             # -----------------------------------------------------------------    
             # Normal report block:
             # -----------------------------------------------------------------    

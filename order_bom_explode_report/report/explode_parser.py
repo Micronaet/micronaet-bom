@@ -700,6 +700,7 @@ class MrpProduction(orm.Model):
         if mp_mode == 'fabric':
             _logger.info('Set sort for fabric')
             order_mode = lambda code: (
+                y_axis[code][8], 
                 code[0:3], 
                 code[6:12], 
                 code[3:6],

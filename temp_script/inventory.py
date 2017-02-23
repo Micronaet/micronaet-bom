@@ -95,7 +95,9 @@ class ResCompany(orm.Model):
         for product in product_pool.browse(
                 cr, uid, total_ids, context=context):    
             log_f.write('%s|%s' % (
-                product.default_code, lst_price))    
+                product.default_code, 
+                product.lst_price,
+                ))    
         log_f.close()
         return True
         

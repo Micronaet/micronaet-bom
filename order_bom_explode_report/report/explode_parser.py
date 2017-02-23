@@ -709,8 +709,7 @@ class MrpProduction(orm.Model):
                 y_axis[code][8], 
                 code,
                 )
-        
-        
+                
         write_xls_line('extra', ('Remove lines:', ))
 
         for key in sorted(y_axis, key=order_mode):

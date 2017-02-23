@@ -23,6 +23,7 @@
                             <button name="import_barcode" string="Import barcode" type="object" />
                             <button name="import_exclude_list" string="Import exclude list" type="object" />
                             <button name="update_product_extra_label_field" string="Update extra label" type="object" />
+                            <button name="import_pricelist_with_parent" string="Import pricelist" type="object" />
                         </group>
                     </page>
                 </xpath>

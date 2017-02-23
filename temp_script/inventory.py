@@ -45,6 +45,58 @@ class ResCompany(orm.Model):
     """
     _inherit = 'res.company'
 
+    def import_pricelist_with_parent(self, cr, uid, ids, context=None):
+        ''' Import pricelist with parent code 
+            >> ordered for overlap problem
+        '''
+        product_pool = self.pool.get('product.product')
+
+        filename = '/home/administrator/photo/xls/pricelist.xls'
+        log = '/home/administrator/photo/xls/pricelist_log.csv'
+
+        try:
+            WB = xlrd.open_workbook(filename)
+        except:
+            raise osv.except_osv(
+                _('Error XLSX'), 
+                _('Cannot read XLS file: %s' % filename),
+                )
+
+        total_ids = [] # Write log
+
+        # ---------------------------------------------------------------------        
+        # Load current list:                
+        # ---------------------------------------------------------------------    
+        WS = WB.sheet_by_index(0)
+        for row in range(1, WS.nrows):
+            parent = WS.cell(row, 0).value            
+            price = WS.cell(row, 1).value
+            
+            if type(parent) == float:
+                parent = '%s' % int(parent)
+            
+            product_ids = product_pool.search(cr, uid, [
+                ('default_code', '=ilike', '%s%%' % parent)], context=context)
+            if not product_ids:
+                continue
+                    
+            _logger.info('Update %s with %s [tot: %s]' % (
+                parent, price, len(product_ids)))            
+            total_ids.extend(product_ids) # Append for log
+            product_pool.write(cr, uid, product_ids, {
+                'lst_price': price,
+                }, context=context)
+            
+        total_ids = set(total_ids)
+        total_ids = tuple(total_ids)
+        log_f = open(log, 'w')
+        for product in product_pool.search(
+                cr, uid, total_ids, context=context):    
+            log_f.write('%s|%s' % (
+                product.default_code, lst_price))    
+        log_f.close()
+        return True
+        
     def update_product_extra_label_field(self, cr, uid, ids, context=None):
         ''' Update extra fields product
         '''

@@ -98,35 +98,52 @@ class ResCompany(orm.Model):
                 ))    
         log_f.close()
         return True
+
+    def update_product_extra_label_field(self, cr, uid, ids, context=None):
+        ''' Update all product
+        '''
+        if context is None:
+            context = {}
+            ctx = {}
+        else:    
+            ctx = context.copy()
+        ctx['product_selection': 'all']
+        self.update_product_extra_label_field(cr, uid, ids, context=ctx)
         
     def update_product_extra_label_field(self, cr, uid, ids, context=None):
         ''' Update extra fields product
         '''
+        if context is None:
+            context = {}
+            
+        all_product = context.get('product_selection', False) == 'all'    
+
         # Pool used:
         line_pool = self.pool.get('sale.order.line')
         product_pool = self.pool.get('product.product')
         
         # Only order:
-        line_ids = line_pool.search(cr, uid, [
-            ('order_id.state', 'in', ('draft', 'cancel', 'sent', 'done')),
-            ], context=context)
+        if only_product:
+            # All product:    
+            product_ids = product_pool.search(cr, uid, [
+                ('structure_id', '!=', False),
+                ('default_code', '!=', False),
+                ], context=context)        
+        else: # only order product:
+            line_ids = line_pool.search(cr, uid, [
+                ('order_id.state', 'in', ('draft', 'cancel', 'sent', 'done')),
+                ], context=context)
 
-        product_ids =  []
-        for line in line_pool.browse(cr, uid, line_ids, context=context):
-            product_id = line.product_id.id
-            if line.product_id.structure_id and line.product_id.default_code:
-                if product_id not in product_ids:
-                    product_ids.append(product_id)
-            else:
-                _logger.error(
-                    'Product no structure or code %s' % line.product_id.name)
+            product_ids =  []
+            for line in line_pool.browse(cr, uid, line_ids, context=context):
+                product_id = line.product_id.id
+                if line.product_id.structure_id and line.product_id.default_code:
+                    if product_id not in product_ids:
+                        product_ids.append(product_id)
+                else:
+                    _logger.error(
+                        'Product no structure/code %s' % line.product_id.name)
             
-        # All product:    
-        #product_ids = product_pool.search(cr, uid, [
-        #    ('structure_id', '!=', False),
-        #    ('default_code', '!=', False),
-        #    ], context=context)
-        
         ctx = context.copy()
         ctx['update_only_field'] = ('label_frame', 'label_fabric_color')
         ctx['log_file'] = '/home/administrator/photo/log/speech.csv'

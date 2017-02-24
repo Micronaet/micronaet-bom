@@ -113,11 +113,13 @@ class ResCompany(orm.Model):
 
         product_ids =  []
         for line in line_pool.browse(cr, uid, line_ids, context=context):
+            product_id = line.product_id.id
             if line.product_id.structure_id and line.product_id.default_code:
-                product_ids.append(line.product_id.id)
+                if product_id not in product_ids:
+                    product_ids.append(product_id)
             else:
                 _logger.error(
-                    'Product no structure or code %s' % line.product_id.id)
+                    'Product no structure or code %s' % line.product_id.name)
             
         # All product:    
         #product_ids = product_pool.search(cr, uid, [

@@ -99,7 +99,7 @@ class ResCompany(orm.Model):
         log_f.close()
         return True
 
-    def update_product_extra_label_field(self, cr, uid, ids, context=None):
+    def update_all_product_extra_label_field(self, cr, uid, ids, context=None):
         ''' Update all product
         '''
         if context is None:
@@ -107,7 +107,7 @@ class ResCompany(orm.Model):
             ctx = {}
         else:    
             ctx = context.copy()
-        ctx['product_selection': 'all']
+        ctx['product_selection'] = 'all'
         self.update_product_extra_label_field(cr, uid, ids, context=ctx)
         
     def update_product_extra_label_field(self, cr, uid, ids, context=None):
@@ -123,15 +123,15 @@ class ResCompany(orm.Model):
         product_pool = self.pool.get('product.product')
         
         # Only order:
-        if only_product:
-            _logger.info('Force description only product order')
+        if all_product:
+            _logger.info('Force description all product')
             # All product:    
             product_ids = product_pool.search(cr, uid, [
                 ('structure_id', '!=', False),
                 ('default_code', '!=', False),
                 ], context=context)        
         else: # only order product:
-            _logger.info('Force description all product')
+            _logger.info('Force description only product order')
             line_ids = line_pool.search(cr, uid, [
                 ('order_id.state', 'in', ('draft', 'cancel', 'sent', 'done')),
                 ], context=context)

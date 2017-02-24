@@ -102,11 +102,28 @@ class ResCompany(orm.Model):
     def update_product_extra_label_field(self, cr, uid, ids, context=None):
         ''' Update extra fields product
         '''
+        # Pool used:
+        line_pool = self.pool.get('sale.order.line')
         product_pool = self.pool.get('product.product')
-        product_ids = product_pool.search(cr, uid, [
-            ('structure_id', '!=', False),
-            ('default_code', '!=', False),
+        
+        # Only order:
+        line_ids = line_pool.search(cr, uid, [
+            ('order_id.state', 'in', ('draft', 'cancel', 'sent', 'done')),
             ], context=context)
+
+        product_ids =  []
+        for line in line_pool.browse(cr, uid, line_ids, context=context):
+            if line.product_id.structure_id and line.product_id.default_code:
+                product_ids.append(line.product_id.id)
+            else:
+                _logger.error(
+                    'Product no structure or code %s' % line.product_id.id)
+            
+        # All product:    
+        #product_ids = product_pool.search(cr, uid, [
+        #    ('structure_id', '!=', False),
+        #    ('default_code', '!=', False),
+        #    ], context=context)
         
         ctx = context.copy()
         ctx['update_only_field'] = ('label_frame', 'label_fabric_color')
@@ -119,6 +136,7 @@ class ResCompany(orm.Model):
             _logger.info('Update label field: %s' % product.default_code)
             
         return True
+        
     def import_exclude_list(self, cr, uid, ids, context=None):
         ''' Import exclude list from file easy
         '''

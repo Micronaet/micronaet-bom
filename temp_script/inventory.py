@@ -124,12 +124,14 @@ class ResCompany(orm.Model):
         
         # Only order:
         if only_product:
+            _logger.info('Force description only product order')
             # All product:    
             product_ids = product_pool.search(cr, uid, [
                 ('structure_id', '!=', False),
                 ('default_code', '!=', False),
                 ], context=context)        
         else: # only order product:
+            _logger.info('Force description all product')
             line_ids = line_pool.search(cr, uid, [
                 ('order_id.state', 'in', ('draft', 'cancel', 'sent', 'done')),
                 ], context=context)

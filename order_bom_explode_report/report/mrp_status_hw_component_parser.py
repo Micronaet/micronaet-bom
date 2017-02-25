@@ -490,9 +490,9 @@ class Parser(report_sxw.rml_parse):
                     hw_data[2].get(
                         (parent, halfwork), '?'), # total
                     halfwork.default_code, # hw code
-                    int(hw_data[0]), # Todo halfwork
-                    int(hw_data[1]), # Stock
-                    int(proposed_hw),
+                    int(round(hw_data[0])), # Todo halfwork
+                    int(round(hw_data[1])), # Stock
+                    int(round(proposed_hw)),
                     False, # XXX no more used #yet_write, # yet write status
                     ]
                 
@@ -529,13 +529,13 @@ class Parser(report_sxw.rml_parse):
                     
                     # Add data block directly:
                     res.append(data_AB + [
-                        int(cmpt.product_qty), # total 
+                        cmpt.product_qty, # total 
                         cp.default_code, # code
-                        int(proposed_cmpt),
-                        int(cmpt_net),
-                        int(cmpt_of),
-                        proposed if proposed > 0.0 else '',
-                        proposed if proposed <= 0.0 else '',
+                        int(round(proposed_cmpt)),
+                        int(round(cmpt_net)),
+                        int(round(cmpt_of)),
+                        int(round(proposed)) if proposed > 0.0 else '',
+                        int(round(proposed)) if proposed <= 0.0 else '',
                         yet_write,
                         cp.mx_of_date or '',
                         ])

@@ -438,7 +438,7 @@ class Parser(report_sxw.rml_parse):
         # Empty record
         empty_A = ['' for n in range(0, 7)] # parent 7
         empty_B = ['' for n in range(0, 6)] # halfwork 6
-        empty_C = ['' for n in range(0, 8)] # component 7
+        empty_C = ['' for n in range(0, 9)] # component 8
         
         # TODO remove use cmpt_present instead:
         hw_present = [] # for highlight only first total in report (for orders)
@@ -537,6 +537,7 @@ class Parser(report_sxw.rml_parse):
                         proposed if proposed > 0.0 else '',
                         proposed if proposed <= 0.0 else '',
                         yet_write,
+                        cmpt.mx_of_date or '',
                         ])
                             
                 if hw_first: # no cmpt data (not in loop)

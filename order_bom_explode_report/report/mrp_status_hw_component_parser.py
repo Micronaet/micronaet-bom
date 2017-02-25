@@ -453,10 +453,10 @@ class Parser(report_sxw.rml_parse):
             # Parent data:
             data_A = [
                 parent, # 0. Code
-                record[2], # 1. OC
-                record[1], # 2. Mag (Net stock - MRP calculated)
-                record[5], # 3. Produced to delivery
-                record[2], # XXX ex.: - record[1] + record[5], # 4. todo
+                int(record[2]), # 1. OC
+                int(record[1]), # 2. Mag (Net stock - MRP calculated)
+                int(record[5]), # 3. Produced to delivery
+                int(record[2]), # XXX ex.: - record[1] + record[5], # 4. todo
                 record[3], # 5. tot. negative stock (for green-red light)
                 record[4], # 6. tot. no bom (for green-red light)
                 # TODO
@@ -490,9 +490,9 @@ class Parser(report_sxw.rml_parse):
                     hw_data[2].get(
                         (parent, halfwork), '?'), # total
                     halfwork.default_code, # hw code
-                    hw_data[0], # Todo halfwork
-                    hw_data[1], # Stock
-                    proposed_hw,
+                    int(hw_data[0]), # Todo halfwork
+                    int(hw_data[1]), # Stock
+                    int(proposed_hw),
                     False, # XXX no more used #yet_write, # yet write status
                     ]
                 
@@ -529,15 +529,15 @@ class Parser(report_sxw.rml_parse):
                     
                     # Add data block directly:
                     res.append(data_AB + [
-                        cmpt.product_qty, # total 
+                        int(cmpt.product_qty), # total 
                         cp.default_code, # code
-                        proposed_cmpt,
-                        cmpt_net,
-                        cmpt_of,
+                        int(proposed_cmpt),
+                        int(cmpt_net),
+                        int(cmpt_of),
                         proposed if proposed > 0.0 else '',
                         proposed if proposed <= 0.0 else '',
                         yet_write,
-                        cmpt.mx_of_date or '',
+                        cp.mx_of_date or '',
                         ])
                             
                 if hw_first: # no cmpt data (not in loop)

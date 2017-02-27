@@ -443,7 +443,8 @@ class Parser(report_sxw.rml_parse):
         # TODO remove use cmpt_present instead:
         hw_present = [] # for highlight only first total in report (for orders)
         
-        cmpt_present = [] # for remove double orders        
+        cmpt_present = [] # for remove double orders   
+
         for parent in sorted(parent_todo):
             record = parent_todo[parent]
             
@@ -467,7 +468,10 @@ class Parser(report_sxw.rml_parse):
                 continue
 
             parent_first = True
-            for hw in record[0].bom_line_ids:
+            for hw in sorted(
+                    record[0].bom_line_ids, 
+                    key=lambda x: x.product_id.default_code
+                    ):
                 if not hw.product_id in hws: # hw in the list selection
                     continue # not in selected list create before
 

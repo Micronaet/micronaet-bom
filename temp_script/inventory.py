@@ -208,6 +208,19 @@ class ResCompany(orm.Model):
     def import_exclude_list(self, cr, uid, ids, context=None):
         ''' Import exclude list from file easy
         '''
+        def generate_code(value):
+            ''' Add extra char
+            '''
+            import barcode
+            EAN = barcode.get_barcode_class('ean13')
+            if len(value) == 13:
+                return value
+            elif len(value) == 12:
+                ean13 = EAN(value)
+                return ean13.get_fullcode()
+            else:
+                return ''
+
         exclude_pool = self.pool.get('product.codebar.exclude')
 
         filename = '/home/administrator/photo/xls/ean/doppi.xls'
@@ -233,12 +246,12 @@ class ResCompany(orm.Model):
         for row in range(1, WS.nrows):
             default_code = WS.cell(row, 0).value
             try:
-                ean13_s = '%s' % int(WS.cell(row, 1).value)
+                ean13_s = generate_code('%s' % int(WS.cell(row, 1).value))
             except:
                 ean13_s = ''
                 
             try:
-                ean13_p = '%s' % int(WS.cell(row, 2).value)
+                ean13_p = generate_code('%s' % int(WS.cell(row, 2).value))
             except:
                 ean13_p = ''
                 

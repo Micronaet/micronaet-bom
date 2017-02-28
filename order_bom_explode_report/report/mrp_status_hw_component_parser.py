@@ -468,9 +468,11 @@ class Parser(report_sxw.rml_parse):
                 continue
 
             parent_first = True
+            
+            #for hw in record[0].bom_line_ids: 
             for hw in sorted(
                     record[0].bom_line_ids, 
-                    key=lambda x: x.product_id.default_code
+                    key=lambda x: x.product_id.default_code,
                     ):
                 if not hw.product_id in hws: # hw in the list selection
                     continue # not in selected list create before
@@ -491,8 +493,7 @@ class Parser(report_sxw.rml_parse):
                 
                 proposed_hw = hw_data[0] - hw_data[1]
                 data_B = [
-                    hw_data[2].get(
-                        (parent, halfwork), '?'), # total
+                    hw_data[2].get((parent, halfwork), '?'), # total
                     halfwork.default_code, # hw code
                     int(round(hw_data[0])), # Todo halfwork
                     int(round(hw_data[1])), # Stock

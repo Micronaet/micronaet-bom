@@ -211,6 +211,7 @@ class ResCompany(orm.Model):
         exclude_pool = self.pool.get('product.codebar.exclude')
 
         filename = '/home/administrator/photo/xls/ean/doppi.xls'
+        product_pool = self.pool.get('product.product')
 
         try:
             WB = xlrd.open_workbook(filename)
@@ -231,8 +232,16 @@ class ResCompany(orm.Model):
         import pdb; pdb.set_trace()
         for row in range(1, WS.nrows):
             default_code = WS.cell(row, 0).value
-            ean13_s = WS.cell(row, 1).value
-            ean13_p = WS.cell(row, 2).value
+            try:
+                ean13_s = '%s' % int(WS.cell(row, 1).value)
+            except:
+                ean13_s = ''
+                
+            try:
+                ean13_p = '%s' % int(WS.cell(row, 2).value)
+            except:
+                ean13_p = ''
+                
             product_ids = product_pool.search(cr, uid, [], context=context)
             if product_ids:
                 product_pool.write(cr, uid, product_ids, {

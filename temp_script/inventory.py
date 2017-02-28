@@ -255,7 +255,8 @@ class ResCompany(orm.Model):
             except:
                 ean13_p = ''
                 
-            product_ids = product_pool.search(cr, uid, [], context=context)
+            product_ids = product_pool.search(cr, uid, [
+                ('default_code', '=', default_code)], context=context)
             if product_ids:
                 product_pool.write(cr, uid, product_ids, {
                     'ean13': ean13_p or ean13_s,

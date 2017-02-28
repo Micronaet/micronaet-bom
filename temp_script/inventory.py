@@ -240,10 +240,11 @@ class ResCompany(orm.Model):
             cr, uid, exclude_ids, context=context)
         exclude = [item.name for item in exclude_proxy]
         
-        fixed = '8017882'
+        #fixed = '8017882'
         WS = WB.sheet_by_index(0)
-        import pdb; pdb.set_trace()
+
         for row in range(1, WS.nrows):
+            # Read fields
             default_code = WS.cell(row, 0).value
             try:
                 ean13_s = generate_code('%s' % int(WS.cell(row, 1).value))
@@ -266,23 +267,23 @@ class ResCompany(orm.Model):
             else:
                 _logger.warning('Not found: %s' % default_code)
                         
-            if ean13_s and ean13_s.startswith(fixed):
-                code = ean13_s[7:12]
-                if code not in exclude:
-                    exclude.append(code)
+            #if ean13_s and ean13_s.startswith(fixed):
+            #    code = ean13_s[7:12]
+            #    if code not in exclude:
+            #        exclude.append(code)
 
-            if ean13_p and ean13_p.startswith(fixed):
-                code = ean13_p[7:12]
-                if code not in exclude:
-                    exclude.append(code)
+            #if ean13_p and ean13_p.startswith(fixed):
+            #    code = ean13_p[7:12]
+            #    if code not in exclude:
+            #        exclude.append(code)
                         
-        for name in exclude:
-            try:
-                exclude_pool.create(cr, uid, {
-                    'name': name,
-                    }, context=context)            
-            except:
-                _logger.warning('Yet present: %s' % name)
+        #for name in exclude:
+        #    try:
+        #        exclude_pool.create(cr, uid, {
+        #            'name': name,
+        #            }, context=context)            
+        #    except:
+        #        _logger.warning('Yet present: %s' % name)
         return True
 
     def check_ean_easylabel(self, cr, uid, ids, context=None):

@@ -111,6 +111,7 @@ class MrpProduction(orm.Model):
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # SAL (+ extra per.)
                 product, # product or halfworked
                 category,
+                {}, # (HW that contain fabric) > fabric mode report
                 ]
             return
             
@@ -188,7 +189,7 @@ class MrpProduction(orm.Model):
         y_axis = {}
         category_fabric = _('Fabric')
         
-        # ADD all fabrici in axis before all check:
+        # ADD all fabrics in axis before all check:
         if mp_mode == 'fabric': # fabric
             fabric_list = (
                 'T3D', 'TES', 'TEX', 'TGT', 'TIO', 'TJO', 'TSK', 'TSQ', 'TWH', 
@@ -258,10 +259,11 @@ class MrpProduction(orm.Model):
                         else:    
                             category = _('Fabric (or extra)')
                         add_x_item(y_axis, component, category)
-
+                        
         write_xls_line('extra', ('Component / Halfworked selected:', ))            
         for code in y_axis.keys():    
             write_xls_line('extra', (code, ))
+        
         
         # =====================================================================
         # Get parameters for search:
@@ -483,6 +485,7 @@ class MrpProduction(orm.Model):
                 # --------------------------------
                 # Explode HW subcomponent for report 2
                 if mode != 'halfwork': 
+                
                     for comp in product.half_bom_ids:
                         comp_code = comp.product_id.default_code
                         if comp_code not in y_axis: # OC out item (no prod.):
@@ -500,6 +503,22 @@ class MrpProduction(orm.Model):
                             comp.category_id.name if comp.category_id else\
                                 'NO CATEGORY',
                             ))
+
+                        # Add extra part for keep HW in fabric report:
+                        if mp_mode == 'fabric':
+                            hw_fabric = y_axis[comp_code][9]
+                            if product.default_code not in hw_fabric:
+                                hw_fabric[product.default_code] = [
+                                    product.mx_net_qty, # stock
+                                    remain, # HW remain to produce
+                                    comp_remain, # Mt of fabric
+                                    ]                                    
+                            else:        
+                                hw_fabric[product.default_code][1] += \
+                                    remain
+                                hw_fabric[product.default_code][2] += \
+                                    comp_remain
+                        
                         # go ahead for download component    
 
                 # Direct sale hw or component:

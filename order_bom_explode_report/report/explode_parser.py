@@ -45,7 +45,6 @@ class MrpProduction(orm.Model):
     """    
     _inherit = 'mrp.production'
     
-
     # Moved here utility for call externally:
     def get_explode_report_object(self, cr, uid, data=None, context=None):
         ''' Search all product elements
@@ -149,6 +148,20 @@ class MrpProduction(orm.Model):
             if product_id.bom_placeholder_rule:
                 return eval(product_id.bom_placeholder_rule)
             return True # Mandatory if not rule
+
+        def update_hw_data_line(hw_fabric, product, remain, comp_remain):
+            ''' Update data line for remain hw line
+            '''
+            if product.default_code not in hw_fabric:
+                hw_fabric[product.default_code] = [
+                    product.mx_net_qty, # stock
+                    remain, # HW remain to produce
+                    comp_remain, # Mt of fabric
+                    ]                                    
+            else:        
+                hw_fabric[product.default_code][1] += remain
+                hw_fabric[product.default_code][2] += comp_remain                                    
+            return True
                         
         # ---------------------------------------------------------------------
         # XLS Log file: 
@@ -454,7 +467,7 @@ class MrpProduction(orm.Model):
         
         order_ids = company_pool.mrp_domain_sale_order_line(
             cr, uid, context=context)
-            
+
         for order in sale_pool.browse(cr, uid, order_ids, context=context):
             # Search in order line:
             for line in order.order_line:                
@@ -485,12 +498,12 @@ class MrpProduction(orm.Model):
                 # --------------------------------
                 # Explode HW subcomponent for report 2
                 if mode != 'halfwork': 
-                
-                    for comp in product.half_bom_ids:
+                    for comp in product.half_bom_ids:             
                         comp_code = comp.product_id.default_code
                         if comp_code not in y_axis: # OC out item (no prod.):
                             # TODO log component not used
                             continue
+
                         comp_remain = remain * comp.product_qty
                         y_axis[comp_code][4][pos] -= comp_remain # OC
                         write_xls_line('move', (
@@ -505,20 +518,10 @@ class MrpProduction(orm.Model):
                             ))
 
                         # Add extra part for keep HW in fabric report:
+                        # Update extra line for fabric HW use:
                         if mp_mode == 'fabric':
-                            hw_fabric = y_axis[comp_code][9]
-                            if product.default_code not in hw_fabric:
-                                hw_fabric[product.default_code] = [
-                                    product.mx_net_qty, # stock
-                                    remain, # HW remain to produce
-                                    comp_remain, # Mt of fabric
-                                    ]                                    
-                            else:        
-                                hw_fabric[product.default_code][1] += \
-                                    remain
-                                hw_fabric[product.default_code][2] += \
-                                    comp_remain
-                        
+                            update_hw_data_line(y_axis[comp_code][9], 
+                                product, remain, comp_remain)                            
                         # go ahead for download component    
 
                 # Direct sale hw or component:
@@ -619,6 +622,14 @@ class MrpProduction(orm.Model):
                                 comp.category_id.name if comp.category_id else\
                                     'NO CATEGORY',
                                 ))
+
+                        # Update extra line for fabric HW use:
+                        if mp_mode == 'fabric':
+                            update_hw_data_line(y_axis[comp_code][9], 
+                                item.product_id, # HW reference
+                                item_remain, # HW remain
+                                comp_remain, # Component remain
+                                )                            
                         continue                
                     
         # =====================================================================

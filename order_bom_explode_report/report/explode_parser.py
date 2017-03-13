@@ -65,6 +65,11 @@ class MrpProduction(orm.Model):
         if data is None:
             data = {}
 
+        # Add status for calc. HW only (filter)?
+        user_pool = self.pool.get('res.users')
+        previous_status = user_pool.set_no_inventory_status(
+            cr, uid, value=False, context=context)
+
         mode = data.get('mode', 'halfwork')
         mp_mode = data.get('mp_mode', False)
         first_supplier_id = data.get('first_supplier_id', False)
@@ -497,7 +502,7 @@ class MrpProduction(orm.Model):
                 # OC direct halfwork or component:
                 # --------------------------------
                 # Explode HW subcomponent for report 2
-                if mode != 'halfwork': 
+                if mode != 'halfwork': # component
                     for comp in product.half_bom_ids:             
                         comp_code = comp.product_id.default_code
                         if comp_code not in y_axis: # OC out item (no prod.):
@@ -536,8 +541,9 @@ class MrpProduction(orm.Model):
                         ''
                         ))                      
                     continue                          
-                 
-                if not len(product.dynamic_bom_line_ids): # no bom
+                
+                # No bom for this product: 
+                if not len(product.dynamic_bom_line_ids):
                     write_xls_line('move', (
                         block, 'NOT USED', order.name, '', date, pos,
                         product_code, '', # Original product
@@ -623,14 +629,14 @@ class MrpProduction(orm.Model):
                                     'NO CATEGORY',
                                 ))
 
-                        # Update extra line for fabric HW use:
-                        if mp_mode == 'fabric':
-                            update_hw_data_line(y_axis[comp_code][9], 
-                                item.product_id, # HW reference
-                                item_remain, # HW remain
-                                comp_remain, # Component remain
-                                )                            
-                        continue                
+                            # Update extra line for fabric HW use:
+                            if mp_mode == 'fabric':
+                                update_hw_data_line(y_axis[comp_code][9], 
+                                    item.product_id, # HW reference
+                                    item_remain, # HW remain
+                                    comp_remain, # Component remain
+                                    )                            
+                        continue # needed?
                     
         # =====================================================================
         #                  UNLOAD FOR PRODUCTION MRP ORDER
@@ -809,6 +815,10 @@ class MrpProduction(orm.Model):
                         res.append(current)
                 else:    
                     res.append(current)
+
+        # Restore previous state:
+        user_pool.set_no_inventory_status(
+            cr, uid, value=previous_status, context=context)            
 
         # Return depend on request inventory or report        
         if for_inventory_delta:

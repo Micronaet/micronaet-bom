@@ -155,22 +155,24 @@ class MrpProduction(orm.Model):
                 return eval(product_id.bom_placeholder_rule)
             return True # Mandatory if not rule
 
-        def update_hw_data_line(data, product, remain, comp_remain):
+        def update_hw_data_line(data, product, remain, mt):
             ''' Update data line for remain hw line
             '''
             hw_fabric = data[9]
             total = data[10] # list of one element
             if product.default_code in hw_fabric:
                 hw_fabric[product.default_code][1] += remain
-                hw_fabric[product.default_code][2] += comp_remain                                    
-                total[0] += comp_remain
+                #hw_fabric[product.default_code][2] += comp_remain                                    
+                #total[0] += comp_remain
             else:
+                stock = product.mx_net_qty
+                stock_mt = stock * mt
                 hw_fabric[product.default_code] = [
-                    product.mx_net_qty, # stock
-                    remain, # HW remain to produce
-                    comp_remain, # Mt of fabric
+                    stock, # 0. Stock HW
+                    remain, # 1. OC remain HW
+                    stock_mt, # 2. Stock Component 
                     ]
-                total[0] = comp_remain
+                total[0] += stock_mt
             return True
                         
         # ---------------------------------------------------------------------
@@ -531,7 +533,7 @@ class MrpProduction(orm.Model):
                         # Update extra line for fabric HW use:
                         if mp_mode == 'fabric':
                             update_hw_data_line(y_axis[comp_code], 
-                                product, remain, comp_remain)                            
+                                product, remain, comp.product_qty)                            
                         # go ahead for download component    
 
                 # Direct sale hw or component:
@@ -639,7 +641,7 @@ class MrpProduction(orm.Model):
                                 update_hw_data_line(y_axis[comp_code], 
                                     item.product_id, # HW reference
                                     item_remain, # HW remain
-                                    comp_remain, # Component remain
+                                    comp.product_qty, # Component remain
                                     )                            
                         continue # needed?
                     

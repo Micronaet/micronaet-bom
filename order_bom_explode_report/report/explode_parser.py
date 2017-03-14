@@ -160,17 +160,17 @@ class MrpProduction(orm.Model):
             '''
             hw_fabric = data[9]
             total = data[10] # list of one element
-            if product.default_code not in hw_fabric:
+            if product.default_code in hw_fabric:
+                hw_fabric[product.default_code][1] += remain
+                hw_fabric[product.default_code][2] += comp_remain                                    
+                total[0] += comp_remain
+            else:
                 hw_fabric[product.default_code] = [
                     product.mx_net_qty, # stock
                     remain, # HW remain to produce
                     comp_remain, # Mt of fabric
                     ]
                 total[0] = comp_remain
-            else:        
-                hw_fabric[product.default_code][1] += remain
-                hw_fabric[product.default_code][2] += comp_remain                                    
-                total[0] += comp_remain
             return True
                         
         # ---------------------------------------------------------------------

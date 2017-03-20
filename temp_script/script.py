@@ -154,6 +154,59 @@ class ResCompany(orm.Model):
             print default_code, category_name
         return True
         
+    def export_ordered_product_for_label_check(
+            self, cr, uid, ids, context=None):    
+        ''' Export product ordered for check label fields
+        '''    
+        # ---------------------------------------------------------------------
+        # Create and open Workbook:
+        # ---------------------------------------------------------------------
+        xls_file = '/home/administrator/photo/xls/label/ordered_product.xlsx'
+        _logger.info('Start export label check: %s' % xls_file)    
+        
+        WB = xlsxwriter.Workbook(xls_file)
+        WS = WB.add_worksheet('Prodotti ordinati')
+        
+        # Pool used:        
+        product_pool = self.pool.get('product.product')
+        sol_pool = self.pool.get('sale.order.line')
+
+        sol_ids = sol_pool.search(cr, uid, [
+            ('order_id.state', 'not in', ('draft', 'sent', 'cancel')),
+            ('order_id.mx_closed', '=', False),            
+            ], context=context)
+        _logger.info('Row selected: %s' % len(sol_ids))    
+        
+        product_ids = [item.product_id.id for item in sol_pool.browse(
+            cr, uid, sol_ids, context=context)]
+        product_ids = list(set(product_ids))
+        product_proxy = product_pool.browse(
+            cr, uid, product_ids, context=context)
+        
+        # Write header:                
+        row = 0
+        WS.write(row, 0, 'Codice')
+        WS.write(row, 1, 'EAN 13')
+        WS.write(row, 2, 'Ean 13 mono')
+        WS.write(row, 3, 'EAN 8')
+        WS.write(row, 4, 'Ean 8 mono')
+        WS.write(row, 5, 'Q x pack')
+        WS.write(row, 6, 'Q x pallet')
+        
+        for product in sorted(product_proxy, key=lambda x: x.default_code):
+            # Write data line:            
+            row += 1            
+            WS.write(row, 0, product.default_code)
+            WS.write(row, 1, product.ean13)
+            WS.write(row, 2, product.ean13_mono)
+            WS.write(row, 3, product.ean8)
+            WS.write(row, 4, product.ean8_mono)
+            WS.write(row, 5, product.q_x_pack)
+            WS.write(row, 6, product.q_x_pallet or product.item_per_pallet)
+        WB.close()
+        _logger.info('Start export label check: %s' % xls_file)    
+        return True
+        
     def pipe_status_export(self, cr, uid, ids, context=None):
         ''' Extract pipe status for inventory check
         '''

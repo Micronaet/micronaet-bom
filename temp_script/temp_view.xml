@@ -25,6 +25,7 @@
                             <button name="update_product_extra_label_field" string="Update extra label (order)" type="object" />
                             <button name="update_all_product_extra_label_field" string="Update extra label (all)" type="object" />
                             <button name="import_pricelist_with_parent" string="Import pricelist" type="object" />
+                            <button name="export_ordered_product_for_label_check" string="Export label check (OC)" type="object" />
                         </group>
                     </page>
                 </xpath>

@@ -45,6 +45,38 @@ class ResCompany(orm.Model):
     """
     _inherit = 'res.company'
 
+    def check_invoice_line(self, cr, uid, ids, context=None):
+        ''' Check invoice line
+        '''
+        filename = '/home/administrator/photo/xls/check_invoice.xls'                
+        
+        invoice_pool = self.pool.get('account.invoice')
+        invoice_ids = invoice_pool.search(cr, uid, [
+            ('date_invoice', '>=', '2017-01-01')], context=context)
+
+        # Open file and write header
+        WB = xlsxwriter.Workbook(filename)
+        WS = WB.add_worksheet('Fatture')
+        WS.write(0, 0, 'Fattura')
+        WS.write(0, 1, '# righe')
+        WS.write(0, 2, '# stock')
+
+        i = 0
+        for invoice in invoice_pool.browse(
+                cr, uid, invoice_ids, context=context):
+            invoice_line = len(invoice.invoice_line)
+            stock_line = 0
+            for stock in invoice.invoiced_picking_ids:
+                stock_line += len(stock.move_lines)
+            if invoice_line != stock_line:                
+                _logger.warning(invoice.number)
+                i += 1
+                WS.write(i, 0, invoice.number)
+                WS.write(i, 1, invoice_line)
+                WS.write(i, 2, stock_line)
+        WB.close()
+        return True
+        
     def import_pricelist_with_parent(self, cr, uid, ids, context=None):
         ''' Import pricelist with parent code 
             >> ordered for overlap problem

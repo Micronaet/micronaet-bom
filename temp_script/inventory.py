@@ -579,6 +579,7 @@ class ResCompany(orm.Model):
         # Write Header line:
         write_xls_line((
             'Ciente', 'Fornitore', 'Azienda', 'Indirizzo', 'Camcard', 'Email',
+            'Opt out', 'Feedback', 
             'Nome', 'Citta', 'Nazione', 'Email', 'Sito', 'Telefono',
             'Cat. Stat.', 'Newsletter', 'Tipo', 'Zona',
             ))
@@ -589,12 +590,18 @@ class ResCompany(orm.Model):
         for partner in partner_pool.browse(
                 cr, uid, partner_ids, context=context):
             write_xls_line((
+                
                 'X' if partner.customer else '',
                 'X' if partner.supplier else '',
                 'X' if partner.is_company else '',
                 'X' if partner.is_address else '',
                 'X' if partner.camcard_text else '',
                 'X' if partner.email else '',
+                
+                'X' if partner.news_opt_out else '',
+                partner.news_feedback_id.name if \
+                    partner.news_feedback_id else '',
+                
                 partner.name,
                 partner.city,
                 partner.country_id.name,

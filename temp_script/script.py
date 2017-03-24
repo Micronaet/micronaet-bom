@@ -51,6 +51,18 @@ class ResCompany(orm.Model):
         '''
         ''' Read XLS file for reassociate inventory category
         ''' 
+        def generate_code_from_cell(value):
+            ''' Add extra char
+            '''
+            import barcode
+            EAN = barcode.get_barcode_class('ean13')
+            if len(value) != 12:
+                raise osv.except_osv(
+                    _('Error'),
+                    _('EAN before control must be 12 char!'))
+            ean13 = EAN(value)
+            return ean13.get_fullcode()
+        
         filename = '/home/administrator/photo/xls/ean/barcode.xls'
         product_pool = self.pool.get('product.product')
 
@@ -69,7 +81,8 @@ class ResCompany(orm.Model):
             
             data = {} 
             try:       
-                ean13_s = '%s' % int(WS.cell(row, 2).value)
+                ean13_s = generate_code_from_cell(
+                    '%s' % int(WS.cell(row, 2).value))
             except:
                 ean13_s = ''
                 _logger.error(
@@ -78,7 +91,8 @@ class ResCompany(orm.Model):
                 data['ean13_s'] = ean13_s
 
             try:
-                ean13 = '%s' % int(WS.cell(row, 3).value) # pack
+                ean13 = generate_code_from_cell(
+                    '%s' % int(WS.cell(row, 3).value)) # pack
             except:
                 ean13 = ''
                 _logger.error(

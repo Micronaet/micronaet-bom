@@ -277,18 +277,11 @@ class ResCompany(orm.Model):
         import pdb; pdb.set_trace()
         exclude = []
         for row in range(0, WS.nrows):
-            # Read fields
-            #default_code = WS.cell(row, 0).value
             try:
                 ean13_s = generate_code('%s' % int(WS.cell(row, 0).value))
             except:
                 ean13_s = ''
                 
-            #try:
-            #    ean13_p = generate_code('%s' % int(WS.cell(row, 2).value))
-            #except:
-            #    ean13_p = ''
-                        
             if ean13_s and ean13_s.startswith(fixed):
                 code = ean13_s[7:12]
                 if code not in exclude_db:

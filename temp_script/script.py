@@ -51,9 +51,8 @@ class ResCompany(orm.Model):
         '''
         ''' Read XLS file for reassociate inventory category
         ''' 
+        filename = '/home/administrator/photo/xls/ean/barcode.xls'
         product_pool = self.pool.get('product.product')
-
-        filename = '/home/administrator/photo/xls/barcode.xls'
 
         try:
             WB = xlrd.open_workbook(filename)
@@ -64,22 +63,39 @@ class ResCompany(orm.Model):
                 )
                 
         WS = xl_workbook.sheet_by_index(0)
+        import pdb; pdb.set_trace()
         for row in range(0, WS.nrows):
             default_code = WS.cell(row_idx, 0)
-            ean13 = WS.cell(row_idx, 2)
-            ean13_s = WS.cell(row_idx, 4)
-            ean13_p = WS.cell(row_idx, 5)
             
+            # q x pack  
+            ean13_s = WS.cell(row_idx, 2)
+            ean13 = WS.cell(row_idx, 3) # pack
+
+            # Write ean 13 of product and single:            
             product_ids = product_pool.search(cr, uid, [
                 ('default_code', '=', default_code),
                 ], context=context)
-            if product_id:
+            if product_ids:
                 product_pool.write(cr, uid, product_ids, {
                     ('ean13', '=', ean13),
-                    #('ean13_single', '=', ean13_s),
-                    #('ean13_pack', '=', ean13_p),
+                    ('ean13_single', '=', ean13_s),
                     }, context=context)
-            print default_code, category_name
+
+            # Write ean 13 for single if exist:
+            if len(default_code) > 12 or not ean13_s:
+                _logger.info('Single unmanaged: %' % default_code)
+                continue # unmanaged single
+            
+            default_code_s = '%-12sS' % default_code
+            _logger.info('Search Single: %s' % default_code_s)
+            product_ids = product_pool.search(cr, uid, [
+                ('default_code', '=', default_code_s),
+                ], context=context)
+            if product_ids:
+                product_pool.write(cr, uid, product_ids, {
+                    ('ean13', '=', ean13_s),
+                    #('ean13_single', '=', ean13_s), # not written
+                    }, context=context)
         
         return True
         

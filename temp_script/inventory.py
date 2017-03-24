@@ -257,7 +257,6 @@ class ResCompany(orm.Model):
 
         filename = '/home/administrator/photo/xls/ean/doppi.xls'
         product_pool = self.pool.get('product.product')
-        import pdb; pdb.set_trace()
         try:
             WB = xlrd.open_workbook(filename)
         except:
@@ -275,6 +274,7 @@ class ResCompany(orm.Model):
         fixed = '8017882'
         WS = WB.sheet_by_index(0)
 
+        import pdb; pdb.set_trace()
         for row in range(0, WS.nrows):
             # Read fields
             default_code = WS.cell(row, 0).value

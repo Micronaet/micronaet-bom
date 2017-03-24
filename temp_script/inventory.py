@@ -239,7 +239,6 @@ class ResCompany(orm.Model):
                 if code not in exclude_db and code not in exclude:
                     exclude.append(code)
 
-        import pdb; pdb.set_trace()            
         for name in exclude:
             try:
                 exclude_pool.create(cr, uid, {

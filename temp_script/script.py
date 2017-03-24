@@ -86,6 +86,10 @@ class ResCompany(orm.Model):
             if ean13:
                 data['ean13'] = ean13
             
+            if not data:
+                _logger.info('No data in this row %s' % default_code)
+                continue
+                
             # Write ean 13 of product and single:            
             product_ids = product_pool.search(cr, uid, [
                 ('default_code', '=', default_code),
@@ -95,7 +99,7 @@ class ResCompany(orm.Model):
 
             # Write ean 13 for single if exist:
             if len(default_code) > 12 or not ean13_s:
-                _logger.info('Single unmanaged: %' % default_code)
+                _logger.info('Single unmanaged: %s' % default_code)
                 continue # unmanaged single
             
             default_code_s = '%-12sS' % default_code

@@ -67,27 +67,31 @@ class ResCompany(orm.Model):
         for row in range(0, WS.nrows):
             default_code = WS.cell(row, 0).value
             
-            # q x pack       
+            data = {} 
             try:       
                 ean13_s = '%s' % int(WS.cell(row, 2).value)
             except:
+                ean13_s = ''
                 _logger.error(
                     'Cannor convert EAN: %s' % (WS.cell(row, 2).value))
+            if ean13_s: 
+                data['ean13_s'] = ean13_s
+
             try:
                 ean13 = '%s' % int(WS.cell(row, 3).value) # pack
             except:
+                ean13 = ''
                 _logger.error(
                     'Cannor convert EAN: %s' % (WS.cell(row, 3).value))
-
+            if ean13:
+                data['ean13'] = ean13
+            
             # Write ean 13 of product and single:            
             product_ids = product_pool.search(cr, uid, [
                 ('default_code', '=', default_code),
                 ], context=context)
             if product_ids:
-                product_pool.write(cr, uid, product_ids, {
-                    ('ean13', '=', ean13),
-                    ('ean13_single', '=', ean13_s),
-                    }, context=context)
+                product_pool.write(cr, uid, product_ids, data, context=context)
 
             # Write ean 13 for single if exist:
             if len(default_code) > 12 or not ean13_s:
@@ -101,8 +105,8 @@ class ResCompany(orm.Model):
                 ], context=context)
             if product_ids:
                 product_pool.write(cr, uid, product_ids, {
-                    ('ean13', '=', ean13_s),
-                    #('ean13_single', '=', ean13_s), # not written
+                    'ean13': ean13_s,
+                    #'ean13_single': ean13_s, # not written
                     }, context=context)
         
         return True

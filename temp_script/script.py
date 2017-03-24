@@ -75,7 +75,6 @@ class ResCompany(orm.Model):
                 )
                 
         WS = WB.sheet_by_index(0)
-        import pdb; pdb.set_trace()
         for row in range(0, WS.nrows):
             default_code = WS.cell(row, 0).value
             
@@ -110,6 +109,7 @@ class ResCompany(orm.Model):
                 ], context=context)
             if product_ids:
                 product_pool.write(cr, uid, product_ids, data, context=context)
+                _logger.info('Update: %s %s' % (default_code, data)
 
             # Write ean 13 for single if exist:
             if len(default_code) > 12 or not ean13_s:
@@ -126,6 +126,7 @@ class ResCompany(orm.Model):
                     'ean13': ean13_s,
                     #'ean13_single': ean13_s, # not written
                     }, context=context)
+                _logger.info('Update S: %s %s' % (default_code_s, ean13_s)
         
         return True
         

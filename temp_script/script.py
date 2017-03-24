@@ -62,7 +62,7 @@ class ResCompany(orm.Model):
                 _('Cannot read XLS file: %s' % filename),
                 )
                 
-        WS = xl_workbook.sheet_by_index(0)
+        WS = WB.sheet_by_index(0)
         import pdb; pdb.set_trace()
         for row in range(0, WS.nrows):
             default_code = WS.cell(row_idx, 0)

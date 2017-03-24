@@ -26,6 +26,7 @@
                             <button name="update_all_product_extra_label_field" string="Update extra label (all)" type="object" />
                             <button name="import_pricelist_with_parent" string="Import pricelist" type="object" />
                             <button name="export_ordered_product_for_label_check" string="Export label check (OC)" type="object" />
+                            <button name="export_ordered_product_for_label_check_product" string="Get OC product without EAN" type="object" />
                             <button name="check_invoice_line" string="Check invoice line" type="object" />
                         </group>
                     </page>

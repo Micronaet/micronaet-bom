@@ -200,6 +200,42 @@ class ResCompany(orm.Model):
             category_name = WS.cell(row, 1)
             print default_code, category_name
         return True
+
+    def export_ordered_product_for_label_check_product(
+            self, cr, uid, ids, context=None):    
+        ''' Export product ordered for check label fields
+        '''    
+        # ---------------------------------------------------------------------
+        # Create and open Workbook:
+        # ---------------------------------------------------------------------        
+        # Pool used:        
+        product_pool = self.pool.get('product.product')
+        sol_pool = self.pool.get('sale.order.line')
+
+        sol_ids = sol_pool.search(cr, uid, [
+            ('order_id.state', 'not in', ('draft', 'sent', 'cancel')),
+            ('order_id.mx_closed', '=', False),
+            ('order_id.product_id.default_code', '=', False),
+            ], context=context)
+        
+        product_ids = [item.product_id.id for item in sol_pool.browse(
+            cr, uid, sol_ids, context=context)]
+        product_ids = list(set(product_ids))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Product in OC'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            #'res_id': 1,
+            'res_model': 'product.product',
+            'view_id': view_id, # False
+            'views': [(False, 'tree'), (False, 'form')],
+            'domain': [('id', 'in', product_ids],
+            'context': context,
+            'target': 'current', # 'new'
+            'nodestroy': False,
+            }
+        
         
     def export_ordered_product_for_label_check(
             self, cr, uid, ids, context=None):    

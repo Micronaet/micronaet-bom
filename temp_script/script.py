@@ -88,7 +88,7 @@ class ResCompany(orm.Model):
                 _logger.error(
                     'Cannor convert EAN: %s' % (WS.cell(row, 2).value))
             if ean13_s: 
-                data['ean13_s'] = ean13_s
+                data['ean13_single'] = ean13_s
 
             try:
                 ean13 = generate_code_from_cell(

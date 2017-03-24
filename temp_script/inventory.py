@@ -257,7 +257,7 @@ class ResCompany(orm.Model):
 
         filename = '/home/administrator/photo/xls/ean/doppi.xls'
         product_pool = self.pool.get('product.product')
-
+        import pdb; pdb.set_trace()
         try:
             WB = xlrd.open_workbook(filename)
         except:
@@ -275,7 +275,7 @@ class ResCompany(orm.Model):
         fixed = '8017882'
         WS = WB.sheet_by_index(0)
 
-        for row in range(1, WS.nrows):
+        for row in range(0, WS.nrows):
             # Read fields
             default_code = WS.cell(row, 0).value
             try:
@@ -283,32 +283,21 @@ class ResCompany(orm.Model):
             except:
                 ean13_s = ''
                 
-            try:
-                ean13_p = generate_code('%s' % int(WS.cell(row, 2).value))
-            except:
-                ean13_p = ''
-                
-            #product_ids = product_pool.search(cr, uid, [
-            #    ('default_code', '=', default_code)], context=context)
-            #if product_ids:
-            #    product_pool.write(cr, uid, product_ids, {
-            #        'ean13': ean13_p or ean13_s,
-            #        'ean13_mono': ean13_s,
-            #        }, context=context)
-            #    _logger.info('Updated: %s' % default_code)
-            #else:
-            #    _logger.warning('Not found: %s' % default_code)
+            #try:
+            #    ean13_p = generate_code('%s' % int(WS.cell(row, 2).value))
+            #except:
+            #    ean13_p = ''
                         
             if ean13_s and ean13_s.startswith(fixed):
                 code = ean13_s[7:12]
                 if code not in exclude:
                     exclude.append(code)
 
-            if ean13_p and ean13_p.startswith(fixed):
-                code = ean13_p[7:12]
-                if code not in exclude:
-                    exclude.append(code)
-                       
+            #if ean13_p and ean13_p.startswith(fixed):
+            #    code = ean13_p[7:12]
+            #    if code not in exclude:
+            #        exclude.append(code)
+        import pdb; pdb.set_trace()            
         for name in exclude:
             try:
                 exclude_pool.create(cr, uid, {

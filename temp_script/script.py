@@ -86,7 +86,7 @@ class ResCompany(orm.Model):
                 ean13_s = ''
                 _logger.error(
                     'Cannor convert EAN: %s' % (WS.cell(row, 2).value))
-            if ean13_s: 
+            if ean13_s and len(ean13_s) == 13: 
                 data['ean13_single'] = ean13_s
 
             try:
@@ -96,7 +96,7 @@ class ResCompany(orm.Model):
                 ean13 = ''
                 _logger.error(
                     'Cannor convert EAN: %s' % (WS.cell(row, 3).value))
-            if ean13:
+            if ean13 and len(ean13) == 13:
                 data['ean13'] = ean13
             
             if not data:

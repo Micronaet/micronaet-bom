@@ -227,7 +227,6 @@ class ResCompany(orm.Model):
         fixed = '8017882'
         WS = WB.sheet_by_index(0)
 
-        import pdb; pdb.set_trace()
         exclude = []
         for row in range(0, WS.nrows):
             try:
@@ -237,13 +236,9 @@ class ResCompany(orm.Model):
                 
             if ean13_s and ean13_s.startswith(fixed):
                 code = ean13_s[7:12]
-                if code not in exclude_db:
+                if code not in exclude_db and code not in exclude:
                     exclude.append(code)
 
-            #if ean13_p and ean13_p.startswith(fixed):
-            #    code = ean13_p[7:12]
-            #    if code not in exclude:
-            #        exclude.append(code)
         import pdb; pdb.set_trace()            
         for name in exclude:
             try:
@@ -251,8 +246,8 @@ class ResCompany(orm.Model):
                     'name': name,
                     }, context=context)            
             except:
-                import pdb; pdb.set_trace()
                 _logger.warning('Yet present: %s' % name)
+                continue
         return True
 
     def check_ean_easylabel(self, cr, uid, ids, context=None):

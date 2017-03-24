@@ -65,11 +65,11 @@ class ResCompany(orm.Model):
         WS = WB.sheet_by_index(0)
         import pdb; pdb.set_trace()
         for row in range(0, WS.nrows):
-            default_code = WS.cell(row_idx, 0)
+            default_code = WS.cell(row, 0)
             
             # q x pack  
-            ean13_s = WS.cell(row_idx, 2)
-            ean13 = WS.cell(row_idx, 3) # pack
+            ean13_s = WS.cell(row, 2)
+            ean13 = WS.cell(row, 3) # pack
 
             # Write ean 13 of product and single:            
             product_ids = product_pool.search(cr, uid, [
@@ -165,8 +165,8 @@ class ResCompany(orm.Model):
                 )
         WS = xl_workbook.sheet_by_index(0)
         for row in range(0, WS.nrows):
-            default_code = WS.cell(row_idx, 0)
-            category_name = WS.cell(row_idx, 1)
+            default_code = WS.cell(row, 0)
+            category_name = WS.cell(row, 1)
             print default_code, category_name
         return True
         

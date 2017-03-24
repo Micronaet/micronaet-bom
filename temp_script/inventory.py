@@ -279,7 +279,7 @@ class ResCompany(orm.Model):
             # Read fields
             default_code = WS.cell(row, 0).value
             try:
-                ean13_s = generate_code('%s' % int(WS.cell(row, 1).value))
+                ean13_s = generate_code('%s' % int(WS.cell(row, 0).value))
             except:
                 ean13_s = ''
                 

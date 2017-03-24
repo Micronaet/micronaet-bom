@@ -269,15 +269,16 @@ class ResCompany(orm.Model):
         exclude_ids = exclude_pool.search(cr, uid, [], context=context)        
         exclude_proxy = exclude_pool.browse(
             cr, uid, exclude_ids, context=context)
-        exclude = [item.name for item in exclude_proxy]
+        exclude_db = [item.name for item in exclude_proxy]
         
         fixed = '8017882'
         WS = WB.sheet_by_index(0)
 
         import pdb; pdb.set_trace()
+        exclude = []
         for row in range(0, WS.nrows):
             # Read fields
-            default_code = WS.cell(row, 0).value
+            #default_code = WS.cell(row, 0).value
             try:
                 ean13_s = generate_code('%s' % int(WS.cell(row, 0).value))
             except:
@@ -290,7 +291,7 @@ class ResCompany(orm.Model):
                         
             if ean13_s and ean13_s.startswith(fixed):
                 code = ean13_s[7:12]
-                if code not in exclude:
+                if code not in exclude_db:
                     exclude.append(code)
 
             #if ean13_p and ean13_p.startswith(fixed):

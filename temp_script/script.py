@@ -68,8 +68,8 @@ class ResCompany(orm.Model):
             default_code = WS.cell(row, 0).value
             
             # q x pack  
-            ean13_s = WS.cell(row, 2).value
-            ean13 = WS.cell(row, 3).value # pack
+            ean13_s = '%s' % int(row[2].value)
+            ean13 = '%s' % int(row[3].value) # pack
 
             # Write ean 13 of product and single:            
             product_ids = product_pool.search(cr, uid, [

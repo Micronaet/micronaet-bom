@@ -69,7 +69,7 @@ class ResCompany(orm.Model):
             
             # q x pack       
             try:       
-                ean13_s = '%s' % int((WS.cell(row, 2).value)
+                ean13_s = '%s' % int(WS.cell(row, 2).value)
             except:
                 _logger.error(
                     'Cannor convert EAN: %s' % (WS.cell(row, 2).value))

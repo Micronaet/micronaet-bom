@@ -67,9 +67,17 @@ class ResCompany(orm.Model):
         for row in range(0, WS.nrows):
             default_code = WS.cell(row, 0).value
             
-            # q x pack              
-            ean13_s = '%s' % int(WS.cell(row, 2).value)
-            ean13 = '%s' % int(WS.cell(row, 3).value) # pack
+            # q x pack       
+            try:       
+                ean13_s = '%s' % int((WS.cell(row, 2).value)
+            except:
+                _logger.error(
+                    'Cannor convert EAN: %s' % (WS.cell(row, 2).value))
+            try:
+                ean13 = '%s' % int(WS.cell(row, 3).value) # pack
+            except:
+                _logger.error(
+                    'Cannor convert EAN: %s' % (WS.cell(row, 3).value))
 
             # Write ean 13 of product and single:            
             product_ids = product_pool.search(cr, uid, [

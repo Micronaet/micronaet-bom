@@ -87,7 +87,7 @@ class ResCompany(orm.Model):
                 _logger.error(
                     'Cannor convert EAN: %s' % (WS.cell(row, 2).value))
             if ean13_s and len(ean13_s) == 13: 
-                data['ean13_single'] = ean13_s
+                data['ean13_mono'] = ean13_s
 
             try:
                 ean13 = generate_code_from_cell(
@@ -124,7 +124,7 @@ class ResCompany(orm.Model):
             if product_ids:
                 product_pool.write(cr, uid, product_ids, {
                     'ean13': ean13_s,
-                    #'ean13_single': ean13_s, # not written
+                    #'ean13_mono': ean13_s, # not written
                     }, context=context)
                 _logger.info('Update S: %s %s' % (default_code_s, ean13_s))
         
@@ -215,12 +215,20 @@ class ResCompany(orm.Model):
         sol_ids = sol_pool.search(cr, uid, [
             ('order_id.state', 'not in', ('draft', 'sent', 'cancel')),
             ('order_id.mx_closed', '=', False),
-            ('order_id.product_id.default_code', '=', False),
             ], context=context)
+        _logger.info('Selected order line: %s' % len(sol_ids))
         
         product_ids = [item.product_id.id for item in sol_pool.browse(
             cr, uid, sol_ids, context=context)]
         product_ids = list(set(product_ids))
+        _logger.info('Selected product: %s' % len(product_ids))
+        
+        product_ids = product_pool.search(cr, uid, [
+            ('id', 'in', product_ids),
+            ('ean13', '=', False),
+            ], context=context)
+        
+        _logger.info('Selected product no barcode: %s' % len(product_ids))
         return {
             'type': 'ir.actions.act_window',
             'name': _('Product in OC'),
@@ -228,14 +236,13 @@ class ResCompany(orm.Model):
             'view_mode': 'tree,form',
             #'res_id': 1,
             'res_model': 'product.product',
-            'view_id': view_id, # False
+            #'view_id': view_id, # False
             'views': [(False, 'tree'), (False, 'form')],
-            'domain': [('id', 'in', product_ids],
+            'domain': [('id', 'in', product_ids)],
             'context': context,
             'target': 'current', # 'new'
             'nodestroy': False,
-            }
-        
+            }        
         
     def export_ordered_product_for_label_check(
             self, cr, uid, ids, context=None):    

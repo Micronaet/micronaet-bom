@@ -190,53 +190,6 @@ class ResCompany(orm.Model):
             
         return True
         
-    """        
-    def import_exclude_list(self, cr, uid, ids, context=None):
-        ''' Import exclude list from file easy
-        '''
-        exclude_pool = self.pool.get('product.codebar.exclude')
-
-        filename = '/home/administrator/photo/xls/ean/barcode.xls'
-
-        try:
-            WB = xlrd.open_workbook(filename)
-        except:
-            raise osv.except_osv(
-                _('Error XLSX'), 
-                _('Cannot read XLS file: %s' % filename),
-                )
-
-        # Load current list:                
-        exclude_ids = exclude_pool.search(cr, uid, [], context=context)        
-        exclude_proxy = exclude_pool.browse(
-            cr, uid, exclude_ids, context=context)
-        exclude = [item.name for item in exclude_proxy]
-        
-        fixed = '8017882'
-        WS = WB.sheet_by_index(0)
-        for row in range(1, WS.nrows):
-            ean13_s = WS.cell(row, 4).value
-            ean13_p = WS.cell(row, 5).value
-            
-            if ean13_s and ean13_s.startswith(fixed):
-                code = ean13_s[7:12]
-                if code not in exclude:
-                    exclude.append(code)
-
-            if ean13_p and ean13_p.startswith(fixed):
-                code = ean13_p[7:12]
-                if code not in exclude:
-                    exclude.append(code)
-        for name in exclude:
-            try:
-                exclude_pool.create(cr, uid, {
-                    'name': name,
-                    }, context=context)            
-            except:
-                _logger.warning('Yet present: %s' % name)
-        return True
-
-    """
     def import_exclude_list(self, cr, uid, ids, context=None):
         ''' Import exclude list from file easy
         '''
@@ -298,6 +251,7 @@ class ResCompany(orm.Model):
                     'name': name,
                     }, context=context)            
             except:
+                import pdb; pdb.set_trace()
                 _logger.warning('Yet present: %s' % name)
         return True
 

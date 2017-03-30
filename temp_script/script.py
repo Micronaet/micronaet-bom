@@ -56,10 +56,8 @@ class ResCompany(orm.Model):
         connector_pool = self.pool.get('product.product.web.server')
         
         # Read excel for product:
-        import pdb; pdb.set_trace()
         filename = '/home/administrator/photo/xls/web/code.xls'
         mode = 'selection'
-        webserver_id = 1 # TODO change
         published = True
         product_ids = []        
         try:
@@ -70,7 +68,17 @@ class ResCompany(orm.Model):
                 _('Cannot read XLS file: %s' % filename),
                 )                
         WS = WB.sheet_by_index(0)
-        for row in range(0, WS.nrows):
+        import pdb; pdb.set_trace()
+        try:
+            webserver_id = int(WS.cell(0, 0).value)
+        except:
+            raise osv.except_osv(
+                _('Error XLSX'), 
+                _('Prima riga deve essere codice web connect!'),
+                )                
+                
+                     
+        for row in range(1, WS.nrows):
             default_code = WS.cell(row, 0).value
             p_ids = product_pool.search(cr, uid, [
                 ('default_code', '=', default_code),

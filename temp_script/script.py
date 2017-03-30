@@ -111,14 +111,15 @@ class ResCompany(orm.Model):
                     connector_pool.create(cr, uid, {
                         'connector_id': webserver_id,
                         'product_id': product.id,
+                        'published': True,
                         }, context=context))
             
         import pdb; pdb.set_trace()    
-        if publish_ids:
-            # Set all record for publish:                    
-            connector_pool.write(cr, uid, publish_ids, {
-                'published': published,                
-                }, context=context)
+        #if publish_ids:
+        #    # Set all record for publish:                    
+        #    connector_pool.write(cr, uid, publish_ids, {
+        #        'published': published,                
+        #        }, context=context)
         return True
     
     # Procedure:    

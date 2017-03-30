@@ -53,7 +53,7 @@ class ResCompany(orm.Model):
         # Pool:
         product_pool = self.pool.get('product.product')
         connector_pool = self.pool.get('product.product.web.server')
-        
+        import pdb; pdb.set_trace()
         # Read excel for product:
         filename = '/home/administrator/photo/xls/web/code.xls'
         mode = 'selection'

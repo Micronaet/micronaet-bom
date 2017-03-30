@@ -79,14 +79,18 @@ class ResCompany(orm.Model):
                 
                      
         for row in range(1, WS.nrows):
-            default_code = WS.cell(row, 0).value
-            p_ids = product_pool.search(cr, uid, [
-                ('default_code', '=', default_code),
-                ], context=context)
-            if not p_ids:
-                _logger.error('Not found %s' % default_code)
+            try:
+                default_code = WS.cell(row, 0).value
+                p_ids = product_pool.search(cr, uid, [
+                    ('default_code', '=', default_code),
+                    ], context=context)
+                if not p_ids:
+                    _logger.error('Not found %s' % default_code)
+                    continue
+                product_ids.append(p_ids[0])
+            except:
+                import pdb; pdb.set_trace()    
                 continue
-            product_ids.append(p_ids[0])
         
         
         # Create record if not present in product

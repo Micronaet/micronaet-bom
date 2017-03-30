@@ -45,6 +45,64 @@ class ResCompany(orm.Model):
     """
     _inherit = 'res.company'
     
+    def publish_image_web_xls(self, cr, uid, ids, context=None):
+        ''' Event for button done
+        '''
+        if context is None:
+            context = {}        
+        
+        # Pool:
+        product_pool = self.pool.get('product.product')
+        connector_pool = self.pool.get('product.product.web.server')
+        
+        # Read excel for product:
+        import pdb; pdb.set_trace()
+        filename = '/home/administrator/photo/xls/web/code.xls'
+        mode = 'selection'
+        webserver_id = 1 # TODO change
+        published = True
+        product_ids = []        
+        try:
+            WB = xlrd.open_workbook(filename)
+        except:
+            raise osv.except_osv(
+                _('Error XLSX'), 
+                _('Cannot read XLS file: %s' % filename),
+                )                
+        WS = WB.sheet_by_index(0)
+        for row in range(0, WS.nrows):
+            default_code = WS.cell(row, 0).value
+            p_ids = product_pool.search(cr, uid, [
+                ('default_code', '=', default_code),
+                ], context=context)
+            if not p_ids:
+                _logger.error('Not found %s' % default_code)
+                continue
+            product_ids.append(p_ids[0])
+        
+        
+        # Create record if not present in product
+        publish_ids = []
+        for product in product_pool.browse(
+                cr, uid, product_ids, context=context):
+            for server in product.web_server_ids:
+                if server.connector_id.id == webserver_id:
+                    publish_ids.append(server.id)
+                    break
+            else: # only if not found:
+                publish_ids.append(
+                    connector_pool.create(cr, uid, {
+                        'connector_id': webserver_id,
+                        'product_id': product.id,
+                        }, context=context))
+            
+        if publish_ids:
+            # Set all record for publish:                    
+            connector_pool.write(cr, uid, publish_ids, {
+                'published': published,                
+                }, context=context)
+        return True
+    
     # Procedure:    
     def import_barcode(self, cr, uid, ids, context=None):
         ''' Import barcode

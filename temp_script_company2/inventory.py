@@ -20,6 +20,8 @@
 import os
 import sys
 import logging
+import xlrd
+import xlsxwriter
 import openerp
 import openerp.netsvc as netsvc
 import openerp.addons.decimal_precision as dp

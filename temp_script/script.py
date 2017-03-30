@@ -95,6 +95,7 @@ class ResCompany(orm.Model):
         
         # Create record if not present in product
         publish_ids = []
+        import pdb; pdb.set_trace()    
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
             for server in product.web_server_ids:
@@ -108,6 +109,7 @@ class ResCompany(orm.Model):
                         'product_id': product.id,
                         }, context=context))
             
+        import pdb; pdb.set_trace()    
         if publish_ids:
             # Set all record for publish:                    
             connector_pool.write(cr, uid, publish_ids, {

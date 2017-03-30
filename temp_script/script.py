@@ -80,6 +80,7 @@ class ResCompany(orm.Model):
         for row in range(1, WS.nrows):
             try:
                 default_code = WS.cell(row, 0).value
+                _logger.info('Product: %s' % default_code)
             except:
                 import pdb; pdb.set_trace()    
                 continue

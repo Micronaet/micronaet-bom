@@ -12,6 +12,7 @@
                             <button name="save_cost_in_cost_method" string="Migrate cost company2" type="object" />                            
                             <button name="export_product_status_for_inventory" string="Export C01" type="object" />
                             <button name="export_partner_pricelist" string="Export partner pricelist" type="object" />                            
+                            <button name="publish_image_web1_xls" string="Import code web site Red" type="object" />
                         </group>
                     </page>
                 </xpath>

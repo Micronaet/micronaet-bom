@@ -68,7 +68,6 @@ class ResCompany(orm.Model):
                 _('Cannot read XLS file: %s' % filename),
                 )                
         WS = WB.sheet_by_index(0)
-        import pdb; pdb.set_trace()
         try:
             webserver_id = int(WS.cell(0, 0).value)
         except:
@@ -82,7 +81,6 @@ class ResCompany(orm.Model):
                 default_code = WS.cell(row, 0).value
                 _logger.info('Product: %s' % default_code)
             except:
-                import pdb; pdb.set_trace()    
                 continue
             try:
                 p_ids = product_pool.search(cr, uid, [
@@ -93,13 +91,11 @@ class ResCompany(orm.Model):
                     continue
                 product_ids.append(p_ids[0])
             except:
-                import pdb; pdb.set_trace()    
                 continue
         
         
         # Create record if not present in product
         publish_ids = []
-        import pdb; pdb.set_trace()    
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
             for server in product.web_server_ids:
@@ -114,7 +110,6 @@ class ResCompany(orm.Model):
                         'published': True,
                         }, context=context))
             
-        import pdb; pdb.set_trace()    
         #if publish_ids:
         #    # Set all record for publish:                    
         #    connector_pool.write(cr, uid, publish_ids, {

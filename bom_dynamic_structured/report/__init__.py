@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ###############################################################################
 #
 #    Copyright (C) 2001-2014 Micronaet SRL (<http://www.micronaet.it>).
@@ -16,35 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+from . import bom_parser
 
-{
-    'name': 'BOM dynamic structured',
-    'version': '0.1',
-    'category': 'MRP',
-    'description': '''        
-        Dynamic BOM management with structured code regular expression
-        ''',
-    'author': 'Micronaet S.r.l. - Nicola Riolini',
-    'website': 'http://www.micronaet.it',
-    'license': 'AGPL-3',
-    'depends': [
-        'base',
-        'mrp',
-        'product',
-        'bom_category',
-        'product_speech_code',
-        'bom_parent_code', # for parent default value
-        'product_pipes', #  ?
-        ],
-    'init_xml': [],
-    'demo': [],
-    'data': [
-        'security/ir.model.access.csv',
-        
-        'dynamic_view.xml',
-        'report/status_report.xml',
-        ],
-    'active': False,
-    'installable': True,
-    'auto_install': False,
-    }
+
+# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

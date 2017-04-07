@@ -49,6 +49,18 @@ class ResCompany(orm.Model):
         ''' Check invoice line
         '''
         # ---------------------------------------------------------------------
+        # Parameters:
+        # ---------------------------------------------------------------------
+        invoice_extra = [
+            'LOCAZIONE',
+            'SBANC',
+            'VARIE',
+            'PALLET',
+            'SC.EXTRA',
+            'BANNER',
+            ]
+        
+        # ---------------------------------------------------------------------
         # Utility:
         # ---------------------------------------------------------------------
         def write_line(WS, page, counter, line):
@@ -76,7 +88,8 @@ class ResCompany(orm.Model):
         WS = {
             'linked': WB.add_worksheet('OK Collegate'), # OK
             'changed': WB.add_worksheet('Collegate ma cambiate'), # Change in invoice
-            'invoiced': WB.add_worksheet('Solo fattura'), # no move line
+            'invoiced': WB.add_worksheet('Solo fattura (aggiunte)'), # no move line
+            'invoiced_extra': WB.add_worksheet('Solo fattura (normale)'), # no move line , 
             'move_empty': WB.add_worksheet('Movimento eliminato dopo'), # move id         
             'unlinked': WB.add_worksheet('Movimenti non fatturati'), # no inv.
             }
@@ -85,6 +98,7 @@ class ResCompany(orm.Model):
             'linked': 0,
             'changed': 0,
             'invoiced': 0,
+            'invoiced_extra': 0,
             'move_empty': 0,
             'unlinked': 0,
             }
@@ -100,6 +114,7 @@ class ResCompany(orm.Model):
         write_line(WS, 'linked', counter, line)
         write_line(WS, 'changed', counter, line)
         write_line(WS, 'invoiced', counter, line)
+        write_line(WS, 'invoiced_extra', counter, line)
         write_line(WS, 'move_empty', counter, line)
         write_line(WS, 'unlinked', counter, line)
 
@@ -143,15 +158,27 @@ class ResCompany(orm.Model):
                 
                 if not generator_move_id:
                     # 1. no picking line (only invoice)
-                    write_line(WS, 'invoiced', counter, [
-                        invoice.number,
-                        move.picking_id.name,
-                        line.product_id.default_code,
-                        '', #move.product_id.default_code,
-                        '', #line.product_qty,
-                        '', #move.product_uom_qty,
-                        'No picking!',
-                        ])
+                    default_code = line.product_id.default_code or ''
+                    if default_code in invoice_extra: # normal
+                        write_line(WS, 'invoiced_extra', counter, [
+                            invoice.number,
+                            move.picking_id.name,
+                            default_code,
+                            '', #move.product_id.default_code,
+                            '', #line.product_qty,
+                            '', #move.product_uom_qty,
+                            'No picking!',
+                            ])
+                    else: # error:
+                        write_line(WS, 'invoiced', counter, [
+                            invoice.number,
+                            move.picking_id.name,
+                            default_code,
+                            '', #move.product_id.default_code,
+                            '', #line.product_qty,
+                            '', #move.product_uom_qty,
+                            'No picking!',
+                            ])
                     
                 elif generator_move_id in move_db:
                     # 2. linked (OK line-move linked)

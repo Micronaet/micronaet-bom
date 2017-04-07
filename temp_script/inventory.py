@@ -48,32 +48,171 @@ class ResCompany(orm.Model):
     def check_invoice_line(self, cr, uid, ids, context=None):
         ''' Check invoice line
         '''
-        filename = '/home/administrator/photo/xls/check_invoice.xls'                
+        # ---------------------------------------------------------------------
+        # Utility:
+        # ---------------------------------------------------------------------
+        def write_line(WS, page, counter, line):
+            ''' Write line and 
+            '''
+            sheet = WS[page]
+            row = counter[page]
+            counter[page] += 1
+            col = 0
+            for item in line:                
+                sheet.write(row, col, item)
+                col += 1
+            return     
         
-        invoice_pool = self.pool.get('account.invoice')
-        invoice_ids = invoice_pool.search(cr, uid, [
-            ('date_invoice', '>=', '2017-01-01')], context=context)
-
+        # ---------------------------------------------------------------------
+        # Generate log file:
+        # ---------------------------------------------------------------------
+        filename = '/home/administrator/photo/xls/invoice/check_invoice.xls'
+        _logger.info('Check invoice: %s' % filename)
+        
         # Open file and write header
         WB = xlsxwriter.Workbook(filename)
-        WS = WB.add_worksheet('Fatture')
-        WS.write(0, 0, 'Fattura')
-        WS.write(0, 1, '# righe')
-        WS.write(0, 2, '# stock')
+        
+        # Create WS:
+        WS = {
+            'linked': WB.add_worksheet('OK Collegate'), # OK
+            'changed': WB.add_worksheet('Collegate ma cambiate'), # Change in invoice
+            'invoiced': WB.add_worksheet('Solo fattura'), # no move line
+            'move_empty': WB.add_worksheet('Movimento eliminato dopo'), # move id         
+            'unlinked': WB.add_worksheet('Movimenti non fatturati'), # no inv.
+            }
 
-        i = 0
+        counter = {
+            'linked': 0,
+            'changed': 0,
+            'invoiced': 0,
+            'move_empty': 0,
+            'unlinked': 0,
+            }
+
+        # Write header:
+        line = [
+            'Fattura', 'Prelievo', 
+            'Prod. Fatt.', 'Prod. prel.', 
+            'Q. Fatt.', 'Q. prel.',
+            'State', 
+            ]
+                
+        write_line(WS, 'linked', counter, line)
+        write_line(WS, 'changed', counter, line)
+        write_line(WS, 'invoiced', counter, line)
+        write_line(WS, 'move_empty', counter, line)
+        write_line(WS, 'unlinked', counter, line)
+
+        # ---------------------------------------------------------------------
+        # Invoice created:
+        # ---------------------------------------------------------------------
+        invoice_pool = self.pool.get('account.invoice')
+        invoice_ids = invoice_pool.search(cr, uid, [
+            ('date_invoice', '>=', '2017-01-01'),
+            ], order='number', context=context)
+        _logger.info('Invoice: %s' % len(invoice_ids))    
+            
+        # ---------------------------------------------------------------------
+        # Picking invoiced:
+        # ---------------------------------------------------------------------
+        picking_pool = self.pool.get('stock.picking')
+        picking_ids = picking_pool.search(cr, uid, [
+            ('invoice_id', 'in', invoice_ids)], context=context)
+        _logger.info('Picking: %s' % len(picking_ids))    
+            
+        # ---------------------------------------------------------------------
+        # Read all stock move (for save data)
+        # ---------------------------------------------------------------------
+        move_pool = self.pool.get('stock.move')
+        move_ids = move_pool.search(cr, uid, [
+            ('picking_id', 'in', picking_ids)], context=context)
+        move_db = {}    
+        _logger.info('Move: %s' % len(move_ids))    
+        for move in move_pool.browse(cr, uid, move_ids, context=context):
+            move_db[move.id] = move
+            
+        # ---------------------------------------------------------------------
+        # Read all invoice line and check move line:
+        # ---------------------------------------------------------------------
         for invoice in invoice_pool.browse(
                 cr, uid, invoice_ids, context=context):
-            invoice_line = len(invoice.invoice_line)
-            stock_line = 0
-            for stock in invoice.invoiced_picking_ids:
-                stock_line += len(stock.move_lines)
-            if invoice_line != stock_line:                
-                _logger.warning(invoice.number)
-                i += 1
-                WS.write(i, 0, invoice.number)
-                WS.write(i, 1, invoice_line)
-                WS.write(i, 2, stock_line)
+            for line in invoice.invoice_line:
+                # Readability:
+                move = line.generator_move_id
+                generator_move_id = move.id
+                
+                if not generator_move_id:
+                    # 1. no picking line (only invoice)
+                    write_line(WS, 'invoiced', counter, [
+                        invoice.number,
+                        move.picking_id.name,
+                        line.product_id.default_code,
+                        '', #move.product_id.default_code,
+                        '', #line.product_qty,
+                        '', #move.product_uom_qty,
+                        'No picking!',
+                        ])
+                    
+                elif generator_move_id in move_db:
+                    # 2. linked (OK line-move linked)
+                    
+                    # TODO test Q. and product
+                    invoice_code = line.product_id.default_code 
+                    move_code = move.product_id.default_code
+                    invoice_qty = line.quantity
+                    move_qty = move.product_uom_qty
+                    state = ''
+                    if move_code != invoice_code:
+                        state += 'Errore codice'                        
+                    if move_qty != invoice_qty:
+                        state += 'Errore quant.'
+                    if state: # With error
+                        write_line(WS, 'changed', counter, [
+                            invoice.number,
+                            move.picking_id.name,
+                            invoice_code,
+                            move_code,
+                            invoice_qty,
+                            move_qty,
+                            state,
+                            ])
+                    else:    
+                        write_line(WS, 'linked', counter, [
+                            invoice.number,
+                            move.picking_id.name,
+                            invoice_code,
+                            move_code,
+                            invoice_qty,
+                            move_qty,
+                            state,
+                            ])                      
+                    
+                    # Clean move database:
+                    del move_db[generator_move_id]                    
+                    
+                else:
+                    # 3. not linked but movement was present
+                    write_line(WS, 'move_empty', counter, [
+                        invoice.number,
+                        '', #move.picking_id.name,
+                        line.product_id.default_code,
+                        '', #move.product_id.default_code,
+                        line.quantity,
+                        '', # move.product_uom_qty,
+                        'Move not existent!',
+                        ])
+
+        for move in move_db.values():
+            write_line(WS, 'unlinked', counter, [
+                '',#invoice.number,
+                move.picking_id.name,
+                '',#line.product_id.default_code,
+                move.product_id.default_code,
+                '',#line.quantity,
+                move.product_uom_qty,
+                'Move not invoiced!',
+                ])
+
         WB.close()
         return True
         

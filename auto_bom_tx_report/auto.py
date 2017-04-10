@@ -76,7 +76,8 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         # Call report:            
         # ---------------------------------------------------------------------
-        mrp_ids = self.search(cr, uid, [], context=context) # TODO remove
+        # Procedure for problema in setup language in ODT report
+        mrp_ids = self.search(cr, uid, [], context=context)
         if mrp_ids:
             mrp_id = mrp_ids[0]
         else:
@@ -84,7 +85,7 @@ class MrpProduction(orm.Model):
                 
         try:
             result, extension = openerp.report.render_report(
-                cr, uid, [mrp_id], report_name, datas, context) # TODO 
+                cr, uid, [mrp_id], report_name, datas, context)
         except:
             _logger.error('Error generation TX report [%s]' % (
                 sys.exc_info(),))

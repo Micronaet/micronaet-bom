@@ -116,7 +116,7 @@ class MrpProduction(orm.Model):
                 datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT),
                 ),
             partner_ids=[(6, 0, partner_ids)],
-            attachments=[('Completo.pdf', result)], 
+            attachments=[('Completo.odt', result)], 
             context=context,
             )
         return True            

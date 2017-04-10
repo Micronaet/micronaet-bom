@@ -47,11 +47,15 @@ class MrpProduction(orm.Model):
     def send_fabric_mrp_report_scheduler(self, cr, uid, context=None):
         ''' Generate PDF with data and send mail
         '''
+        if context is None:
+            context = {
+                'lang': 'it_IT',
+                }
+                
         #filename = 'tmp.pdf' # TODO change
         report_name = 'stock_status_explode_report'
         datas = {
             # Report setup:
-            #'record_ids': [job.id],
             'model': 'mrp.production',
             'active_id': False,
             'active_ids': [],
@@ -69,12 +73,18 @@ class MrpProduction(orm.Model):
             'with_type_ids': []
             }
     
-        # -----------------------------------------------------------------
+        # ---------------------------------------------------------------------
         # Call report:            
-        # -----------------------------------------------------------------
+        # ---------------------------------------------------------------------
+        mrp_ids = self.search(cr, uid, [], context=context) # TODO remove
+        if mrp_ids:
+            mrp_id = mrp_ids[0]
+        else:
+            mrp_id = False
+                
         try:
             result, extension = openerp.report.render_report(
-                cr, uid, [], report_name, datas, context)
+                cr, uid, [mrp_id], report_name, datas, context) # TODO 
         except:
             _logger.error('Error generation TX report [%s]' % (
                 sys.exc_info(),))
@@ -102,7 +112,9 @@ class MrpProduction(orm.Model):
         thread_pool.message_post(cr, uid, False, 
             type='email', 
             body='Stato tessuti settimanale', 
-            subject='Invio automatico stato tessuto: %s' % date,
+            subject='Invio automatico stato tessuto: %s' % (
+                datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT),
+                ),
             partner_ids=[(6, 0, partner_ids)],
             attachments=[('Completo.pdf', result)], 
             context=context,

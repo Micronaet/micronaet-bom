@@ -77,7 +77,7 @@ class CcomponentStatusReportWizard(orm.TransientModel):
             report_name = 'mrp_status_hw_cmp_report'
         else: # halfwork, component
             report_name = 'stock_status_explode_report'
-            
+
         return {
             'type': 'ir.actions.report.xml',
             'report_name': report_name,

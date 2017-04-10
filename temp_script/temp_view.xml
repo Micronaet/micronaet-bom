@@ -27,7 +27,7 @@
                             <button name="import_pricelist_with_parent" string="Import pricelist" type="object" />
                             <button name="export_ordered_product_for_label_check" string="Export label check (OC)" type="object" />
                             <button name="export_ordered_product_for_label_check_product" string="Get OC product without EAN" type="object" />
-                            <button name="check_invoice_line" string="Check invoice line" type="object" />
+                            <!--<button name="check_invoice_line" string="Check invoice line" type="object" />-->
                             <button name="publish_image_web_xls" string="Import code web site Red" type="object" />
                         </group>
                     </page>

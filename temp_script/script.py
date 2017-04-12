@@ -45,6 +45,27 @@ class ResCompany(orm.Model):
     """
     _inherit = 'res.company'
     
+    def export_code_duty(self, cr, uid, ids, context=None):
+        ''' Export duty for mexal import
+        '''
+        file_csv = '/home/administrator/photo/output/duty.csv'
+        product_pool = self.pool.get('product.product')
+        product_ids = product_pool.search(cr, uid, [
+            ('duty_id', '!=', False),
+            ('default_code', '!=', False),
+            ], context=context)            
+        
+        f_csv = open(file_csv, 'w')    
+        _logger.info('Start export: %s' % file_csv)
+        for product in product_pool.browse(
+                cr, uid, product_ids, context=context):
+            f_csv.write('%-20s;%-20s\r\n' % (
+                product.default_code,
+                product.duty_id.code,
+                )) 
+        _logger.info('End export: %s' % file_csv)
+        return True
+        
     def publish_image_web_xls(self, cr, uid, ids, context=None):
         ''' Event for button done
         '''

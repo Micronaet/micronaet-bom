@@ -29,6 +29,7 @@
                             <button name="export_ordered_product_for_label_check_product" string="Get OC product without EAN" type="object" />
                             <!--<button name="check_invoice_line" string="Check invoice line" type="object" />-->
                             <button name="publish_image_web_xls" string="Import code web site Red" type="object" />
+                            <button name="export_code_duty" string="Export duty" type="object" />
                         </group>
                     </page>
                 </xpath>

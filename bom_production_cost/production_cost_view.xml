@@ -1,7 +1,63 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+        <!--mrp.production.employee.cost-->
+        <record model="ir.ui.view" id="view_mrp_production_employee_cost_tree">
+            <field name="name">mrp.production.employee.cost.tree</field>
+            <field name="model">mrp.production.employee.cost</field>
+            <field name="arch" type="xml">
+                <tree string="Employee cost" editable="bottom">
+                    <field name="name" />
+                    <field name="from_date" />
+                    <field name="hour_cost" />
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_mrp_production_employee_cost_form">
+            <field name="name">mrp.production.employee.cost.form</field>
+            <field name="model">mrp.production.employee.cost</field>
+            <field name="arch" type="xml">
+                <form string="Employee cost" version="7.0">
+                    <sheet>
+                        <group colspan="4" col="4">
+                            <field name="name" />
+                            <newline/>
+                            <field name="from_date" />
+                            <field name="hour_cost" />
+                        </group>    
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_mrp_production_employee_cost">
+            <field name="name">MRP hour cost</field>
+            <field name="res_model">mrp.production.employee.cost</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_mrp_production_employee_cost_tree"/>
+            <field name="context">{}</field>
+            <field name="domain">[]</field>
+        </record>
+        <menuitem 
+            parent="production_family.menu_configuration_family" 
+            id="menu_mrp_production_employee_cost" 
+            action="action_mrp_production_employee_cost"
+            groups="group_mrp_hour_cost_manager"
+            sequence="10"
+            />
 
+        <record model="ir.ui.view" id="view_product_template_hour_cost_tree">
+            <field name="name">product.template.tree</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_tree_view"/>
+            <field name="arch" type="xml">
+                <field name="state" position="after">
+                    <field name="medium_mrp_cost" />
+                    <field name="medium_mrp_cost_forced" />
+                    <button name="update_family_medium_mrp_cost" string="Update medium cost" type="object" icon="terp-dolar" groups="bom_production_cost.group_mrp_hour_cost_manager"/>
+                </field>
+            </field>
+        </record>  
     </data>
 </openerp>
 

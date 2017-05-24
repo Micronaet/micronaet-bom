@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+   <data>
+        <record id="group_mrp_hour_cost_manager" model="res.groups">
+            <field name="name">MRP hour cost manager</field>
+        </record>
+   </data>
+</openerp>

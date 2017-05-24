@@ -53,25 +53,55 @@ class MrpProductionEmployeeCost(orm.Model):
         'from_date': fields.date('From date', required=True),
         }
 
-class ProductProduct(orm.Model):
+class ProductTemplate(orm.Model):
     """ Model name: Product
     """    
-    _inherit = 'product.product'
+    _inherit = 'product.template'
     
     def update_family_medium_mrp_cost(self, cr, uid, ids, context=None):
         ''' Update family cost from statistics
         '''
+        # Pool used:
         stat_pool = self.pool.get('mrp.production.stats')
+        
         stats_db = {}
         stat_ids = stat_pool.search(cr, uid, [], context=context)
-        for stat in stat_pool.browse(cr, uid, stat_ids, context=context):
-            
+
+        # Get hour cost:
         
+        if not cost_ids:
+            raise osv.except_osv(
+                _('No hour cost'), 
+                _('Insert cost in MRP cost management'),
+                )
+        hour_cost = 
+                        
+        # Get total data:
+        for stat in stat_pool.browse(cr, uid, stat_ids, context=context):
+            product_id = stat.mrp_id.product_id.id # Family
+            if product_id not in stats_db:
+                stats_db[product_id] = [0, 0]
+            stats_db[product_id][1] += stat.total
+            stats_db[product_id][0] += stat.workers * hour_cost * stat.hour   
+          
+        # Get unit cost:
+        for product_id in stats_db:
+            total_cost, total_hour = stats_db[product_id]
+            if not total_hour:
+                _logger.error('Jump division per 0 product: %s' % product_id)
+                continue
+                
+            self.write(cr, uid, product_id, {
+                'medium_mrp_cost': total_cost / total_hour,
+                }, context=context)
         return True
         
     _columns = {
         'medium_mrp_cost': fields.float('Cost m(x)', digits=(16, 3),
             help='Medium cost of production for family',
+            ),
+        'medium_mrp_cost_forced': fields.float('Forced Cost m(x)', 
+            digits=(16, 3), help='Medium cost of production for family froced',
             ),
         }
     

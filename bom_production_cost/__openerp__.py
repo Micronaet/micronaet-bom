@@ -32,13 +32,16 @@
     'license': 'AGPL-3',
     'depends': [
         'base',
+        'product',
         'production_family', # Family mamagement
-        'roduction_accounting_external_stats', # Statistics
+        'production_accounting_external_stats', # Statistics
         ],
     'init_xml': [],
     'demo': [],
     'data': [
-        'security/ir.model.access.csv',    
+        'security/cost_group.xml', 
+        'security/ir.model.access.csv',
+        
         'production_cost_view.xml',
         ],
     'active': False,

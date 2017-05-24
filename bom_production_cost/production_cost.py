@@ -66,8 +66,13 @@ class ProductTemplate(orm.Model):
             ''' Search date in database and return correct hour cost for the
                 period
             '''
-            res = 10.0 
-            return res
+            for from_date in sorted(hour_cost_db, reverse=True):
+                if date >= from_date:
+                    return hour_cost_db[from_date]
+            raise osv.except_osv(
+                _('No hour cost'), 
+                _('Date %s non present if hour cost period!' % date),
+                )
             
         # Pool used:
         stat_pool = self.pool.get('mrp.production.stats')
@@ -87,18 +92,14 @@ class ProductTemplate(orm.Model):
         for cost in cost_pool.browse(cr, uid, cost_ids, context=context):
             hour_cost_db[cost.from_date] = cost.hour_cost    
         
-        # TODO remove:    
-        hour_cost = cost_pool.browse(
-            cr, uid, cost_ids, context=context)[0].hour_cost
-                        
         # Get total data:
         for stat in stat_pool.browse(cr, uid, stat_ids, context=context):
             product_id = stat.mrp_id.product_id.id # Family
             if product_id not in stats_db:
                 stats_db[product_id] = [0, 0]
             stats_db[product_id][1] += stat.total
-            # TODO reactivate:
-            #hour_cost = get_hour_cost(hour_cost_db, stat.date)
+            hour_cost = get_hour_cost(hour_cost_db, stat.date)
+                
             stats_db[product_id][0] += stat.workers * hour_cost * stat.hour   
           
         # Get unit cost:

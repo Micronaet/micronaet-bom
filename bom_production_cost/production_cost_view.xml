@@ -46,7 +46,8 @@
             sequence="10"
             />
 
-        <record model="ir.ui.view" id="view_product_template_hour_cost_tree">
+        <!--product.template-->
+        <!--<record model="ir.ui.view" id="view_product_template_hour_cost_tree">
             <field name="name">product.template.tree</field>
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_tree_view"/>
@@ -57,7 +58,43 @@
                     <button name="update_family_medium_mrp_cost" string="Update medium cost" type="object" icon="terp-dolar" groups="bom_production_cost.group_mrp_hour_cost_manager"/>
                 </field>
             </field>
-        </record>  
+        </record>-->
+        <record model="ir.ui.view" id="view_product_template_cost_tree">
+            <field name="name">product.template.tree</field>
+            <field name="model">product.template</field>
+            <field name="priority" eval="50" />
+            <field name="arch" type="xml">
+                <tree string="Product" editable="bottom" colors="red:medium_mrp_cost==0">
+	                <field name="name" readonly="1"/>
+	                <field name="is_family" readonly="1"/>
+	                <field name="family_list" readonly="1"/>
+	                <field name="force_manufacture" readonly="1"/>
+	                <field name="categ_id" readonly="1"/>
+	                <field name="type" readonly="1"/>
+	                <field name="uom_id" invisible="1"/>
+	                <field name="state" readonly="1"/>
+	                <field name="medium_mrp_cost" readonly="1"/>
+	                <field name="medium_mrp_cost_forced" modifiers="{}"/>
+	                <button name="update_family_medium_mrp_cost" string="Update medium cost" type="object" icon="terp-dolar"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_view_product_template_cost">
+            <field name="name">Family cost</field>
+            <field name="res_model">product.template</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_product_template_cost_tree"/>
+            <field name="context">{}</field>
+            <field name="domain">[('is_family', '=', True)]</field>
+        </record>
+        <menuitem 
+            parent="production_family.menu_configuration_family" 
+            id="menu_view_product_template_cost" 
+            action="action_view_product_template_cost"
+            groups="group_mrp_hour_cost_manager"
+            sequence="5"
+            />
     </data>
 </openerp>
 

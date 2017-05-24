@@ -61,20 +61,35 @@ class ProductTemplate(orm.Model):
     def update_family_medium_mrp_cost(self, cr, uid, ids, context=None):
         ''' Update family cost from statistics
         '''
+        # Utility:
+        def get_hour_cost(hour_cost_db, date):
+            ''' Search date in database and return correct hour cost for the
+                period
+            '''
+            res = 10.0 
+            return res
+            
         # Pool used:
         stat_pool = self.pool.get('mrp.production.stats')
+        cost_pool = self.pool.get('mrp.production.employee.cost')
         
         stats_db = {}
         stat_ids = stat_pool.search(cr, uid, [], context=context)
 
         # Get hour cost:
-        
+        cost_ids = cost_pool.search(cr, uid, [], context=context)
         if not cost_ids:
             raise osv.except_osv(
                 _('No hour cost'), 
                 _('Insert cost in MRP cost management'),
                 )
-        hour_cost = 
+        hour_cost_db = {}
+        for cost in cost_pool.browse(cr, uid, cost_ids, context=context):
+            hour_cost_db[cost.from_date] = cost.hour_cost    
+        
+        # TODO remove:    
+        hour_cost = cost_pool.browse(
+            cr, uid, cost_ids, context=context)[0].hour_cost
                         
         # Get total data:
         for stat in stat_pool.browse(cr, uid, stat_ids, context=context):
@@ -82,6 +97,8 @@ class ProductTemplate(orm.Model):
             if product_id not in stats_db:
                 stats_db[product_id] = [0, 0]
             stats_db[product_id][1] += stat.total
+            # TODO reactivate:
+            #hour_cost = get_hour_cost(hour_cost_db, stat.date)
             stats_db[product_id][0] += stat.workers * hour_cost * stat.hour   
           
         # Get unit cost:

@@ -57,13 +57,12 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Utility:
         # ---------------------------------------------------------------------
-        def xls_write_row(WS, row, line, title=False, inventory=False):
+        def xls_write_row(WS, row, line, title=False):
             ''' Write row in a file
             '''
             if title: # data line
                 WS.write(row, 0, title)
-                WS.write(row, 1, inventory)                
-                col = 1
+                col = 0
             else: # header line:
                 col = -1
                 
@@ -87,6 +86,16 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 xls_write_row(WS, row, inventory[default_code], default_code)
             _logger.info('End extract %s sheet: %s' % (xls_file, name))
             return            
+        
+        def clean_float(value):
+            ''' Clean float value
+            '''    
+            try: 
+                res = float(value)
+                return res
+            except:
+                #_logger.warning('Float value not present: %s' % value)
+                return 0.0
             
         if context is None: 
             context = {}    
@@ -95,7 +104,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         code_part = 5
         xls_file = '/home/administrator/photo/xls/stock/inventory_%s.xlsx'
         xls_infile = '/home/administrator/photo/xls/stock/use_inv_%s.xlsx'
-
+        start_row = 2 # first data row (start from 0)
         
         # Read parameter from wizard:
         wiz_browse = self.browse(cr, uid, ids, context=context)[0]
@@ -125,7 +134,13 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         _logger.info('Read %s invoice line' % len(line_ids))        
         for line in line_pool.browse(
                 cr, uid, line_ids, context=context):
-            default_code = line.product_id.default_code[:code_part] 
+            try:    
+                default_code = line.product_id.default_code[:code_part].strip()
+            except:
+                _logger.error(
+                    'Product code error: %s' % line.product_id.default_code)
+                continue
+                
             quantity = line.quantity
             date_invoice = line.invoice_id.date_invoice
             
@@ -144,8 +159,40 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Integrate unload inventory:
         # ---------------------------------------------------------------------
-        
-        
+        _logger.info('Read inventory adjust file: %s' % xls_infile),
+        # Open file:
+        try:
+            # from xlrd.sheet import ctype_text   
+            WB_inv = xlrd.open_workbook(xls_infile)
+            WS_inv = WB_inv.sheet_by_index(0)
+        except:
+            raise osv.except_osv(
+                _('Open file error'), 
+                _('Cannot open file: %s' % xls_infile),
+                )
+
+        for i in range(start_row, WS_inv.nrows):
+            row = WS_inv.row(i) # generate error at end
+            default_code = row[0].value
+            if not default_code: # end import
+                _logger.info('End import at line: %s' % i)
+                break
+            
+            if default_code not in inventory:
+                _logger.warning('Code not found: %s' % default_code)
+                inventory[default_code] = [
+                    0, # Start inv.
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, # End inv.
+                    ]                    
+
+            for col in range(1, 15):
+                inventory[default_code][col - 1] += clean_float(row[col].value)
+        _logger.info('End inventory adjust file: %s' % xls_infile),
+
+        # Export in XLSX file:
+        xls_sheet_write(WB, 'Stock + INV', inventory)
+
 
     _columns = {
         'year': fields.integer('Year', required=True),

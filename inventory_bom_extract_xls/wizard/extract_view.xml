@@ -9,6 +9,7 @@
                 <form string="Wizard" version="7.0">
                    <header>
                        <button string="Cancel" special="cancel" />
+                       <button name="action_extract_reload" string="Extract (reload cost/revenue)" type="object" icon="gtk-jump-to" />
                        <button name="action_extract" string="Extract" type="object" icon="gtk-jump-to" class="oe_highlight" />
                    </header>                   
                    <group colspan="4" col="4">

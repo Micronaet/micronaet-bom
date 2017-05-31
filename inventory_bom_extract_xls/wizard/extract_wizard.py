@@ -115,6 +115,10 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         
         def xls_sheet_write(WB, name, inventory, header):
             ''' Add new sheet and write inventory data
+                WB: Excel Workbook
+                name: Sheet name
+                inventory: database to write
+                header: title list
             '''
             WS = WB.add_worksheet(name)
             xls_write_row(WS, 0, header)
@@ -125,7 +129,22 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 xls_write_row(WS, row, inventory[code], code)
             _logger.info('End extract %s sheet: %s' % (xls_file, name))
             return            
-        
+
+        def xls_sheet_write_list(WB, name, value, title):
+            ''' Write a simple list on Excel file
+                WB: Excel workbook
+                name: Sheet name
+                value: list of data
+                title: string for title
+            '''
+            WS = WB.add_worksheet(name)
+            WS.write(0, 0, title)
+            row = 0
+            for item in sorted(value):
+                row += 1
+                WS.write(row, 0, item)
+            return    
+            
         def clean_float(value):
             ''' Clean float value
             '''    
@@ -305,7 +324,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                             and component.inv_cost_account not in \
                             ledger_selection and component.inv_first_supplier \
                             not in supplier_selection:
-                        if component not in jumped:    
+                        if component_code not in jumped:    
                             jumped.append(component_code)
                            
                         continue 
@@ -315,18 +334,10 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     materials[component_code][col] += \
                         product_qty * line.product_qty # TODO real cost
 
-        xls_sheet_write(WB, '5. Materiali utilizzati', materials, 
-            header_product)
-
-        # Create Jumped material list:
-        WS = WB.add_worksheet('6. Materiali saltati')
-        WS.write(0, 0, 'Codice materiale')
-        row = 0
-        for componet_code in sorted(jumped):
-            row += 1
-            WS.write(row, 0, component_code)
-
-        _logger.info('End extract %s sheet: %s' % (xls_file, name))
+        xls_sheet_write(
+            WB, '5. Materiali utilizzati', materials, header_product)
+        xls_sheet_write_list(
+            WB, '6. Materiali saltati', jumped, 'Codice materiale')
                         
     _columns = {
         'year': fields.integer('Year', required=True),

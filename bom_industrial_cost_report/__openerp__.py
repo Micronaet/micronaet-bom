@@ -37,6 +37,8 @@
     'init_xml': [],
     'demo': [],
     'data': [
+        'security/bom_group.xml',
+        
         'industrial_view.xml',
         ],
     'active': False,

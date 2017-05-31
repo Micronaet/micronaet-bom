@@ -197,8 +197,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             inventory[parent_code][month] += quantity   
 
         # Export in XLSX file:
-        xls_sheet_write(WB, 'Product Stock', inventory_product)
-        xls_sheet_write(WB, 'Parent Stock', inventory)
+        xls_sheet_write(WB, '1. Vendite prodotti', inventory_product)
+        xls_sheet_write(WB, '2. Vendite padre', inventory)
         
         # ---------------------------------------------------------------------
         # Integrate unload inventory:
@@ -235,13 +235,13 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         _logger.info('End inventory adjust file: %s' % xls_infile),
 
         # Export in XLSX file:
-        xls_sheet_write(WB, 'Stock + INV', inventory)
+        xls_sheet_write(WB, '3. Correzione padre', inventory)
 
         # ---------------------------------------------------------------------
         # Assign product unload depend on inventory database
         # ---------------------------------------------------------------------
         for default_code, unload_list in inventory_product.iteritems():
-            parent_code = default_code[:code_part]
+            parent_code = default_code[:code_part].strip()
             # loop on month:
             for col in range(0, 12):
                 product_qty = inventory_product[default_code][col]
@@ -256,7 +256,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     inventory_product[default_code][col] = parent_qty
                     inventory[parent_code][col + 1] = 0.0
         # Export in XLSX file:
-        xls_sheet_write(WB, 'Uload product', inventory_product)
+        xls_sheet_write(WB, '4. Correzione prodotti', inventory_product)
                    
     _columns = {
         'year': fields.integer('Year', required=True),

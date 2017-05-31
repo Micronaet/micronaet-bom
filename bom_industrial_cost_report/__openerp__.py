@@ -33,6 +33,7 @@
         'base',
         'mrp',
         'bom_production_cost',
+        'bom_dynamic_structured', # for dynamic bom structure
         ],
     'init_xml': [],
     'demo': [],
@@ -40,6 +41,7 @@
         'security/bom_group.xml',
         
         'industrial_view.xml',
+        'report/report_bom.xml',
         ],
     'active': False,
     'installable': True,

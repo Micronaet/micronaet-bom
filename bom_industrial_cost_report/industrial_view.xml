@@ -26,11 +26,14 @@
                      <field name="bom_selection" invisible="1"/>
                      <field name="name" />
                      <field name="default_code" />
+                     <button name="open_current_dynamic_bom" string="Manage dynamic lines" type="object" icon="gtk-justify-fill"/>
                      <field name="from_industrial" />
                      <field name="to_industrial" />
                      <field name="state" invisible="1" />
-                     <button name="bom_selection_on" string="Set for BOM" type="object" icon="star-off" attrs="{'invisible': [('bom_selection','=',True)]}"/>
-                     <button name="bom_selection_off" string="Set for BOM" type="object" icon="star-on" attrs="{'invisible': [('bom_selection','=',False)]}"/> 
+                     <button name="bom_selection_on" string="Set BOM on" type="object" icon="star-off" attrs="{'invisible': [('bom_selection','=',True)]}"/>
+                     <button name="bom_selection_off" string="Set BOM off" type="object" icon="star-on" attrs="{'invisible': [('bom_selection','=',False)]}"/> 
+                     <button name="open_single_report" string="Print single" type="object" icon="gtk-print" attrs="{'invisible': [('bom_selection','=',False)]}"/>
+                     <button name="open_multi_report" string="Print all" type="object" icon="gtk-dnd-multiple" attrs="{'invisible': [('bom_selection','=',False)]}"/>
                  </tree>
              </field>
          </record>
@@ -43,16 +46,6 @@
              <field name="search_view_id" ref="view_product_bom_selection_search"/>             
              <field name="context">{}</field>
              <field name="domain">[]</field>
-         </record>
-         <record model="ir.actions.act_window" id="action_product_bom_selection_selected_tree">
-             <field name="name">Product BOM selected</field>
-             <field name="res_model">product.product</field>
-             <field name="view_type">form</field>
-             <field name="view_mode">tree,form</field>
-             <field name="view_id" ref="view_product_bom_selection_tree"/>
-             <field name="search_view_id" ref="view_product_bom_selection_search"/>             
-             <field name="context">{}</field>
-             <field name="domain">[('bom_selection', '=', True)]</field>
          </record>
          <menuitem 
              parent="mrp.menu_mrp_bom" 
@@ -67,12 +60,6 @@
                  id="menu_product_bom_selection_tree" 
                  action="action_product_bom_selection_tree"
                  sequence="10"
-                 />
-             <menuitem 
-                 parent="menu_product_bom_selection_root" 
-                 id="menu_product_bom_selection_selected_tree" 
-                 action="action_product_bom_selection_selected_tree"
-                 sequence="20"
                  />
     </data>
 </openerp>

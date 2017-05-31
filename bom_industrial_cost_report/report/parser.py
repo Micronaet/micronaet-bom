@@ -38,23 +38,47 @@ class Parser(report_sxw.rml_parse):
     def __init__(self, cr, uid, name, context):
         super(Parser, self).__init__(cr, uid, name, context)
         self.localcontext.update({
-            'get_objects': self.get_objects(),
+            'get_objects': self.get_objects,
+            'get_details': self.get_details,
         })
         
-    def get_objects(self, objects):
+    def get_objects(self, data=None):
         ''' Return single report or list of selected bom 
-        '''
-        # Readability:
+        '''        # Readability:
         cr = self.cr
         uid = self.uid
         context = {}
+        if data is None:
+            data = {}
+
+        # Pool used:    
         product_pool = self.pool.get('product.product')
         
-        if self.name == 'industrial_cost_bom_single_report':
-            objects = [objects[0]] # only first if single report:
-        else:
-            product_ids = product_pool.search(cr, uid, [], context=context)
-            objects = product_pool.browse(
-                cr, uid, product_ids, context=context)
+        active_ids = data.get('active_ids', False)            
+        if not active_ids:
+            active_ids = product_pool.search(cr, uid, [
+                ('bom_selection', '=', True),
+                ], context=context)
+        objects = product_pool.browse(
+            cr, uid, active_ids, context=context)
            
-        return sorted(objects, key=lambda o: o.default_code)
+        return objects #sorted(objects, key=lambda o: o.default_code)
+
+    def get_details(self, dynamic_bom_line_ids):
+        ''' Create detail row
+        '''
+        res = {}
+        for item in dynamic_bom_line_ids:
+            res[item] = []
+            for seller in item.product_id.seller_ids:
+                 for pricelist in seller.pricelist_ids:
+                     if not pricelist.is_active:
+                         continue
+                     res[item].append((
+                         seller.name.name,
+                         '%10.5f' % pricelist.price,
+                         pricelist.date_quotation or '???',
+                         '%10.5f' % (pricelist.price * item.product_qty),
+                         ))
+                         
+        return res.iteritems()

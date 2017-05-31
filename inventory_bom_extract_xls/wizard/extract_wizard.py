@@ -193,7 +193,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     0, # End inv.
                     ]
             month = int(date_invoice[5:7])
-            inventory_product[default_code][month] += quantity   
+            inventory_product[default_code][month - 1] += quantity   
             inventory[parent_code][month] += quantity   
 
         # Export in XLSX file:
@@ -244,15 +244,20 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             parent_code = default_code[:code_part]
             # loop on month:
             for col in range(0, 12):
-                product_qty = 
-                parent_qty = 
+                product_qty = inventory_product[default_code][col]
+                parent_qty = inventory[parent_code][col + 1]
                 
                 # 3 case:
-                if  # parent 0 (no unload)
-                elif # product > parent (yes unload) 
-                else: # partial product < parent
-            
-
+                if not parent_qty:
+                    inventory_product[default_code][col] = 0.0
+                elif product_qty <= parent_qty: 
+                    inventory[parent_code][col + 1] -= product_qty                     
+                else: # product qty > parent_qty
+                    inventory_product[default_code][col] = parent_qty
+                    inventory[parent_code][col + 1] = 0.0
+        # Export in XLSX file:
+        xls_sheet_write(WB, 'Uload product', inventory_product)
+                   
     _columns = {
         'year': fields.integer('Year', required=True),
         }

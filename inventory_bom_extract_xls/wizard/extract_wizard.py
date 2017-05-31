@@ -145,6 +145,11 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         xls_infile = '/home/administrator/photo/xls/stock/use_inv_%s.xlsx'
         start_row = 2 # first data row (start from 0)
         
+        ledger_selection = (
+            '37.00101', '37.00103', '37.00105', '37.00106', '37.00108',            
+            )
+        supplier_selection = ('20.01330', )
+        
         # Read parameter from wizard:
         wiz_browse = self.browse(cr, uid, ids, context=context)[0]
         year = wiz_browse.year
@@ -280,6 +285,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # D. Extra material from sales
         # ---------------------------------------------------------------------
         materials = {}
+        jumped = [] # Material not managed
         for default_code, unload_list in inventory_product.iteritems():
             for col in range (0, 12):
                 product_qty = unload_list[col]
@@ -292,8 +298,17 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     continue
                             
                 for line in bom_line_ids: # has bom
-                    component_code = line.product_id.default_code    
+                    component = line.product_id
+                    component_code = component.default_code
                     # TODO check cost / revenue / supplier value
+                    if component.inv_revenue_account not in ledger_selection \
+                            and component.inv_cost_account not in \
+                            ledger_selection and component.inv_first_supplier \
+                            not in supplier_selection:
+                        if component not in jumped:    
+                            jumped.append(component_code)
+                           
+                        continue 
                     if component_code not in materials:
                         materials[component_code] = \
                             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]        
@@ -302,6 +317,16 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
 
         xls_sheet_write(WB, '5. Materiali utilizzati', materials, 
             header_product)
+
+        # Create Jumped material list:
+        WS = WB.add_worksheet('6. Materiali saltati')
+        WS.write(0, 0, 'Codice materiale')
+        row = 0
+        for componet_code in sorted(jumped):
+            row += 1
+            WS.write(row, 0, component_code)
+
+        _logger.info('End extract %s sheet: %s' % (xls_file, name))
                         
     _columns = {
         'year': fields.integer('Year', required=True),

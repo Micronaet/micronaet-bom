@@ -45,8 +45,8 @@ class ProductProduct(orm.Model):
     _inherit = 'product.product'
     
     _columns = {
-        'inv_cost_account': fields.char('Inv. cost account', size=15),
-        'inv_revenue_account': fields.char('Inv. cost account', size=15),
-        'inv_first_supplier': fields.char('Inv. First supplier', size=15),        
+        'inv_cost_account': fields.char('Inv. cost account', size=8),
+        'inv_revenue_account': fields.char('Inv. cost account', size=8),
+        'inv_first_supplier': fields.char('Inv. First supplier', size=8),        
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -282,7 +282,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         materials = {}
         for default_code, unload_list in inventory_product.iteritems():
             for col in range (0, 12):
-                product_qty = uload_list[col]
+                product_qty = unload_list[col]
                 bom_line_ids = products[default_code].dynamic_bom_line_ids
                 if not bom_line_ids:
                     if default_code not in materials:

@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<openerp>
+<data noupdate="1">
+    <record id="aeroo_industrial_cost_bom_report" model="ir.actions.report.xml">
+        <field name="name">Industrial BOM</field>
+        <field name="type">ir.actions.report.xml</field>
+        <field name="model">product.product</field>
+        <field name="report_name">industrial_cost_bom_report</field>
+        <field name="report_type">aeroo</field>
+        <field name="in_format">oo-odt</field>
+        <field name="parser_loc">bom_industrial_cost_report/report/parser.py</field>
+        <field name="report_rml">bom_industrial_cost_report/report/bom.odt</field>
+        <field name="parser_state">loc</field>
+        <field name="tml_source">file</field>
+    </record>    
+    <ir_set>
+        <field eval="'action'" name="key"/>
+        <field eval="'client_print_multi'" name="key2"/>
+        <field eval="['mrp.bom']" name="models"/>
+        <field name="name">action_industrial_cost_bom_report</field>
+        <field eval="'ir.actions.report.xml,'+str(aeroo_industrial_cost_bom_report)" name="value"/>
+        <field eval="True" name="isobject"/>
+        <field eval="True" name="replace"/>
+    </ir_set>
+    <record id="aeroo_industrial_cost_bom_single_report" model="ir.actions.report.xml">
+        <field name="name">Industrial BOM single</field>
+        <field name="type">ir.actions.report.xml</field>
+        <field name="model">product.product</field>
+        <field name="report_name">industrial_cost_bom_single_report</field>
+        <field name="report_type">aeroo</field>
+        <field name="in_format">oo-odt</field>
+        <field name="parser_loc">bom_industrial_cost_report/report/parser.py</field>
+        <field name="report_rml">bom_industrial_cost_report/report/bom.odt</field>
+        <field name="parser_state">loc</field>
+        <field name="tml_source">file</field>
+    </record>    
+    <ir_set>
+        <field eval="'action'" name="key"/>
+        <field eval="'client_print_multi'" name="key2"/>
+        <field eval="['mrp.bom']" name="models"/>
+        <field name="name">action_industrial_cost_bom_single_report</field>
+        <field eval="'ir.actions.report.xml,'+str(aeroo_industrial_cost_bom_single_report)" name="value"/>
+        <field eval="True" name="isobject"/>
+        <field eval="True" name="replace"/>
+    </ir_set>
+</data>
+</openerp>
+

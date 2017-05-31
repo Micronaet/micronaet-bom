@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ###############################################################################
 #
 #    Copyright (C) 2001-2014 Micronaet SRL (<http://www.micronaet.it>).
@@ -17,8 +16,30 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from . import product_extra
-from . import wizard
 
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+{
+    'name': 'BOM Industrial cost',
+    'version': '0.1',
+    'category': 'MRP',
+    'description': '''        
+        BOM Industrial cost calculation. 
+        Mark a list of observed product and calculate all cost from material
+        and work on MRP.
+        ''',
+    'author': 'Micronaet S.r.l. - Nicola Riolini',
+    'website': 'http://www.micronaet.it',
+    'license': 'AGPL-3',
+    'depends': [
+        'base',
+        'mrp',
+        'bom_production_cost',
+        ],
+    'init_xml': [],
+    'demo': [],
+    'data': [
+        'industrial_view.xml',
+        ],
+    'active': False,
+    'installable': True,
+    'auto_install': False,
+    }

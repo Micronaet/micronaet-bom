@@ -3,7 +3,7 @@
     <data>
        <!-- product.inventory.extract.xls.wizard -->
        <record id="product_inventory_extract_xls_wizard_view" model="ir.ui.view">
-            <field name="name"></field>
+            <field name="name">Extract inventory</field>
             <field name="model">product.inventory.extract.xls.wizard</field>
             <field name="arch" type="xml">
                 <form string="Wizard" version="7.0">

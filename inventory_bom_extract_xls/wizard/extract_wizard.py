@@ -48,6 +48,39 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
     '''
     _name = 'product.inventory.extract.xls.wizard'
 
+    def import_csv_inventory_cost_revenue(
+            self, cr, uid, filename, context=None):
+        ''' Import CSV data for inventory
+        '''
+        product_pool = self.pool.get('product.product')
+        i = 0
+        for line in open(filename, 'r'):
+            i += 1
+            if i % 50 == 0:
+                _logger.info('Update cost / revenue: %s' % i)
+            fields = line.split(';')
+            
+            # Read parameters:
+            default_code = fields[0].strip()
+            description = fields[1].strip()
+            revenue = fields[2].strip()
+            cost = fields[3].strip()
+            supplier = fields[4].strip()
+
+            product_ids = product_pool.search(cr, uid, [
+                ('default_code', '=', default_code),
+                ], context=context)
+                
+            if product_ids: # exist:
+                product_pool.write(cr, uid, product_ids, {
+                    'inv_revenue_account': revenue,
+                    'inv_cost_account': cost,
+                    'inv_first_supplier': supplier,
+                    }, context=context)
+        else:
+            _logger.error('Product code not found: %s' % default_code)               
+        return True
+        
     # --------------------
     # Wizard button event:
     # --------------------
@@ -81,9 +114,9 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 'Inv. fin.'
                 ])
             row = 0
-            for default_code in sorted(inventory):
+            for code in sorted(inventory):
                 row += 1
-                xls_write_row(WS, row, inventory[default_code], default_code)
+                xls_write_row(WS, row, inventory[code], code)
             _logger.info('End extract %s sheet: %s' % (xls_file, name))
             return            
         
@@ -101,10 +134,15 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             context = {}    
             
         # Parameters:        
-        code_part = 5
+        code_part = 6
         xls_file = '/home/administrator/photo/xls/stock/inventory_%s.xlsx'
         xls_infile = '/home/administrator/photo/xls/stock/use_inv_%s.xlsx'
         start_row = 2 # first data row (start from 0)
+        csv_file = '/home/administrator/photo/xls/stock/costrevenue.csv'
+        
+        _logger.info('Import cost and revenue in product')
+        self.import_csv_inventory_cost_revenue(
+            cr, uid, csv_file, context=context)
         
         # Read parameter from wizard:
         wiz_browse = self.browse(cr, uid, ids, context=context)[0]
@@ -119,42 +157,48 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         WB = xlsxwriter.Workbook(xls_file)
 
         # ---------------------------------------------------------------------
-        # Read parent code in invoice
+        # Read parent code in invoice and default code in invoice
         # ---------------------------------------------------------------------
         _logger.info('Start extract sale from invoice, year %s' % year)
         line_pool = self.pool.get('account.invoice.line')
         line_ids = line_pool.search(cr, uid, [
             ('invoice_id.date_invoice', '>=', '%s-01-01' % year),
             #('invoice_id.date_invoice', '<', '%s-02-01' % year),
-            ('invoice_id.date_invoice', '<', '%s-01-01' % (year +1)),
+            ('invoice_id.date_invoice', '<', '%s-01-01' % (year + 1)),
             ('invoice_id.state', '=', 'open'),
             ], context=context)
             
+        inventory_product = {}
         inventory = {}    
         _logger.info('Read %s invoice line' % len(line_ids))        
         for line in line_pool.browse(
                 cr, uid, line_ids, context=context):
-            try:    
-                default_code = line.product_id.default_code[:code_part].strip()
-            except:
-                _logger.error(
-                    'Product code error: %s' % line.product_id.default_code)
+            default_code = line.product_id.default_code
+            if not default_code:
+                _logger.error('No default code')
                 continue
+            parent_code = default_code[:code_part].strip()
                 
             quantity = line.quantity
             date_invoice = line.invoice_id.date_invoice
             
-            if default_code not in inventory:
-                inventory[default_code] = [
+            if default_code not in inventory_product:
+                inventory_product[default_code] = [
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    ]
+            if parent_code not in inventory:
+                inventory[parent_code] = [
                     0, # Start inv.
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, # End inv.
                     ]
             month = int(date_invoice[5:7])
-            inventory[default_code][month] += quantity   
+            inventory_product[default_code][month] += quantity   
+            inventory[parent_code][month] += quantity   
 
         # Export in XLSX file:
-        xls_sheet_write(WB, 'Stock', inventory)
+        xls_sheet_write(WB, 'Product Stock', inventory_product)
+        xls_sheet_write(WB, 'Parent Stock', inventory)
         
         # ---------------------------------------------------------------------
         # Integrate unload inventory:
@@ -173,26 +217,41 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
 
         for i in range(start_row, WS_inv.nrows):
             row = WS_inv.row(i) # generate error at end
-            default_code = row[0].value
-            if not default_code: # end import
+            parent_code = row[0].value
+            if not parent_code: # end import
                 _logger.info('End import at line: %s' % i)
                 break
             
-            if default_code not in inventory:
-                _logger.warning('Code not found: %s' % default_code)
-                inventory[default_code] = [
+            if parent_code not in inventory:
+                _logger.warning('Code not found: %s' % parent_code)
+                inventory[parent_code] = [
                     0, # Start inv.
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, # End inv.
                     ]                    
 
             for col in range(1, 15):
-                inventory[default_code][col - 1] += clean_float(row[col].value)
+                inventory[parent_code][col - 1] += clean_float(row[col].value)
         _logger.info('End inventory adjust file: %s' % xls_infile),
 
         # Export in XLSX file:
         xls_sheet_write(WB, 'Stock + INV', inventory)
 
+        # ---------------------------------------------------------------------
+        # Assign product unload depend on inventory database
+        # ---------------------------------------------------------------------
+        for default_code, unload_list in inventory_product.iteritems():
+            parent_code = default_code[:code_part]
+            # loop on month:
+            for col in range(0, 12):
+                product_qty = 
+                parent_qty = 
+                
+                # 3 case:
+                if  # parent 0 (no unload)
+                elif # product > parent (yes unload) 
+                else: # partial product < parent
+            
 
     _columns = {
         'year': fields.integer('Year', required=True),

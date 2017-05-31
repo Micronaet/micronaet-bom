@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+         <record model="ir.ui.view" id="view_product_bom_selection_tree">
+             <field name="name">product.product.bom.selection.tree</field>
+             <field name="model">product.product</field>
+             <field name="priority" eval="50" />
+             <field name="arch" type="xml">
+                 <tree string="BOM selection" editable="bottom" color="blue:bom_selection==True">        
+                     <field name="bom_selection" />
+                     <field name="name" />
+                     <field name="default_code" />
+                     <field name="from_industrial" />
+                     <field name="to_industrial" />
+                     <field name="state" />
+                     <button name="bom_selection_on" string="Set for BOM" type="object" icon="star-off" attrs="{'invisible': [('bom_selection','=',False)]}"/>
+                     <button name="bom_selection_off" string="Set for BOM" type="object" icon="star-on" attrs="{'invisible': [('bom_selection','=',True)]}"/>
+                     
+                 </tree>
+             </field>
+         </record>
+    </data>
+</openerp>
+

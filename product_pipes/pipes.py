@@ -119,8 +119,8 @@ class ProductProduct(orm.Model):
         '''
         pipe_ids = self.search(cr, uid, [
             ('is_pipe', '=', True),
-            ('material_id.weight_specific', '>', 0.0), # has wh/vol.
-            ('material_id.last_price', '>', 0.0), # has price
+            ('pipe_material_id.weight_specific', '>', 0.0), # has wh/vol.
+            ('pipe_material_id.last_price', '>', 0.0), # has price
             ], context=context)
         return self.calculate_pipe_price_from_dimension(
             cr, uid, pipe_ids, context=context)
@@ -131,9 +131,9 @@ class ProductProduct(orm.Model):
         # Used from button but also for scheduled operation
         for product in self.browse(cr, uid, ids, context=context):            
             # Area:
-            plain_area = product.pipe_diameter^2 * math.pi
+            plain_area = (product.pipe_diameter ** 2) * math.pi
             empty_area = (
-                product.pipe_diameter - 2 * product.pipe_thick)^2 * math.pi
+                product.pipe_diameter - 2 * product.pipe_thick) ** 2 * math.pi
             
             # Volume:    
             plain_volume = plain_area * product.pipe_length
@@ -141,10 +141,10 @@ class ProductProduct(orm.Model):
             volume = plain_volume - empty_volume / 1000000 # m3
             
             # Weight:
-            weight = volume * product.material_id.weight_specific
+            weight = volume * product.pipe_material_id.weight_specific
             
             # Price: 
-            standard_price = weight * product.material_id.last_price
+            standard_price = weight * product.pipe_material_id.last_price
             
             self.write(cr, uid, product.id, {
                 'standard_price': standard_price,

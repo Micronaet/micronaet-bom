@@ -68,40 +68,68 @@ class Parser(report_sxw.rml_parse):
     def get_details(self, product):
         ''' Create detail row
         '''
-        res = {}
-        
-        # Min / Max totals:
-        self.min = 0.0
-        self.max = 0.0
-        for item in product.dynamic_bom_line_ids:
-            res[item] = []
-            max_value = 0.0
+        # ---------------------------------------------------------------------
+        # Utility:
+        # ---------------------------------------------------------------------
+        def load_subelements_price(self, res, item, product, hw=False):
+            ''' Load list in all seller pricelist return min and max value
+            '''
             min_value = 0.0
-            for seller in item.product_id.seller_ids:
+            max_value = 0.0
+            
+            record = [item, []]
+            # TODO manage as pipe?
+            for seller in product.seller_ids:
                  for pricelist in seller.pricelist_ids:
                      if not pricelist.is_active:
                          continue
                      total = pricelist.price * item.product_qty
-                     res[item].append((
+                     record[1].append((
                          seller.name.name,
                          '%10.5f' % pricelist.price,
                          pricelist.date_quotation or '???',
                          '%10.5f' % total,
+                         hw,
                          ))
                      if not min_value or total < min_value:
                          min_value = total
                      if total > max_value:
                          max_value = total
+                         
+            # Update min and max value:             
             self.min += min_value
             self.max += max_value
-            
+            res.append(record)
+            return
+        
+        # ---------------------------------------------------------------------
+        # Load component list (and subcomponent for HW):
+        # ---------------------------------------------------------------------
+        res = []        
+        # Min / Max totals:
+        self.min = 0.0
+        self.max = 0.0
+        for item in product.dynamic_bom_line_ids:
+            component = item.product_id
+            half_bom_ids = component.half_bom_ids # if half component
+            if half_bom_ids: # HW component
+                for cmpt in half_bom_ids:
+                    load_subelements_price(
+                        self, res, cmpt, cmpt.product_id, 
+                        item.product_id.default_code,
+                        )
+            else: # not HW component
+                load_subelements_price(
+                    self, res, item, item.product_id)
+
+        # ---------------------------------------------------------------------
         # Add lavoration cost:
+        # ---------------------------------------------------------------------
         mrp_cost = product.family_id.medium_mrp_cost_forced or\
             product.family_id.medium_mrp_cost
         self.min += mrp_cost
-        self.max += mrp_cost
-            
-        return res.iteritems()
+        self.max += mrp_cost            
+        return res
         
     def get_totals(self, mode):
         ''' Total value (min or max)

@@ -11,7 +11,10 @@
                     <field name="name" />
                     <field name="first_supplier_id" />
                     <field name="resistence" />
+                    <field name="weight_specific" />
+                    <field name="last_price" />
                     <field name="note" />
+                    <button name="realculate_all_price" string="Recalculate pipe cost" type="object" icon="gtk-refresh"/>
                 </tree>
             </field>
         </record>
@@ -19,22 +22,29 @@
             <field name="name">product.pipe.material.product.pipe.material</field>
             <field name="model">product.pipe.material</field>
             <field name="arch" type="xml">
-                <form string="Pipe material">        
-                    <group colspan="4" col="4">
-                        <field name="code" />
-                        <field name="name" />
-                        <field name="resistence" />
-                        <field name="first_supplier_id" />
-                        <separator string="Order lot" colspan="4"/>
-                        <field name="lot_ids" colspan="4" nolabel="1" >
-                            <tree string="Order lot" editable="bottom">
-                                <field name="diameter" />
-                                <field name="order_lot" />
-                            </tree>
-                        </field>                    
-                        <separator string="Note" colspan="4"/>
-                        <field name="note" colspan="4" nolabel="1"/>
-                    </group>   
+                <form string="Pipe material" version="7.0">
+                    <header>
+                        <button name="realculate_all_price" string="Recalculate pipe cost" type="object" icon="gtk-refresh"/>
+                    </header>
+                    <sheet>
+                        <group colspan="4" col="4">
+                            <field name="code" />
+                            <field name="name" />
+                            <field name="resistence" />
+                            <field name="first_supplier_id" />
+                            <field name="weight_specific" />
+                            <field name="last_price" />
+                            <separator string="Order lot" colspan="4"/>
+                            <field name="lot_ids" colspan="4" nolabel="1" >
+                                <tree string="Order lot" editable="bottom">
+                                    <field name="diameter" />
+                                    <field name="order_lot" />
+                                </tree>
+                            </field>                    
+                            <separator string="Note" colspan="4"/>
+                            <field name="note" colspan="4" nolabel="1"/>
+                        </group>   
+                    </sheet>    
                 </form>
             </field>
         </record>

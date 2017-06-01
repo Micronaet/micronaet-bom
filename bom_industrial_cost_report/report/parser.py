@@ -40,6 +40,7 @@ class Parser(report_sxw.rml_parse):
         self.localcontext.update({
             'get_objects': self.get_objects,
             'get_details': self.get_details,
+            'get_totals': self.get_totals,
         })
         
     def get_objects(self, data=None):
@@ -64,21 +65,49 @@ class Parser(report_sxw.rml_parse):
            
         return objects #sorted(objects, key=lambda o: o.default_code)
 
-    def get_details(self, dynamic_bom_line_ids):
+    def get_details(self, product):
         ''' Create detail row
         '''
         res = {}
-        for item in dynamic_bom_line_ids:
+        
+        # Min / Max totals:
+        self.min = 0.0
+        self.max = 0.0
+        for item in product.dynamic_bom_line_ids:
             res[item] = []
+            max_value = 0.0
+            min_value = 0.0
             for seller in item.product_id.seller_ids:
                  for pricelist in seller.pricelist_ids:
                      if not pricelist.is_active:
                          continue
+                     total = pricelist.price * item.product_qty
                      res[item].append((
                          seller.name.name,
                          '%10.5f' % pricelist.price,
                          pricelist.date_quotation or '???',
-                         '%10.5f' % (pricelist.price * item.product_qty),
+                         '%10.5f' % total,
                          ))
-                         
+                     if not min_value or total < min_value:
+                         min_value = total
+                     if total > max_value:
+                         max_value = total
+            self.min += min_value
+            self.max += max_value
+            
+        # Add lavoration cost:
+        mrp_cost = product.family_id.medium_mrp_cost_forced or\
+            product.family_id.medium_mrp_cost
+        self.min += mrp_cost
+        self.max += mrp_cost
+            
         return res.iteritems()
+        
+    def get_totals(self, mode):
+        ''' Total value (min or max)
+        '''    
+        if mode == 'min':
+            return self.min
+        else:
+            return self.max
+        return 

@@ -21,6 +21,7 @@ import os
 import sys
 import logging
 import openerp
+import math
 import openerp.netsvc as netsvc
 import openerp.addons.decimal_precision as dp
 from openerp.osv import fields, osv, expression, orm
@@ -60,6 +61,12 @@ class ProductPipeMaterial(orm.Model):
     _name = 'product.pipe.material'
     _description = 'Pipe description'
     
+    def realculate_all_price(self, cr, uid, ids, context=None):
+        ''' Manually launch schedule operation
+        '''
+        self.pool.get('product.product').schedule_pipe_price_calculation(
+            cr, uid, context=context)
+            
     _columns = {
         'code': fields.char('Code', size=10),
         'name': fields.char('Pipe material', size=32),
@@ -67,6 +74,9 @@ class ProductPipeMaterial(orm.Model):
             'res.partner', 'First supplier'),
         'resistence': fields.char('Resistence', size=20),
         'note': fields.text('Note'),
+        'weight_specific': fields.float(
+            'Weight specific (Kg/dm3)', digits=(16, 10)),
+        'last_price': fields.float('Last price', digits=(16, 4)),
         }
 
 class ProductPipeMaterialLot(orm.Model):
@@ -103,6 +113,43 @@ class ProductProduct(orm.Model):
     """    
     _inherit = 'product.product'
     
+    # Scheduled operations:
+    def schedule_pipe_price_calculation(self, cr, uid, context=None):
+        ''' Calculate all pipe value if weight / volume is present
+        '''
+        pipe_ids = self.search(cr, uid, [
+            ('is_pipe', '=', True),
+            ('material_id.weight_specific', '>', 0.0), # has wh/vol.
+            ('material_id.last_price', '>', 0.0), # has price
+            ], context=context)
+        return self.calculate_pipe_price_from_dimension(
+            cr, uid, pipe_ids, context=context)
+            
+    def calculate_pipe_price_from_dimension(self, cr, uid, ids, context=None):
+        ''' Calculate volume depend on dimension of pipe and weight / volume
+        '''
+        # Used from button but also for scheduled operation
+        for product in self.browse(cr, uid, ids, context=context):            
+            # Area:
+            plain_area = product.pipe_diameter^2 * math.pi
+            empty_area = (
+                product.pipe_diameter - 2 * product.pipe_thick)^2 * math.pi
+            
+            # Volume:    
+            plain_volume = plain_area * product.pipe_length
+            empty_volume = empty_area * product.pipe_length
+            volume = plain_volume - empty_volume / 1000000 # m3
+            
+            # Weight:
+            weight = volume * product.material_id.weight_specific
+            
+            # Price: 
+            standard_price = weight * product.material_id.last_price
+            
+            self.write(cr, uid, product.id, {
+                'standard_price': standard_price,
+                }, context=context)
+        
     _columns = {
         'is_pipe': fields.boolean('Is Pipe'),
         'pipe_diameter': fields.float('Pipe diameter mm.', digits=(16, 2)),

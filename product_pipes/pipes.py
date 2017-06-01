@@ -130,15 +130,22 @@ class ProductProduct(orm.Model):
         '''
         # Used from button but also for scheduled operation
         for product in self.browse(cr, uid, ids, context=context):            
+            thick = product.pipe_thick
+            
             # Area:
-            plain_area = (product.pipe_diameter ** 2) * math.pi
-            empty_area = (
-                product.pipe_diameter - 2 * product.pipe_thick) ** 2 * math.pi
+            ray1 = product.pipe_diameter / 2
+            if product.pipe_diameter2:
+                ray2 = product.pipe_diameter2 / 2
+            else:    
+                ray2 = ray1
+                
+            plain_area = ray1 * ray2 * math.pi
+            empty_area = (ray1 - thick) * (ray2 - thick) * math.pi
             
             # Volume:    
             plain_volume = plain_area * product.pipe_length
             empty_volume = empty_area * product.pipe_length
-            volume = plain_volume - empty_volume / 1000000 # m3
+            volume = (plain_volume - empty_volume) / 1000000 # m3
             
             # Weight:
             weight = volume * product.pipe_material_id.weight_specific
@@ -148,11 +155,14 @@ class ProductProduct(orm.Model):
             
             self.write(cr, uid, product.id, {
                 'standard_price': standard_price,
+                'weight': weight,
                 }, context=context)
         
     _columns = {
         'is_pipe': fields.boolean('Is Pipe'),
         'pipe_diameter': fields.float('Pipe diameter mm.', digits=(16, 2)),
+        'pipe_diameter2': fields.float('Pipe diameter 2 mm.', 
+            digits=(16, 2), help='For elliptic pipes'),
         'pipe_thick': fields.float('Pipe thick mm.', digits=(16, 2)),
         'pipe_length': fields.float('Pipe length mm.', digits=(16, 2)),
         'pipe_resistence': fields.char('Pipe resistence', size=32),

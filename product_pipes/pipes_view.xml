@@ -89,6 +89,9 @@
             <field name="priority" eval="50" />
             <field name="arch" type="xml">
                 <form string="Pipes" version="7.0">        
+                    <header>
+                        <button name="calculate_pipe_price_from_dimension" string="Refresh current price" type="object" icon="gtk-refresh"/>
+                    </header>
                     <sheet>
                         <group col="4" colspan="4">
                             <field name="name" />
@@ -99,10 +102,11 @@
 
                             <separator string="Dimension:" colspan="4"/>
                             <field name="pipe_diameter" />
+                            <field name="pipe_diameter2" />
                             <field name="pipe_thick" />
                             <field name="pipe_length" />
                             <field name="pipe_resistence" />
-                            <field name="weight" />
+                            <field name="weight" string="Weight Kg. (calc.)" />
                             
                             <separator string="Price" colspan="4"/>
                             <field name="standard_price" />

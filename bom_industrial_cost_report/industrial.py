@@ -147,7 +147,39 @@ class ProductProduct(orm.Model):
     """
     
     _inherit = 'product.product'
-    
+            
+    # -------------------------------------------------------------------------    
+    # Utility function:
+    # -------------------------------------------------------------------------    
+    def get_cost_industrial_for_product(self, cr, uid, ids, context=None):
+        ''' Return all list of industrial cost for product passed
+            ids: product ids XXX now is one!
+        '''        
+        res = {}
+        cost_pool = self.pool.get('mrp.bom.industrial.cost')
+        cost_ids = cost_pool.search(cr, uid, [], context=context)
+        cost_db = {}
+        for cost in cost_pool.browse(
+                cr, uid, cost_ids, context=context):
+            cost_db[cost.id] = cost.name            
+        
+        for product in self.browse(cr, uid, ids, context=context):
+            default_code = product.default_code
+            if not default_code:
+                continue
+                       
+            cr.execute('''
+                SELECT cost_id, cost
+                FROM mrp_bom_industrial_cost_line 
+                WHERE %s ilike name
+                ORDER BY length(name) desc;
+                ''', (default_code, ))
+
+            # Update category element priority order len mask
+            for item in cr.fetchall():
+                res[cost_db.get(item[0], '???')] = item[1]            
+        return res
+
     # -------------------------------------------------------------------------
     # Button for select
     # -------------------------------------------------------------------------

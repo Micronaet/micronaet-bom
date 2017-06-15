@@ -132,10 +132,11 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         # Add lavoration cost:
         # ---------------------------------------------------------------------
-        mrp_cost = product.family_id.medium_mrp_cost_forced or\
-            product.family_id.medium_mrp_cost
-        self.min += mrp_cost
-        self.max += mrp_cost            
+        cost_industrial = product_pool.get_cost_industrial_for_product(
+            cr, uid, [product.id], context=context)
+            
+        #self.min += mrp_cost
+        #self.max += mrp_cost            
         return res
         
     def get_totals(self, mode):

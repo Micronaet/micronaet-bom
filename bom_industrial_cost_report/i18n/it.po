@@ -6,16 +6,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-01 13:27+0000\n"
-"PO-Revision-Date: 2017-06-01 15:30+0100\n"
+"POT-Creation-Date: 2017-06-15 11:52+0000\n"
+"PO-Revision-Date: 2017-06-15 13:56+0100\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: \n"
-"X-Generator: Poedit 1.6.10\n"
 "Language: it\n"
+"X-Generator: Poedit 1.6.10\n"
 
 #. module: bom_industrial_cost_report
 #: view:product.product:bom_industrial_cost_report.view_product_bom_selection_search
@@ -38,14 +38,79 @@ msgid "BOM selection"
 msgstr "Selezione DB"
 
 #. module: bom_industrial_cost_report
+#: view:mrp.bom.industrial.cost.line:bom_industrial_cost_report.view_mrp_bom_industrial_cost_line_search
+#: field:mrp.bom.industrial.cost.line,cost:0
+#: field:mrp.bom.industrial.cost.line,cost_id:0
+msgid "Cost"
+msgstr "Costo"
+
+#. module: bom_industrial_cost_report
+#: model:ir.actions.act_window,name:bom_industrial_cost_report.action_mrp_bom_industrial_cost_line
+#: model:ir.ui.menu,name:bom_industrial_cost_report.menu_mrp_bom_industrial_cost_line
+msgid "Cost detail"
+msgstr "Dettaglio costo"
+
+#. module: bom_industrial_cost_report
+#: view:mrp.bom.industrial.cost.line:bom_industrial_cost_report.view_mrp_bom_industrial_cost_line_form
+#: view:mrp.bom.industrial.cost.line:bom_industrial_cost_report.view_mrp_bom_industrial_cost_line_tree
+msgid "Cost filter"
+msgstr "Filtro costo"
+
+#. module: bom_industrial_cost_report
+#: view:mrp.bom.industrial.cost.line:bom_industrial_cost_report.view_mrp_bom_industrial_cost_line_search
+msgid "Cost line"
+msgstr "Riga costo"
+
+#. module: bom_industrial_cost_report
+#: field:mrp.bom.industrial.cost,create_uid:0
+#: field:mrp.bom.industrial.cost.line,create_uid:0
+msgid "Created by"
+msgstr "Creato da"
+
+#. module: bom_industrial_cost_report
+#: field:mrp.bom.industrial.cost,create_date:0
+#: field:mrp.bom.industrial.cost.line,create_date:0
+msgid "Created on"
+msgstr "Creato il"
+
+#. module: bom_industrial_cost_report
+#: field:mrp.bom.industrial.cost,default_cost:0
+msgid "Default cost"
+msgstr "Costo predefinito"
+
+#. module: bom_industrial_cost_report
+#: help:mrp.bom.industrial.cost,default_cost:0
+msgid "Default cost used when append imported BOM"
+msgstr ""
+"Costo predefinito, utilizzato quando si importano le distinte base "
+"selezionate come setup iniziale"
+
+#. module: bom_industrial_cost_report
+#: view:mrp.bom.industrial.cost:bom_industrial_cost_report.view_mrp_bom_industrial_cost_form
+#: view:mrp.bom.industrial.cost:bom_industrial_cost_report.view_mrp_bom_industrial_cost_tree
+msgid "Detail list"
+msgstr "Lista dettaglio"
+
+#. module: bom_industrial_cost_report
+#: view:mrp.bom.industrial.cost:bom_industrial_cost_report.view_mrp_bom_industrial_cost_form
+msgid "Detail:"
+msgstr "Dettaglio:"
+
+#. module: bom_industrial_cost_report
 #: field:product.product,from_industrial:0
 msgid "From industrial cost"
 msgstr "Dal costo produzione"
 
 #. module: bom_industrial_cost_report
+#: view:mrp.bom.industrial.cost.line:bom_industrial_cost_report.view_mrp_bom_industrial_cost_line_search
 #: view:product.product:bom_industrial_cost_report.view_product_bom_selection_search
 msgid "Group By..."
 msgstr "Raggruppa per..."
+
+#. module: bom_industrial_cost_report
+#: field:mrp.bom.industrial.cost,id:0 field:mrp.bom.industrial.cost.line,id:0
+msgid "ID"
+msgstr "ID"
 
 #. module: bom_industrial_cost_report
 #: model:ir.actions.report.xml,name:bom_industrial_cost_report.aeroo_industrial_cost_bom_report
@@ -53,14 +118,77 @@ msgid "Industrial BOM"
 msgstr "DB produzione"
 
 #. module: bom_industrial_cost_report
+#: model:ir.actions.act_window,name:bom_industrial_cost_report.action_mrp_bom_industrial_cost
+#: model:ir.model,name:bom_industrial_cost_report.model_mrp_bom_industrial_cost
+#: model:ir.ui.menu,name:bom_industrial_cost_report.menu_mrp_bom_industrial_cost
+#: view:mrp.bom.industrial.cost:bom_industrial_cost_report.view_mrp_bom_industrial_cost_form
+#: view:mrp.bom.industrial.cost:bom_industrial_cost_report.view_mrp_bom_industrial_cost_tree
+msgid "Industrial cost"
+msgstr "Costo industriale"
+
+#. module: bom_industrial_cost_report
+#: model:ir.model,name:bom_industrial_cost_report.model_mrp_bom_industrial_cost_line
+msgid "Industrial cost line"
+msgstr "Riga costo industriale"
+
+#. module: bom_industrial_cost_report
+#: field:mrp.bom.industrial.cost,write_uid:0
+#: field:mrp.bom.industrial.cost.line,write_uid:0
+msgid "Last Updated by"
+msgstr "Ultimo aggiornamento di"
+
+#. module: bom_industrial_cost_report
+#: field:mrp.bom.industrial.cost,write_date:0
+#: field:mrp.bom.industrial.cost.line,write_date:0
+msgid "Last Updated on"
+msgstr "Ultimo aggiornamento il"
+
+#. module: bom_industrial_cost_report
+#: field:mrp.bom.industrial.cost,line_ids:0
+msgid "Line"
+msgstr "Linea"
+
+#. module: bom_industrial_cost_report
+#: view:mrp.bom.industrial.cost:bom_industrial_cost_report.view_mrp_bom_industrial_cost_form
+msgid "Load BOM selected"
+msgstr "Carica DB selezionate"
+
+#. module: bom_industrial_cost_report
 #: view:product.product:bom_industrial_cost_report.view_product_bom_selection_tree
 msgid "Manage dynamic lines"
 msgstr "Gestisci righe dinamiche"
 
 #. module: bom_industrial_cost_report
+#: field:mrp.bom.industrial.cost.line,name:0
+msgid "Mask"
+msgstr "Maschera"
+
+#. module: bom_industrial_cost_report
+#: help:mrp.bom.industrial.cost.line,name:0
+msgid "Mask for code, use % for all, _ for replace one char"
+msgstr ""
+"Maschera per selezionare il codice, utilizzare % per tutto, _ per "
+"rimpiazzare un carattere."
+
+#. module: bom_industrial_cost_report
+#: field:mrp.bom.industrial.cost,name:0
+msgid "Name"
+msgstr "Nome"
+
+#. module: bom_industrial_cost_report
+#: view:mrp.bom.industrial.cost.line:bom_industrial_cost_report.view_mrp_bom_industrial_cost_line_search
+msgid "No cost"
+msgstr "Senza costo"
+
+#. module: bom_industrial_cost_report
 #: view:product.product:bom_industrial_cost_report.view_product_bom_selection_search
 msgid "Not selected"
 msgstr "Non selezionato"
+
+#. module: bom_industrial_cost_report
+#: field:mrp.bom.industrial.cost,note:0
+msgid "Note"
+msgstr "Note"
 
 #. module: bom_industrial_cost_report
 #: view:product.product:bom_industrial_cost_report.view_product_bom_selection_tree

@@ -78,13 +78,13 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         # Utility:
         # ---------------------------------------------------------------------
-        def load_subelements_price(self, res, item, product, hw=False):
+        def load_subelements_price(self, res, mode, item, product, hw=False):
             ''' Load list in all seller pricelist return min and max value
             '''
             min_value = 0.0
             max_value = 0.0
             
-            record = [item, []]
+            record = [mode, item, []]
             # TODO manage as pipe?
             for seller in product.seller_ids:
                  for pricelist in seller.pricelist_ids:
@@ -122,21 +122,22 @@ class Parser(report_sxw.rml_parse):
             if half_bom_ids: # HW component
                 for cmpt in half_bom_ids:
                     load_subelements_price(
-                        self, res, cmpt, cmpt.product_id, 
+                        self, res, 'S', cmpt, cmpt.product_id, 
                         item.product_id.default_code,
                         )
             else: # not HW component
                 load_subelements_price(
-                    self, res, item, item.product_id)
+                    self, res, 'C', item, item.product_id)
 
         # ---------------------------------------------------------------------
         # Add lavoration cost:
         # ---------------------------------------------------------------------
         cost_industrial = product_pool.get_cost_industrial_for_product(
             cr, uid, [product.id], context=context)
-            
-        #self.min += mrp_cost
-        #self.max += mrp_cost            
+        for cost, value in cost_industrial:
+            res.append((cost, value))    
+            self.min += value
+            self.max += value
         return res
         
     def get_totals(self, mode):

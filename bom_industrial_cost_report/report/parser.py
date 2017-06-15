@@ -108,7 +108,7 @@ class Parser(report_sxw.rml_parse):
             self.max += max_value
             res.append(record)
             return
-        
+
         # ---------------------------------------------------------------------
         # Load component list (and subcomponent for HW):
         # ---------------------------------------------------------------------
@@ -139,7 +139,6 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         # Add lavoration cost:
         # ---------------------------------------------------------------------
-        import pdb; pdb.set_trace()
         cost_industrial = product_pool.get_cost_industrial_for_product(
             cr, uid, [product.id], context=context)
         for cost, value in cost_industrial:

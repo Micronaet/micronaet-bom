@@ -154,7 +154,8 @@ class ProductProduct(orm.Model):
     def get_cost_industrial_for_product(self, cr, uid, ids, context=None):
         ''' Return all list of industrial cost for product passed
             ids: product ids XXX now is one!
-        '''        
+        '''
+        import pdb; pdb.set_trace()
         res = {}
         cost_pool = self.pool.get('mrp.bom.industrial.cost')
         cost_ids = cost_pool.search(cr, uid, [], context=context)

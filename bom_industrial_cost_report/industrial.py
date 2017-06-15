@@ -96,13 +96,14 @@ class MrpBomIndustrialCost(orm.Model):
                 _('Error product reference selected for BOM'),
                 )
         for product in product_pool.browse(cr, uid, mask_ids, context=context):
-            if product.default_code in current_mask:
+            mask = '%s%%' % product.default_code
+            if mask in current_mask:
                 continue
-                
+                 
             line_pool.create(cr, uid, {
                 'cost_id': current_proxy.id,
                 'cost': current_proxy.default_cost,
-                'name': product.default_code,                
+                'name': mask,
                 }, context=context) 
         return True
         
@@ -122,7 +123,8 @@ class MrpBomIndustrialCostLine(orm.Model):
     _order = 'name'
     
     _columns = {
-        'name': fields.char('Start code', size=64, required=True),
+        'name': fields.char('Mask', size=64, required=True, 
+            help='Mask for code, use % for all, _ for replace one char'),
         'cost': fields.float('Cost', digits=(16, 3), required=True),
         'cost_id': fields.many2one(
             'mrp.bom.industrial.cost', 'Cost', 

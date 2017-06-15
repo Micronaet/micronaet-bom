@@ -155,7 +155,6 @@ class ProductProduct(orm.Model):
         ''' Return all list of industrial cost for product passed
             ids: product ids XXX now is one!
         '''
-        import pdb; pdb.set_trace()
         res = {}
         cost_pool = self.pool.get('mrp.bom.industrial.cost')
         cost_ids = cost_pool.search(cr, uid, [], context=context)
@@ -168,13 +167,14 @@ class ProductProduct(orm.Model):
             default_code = product.default_code
             if not default_code:
                 continue
-                       
-            cr.execute('''
+            import pdb; pdb.set_trace()
+            query = '''
                 SELECT cost_id, cost
                 FROM mrp_bom_industrial_cost_line 
                 WHERE %s ilike name
                 ORDER BY length(name) desc;
-                ''', (default_code, ))
+                ''' % default_code
+            cr.execute(query)
 
             # Update category element priority order len mask
             for item in cr.fetchall():

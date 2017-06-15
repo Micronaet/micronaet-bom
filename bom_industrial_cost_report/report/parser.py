@@ -91,7 +91,7 @@ class Parser(report_sxw.rml_parse):
                      if not pricelist.is_active:
                          continue
                      total = pricelist.price * item.product_qty
-                     record[1].append((
+                     record[2].append((
                          seller.name.name,
                          '%10.5f' % pricelist.price,
                          pricelist.date_quotation or '???',

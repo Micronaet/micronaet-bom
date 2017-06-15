@@ -1,6 +1,91 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+         <!--mrp.bom.industrial.cost.line-->
+         <record model="ir.ui.view" id="view_mrp_bom_industrial_cost_line_tree">
+             <field name="name">mrp.bom.industrial.cost.line.tree</field>
+             <field name="model">mrp.bom.industrial.cost.line</field>
+             <field name="arch" type="xml">
+                 <tree string="Cost filter" editable="bottom">
+                     <field name="cost_id" invisible="context.get('is_embedded', False)"/>
+                     <field name="name" />
+                     <field name="cost" />
+                 </tree>
+             </field>
+         </record>         
+         <record model="ir.ui.view" id="view_mrp_bom_industrial_cost_line_form">
+             <field name="name">mrp.bom.industrial.cost.line.tree</field>
+             <field name="model">mrp.bom.industrial.cost.line</field>
+             <field name="arch" type="xml">
+                 <form string="Cost filter">
+                     <field name="cost_id" />
+                     <field name="name" />
+                     <field name="cost" />
+                 </form>
+             </field>
+         </record>
+         <record model="ir.ui.view" id="view_mrp_bom_industrial_cost_line_search">
+             <field name="name">mrp.bom.industrial.cost.line.search</field>
+             <field name="model">mrp.bom.industrial.cost.line</field>
+             <field name="arch" type="xml">
+                 <search string="Cost line" version="7.0">        
+                     <field name="name" />
+                     <field name="cost_id" />
+                     <filter name="cost_0" string="No cost" domain="[('cost','=',0)]"/>
+                     <group expand="0" string="Group By...">
+                         <filter name="group_cost" string="Cost" context="{'group_by': 'cost_id'}"/>
+                     </group>                
+                 </search>
+             </field>
+         </record>
+         
+         <record model="ir.actions.act_window" id="action_mrp_bom_industrial_cost_line">
+             <field name="name">Cost detail</field>
+             <field name="res_model">mrp.bom.industrial.cost.line</field>
+             <field name="view_type">form</field>
+             <field name="view_mode">tree,form</field>
+             <field name="view_id" ref="view_mrp_bom_industrial_cost_line_tree"/>
+             <field name="context">{}</field>
+             <field name="domain">[]</field>
+         </record>
+
+         <!--mrp.bom.industrial.cost-->
+         <record model="ir.ui.view" id="view_mrp_bom_industrial_cost_tree">
+             <field name="name">mrp.bom.industrial.cost.tree</field>
+             <field name="model">mrp.bom.industrial.cost</field>
+             <field name="arch" type="xml">
+                 <tree string="Industrial cost">
+                     <field name="name" />
+                     <button name="open_load_detail_list" string="Detail list" type="object" colspan="1" icon="gtk-goto-last"/>
+                 </tree>
+             </field>
+         </record>
+         <record model="ir.ui.view" id="view_mrp_bom_industrial_cost_form">
+             <field name="name">mrp.bom.industrial.cost.tree</field>
+             <field name="model">mrp.bom.industrial.cost</field>
+             <field name="arch" type="xml">
+                 <form string="Industrial cost">
+                     <group colspan="4" col="4">
+                         <field name="name" />
+                         <field name="default_cost" />
+                         <separator string="Detail:" colspan="2"/>
+                         <button name="load_detail_from_BOM" string="Load BOM selected" type="object" colspan="1" icon="gtk-refresh"/>
+                         <button name="open_load_detail_list" string="Detail list" type="object" colspan="1" icon="gtk-goto-last"/>
+                         <field name="line_ids" colspan="4" col="4" nolabel="1" context="{'is_embedded': True}"/>
+                     </group>    
+                 </form>
+             </field>
+         </record>
+         <record model="ir.actions.act_window" id="action_mrp_bom_industrial_cost">
+             <field name="name">Industrial cost</field>
+             <field name="res_model">mrp.bom.industrial.cost</field>
+             <field name="view_type">form</field>
+             <field name="view_mode">tree,form</field>
+             <field name="view_id" ref="view_mrp_bom_industrial_cost_tree"/>
+             <field name="context">{}</field>
+             <field name="domain">[]</field>
+         </record>
+         
          <record model="ir.ui.view" id="view_product_bom_selection_search">
              <field name="name">product.product.search</field>
              <field name="model">product.product</field>
@@ -61,6 +146,19 @@
                  action="action_product_bom_selection_tree"
                  sequence="10"
                  />
+             <menuitem 
+                 parent="menu_product_bom_selection_root" 
+                 id="menu_mrp_bom_industrial_cost" 
+                 action="action_mrp_bom_industrial_cost"
+                 sequence="90"
+                 />
+             <menuitem 
+                 parent="menu_product_bom_selection_root" 
+                 id="menu_mrp_bom_industrial_cost_line" 
+                 action="action_mrp_bom_industrial_cost_line"
+                 sequence="99"
+                 />
+                 
     </data>
 </openerp>
 

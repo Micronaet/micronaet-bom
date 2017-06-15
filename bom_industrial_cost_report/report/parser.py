@@ -30,6 +30,7 @@ from openerp.report import report_sxw
 from openerp.report.report_sxw import rml_parse
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+from openerp.osv import fields, osv, expression, orm
 
 _logger = logging.getLogger(__name__)
 
@@ -52,6 +53,12 @@ class Parser(report_sxw.rml_parse):
         if data is None:
             data = {}
 
+        if not data.get('wizard', False):
+            raise osv.except_osv(
+                _('Access error'), 
+                _('No right to print BOM'),
+                )
+                
         # Pool used:    
         product_pool = self.pool.get('product.product')
         

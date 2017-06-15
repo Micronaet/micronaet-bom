@@ -39,6 +39,7 @@
     'demo': [],
     'data': [
         'security/bom_group.xml',
+        'security/ir.model.access.csv',
         
         'industrial_view.xml',
         'report/report_bom.xml',

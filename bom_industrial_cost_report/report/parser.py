@@ -137,12 +137,16 @@ class Parser(report_sxw.rml_parse):
                     self, res, 'C', item, item.product_id)
 
         # ---------------------------------------------------------------------
-        # Add lavoration cost:
+        # Extra data end report:
         # ---------------------------------------------------------------------
+        # Add header:
+        res.append(('H', False, False))    
+
+        # Add lavoration cost:
         cost_industrial = product_pool.get_cost_industrial_for_product(
             cr, uid, [product.id], context=context)
-        for cost, value in cost_industrial:
-            res.append((cost, value))    
+        for cost, value in cost_industrial.iteritems():
+            res.append(('T', cost, value))    
             self.min += value
             self.max += value
         return res

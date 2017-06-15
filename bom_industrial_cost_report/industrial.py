@@ -167,18 +167,20 @@ class ProductProduct(orm.Model):
             default_code = product.default_code
             if not default_code:
                 continue
-            import pdb; pdb.set_trace()
+
             query = '''
                 SELECT cost_id, cost
                 FROM mrp_bom_industrial_cost_line 
-                WHERE %s ilike name
+                WHERE '%s' ilike name
                 ORDER BY length(name) desc;
                 ''' % default_code
             cr.execute(query)
 
             # Update category element priority order len mask
             for item in cr.fetchall():
-                res[cost_db.get(item[0], '???')] = item[1]            
+                cost_name = cost_db.get(item[0], '???')
+                if cost_name not in res: # only the first 
+                    res[cost_name] = item[1]            
         return res
 
     # -------------------------------------------------------------------------

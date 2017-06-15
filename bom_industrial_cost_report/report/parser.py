@@ -112,7 +112,10 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         # Load component list (and subcomponent for HW):
         # ---------------------------------------------------------------------
-        res = []        
+        # Pool used:    
+        product_pool = self.pool.get('product.product')
+
+        res = []
         # Min / Max totals:
         self.min = 0.0
         self.max = 0.0
@@ -132,6 +135,7 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         # Add lavoration cost:
         # ---------------------------------------------------------------------
+        import pdb; pdb.set_trace()
         cost_industrial = product_pool.get_cost_industrial_for_product(
             cr, uid, [product.id], context=context)
         for cost, value in cost_industrial:

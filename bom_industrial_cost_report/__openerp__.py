@@ -32,6 +32,7 @@
     'depends': [
         'base',
         'mrp',
+        'product',
         'bom_production_cost',
         'bom_dynamic_structured', # for dynamic bom structure
         ],

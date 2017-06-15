@@ -112,6 +112,10 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         # Load component list (and subcomponent for HW):
         # ---------------------------------------------------------------------
+        cr = self.cr
+        uid = self.uid
+        context = {}
+
         # Pool used:    
         product_pool = self.pool.get('product.product')
 

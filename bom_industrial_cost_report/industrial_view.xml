@@ -119,6 +119,7 @@
                      <button name="bom_selection_off" string="Set BOM off" type="object" icon="star-on" attrs="{'invisible': [('bom_selection','=',False)]}"/> 
                      <button name="open_single_report" string="Print single" type="object" icon="gtk-print" attrs="{'invisible': [('bom_selection','=',False)]}"/>
                      <button name="open_multi_report" string="Print all" type="object" icon="gtk-dnd-multiple" attrs="{'invisible': [('bom_selection','=',False)]}"/>
+                     <button name="open_xls_report" string="Export XLSX" type="object" icon="terp-go-month" attrs="{'invisible': [('bom_selection','=',False)]}"/>
                  </tree>
              </field>
          </record>

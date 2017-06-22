@@ -198,33 +198,7 @@ class ProductProduct(orm.Model):
         '''
         return self.write(cr, uid, ids, {
             'bom_selection': False,            
-            }, context=context)
-
-    def open_single_report(self, cr, uid, ids, context=None):
-        ''' Return single report
-        '''
-        datas = {}
-        datas['wizard'] = True # started from wizard
-        datas['active_ids'] = ids
-        return {
-            'type': 'ir.actions.report.xml',
-            'report_name': 'industrial_cost_bom_report', 
-            'datas': datas,
-            #'context': context,
-            }
-
-    def open_multi_report(self, cr, uid, ids, context=None):
-        ''' Return single report
-        '''
-        datas = {}
-        datas['wizard'] = True # started from wizard
-        datas['active_ids'] = False
-        return {
-            'type': 'ir.actions.report.xml',
-            'report_name': 'industrial_cost_bom_report', 
-            'datas': datas,
-            #'context': context,
-            }
+            }, context=context)                
             
     _columns = {
         'bom_selection': fields.boolean('BOM Selection'),

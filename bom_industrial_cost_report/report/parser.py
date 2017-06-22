@@ -188,8 +188,26 @@ class ProductProduct(orm.Model):
             
         _logger.info('End export BOM cost on %s' % xls_filename)
         WB.close()
-        return                    
-    
+
+        attachment_pool = self.pool.get('ir.attachment')
+        b64 = open(xls_filename, 'rb').read().encode('base64')
+        attachment_id = attachment_pool.create(cr, uid, {
+            'name': 'BOM industrial cost',
+            'datas_fname': 'bom_industrial_cost_report.xlsx',
+            'type': 'binary',
+            'datas': b64,
+            'partner_id': 1,
+            'res_model':'res.partner',
+            'res_id': 1,
+            }, context=context)
+        
+        return {
+            'type' : 'ir.actions.act_url',
+            'url': '/web/binary/saveas?model=ir.attachment&field=datas&'
+                'filename_field=datas_fname&id=%s' % attachment_id,
+            'target': 'self',
+            }   
+            
     # -------------------------------------------------------------------------
     # Report utility:
     # -------------------------------------------------------------------------

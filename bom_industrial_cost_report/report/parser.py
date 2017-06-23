@@ -155,7 +155,7 @@ class ProductProduct(orm.Model):
         for product in self._report_industrial_get_objects(
                 cr, uid, data=datas, context=context):
             row += 1
-            not_detailt = False
+            not_details = False
 
             industrial_cost = [0.0 for col in range(0, len(cost_db))]
             for mode, item, details in self._report_industrial_get_details(

@@ -59,5 +59,5 @@ class ResCompany(orm.Model):
                 line.product_uom_qty - line.delivered_qty,
                 0.0,
                 )
-    
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

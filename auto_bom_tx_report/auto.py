@@ -21,6 +21,7 @@ import os
 import sys
 import logging
 import openerp
+import xlsxwriter
 import openerp.netsvc as netsvc
 import openerp.addons.decimal_precision as dp
 from openerp.osv import fields, osv, expression, orm
@@ -55,8 +56,11 @@ class MrpProduction(orm.Model):
             ''' Write line in excel file
             '''
             col = 0
-            for item, format_cell in line:
-                WS.write(row, col, item, format_cell)
+            for record in line:
+                if len(record) == 2: # Normal text, format
+                    WS.write(row, col, *record)
+                else: # Rich format
+                    WS.write_rich_string(row, col, *record)
                 col += 1
             return True
 
@@ -93,29 +97,70 @@ class MrpProduction(orm.Model):
                     'border': 1,
                     #'text_wrap': True,
                     }),
-                'text_red': WB.add_format({
+                    
+                # -------------------------------------------------------------
+                # With text color:
+                # -------------------------------------------------------------
+                'bg_red': WB.add_format({
                     'font_color': 'black',
+                    'bg_color': '#ff420e',
                     'font_name': 'Courier 10 pitch',
                     'font_size': 9,
                     'align': 'left',
-                    'bg_color': 'red',
                     'border': 1,
-                    #'text_wrap': True,
+                    }),
+                'bg_green': WB.add_format({
+                    'font_color': 'black',
+                    'bg_color': '#99cc66',
+                    'font_name': 'Courier 10 pitch',
+                    'font_size': 9,
+                    'align': 'left',
+                    'border': 1,
+                    }),
+
+                # -------------------------------------------------------------
+                # With text color:
+                # -------------------------------------------------------------
+                'text_blue': WB.add_format({
+                    'font_color': 'blue',
+                    'font_name': 'Courier 10 pitch',
+                    'font_size': 9,
+                    'align': 'left',
+                    'border': 1,
+                    }),
+                'text_red': WB.add_format({
+                    'font_color': '#ff420e',
+                    'font_name': 'Courier 10 pitch',
+                    'font_size': 9,
+                    'align': 'left',
+                    'border': 1,
                     }),
                 'text_green': WB.add_format({
-                    'font_color': 'black',
+                    'font_color': '#99cc66',
                     'font_name': 'Courier 10 pitch',
                     'font_size': 9,
                     'align': 'left',
-                    'bg_color': 'green',
                     'border': 1,
-                    #'text_wrap': True,
                     }),
+                'text_yellow': WB.add_format({
+                    'font_color': '#ffff99',
+                    'font_name': 'Courier 10 pitch',
+                    'font_size': 9,
+                    'align': 'left',
+                    'border': 1,
+                    }),
+                'text_grey': WB.add_format({
+                    'font_color': '#eeeeee',
+                    'font_name': 'Courier 10 pitch',
+                    'font_size': 9,
+                    'align': 'left',
+                    'border': 1,
+                    }),                
+                    
                 'number': WB.add_format({
                     'font_name': 'Courier 10 pitch',
                     'font_size': 9,
                     'align': 'right',
-                    #'bg_color': 'white',
                     'border': 1,
                     'num_format': num_format,
                     }),
@@ -144,8 +189,7 @@ class MrpProduction(orm.Model):
         def write_xls_block_line(WS, row, line):
             ''' Write line block for fabric, return new row position
             '''
-            # Format used:
-            
+            # Extract element from line_
             (inv, tcar, tscar, mm, oc, of, sal, o, category, hw, hw_total) = \
                 line
             
@@ -153,9 +197,9 @@ class MrpProduction(orm.Model):
             #                            ROW 0
             # -----------------------------------------------------------------
             if sal[11] < 0:
-                format_text = get_xls_format('text_red')
+                format_text = get_xls_format('bg_red')
             else:
-                format_text = get_xls_format('text_green')
+                format_text = get_xls_format('bg_green')
             
             line0 = [
                 ('%s - %s (forn. abit.: %s' % (
@@ -166,11 +210,18 @@ class MrpProduction(orm.Model):
                 (category, format_text),
                 ]        
             write_xls_mrp_line(WS, row, line0)
+            row += 1
             
             # -----------------------------------------------------------------
             #                            ROW 1
             # -----------------------------------------------------------------
             format_header = get_xls_format('header')
+            
+            # Merge cell:
+            WS.merge_range(row, 0, row, 10, '')
+            WS.merge_range(row, 11, row, 13, '')
+            
+            # Create row data:
             line1 = [
                 ('%s (31/12: N.D.)' % o.default_code, format_header),
                 ('Set.', format_header),
@@ -187,13 +238,18 @@ class MrpProduction(orm.Model):
                 ('Ago.', format_header),
                 ]
             write_xls_mrp_line(WS, row, line1)
+            row += 1
                 
             # -----------------------------------------------------------------
-            #                            ROW 1
+            #                            ROW 2
             # -----------------------------------------------------------------
             format_text = get_xls_format('text')
             format_number = get_xls_format('number')
+
+            # Merge cell:            
+            WS.merge_range(row, 0, row, 1, '')
             
+            # Create row data:
             line2 = [
                 ('Inv. %s: %s' % (o.mx_start_date or '', inv), format_text),
                 ('MM', format_text),
@@ -211,9 +267,10 @@ class MrpProduction(orm.Model):
                 (mm[11], format_number),
                 ]
             write_xls_mrp_line(WS, row, line2)
+            row += 1
             
             # -----------------------------------------------------------------
-            #                            ROW 1
+            #                            ROW 3
             # -----------------------------------------------------------------
             line3 = [
                 ('Tot. Scar.: %s' % tscar, format_text),
@@ -232,7 +289,82 @@ class MrpProduction(orm.Model):
                 (oc[11], format_number),
                 ]
             write_xls_mrp_line(WS, row, line3)
+            row += 1
+
+            # -----------------------------------------------------------------
+            #                            ROW 4
+            # -----------------------------------------------------------------
+            line4 = [
+                ('Tot. Car.: %s' % tcar, format_text),
+                ('OF', format_text),
+                (of[0], format_number),
+                (of[1], format_number),
+                (of[2], format_number),
+                (of[3], format_number),
+                (of[4], format_number),
+                (of[5], format_number),
+                (of[6], format_number),
+                (of[7], format_number),
+                (of[8], format_number),
+                (of[9], format_number),
+                (of[10], format_number),
+                (of[11], format_number),
+                ]
+            write_xls_mrp_line(WS, row, line4)
+            row += 1
+                            
+            # -----------------------------------------------------------------
+            #                            ROW 5
+            # -----------------------------------------------------------------
+            line5 = [
+                ('Mag.: %s' % o.mx_net_mrp_qty, format_text),
+                ('SAL', format_text),
+                (sal[0], format_number),
+                (sal[1], format_number),
+                (sal[2], format_number),
+                (sal[3], format_number),
+                (sal[4], format_number),
+                (sal[5], format_number),
+                (sal[6], format_number),
+                (sal[7], format_number),
+                (sal[8], format_number),
+                (sal[9], format_number),
+                (sal[10], format_number),
+                (sal[11], format_number),
+                ]
+            write_xls_mrp_line(WS, row, line5)
+            row += 1
             
+            # -----------------------------------------------------------------
+            #                            ROW Halfwork
+            # -----------------------------------------------------------------
+            if hw:
+                # Merge cell:
+                WS.merge_range(row, 0, row, 12, '')
+
+                # Create row data:
+                line6 = [
+                    [], # rich text format
+                    (int(hw_total[0]), format_number),                    
+                    ]                        
+                for hw_code, hw_status in hw.iteritems():
+                    if hw_status[1] <= hw_status[0]: # black
+                        line6[0].append(get_xls_format('text')) 
+                    else: # red
+                        line6[0].append(get_xls_format('text_red'))
+                    line6[0].append('%s OC:%s' % (
+                        hw_code,
+                        int(hw_status[1]),
+                        ))
+                    # Green:
+                    line6[0].append(' M.:%s>>>%s' % (
+                        int(hw_status[0]),
+                        int(hw_status[2]),
+                        ))
+            line6[0].append(get_xls_format('text_grey'))
+            write_xls_mrp_line(WS, row, line6)
+            row += 1
+                
             # -----------------------------------------------------------------
             #                          EXTRA ROW
             # -----------------------------------------------------------------
@@ -244,6 +376,9 @@ class MrpProduction(orm.Model):
         WB = xlsxwriter.Workbook(filename)
         WS = WB.add_worksheet(_('Fabric'))
 
+        # Format columns width:
+        WS.set_column(0, 0, 30)
+        
         # Format for cell:            
         num_format = '#,##0'
         
@@ -323,6 +458,9 @@ class MrpProduction(orm.Model):
             
             return True # XXX BREAK HERE!!!!
             attachments = []
+        else:
+            _logger.error('Only odt or xlsx mode for this report!')
+            return False
                 
         # ---------------------------------------------------------------------
         # Send report:
@@ -349,6 +487,5 @@ class MrpProduction(orm.Model):
             attachments=attachments, 
             context=context,
             )
-        return True            
-
+        return True
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

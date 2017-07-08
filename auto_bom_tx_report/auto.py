@@ -361,15 +361,15 @@ class MrpProduction(orm.Model):
                         int(hw_status[0]),
                         int(hw_status[2]),
                         ))
-            line6[0].append(get_xls_format('text_grey'))
-            write_xls_mrp_line(WS, row, line6)
-            row += 1
+                line6[0].append(get_xls_format('text_grey'))
+                write_xls_mrp_line(WS, row, line6)
+                row += 1
                 
             # -----------------------------------------------------------------
             #                          EXTRA ROW
             # -----------------------------------------------------------------
             row += 1
-            return True
+            return row
         
         filename = '/tmp/extract_fabric_report.xlsx'        
         _logger.info('Start create file %s' % filename)
@@ -378,6 +378,8 @@ class MrpProduction(orm.Model):
 
         # Format columns width:
         WS.set_column(0, 0, 30)
+        WS.set_column(1, 1, 2)
+        WS.set_column(0, 2, 13)
         
         # Format for cell:            
         num_format = '#,##0'

@@ -84,7 +84,7 @@ class MrpProduction(orm.Model):
                     'font_size': 9,
                     'align': 'center',
                     'valign': 'vcenter',
-                    'bg_color': 'gray',
+                    'bg_color': '#f1f1f1', # gray
                     'border': 1,
                     #'text_wrap': True,
                     }),
@@ -121,6 +121,13 @@ class MrpProduction(orm.Model):
                 # -------------------------------------------------------------
                 # With text color:
                 # -------------------------------------------------------------
+                'text_black': WB.add_format({
+                    'font_color': 'black',
+                    'font_name': 'Courier 10 pitch',
+                    'font_size': 9,
+                    'align': 'left',
+                    'border': 1,
+                    }),
                 'text_blue': WB.add_format({
                     'font_color': 'blue',
                     'font_name': 'Courier 10 pitch',
@@ -136,14 +143,7 @@ class MrpProduction(orm.Model):
                     'border': 1,
                     }),
                 'text_green': WB.add_format({
-                    'font_color': '#99cc66',
-                    'font_name': 'Courier 10 pitch',
-                    'font_size': 9,
-                    'align': 'left',
-                    'border': 1,
-                    }),
-                'text_yellow': WB.add_format({
-                    'font_color': '#ffff99',
+                    'font_color': 'green', ##99cc66
                     'font_name': 'Courier 10 pitch',
                     'font_size': 9,
                     'align': 'left',
@@ -156,8 +156,25 @@ class MrpProduction(orm.Model):
                     'align': 'left',
                     'border': 1,
                     }),                
+
+                'text_bg_yellow': WB.add_format({
+                    'font_color': 'black',
+                    'bg_color': '#ffff99',
+                    'font_name': 'Courier 10 pitch',
+                    'font_size': 9,
+                    'align': 'left',
+                    'border': 1,
+                    }),
                     
                 'number': WB.add_format({
+                    'font_name': 'Courier 10 pitch',
+                    'font_size': 9,
+                    'align': 'right',
+                    'border': 1,
+                    'num_format': num_format,
+                    }),
+                'number_blue': WB.add_format({
+                    'font_color': 'blue',
                     'font_name': 'Courier 10 pitch',
                     'font_size': 9,
                     'align': 'right',
@@ -196,17 +213,31 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             #                            ROW 0
             # -----------------------------------------------------------------
+            # Merge cell:
+            WS.merge_range(row, 0, row, 10, '')
+            WS.merge_range(row, 11, row, 13, '')
+
             if sal[11] < 0:
                 format_text = get_xls_format('bg_red')
             else:
                 format_text = get_xls_format('bg_green')
             
             line0 = [
-                ('%s - %s (forn. abit.: %s' % (
+                ('%s - %s (forn. abit.: %s)' % (
                     o.name,
                     o.colour,
                     o.first_supplier_id.name if o.first_supplier_id else '',
                     ), format_text),
+                ('', format_text),
+                ('', format_text),
+                ('', format_text),
+                ('', format_text),
+                ('', format_text),
+                ('', format_text),
+                ('', format_text),
+                ('', format_text),
+                ('', format_text),
+                ('', format_text),
                 (category, format_text),
                 ]        
             write_xls_mrp_line(WS, row, line0)
@@ -217,13 +248,13 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             format_header = get_xls_format('header')
             
-            # Merge cell:
-            WS.merge_range(row, 0, row, 10, '')
-            WS.merge_range(row, 11, row, 13, '')
+            # Merge cell:            
+            WS.merge_range(row, 0, row, 1, '')
             
             # Create row data:
             line1 = [
                 ('%s (31/12: N.D.)' % o.default_code, format_header),
+                ('', format_header),
                 ('Set.', format_header),
                 ('Ott.', format_header),
                 ('Nov.', format_header),
@@ -245,9 +276,6 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             format_text = get_xls_format('text')
             format_number = get_xls_format('number')
-
-            # Merge cell:            
-            WS.merge_range(row, 0, row, 1, '')
             
             # Create row data:
             line2 = [
@@ -317,7 +345,8 @@ class MrpProduction(orm.Model):
             #                            ROW 5
             # -----------------------------------------------------------------
             line5 = [
-                ('Mag.: %s' % o.mx_net_mrp_qty, format_text),
+                ('Mag.: %s' % o.mx_net_mrp_qty, get_xls_format(
+                    'text_bg_yellow')),
                 ('SAL', format_text),
                 (sal[0], format_number),
                 (sal[1], format_number),
@@ -345,7 +374,19 @@ class MrpProduction(orm.Model):
                 # Create row data:
                 line6 = [
                     [], # rich text format
-                    (int(hw_total[0]), format_number),                    
+                    ('', format_text),
+                    ('', format_text),
+                    ('', format_text),
+                    ('', format_text),
+                    ('', format_text),
+                    ('', format_text),
+                    ('', format_text),
+                    ('', format_text),
+                    ('', format_text),
+                    ('', format_text),
+                    ('', format_text),
+                    ('', format_text),
+                    (int(hw_total[0]), get_xls_format('number_blue')),
                     ]                        
                 for hw_code, hw_status in hw.iteritems():
                     if hw_status[1] <= hw_status[0]: # black
@@ -356,11 +397,15 @@ class MrpProduction(orm.Model):
                         hw_code,
                         int(hw_status[1]),
                         ))
+                        
                     # Green:
-                    line6[0].append(' M.:%s>>>%s' % (
-                        int(hw_status[0]),
-                        int(hw_status[2]),
-                        ))
+                    line6[0].append(get_xls_format('text_green'))
+                    line6[0].append(' M.:%s' % int(hw_status[0]))
+                    line6[0].append(get_xls_format('text_black'))
+                    line6[0].append('>>>')
+                    line6[0].append(get_xls_format('text_blue'))
+                    line6[0].append('%s ' % int(hw_status[2]))
+                    
                 line6[0].append(get_xls_format('text_grey'))
                 write_xls_mrp_line(WS, row, line6)
                 row += 1
@@ -377,9 +422,9 @@ class MrpProduction(orm.Model):
         WS = WB.add_worksheet(_('Fabric'))
 
         # Format columns width:
-        WS.set_column(0, 0, 30)
-        WS.set_column(1, 1, 2)
-        WS.set_column(0, 2, 13)
+        WS.set_column('A:A', 30)
+        WS.set_column('B:B', 2)
+        WS.set_column('C:N', 13)
         
         # Format for cell:            
         num_format = '#,##0'

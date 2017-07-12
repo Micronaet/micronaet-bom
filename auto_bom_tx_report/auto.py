@@ -84,7 +84,7 @@ class MrpProduction(orm.Model):
                     'font_size': 9,
                     'align': 'center',
                     'valign': 'vcenter',
-                    'bg_color': '#f1f1f1', # gray
+                    'bg_color': '#cfcfcf', # gray
                     'border': 1,
                     #'text_wrap': True,
                     }),
@@ -168,8 +168,17 @@ class MrpProduction(orm.Model):
                     'align': 'left',
                     'border': 1,
                     }),                
+                'text_wrap': WB.add_format({
+                    'font_color': 'black',
+                    'font_name': 'Courier 10 pitch',
+                    'font_size': 9,
+                    'align': 'left',
+                    'border': 1,
+                    'text_wrap': True,
+                    }),
 
                 'text_bg_yellow': WB.add_format({
+                    'bold': True, 
                     'font_color': 'black',
                     'bg_color': '#ffff99',
                     'font_name': 'Courier 10 pitch',
@@ -222,6 +231,10 @@ class MrpProduction(orm.Model):
             (inv, tcar, tscar, mm, oc, of, sal, o, category, hw, hw_total) = \
                 line
             
+            # Jump pipes:
+            if category == 'Pipes':    
+                return row # same row
+                
             # -----------------------------------------------------------------
             #                            ROW 0
             # -----------------------------------------------------------------
@@ -388,7 +401,7 @@ class MrpProduction(orm.Model):
             # Order only from now to the end of block:    
             for i in range(1, 13):
                 if i >= self.current_day_cell:
-                    lineOrd.append(('', bg_order))
+                    lineOrd.append(('',  format_order))
                 else:    
                     lineOrd.append(('', format_text))
                 
@@ -436,6 +449,7 @@ class MrpProduction(orm.Model):
                     line6[0].append('>>>')
                     line6[0].append(get_xls_format('text_blue'))
                     line6[0].append('%s ' % int(hw_status[2]))
+                    line6[0].append(get_xls_format('text_wrap'))
                     
                 line6[0].append(get_xls_format('text_grey'))
                 write_xls_mrp_line(WS, row, line6)

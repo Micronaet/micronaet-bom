@@ -93,9 +93,14 @@ class MrpProduction(orm.Model):
                     'font_name': 'Courier 10 pitch',
                     'font_size': 9,
                     'align': 'left',
-                    #'bg_color': 'gray',
                     'border': 1,
-                    #'text_wrap': True,
+                    }),
+                'text_center': WB.add_format({
+                    'font_color': 'black',
+                    'font_name': 'Courier 10 pitch',
+                    'font_size': 9,
+                    'align': 'center',
+                    'border': 1,
                     }),
                     
                 # -------------------------------------------------------------
@@ -305,7 +310,7 @@ class MrpProduction(orm.Model):
             # Create row data:
             line2 = [
                 ('Inv. %s: %s' % (o.mx_start_date or '', inv), format_text),
-                ('MM', format_text),
+                ('MM', get_xls_format('text_center')),
                 (mm[0], format_number),
                 (mm[1], format_number),
                 (mm[2], format_number),
@@ -327,7 +332,7 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             line3 = [
                 ('Tot. Scar.: %s' % tscar, format_text),
-                ('OC', format_text),
+                ('OC', get_xls_format('text_center')),
                 (oc[0], format_number),
                 (oc[1], format_number),
                 (oc[2], format_number),
@@ -349,7 +354,7 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             line4 = [
                 ('Tot. Car.: %s' % tcar, format_text),
-                ('OF', format_text),
+                ('OF', get_xls_format('text_center')),
                 (of[0], format_number),
                 (of[1], format_number),
                 (of[2], format_number),
@@ -372,7 +377,7 @@ class MrpProduction(orm.Model):
             line5 = [
                 ('Mag.: %s' % o.mx_net_mrp_qty, get_xls_format(
                     'text_bg_yellow')),
-                ('SAL', format_text),
+                ('SAL', get_xls_format('text_center')),
                 (sal[0], format_number),
                 (sal[1], format_number),
                 (sal[2], format_number),
@@ -467,7 +472,7 @@ class MrpProduction(orm.Model):
         WS = WB.add_worksheet(_('Fabric'))
 
         # Format columns width:
-        WS.set_column('A:A', 18)
+        WS.set_column('A:A', 19)
         WS.set_column('B:B', 3)
         WS.set_column('C:N', 8)
         

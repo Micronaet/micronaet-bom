@@ -144,6 +144,7 @@ class MrpProduction(orm.Model):
                     'font_size': 9,
                     'align': 'left',
                     'border': 1,
+                    'text_wrap': True
                     }),
                 'text_blue': WB.add_format({
                     'font_color': 'blue',
@@ -151,6 +152,7 @@ class MrpProduction(orm.Model):
                     'font_size': 9,
                     'align': 'left',
                     'border': 1,
+                    'text_wrap': True
                     }),
                 'text_red': WB.add_format({
                     'font_color': '#ff420e',
@@ -158,6 +160,7 @@ class MrpProduction(orm.Model):
                     'font_size': 9,
                     'align': 'left',
                     'border': 1,
+                    'text_wrap': True
                     }),
                 'text_green': WB.add_format({
                     'font_color': '#328238', ##99cc66
@@ -165,7 +168,9 @@ class MrpProduction(orm.Model):
                     'font_size': 9,
                     'align': 'left',
                     'border': 1,
+                    'text_wrap': True
                     }),
+
                 'text_grey': WB.add_format({
                     'font_color': '#eeeeee',
                     'font_name': 'Courier 10 pitch',
@@ -454,7 +459,7 @@ class MrpProduction(orm.Model):
                     line6[0].append('>>>')
                     line6[0].append(get_xls_format('text_blue'))
                     line6[0].append('%s ' % int(hw_status[2]))
-                    line6[0].append(get_xls_format('text_wrap'))
+                    #line6[0].append(get_xls_format('text_wrap'))
                     
                 line6[0].append(get_xls_format('text_grey'))
                 write_xls_mrp_line(WS, row, line6)

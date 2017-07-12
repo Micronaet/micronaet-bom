@@ -379,23 +379,19 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             #                            Order block
             # -----------------------------------------------------------------
+            
             format_order = get_xls_format('bg_order')
             lineOrd = [
-                ('Ordinare:', format_text),
+                ('Ordinare:', format_order),
                 ('', format_text),
-                ('', bg_order),
-                ('', bg_order),
-                ('', bg_order),
-                ('', bg_order),
-                ('', bg_order),
-                ('', bg_order),
-                ('', bg_order),
-                ('', bg_order),
-                ('', bg_order),
-                ('', bg_order),
-                ('', bg_order),
-                ('', bg_order),
                 ]
+            # Order only from now to the end of block:    
+            for i in range(1, 13):
+                if i >= self.current_day_cell:
+                    lineOrd.append(('', bg_order))
+                else:    
+                    lineOrd.append(('', format_text))
+                
             write_xls_mrp_line(WS, row, lineOrd)
             row += 1
             
@@ -460,6 +456,13 @@ class MrpProduction(orm.Model):
         WS.set_column('A:A', 18)
         WS.set_column('B:B', 3)
         WS.set_column('C:N', 8)
+        
+        # Current month cell:
+        convert_month = {
+            1: 5, 2: 6, 3: 7, 4: 8, 5:9, 6: 10, 7: 11, 8: 12,
+            9: 1, 10: 2, 11: 3, 12: 4,            
+            }
+        self.current_day_cell = convert_month[datetime.now().month]
         
         # Format for cell:            
         num_format = '#,##0'

@@ -102,6 +102,7 @@ class MrpProduction(orm.Model):
                 # With text color:
                 # -------------------------------------------------------------
                 'bg_red': WB.add_format({
+                    'bold': True, 
                     'font_color': 'black',
                     'bg_color': '#ff420e',
                     'font_name': 'Courier 10 pitch',
@@ -110,12 +111,23 @@ class MrpProduction(orm.Model):
                     'border': 1,
                     }),
                 'bg_green': WB.add_format({
+                    'bold': True, 
                     'font_color': 'black',
                     'bg_color': '#99cc66',
                     'font_name': 'Courier 10 pitch',
                     'font_size': 9,
                     'align': 'left',
                     'border': 1,
+                    }),
+                'bg_order': WB.add_format({
+                    'bold': True, 
+                    'font_color': 'black',
+                    'bg_color': '#cc9900',
+                    'font_name': 'Courier 10 pitch',
+                    'font_size': 9,
+                    'align': 'right',
+                    'border': 1,
+                    'num_format': num_format,
                     }),
 
                 # -------------------------------------------------------------
@@ -143,7 +155,7 @@ class MrpProduction(orm.Model):
                     'border': 1,
                     }),
                 'text_green': WB.add_format({
-                    'font_color': 'green', ##99cc66
+                    'font_color': '#328238', ##99cc66
                     'font_name': 'Courier 10 pitch',
                     'font_size': 9,
                     'align': 'left',
@@ -363,6 +375,29 @@ class MrpProduction(orm.Model):
                 ]
             write_xls_mrp_line(WS, row, line5)
             row += 1
+
+            # -----------------------------------------------------------------
+            #                            Order block
+            # -----------------------------------------------------------------
+            format_order = get_xls_format('bg_order')
+            lineOrd = [
+                ('Ordinare:', format_text),
+                ('', format_text),
+                ('', bg_order),
+                ('', bg_order),
+                ('', bg_order),
+                ('', bg_order),
+                ('', bg_order),
+                ('', bg_order),
+                ('', bg_order),
+                ('', bg_order),
+                ('', bg_order),
+                ('', bg_order),
+                ('', bg_order),
+                ('', bg_order),
+                ]
+            write_xls_mrp_line(WS, row, lineOrd)
+            row += 1
             
             # -----------------------------------------------------------------
             #                            ROW Halfwork
@@ -422,9 +457,9 @@ class MrpProduction(orm.Model):
         WS = WB.add_worksheet(_('Fabric'))
 
         # Format columns width:
-        WS.set_column('A:A', 30)
-        WS.set_column('B:B', 2)
-        WS.set_column('C:N', 13)
+        WS.set_column('A:A', 18)
+        WS.set_column('B:B', 3)
+        WS.set_column('C:N', 8)
         
         # Format for cell:            
         num_format = '#,##0'

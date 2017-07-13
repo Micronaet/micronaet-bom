@@ -563,10 +563,11 @@ class MrpProduction(orm.Model):
             attachments = [('Completo.odt', result)]
         elif mode == 'xlsx':
             filename = self.extract_mrp_production_report_xlsx(
-                cr, uid, data=datas, context=context)
-            
-            return True # XXX BREAK HERE!!!!
-            attachments = []
+                cr, uid, data=datas, context=context)                
+
+            # Create attachment block for send after:    
+            xlsx_raw = open(filename, 'rb').read()
+            attachments = [('Stato_tessuti.xlsx', xlsx_raw)]            
         else:
             _logger.error('Only odt or xlsx mode for this report!')
             return False

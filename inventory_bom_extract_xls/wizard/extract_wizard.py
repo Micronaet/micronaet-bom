@@ -102,6 +102,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         def xls_write_row(WS, row, line, title=False):
             ''' Write row in a file
             '''
+            print 'Write sheet: %s' % title
+            
             if title: # data line
                 WS.write(row, 0, title)
                 col = 0
@@ -257,7 +259,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 )
 
         for i in range(start_row, WS_inv.nrows):
-            row = WS_inv.row(i) # generate error at end
+            row = WS_inv.row(i)
             parent_code = row[0].value
             if not parent_code: # end import
                 _logger.info('End import at line: %s' % i)
@@ -310,7 +312,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 product_qty = unload_list[col]
                 bom_line_ids = products[default_code].dynamic_bom_line_ids
                 if not bom_line_ids:
-                    if default_code not in materials:
+                    if default_code not in materials: # Product with no BOM
                         materials[default_code] = \
                             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]         
                     materials[default_code][col] += product_qty # TODO cost
@@ -319,18 +321,25 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 for line in bom_line_ids: # has bom
                     component = line.product_id
                     component_code = component.default_code
+                    
                     # TODO check cost / revenue / supplier value
                     if component.inv_revenue_account not in ledger_selection \
                             and component.inv_cost_account not in \
                             ledger_selection and component.inv_first_supplier \
                             not in supplier_selection:
-                        if component_code not in jumped:    
-                            jumped.append(component_code)
-                           
-                        continue 
+                        if component_code not in jumped: 
+                            # log jumped material (with useful information)
+                            jumped.append((
+                                component_code, 
+                                component.inv_revenue_account,
+                                component.inv_cost_account,
+                                component.inv_first_supplier,
+                                ))                           
+                        continue
+
                     if component_code not in materials:
                         materials[component_code] = \
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]        
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
                     materials[component_code][col] += \
                         product_qty * line.product_qty # TODO real cost
 
@@ -346,7 +355,4 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
     _defaults = {
         'year': lambda *x: int(datetime.now().strftime('%Y')),
         }    
-
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
-
-

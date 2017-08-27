@@ -1,13 +1,13 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* lavoration_cl_sl
+# 	* mrp_cut_lavoration
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-28 07:21+0000\n"
-"PO-Revision-Date: 2016-11-28 08:20+0100\n"
+"POT-Creation-Date: 2017-07-27 16:28+0000\n"
+"PO-Revision-Date: 2017-08-06 10:42+0100\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -17,153 +17,12 @@ msgstr ""
 "Language: it\n"
 "X-Generator: Poedit 1.6.10\n"
 
-#. module: lavoration_cl_sl
-#: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
-msgid "Add lavoration internal note..."
-msgstr "Aggiungi nota lavorazione interna..."
+#. module: mrp_cut_lavoration
+#: model:ir.ui.menu,name:mrp_cut_lavoration.menu_stock_picking_cl_closed_tree
+msgid "Lavoration cut list (all)"
+msgstr "Lista lavorazioni taglio (tutte)"
 
-#. module: lavoration_cl_sl
-#: field:res.company,cl_mrp_lavoration_id:0
-msgid "CL Lavoration"
-msgstr "Lavorazione CL"
-
-#. module: lavoration_cl_sl
-#: model:ir.model,name:lavoration_cl_sl.model_res_company
-msgid "Companies"
-msgstr "Aziende"
-
-#. module: lavoration_cl_sl
-#: model:ir.actions.act_window,name:lavoration_cl_sl.action_rec_company_parameter_tree
-#: model:ir.ui.menu,name:lavoration_cl_sl.menu_stock_picking_cl_configuration
-msgid "Company lavoration parameter"
-msgstr "Parametri aziendali"
-
-#. module: lavoration_cl_sl
-#: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
-msgid "Done"
-msgstr "Completato"
-
-#. module: lavoration_cl_sl
-#: field:res.company,enable_mrp_lavoration:0
-msgid "Enable lavoration"
-msgstr "Abilita lavorazione"
-
-#. module: lavoration_cl_sl
-#: code:addons/lavoration_cl_sl/lavoration.py:148
-#, python-format
-msgid "Error"
-msgstr "Errore"
-
-#. module: lavoration_cl_sl
-#: field:stock.picking,is_mrp_lavoration:0
-msgid "Is Lavoration"
-msgstr "E' lavorazione"
-
-#. module: lavoration_cl_sl
-#: model:ir.actions.act_window,name:lavoration_cl_sl.action_stock_picking_cl_closed_tree
-#: model:ir.ui.menu,name:lavoration_cl_sl.menu_stock_picking_cl_closed_tree
-msgid "Lavoration list (all)"
-msgstr "Lista lavorazioni (tutte)"
-
-#. module: lavoration_cl_sl
-#: model:ir.actions.act_window,name:lavoration_cl_sl.action_stock_picking_cl_tree
-#: model:ir.ui.menu,name:lavoration_cl_sl.menu_stock_picking_cl
-msgid "Lavoration list (open)"
-msgstr "Lista lavorazioni (aperte)"
-
-#. module: lavoration_cl_sl
-#: field:stock.move,linked_cl_stock_move_id:0
-msgid "Link CL linked move"
-msgstr "Collega movimenti CL"
-
-#. module: lavoration_cl_sl
-#: field:stock.quant,lavoration_link_id:0
-msgid "Link to CL lavoration"
-msgstr "Collega a CL lavorazione"
-
-#. module: lavoration_cl_sl
-#: field:stock.move,linked_sl_stock_move_id_ids:0
-msgid "Linked SL movements"
-msgstr "Collega a movimenti SL"
-
-#. module: lavoration_cl_sl
-#: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
-msgid "Movement"
-msgstr "Movementi"
-
-#. module: lavoration_cl_sl
-#: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
-msgid "Movimenti di Magazzino"
-msgstr "Movimenti di Magazzino"
-
-#. module: lavoration_cl_sl
-#: model:ir.model,name:lavoration_cl_sl.model_stock_picking
-msgid "Picking List"
-msgstr "Documento di prelievo"
-
-#. module: lavoration_cl_sl
-#: view:res.company:lavoration_cl_sl.view_res_company_cl_sl_picking_ref_tree
-msgid "Picking setup"
-msgstr "Impostazione prelievo"
-
-#. module: lavoration_cl_sl
-#: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
-msgid "Pieces"
-msgstr "Pezzi"
-
-#. module: lavoration_cl_sl
-#: model:ir.model,name:lavoration_cl_sl.model_stock_quant
-msgid "Quants"
-msgstr "Quant."
-
-#. module: lavoration_cl_sl
-#: field:res.company,sl_mrp_lavoration_id:0
-msgid "SL Lavoration"
-msgstr "SL Lavorazione"
-
-#. module: lavoration_cl_sl
-#: field:stock.picking,linked_sl_id:0
-msgid "SL linked"
-msgstr "SL collegate"
-
-#. module: lavoration_cl_sl
-#: field:stock.move,linked_sl_status:0
-msgid "SL movement"
-msgstr "SL movimenti"
-
-#. module: lavoration_cl_sl
-#: code:addons/lavoration_cl_sl/lavoration.py:202
-#, python-format
-msgid "SL-LAV-%s"
-msgstr "SL-LAV-%s"
-
-#. module: lavoration_cl_sl
-#: code:addons/lavoration_cl_sl/lavoration.py:149
-#, python-format
-msgid "Set up in company location for stock and mrp1!"
-msgstr "Imposta "
-
-#. module: lavoration_cl_sl
-#: model:ir.model,name:lavoration_cl_sl.model_stock_move
-msgid "Stock Move"
-msgstr "Movimento di magazzino"
-
-#. module: lavoration_cl_sl
-#: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
-msgid "String"
-msgstr "Stringa"
-
-#. module: lavoration_cl_sl
-#: field:stock.picking,total_work:0
-msgid "Tot. H."
-msgstr "Tot. H."
-
-#. module: lavoration_cl_sl
-#: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
-msgid "Unlock"
-msgstr "Sblocca"
-
-#. module: lavoration_cl_sl
-#: field:stock.picking,workers:0
-msgid "Workers"
-msgstr "Addetti"
+#. module: mrp_cut_lavoration
+#: model:ir.ui.menu,name:mrp_cut_lavoration.menu_stock_picking_cut_cl
+msgid "Lavoration cut list (open)"
+msgstr "Lista lavorazioni taglio (aperte)"

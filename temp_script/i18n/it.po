@@ -1,0 +1,248 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* temp_script
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-07-27 16:32+0000\n"
+"PO-Revision-Date: 2017-08-16 17:10+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: it\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#. module: temp_script
+#: code:addons/temp_script/script.py:499 code:addons/temp_script/script.py:528
+#, python-format
+msgid "BOM Error"
+msgstr "Errore DB"
+
+#. module: temp_script
+#: code:addons/temp_script/inventory.py:260
+#: code:addons/temp_script/inventory.py:384
+#: code:addons/temp_script/script.py:89 code:addons/temp_script/script.py:167
+#: code:addons/temp_script/script.py:288
+#, python-format
+msgid "Cannot read XLS file: %s"
+msgstr "File XLS non leggibile: %s"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Check BOM link in HW product"
+msgstr "Controlla DB collegamenti nei prodotti semilavorati"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Check EAN easylabel"
+msgstr "Controlla EAN Easylabel"
+
+#. module: temp_script
+#: model:ir.model,name:temp_script.model_res_company
+msgid "Companies"
+msgstr "Aziende"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Correct inventory category"
+msgstr "Corretta categoria inventario"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Create dynamic rule"
+msgstr "Crea regole dinamiche"
+
+#. module: temp_script
+#: code:addons/temp_script/inventory.py:432
+#: code:addons/temp_script/script.py:155
+#, python-format
+msgid "EAN before control must be 12 char!"
+msgstr "EAN prima del controllo deve essere di 12 caratteri!"
+
+#. module: temp_script
+#: code:addons/temp_script/inventory.py:431
+#: code:addons/temp_script/script.py:154
+#, python-format
+msgid "Error"
+msgstr "Errore"
+
+#. module: temp_script
+#: code:addons/temp_script/inventory.py:259
+#: code:addons/temp_script/inventory.py:383
+#: code:addons/temp_script/script.py:88 code:addons/temp_script/script.py:96
+#: code:addons/temp_script/script.py:166 code:addons/temp_script/script.py:287
+#, python-format
+msgid "Error XLSX"
+msgstr "Errore XLSX"
+
+#. module: temp_script
+#: code:addons/temp_script/script.py:238
+#, python-format
+msgid "Error open file"
+msgstr "Errore aprendo il file"
+
+#. module: temp_script
+#: code:addons/temp_script/inventory.py:455
+#, python-format
+msgid "Error opening XLS file: %s"
+msgstr "Errore aprendo il file XLS: %s"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Export duty"
+msgstr "Esporta categoria doganale"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Export label check (OC)"
+msgstr "Esporta controllo etichette (OC)"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Export mailing list"
+msgstr "Esporta mailing list"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Force first supplier"
+msgstr "Forza primo fornitore"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Generate HW pipe"
+msgstr "Genera tubi semilavorati"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Get OC product without EAN"
+msgstr "Genera OC prodotti senza EAN"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Import barcode"
+msgstr "Importa codice a barre"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Import code web site Red"
+msgstr "Importa codici sito internet Re Desiderio"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Import exclude list"
+msgstr "Importa lista esclusioni"
+
+#. module: temp_script
+#: code:addons/temp_script/inventory.py:454
+#, python-format
+msgid "Import file: %s"
+msgstr "Importa file: %s"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Import pricelist"
+msgstr "Importa listino"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Inventory to reset"
+msgstr "Reset inventario"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Lavoration problem 2016"
+msgstr "Problemi lavorazioni 2016"
+
+#. module: temp_script
+#: code:addons/temp_script/script.py:590
+#, python-format
+msgid "New rule"
+msgstr "Nuova regola"
+
+#. module: temp_script
+#: code:addons/temp_script/script.py:555
+#, python-format
+msgid "No HW component found!"
+msgstr "Nessun componente semilavorato trovato!"
+
+#. module: temp_script
+#: code:addons/temp_script/script.py:529
+#, python-format
+msgid "No category %s"
+msgstr "Nessuna categoria %s"
+
+#. module: temp_script
+#: code:addons/temp_script/script.py:500
+#, python-format
+msgid "No dynamic bom"
+msgstr "No DB dinamica"
+
+#. module: temp_script
+#: code:addons/temp_script/script.py:239
+#, python-format
+msgid "Not found: %s"
+msgstr "Non trovato: %s"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Pipe status"
+msgstr "Stato tubi"
+
+#. module: temp_script
+#: code:addons/temp_script/script.py:97
+#, python-format
+msgid "Prima riga deve essere codice web connect!"
+msgstr "Prima riga deve essere codice connessione web!"
+
+#. module: temp_script
+#: model:ir.model,name:temp_script.model_product_product
+msgid "Product"
+msgstr "Prodotto"
+
+#. module: temp_script
+#: code:addons/temp_script/script.py:327
+#, python-format
+msgid "Product in OC"
+msgstr "Prodotto in OC"
+
+#. module: temp_script
+#: code:addons/temp_script/script.py:537
+#, python-format
+msgid "Product|Component|Mask|Note\n"
+msgstr "Prodotto|Componente|Maschera|Note\n"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Supplier cost info"
+msgstr "Info costo fornitore"
+
+#. module: temp_script
+#: view:product.product:temp_script.view_temp_product_search
+msgid "Temp"
+msgstr "Temp"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Temp script"
+msgstr "Script temporanei"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Update extra label (all)"
+msgstr "Aggiorna etichette extra (tutte)"
+
+#. module: temp_script
+#: view:res.company:temp_script.view_res_company_temp_script_form
+msgid "Update extra label (order)"
+msgstr "Aggiorna etichette extra (ordine)"
+
+#. module: temp_script
+#: code:addons/temp_script/script.py:573
+#, python-format
+msgid "Yet present!"
+msgstr "GIà presente!"

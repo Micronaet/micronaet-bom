@@ -1,0 +1,96 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* product_force_uom
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-07-27 16:31+0000\n"
+"PO-Revision-Date: 2017-08-08 23:48+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: it\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#. module: product_force_uom
+#: view:product.product.uom.force.wizard:product_force_uom.product_product_uom_force_wizard
+msgid "Cancel"
+msgstr "Annulla"
+
+#. module: product_force_uom
+#: view:product.product:product_force_uom.view_product_product_force_button_form
+msgid ""
+"Change UOM give problem in there's stock movement with old UOM! Confirm?"
+msgstr ""
+"Il cambio della UM da problemi se sono presenti movimenti di magazzino, "
+"confermi?"
+
+#. module: product_force_uom
+#: field:product.product.uom.force.wizard,create_uid:0
+msgid "Created by"
+msgstr "Creato da"
+
+#. module: product_force_uom
+#: field:product.product.uom.force.wizard,create_date:0
+msgid "Created on"
+msgstr "Creato il "
+
+#. module: product_force_uom
+#: code:addons/product_force_uom/wizard/product_force_wizard.py:63
+#, python-format
+msgid "Error reading product to force"
+msgstr "Errore leggendo il prodotto da forzare"
+
+#. module: product_force_uom
+#: view:product.product:product_force_uom.view_product_product_force_button_form
+#: view:product.product.uom.force.wizard:product_force_uom.product_product_uom_force_wizard
+#: field:product.product.uom.force.wizard,uom_id:0
+msgid "Force UOM"
+msgstr "Forza UM"
+
+#. module: product_force_uom
+#: model:ir.actions.act_window,name:product_force_uom.action_product_product_uom_force_wizard
+msgid "Force product UOM wizard"
+msgstr "Wizard forzature UM prodotto"
+
+#. module: product_force_uom
+#: code:addons/product_force_uom/wizard/product_force_wizard.py:85
+#, python-format
+msgid "Forced UOM from %s to %s"
+msgstr "Forzata UM da %s a %s"
+
+#. module: product_force_uom
+#: field:product.product.uom.force.wizard,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: product_force_uom
+#: field:product.product.uom.force.wizard,write_uid:0
+msgid "Last Updated by"
+msgstr "Aggiornato da"
+
+#. module: product_force_uom
+#: field:product.product.uom.force.wizard,write_date:0
+msgid "Last Updated on"
+msgstr "Aggiornato il"
+
+#. module: product_force_uom
+#: code:addons/product_force_uom/wizard/product_force_wizard.py:62
+#, python-format
+msgid "No product"
+msgstr "Nessun prodotto"
+
+#. module: product_force_uom
+#: model:res.groups,name:product_force_uom.group_product_force_uom_manager
+msgid "Product force UOM Manager"
+msgstr "Responsabile forzatura UM prodotto"
+
+#. module: product_force_uom
+#: view:product.product.uom.force.wizard:product_force_uom.product_product_uom_force_wizard
+msgid "Wizard"
+msgstr "Wizard"

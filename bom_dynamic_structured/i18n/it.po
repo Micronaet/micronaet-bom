@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-07 10:24+0000\n"
-"PO-Revision-Date: 2016-11-07 11:30+0100\n"
+"POT-Creation-Date: 2017-07-27 16:23+0000\n"
+"PO-Revision-Date: 2017-07-27 18:48+0100\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -20,13 +20,18 @@ msgstr ""
 #. module: bom_dynamic_structured
 #: view:mrp.bom.line:bom_dynamic_structured.view_mrp_bom_line_search
 msgid "BOM"
-msgstr "D.B."
+msgstr "DB"
 
 #. module: bom_dynamic_structured
 #: model:ir.actions.act_window,name:bom_dynamic_structured.action_mrp_bom_structure_category
 #: model:ir.ui.menu,name:bom_dynamic_structured.menu_action_mrp_bom_structure_category
 msgid "BOM Structure category"
 msgstr "Categoria DB"
+
+#. module: bom_dynamic_structured
+#: field:product.product,bom_alternative:0
+msgid "BOM alternative"
+msgstr "DB alternativa"
 
 #. module: bom_dynamic_structured
 #: view:mrp.bom:bom_dynamic_structured.view_mrp_bom_dynamic_new_form
@@ -42,6 +47,11 @@ msgstr "Ricerca dettagli DB"
 #: field:product.product,bom_placeholder:0
 msgid "BOM placeholder"
 msgstr "Segnaposto DB"
+
+#. module: bom_dynamic_structured
+#: field:product.product,bom_placeholder_rule:0
+msgid "BOM placeholder rule"
+msgstr "Regola segnaposto DB"
 
 #. module: bom_dynamic_structured
 #: model:ir.model,name:bom_dynamic_structured.model_mrp_bom_structure_category
@@ -92,7 +102,7 @@ msgid "Category type for ordering purpose"
 msgstr "Tipo di categoria per scopi di ordinamento"
 
 #. module: bom_dynamic_structured
-#: code:addons/bom_dynamic_structured/dynamic.py:411
+#: code:addons/bom_dynamic_structured/dynamic.py:424
 #, python-format
 msgid "Code error:"
 msgstr "Errore codice:"
@@ -120,13 +130,23 @@ msgid "Created on"
 msgstr "Creato il"
 
 #. module: bom_dynamic_structured
+#: selection:mrp.bom.structure.category,department:0
+msgid "Cut"
+msgstr "Taglio"
+
+#. module: bom_dynamic_structured
 #: view:product.product:bom_dynamic_structured.view_product_product_dynamic_bom_form
 msgid "Default parent BOM component"
 msgstr "DB padre predefinita componente"
 
 #. module: bom_dynamic_structured
-#: code:addons/bom_dynamic_structured/dynamic.py:171
-#: code:addons/bom_dynamic_structured/dynamic.py:382
+#: field:mrp.bom.structure.category,department:0
+msgid "Department"
+msgstr "Dipartimento"
+
+#. module: bom_dynamic_structured
+#: code:addons/bom_dynamic_structured/dynamic.py:178
+#: code:addons/bom_dynamic_structured/dynamic.py:395
 #: view:mrp.bom:bom_dynamic_structured.view_mrp_bom_dynamic_new_form
 #: view:product.product:bom_dynamic_structured.view_product_product_dynamic_button_bom_form
 #: field:structure.structure,dynamic_bom_id:0
@@ -135,7 +155,7 @@ msgid "Dynamic BOM"
 msgstr "DB dinamica"
 
 #. module: bom_dynamic_structured
-#: code:addons/bom_dynamic_structured/dynamic.py:319
+#: code:addons/bom_dynamic_structured/dynamic.py:332
 #, python-format
 msgid "Dynamic BOM component"
 msgstr "Componenti DB dinamici"
@@ -162,7 +182,7 @@ msgid "Dynamic BOM:"
 msgstr "DB dinamica:"
 
 #. module: bom_dynamic_structured
-#: code:addons/bom_dynamic_structured/dynamic.py:447
+#: code:addons/bom_dynamic_structured/dynamic.py:460
 #, python-format
 msgid "Dynamic lines"
 msgstr "Righe dinamiche"
@@ -173,14 +193,14 @@ msgid "Dynamic mask"
 msgstr "Maschera dinamica"
 
 #. module: bom_dynamic_structured
-#: code:addons/bom_dynamic_structured/dynamic.py:412
+#: code:addons/bom_dynamic_structured/dynamic.py:425
 #, python-format
 msgid "Error parsing code: %s"
 msgstr "Errore analizzando il codice: %s"
 
 #. module: bom_dynamic_structured
-#: code:addons/bom_dynamic_structured/dynamic.py:353
 #: code:addons/bom_dynamic_structured/dynamic.py:366
+#: code:addons/bom_dynamic_structured/dynamic.py:379
 #, python-format
 msgid "Error!"
 msgstr "Errore!"
@@ -193,6 +213,7 @@ msgstr "Maschera fissa"
 #. module: bom_dynamic_structured
 #: view:mrp.bom.line:bom_dynamic_structured.view_mrp_bom_line_search
 #: view:mrp.bom.structure.category:bom_dynamic_structured.view_mrp_bom_structure_category_search
+#: view:product.product:bom_dynamic_structured.view_product_bom_dynamic_search
 msgid "Group By..."
 msgstr "Raggruppa per..."
 
@@ -202,7 +223,7 @@ msgid "Halfwork"
 msgstr "Semilavorato"
 
 #. module: bom_dynamic_structured
-#: code:addons/bom_dynamic_structured/dynamic.py:275
+#: code:addons/bom_dynamic_structured/dynamic.py:288
 #, python-format
 msgid "Halfworked component"
 msgstr "Componente semilavorato"
@@ -212,6 +233,11 @@ msgstr "Componente semilavorato"
 #: field:mrp.bom.structure.category.type,id:0
 msgid "ID"
 msgstr "ID"
+
+#. module: bom_dynamic_structured
+#: field:mrp.bom.structure.category,important:0
+msgid "Important"
+msgstr "Importante"
 
 #. module: bom_dynamic_structured
 #: field:mrp.bom.structure.category,write_uid:0
@@ -231,16 +257,57 @@ msgid "Manage dynamic lines"
 msgstr "Gestisci righe dinamiche"
 
 #. module: bom_dynamic_structured
+#: help:product.product,bom_placeholder:0
+msgid "Mandatory fields for BOM, now not present!"
+msgstr "Campo obbligatorio per DB, ora non e' compilato!"
+
+#. module: bom_dynamic_structured
+#: help:product.product,bom_placeholder_rule:0
+msgid "Mandatory if respect rule, es.: default_code[3:4].upper()==\"S\""
+msgstr ""
+"Obbligatorio se rispetta la regola, es.: default_code[3:4].upper()==\"S\""
+
+#. module: bom_dynamic_structured
 #: view:mrp.bom.line:bom_dynamic_structured.view_mrp_bom_line_search
 msgid "Mask"
 msgstr "Maschera"
 
 #. module: bom_dynamic_structured
-#: code:addons/bom_dynamic_structured/dynamic.py:354
+#: help:mrp.bom,max_optional:0
+msgid "Max number of optional placeholdeer element"
+msgstr "Massimo numero di elementi segnaposto opzionali"
+
+#. module: bom_dynamic_structured
+#: field:mrp.bom,max_optional:0
+msgid "Max. Optional"
+msgstr "Massimo el. opzionali"
+
+#. module: bom_dynamic_structured
+#: help:mrp.bom,min_optional:0
+msgid "Min number of optional placeholdeer element"
+msgstr "Numero minimo segnaposto opzionali"
+
+#. module: bom_dynamic_structured
+#: field:mrp.bom,min_optional:0
+msgid "Min. Optional"
+msgstr "Min. el. opzionali"
+
+#. module: bom_dynamic_structured
+#: view:product.product:bom_dynamic_structured.view_product_bom_dynamic_search
+msgid "No parent bom"
+msgstr "No DB padre"
+
+#. module: bom_dynamic_structured
 #: code:addons/bom_dynamic_structured/dynamic.py:367
+#: code:addons/bom_dynamic_structured/dynamic.py:380
 #, python-format
 msgid "No product with mask selected!"
 msgstr "Nessuno prodotto con la maschera selezionata!"
+
+#. module: bom_dynamic_structured
+#: help:product.product,bom_alternative:0
+msgid "Not mandatory but often present, alternative to other!"
+msgstr "Non obbligatorio ma spesso presente, alternativo ad altri!"
 
 #. module: bom_dynamic_structured
 #: view:mrp.bom.structure.category:bom_dynamic_structured.view_mrp_bom_structure_category_form
@@ -260,15 +327,25 @@ msgid "Open mask"
 msgstr "Apri maschera"
 
 #. module: bom_dynamic_structured
+#: view:product.product:bom_dynamic_structured.view_product_bom_dynamic_search
+msgid "Parent BOM"
+msgstr "DB padre"
+
+#. module: bom_dynamic_structured
 #: view:product.product:bom_dynamic_structured.view_product_product_dynamic_bom_form
 msgid "Parent BOM default"
 msgstr "DB padre predefinita"
 
 #. module: bom_dynamic_structured
-#: code:addons/bom_dynamic_structured/dynamic.py:199
+#: code:addons/bom_dynamic_structured/dynamic.py:206
 #, python-format
 msgid "Part %s not found in %s block"
 msgstr "Parte %s non trovata nel blocco %s"
+
+#. module: bom_dynamic_structured
+#: selection:mrp.bom.structure.category,department:0
+msgid "Plastic"
+msgstr "Plastica"
 
 #. module: bom_dynamic_structured
 #: model:ir.model,name:bom_dynamic_structured.model_product_product
@@ -277,12 +354,18 @@ msgid "Product"
 msgstr "Prodotto"
 
 #. module: bom_dynamic_structured
+#: view:product.product:bom_dynamic_structured.view_product_bom_dynamic_search
+msgid "Product and bom"
+msgstr "Prodotto e DB"
+
+#. module: bom_dynamic_structured
 #: model:ir.model,name:bom_dynamic_structured.model_structure_structure
 msgid "Product code structure"
-msgstr "Struttura codice prodotto"
+msgstr "Codice prodotto struttura"
 
 #. module: bom_dynamic_structured
 #: model:ir.actions.act_window,name:bom_dynamic_structured.action_product_product_bom_line_dynamic
+#: model:ir.actions.report.xml,name:bom_dynamic_structured.aeroo_product_bom_dynamic_report_id
 #: model:ir.ui.menu,name:bom_dynamic_structured.menu_product_product_bom_line_dynamic
 #: view:product.product:bom_dynamic_structured.view_product_product_dynamic_bom_form
 #: view:product.product:bom_dynamic_structured.view_product_product_dynamic_bom_tree
@@ -326,7 +409,7 @@ msgid "Structure reference"
 msgstr "Riferimento struttura"
 
 #. module: bom_dynamic_structured
-#: code:addons/bom_dynamic_structured/dynamic.py:120
+#: code:addons/bom_dynamic_structured/dynamic.py:127
 #, python-format
 msgid "Structured dynamic BOM"
 msgstr "DB dinamica strutturata"
@@ -337,7 +420,12 @@ msgid "Substitution mask"
 msgstr "Maschera di sostituzione"
 
 #. module: bom_dynamic_structured
-#: code:addons/bom_dynamic_structured/dynamic.py:314
+#: field:product.product,temp_selection:0
+msgid "Temp selection"
+msgstr "Seleziona temporanea"
+
+#. module: bom_dynamic_structured
+#: code:addons/bom_dynamic_structured/dynamic.py:327
 #, python-format
 msgid "This is the only rule that use this component"
 msgstr "Questa è l'unica regola che usa questo componente"
@@ -354,7 +442,12 @@ msgid "UOM"
 msgstr "UM"
 
 #. module: bom_dynamic_structured
-#: code:addons/bom_dynamic_structured/dynamic.py:313
+#: selection:mrp.bom.structure.category,department:0
+msgid "Ware"
+msgstr "Merce"
+
+#. module: bom_dynamic_structured
+#: code:addons/bom_dynamic_structured/dynamic.py:326
 #, python-format
 msgid "Warning"
 msgstr "Attenzione"

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-21 07:56+0000\n"
-"PO-Revision-Date: 2016-11-21 08:56+0100\n"
+"POT-Creation-Date: 2017-07-27 16:23+0000\n"
+"PO-Revision-Date: 2017-08-04 14:18+0100\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -56,12 +56,12 @@ msgstr "ID"
 #. module: bom_force_parent
 #: field:mrp.bom.force.parent.wizard,write_uid:0
 msgid "Last Updated by"
-msgstr "Last Updated by"
+msgstr "Aggiornato da"
 
 #. module: bom_force_parent
 #: field:mrp.bom.force.parent.wizard,write_date:0
 msgid "Last Updated on"
-msgstr "Last Updated on"
+msgstr "Aggiornato il"
 
 #. module: bom_force_parent
 #: field:mrp.bom.force.parent.wizard,parent_bom_id:0

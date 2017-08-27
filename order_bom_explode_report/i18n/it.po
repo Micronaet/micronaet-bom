@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-25 11:44+0000\n"
-"PO-Revision-Date: 2016-10-25 13:45+0100\n"
+"POT-Creation-Date: 2017-07-27 16:28+0000\n"
+"PO-Revision-Date: 2017-08-06 20:46+0100\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -18,15 +18,33 @@ msgstr ""
 "X-Generator: Poedit 1.6.10\n"
 
 #. module: order_bom_explode_report
-#: code:addons/order_bom_explode_report/report/mrp_parser.py:68
+#: code:addons/order_bom_explode_report/report/mrp_parser.py:69
+#: code:addons/order_bom_explode_report/report/mrp_status_hw_component_parser.py:77
+#: code:addons/order_bom_explode_report/report/old/mrp_status_hw_component_parser.py:74
+#: code:addons/order_bom_explode_report/report/originali/mrp_status_hw_component_parser.py:77
 #, python-format
 msgid "Active production for %s days"
 msgstr "Produzione attive (finestra di %s giorni)"
 
 #. module: order_bom_explode_report
+#: help:component.status.report.wizard,with_deadline:0
+msgid "Add line with parent distribution of remain to produce OC"
+msgstr "Aggiunge riga con la distribuzione padre dei residui da produrre OC"
+
+#. module: order_bom_explode_report
 #: view:component.status.report.wizard:order_bom_explode_report.component_status_report_wizard_view
 msgid "Cancel"
 msgstr "Annulla"
+
+#. module: order_bom_explode_report
+#: model:ir.model,name:order_bom_explode_report.model_res_company
+msgid "Companies"
+msgstr "Aziende"
+
+#. module: order_bom_explode_report
+#: field:component.status.report.wizard,type_id:0
+msgid "Component category type"
+msgstr "Tipo di categoria componente"
 
 #. module: order_bom_explode_report
 #: field:component.status.report.wizard,create_uid:0
@@ -44,9 +62,32 @@ msgid "Days"
 msgstr "Giorni"
 
 #. module: order_bom_explode_report
+#: selection:component.status.report.wizard,mp_mode:0
+msgid "Extra material (all) *"
+msgstr "Materiale extra (tutti) *"
+
+#. module: order_bom_explode_report
+#: code:addons/order_bom_explode_report/report/explode_parser.py:215
+#: selection:component.status.report.wizard,mp_mode:0
+#, python-format
+msgid "Fabric"
+msgstr "Tessuto"
+
+#. module: order_bom_explode_report
+#: code:addons/order_bom_explode_report/report/explode_parser.py:285
+#, python-format
+msgid "Fabric (or extra)"
+msgstr "Tessuto (o extra)"
+
+#. module: order_bom_explode_report
 #: selection:component.status.report.wizard,mode:0
 msgid "Final component"
 msgstr "Componenti finali"
+
+#. module: order_bom_explode_report
+#: field:component.status.report.wizard,first_supplier_id:0
+msgid "First supplier"
+msgstr "Primo fornitore"
 
 #. module: order_bom_explode_report
 #: selection:component.status.report.wizard,mode:0
@@ -61,12 +102,55 @@ msgstr "ID"
 #. module: order_bom_explode_report
 #: field:component.status.report.wizard,write_uid:0
 msgid "Last Updated by"
-msgstr "Ultimo aggiornamento da"
+msgstr "Aggiornato da"
 
 #. module: order_bom_explode_report
 #: field:component.status.report.wizard,write_date:0
 msgid "Last Updated on"
-msgstr "Ultimo aggiornamento il"
+msgstr "Aggiornato il"
+
+#. module: order_bom_explode_report
+#: field:component.status.report.wizard,mp_mode:0
+msgid "MP mode"
+msgstr "Modalità MP"
+
+#. module: order_bom_explode_report
+#: model:ir.model,name:order_bom_explode_report.model_mrp_production
+msgid "Manufacturing Order"
+msgstr "Ordine di produzione"
+
+#. module: order_bom_explode_report
+#: code:addons/order_bom_explode_report/report/mrp_status_hw_component_parser.py:276
+#, python-format
+msgid "NODBERROR"
+msgstr "NODBERROR"
+
+#. module: order_bom_explode_report
+#: field:component.status.report.wizard,negative_start:0
+msgid "Negative start"
+msgstr "Partenza negativa"
+
+#. module: order_bom_explode_report
+#: code:addons/order_bom_explode_report/report/explode_parser.py:264
+#, python-format
+msgid "No category"
+msgstr "Nessuna categoria"
+
+#. module: order_bom_explode_report
+#: field:component.status.report.wizard,only_negative:0
+msgid "Only negative"
+msgstr "Solo negativi"
+
+#. module: order_bom_explode_report
+#: selection:component.status.report.wizard,mp_mode:0
+msgid "Pipe *"
+msgstr "Tubo *"
+
+#. module: order_bom_explode_report
+#: code:addons/order_bom_explode_report/report/explode_parser.py:283
+#, python-format
+msgid "Pipes"
+msgstr "Tubi"
 
 #. module: order_bom_explode_report
 #: view:component.status.report.wizard:order_bom_explode_report.component_status_report_wizard_view
@@ -95,6 +179,11 @@ msgid "Scheduled production"
 msgstr "Produzioni schedulate"
 
 #. module: order_bom_explode_report
+#: model:ir.actions.report.xml,name:order_bom_explode_report.aeroo_mrp_explode_status_hw_cmp_report_id
+msgid "Status HW component MRP"
+msgstr "Stato componenti semilavorati produzione"
+
+#. module: order_bom_explode_report
 #: model:ir.actions.report.xml,name:order_bom_explode_report.aeroo_mrp_explode_status_report_id
 msgid "Status explode MRP"
 msgstr "Stato componenti produzioni attive"
@@ -103,6 +192,31 @@ msgstr "Stato componenti produzioni attive"
 #: model:ir.actions.report.xml,name:order_bom_explode_report.aeroo_stock_explode_status_report_id
 msgid "Status explode component"
 msgstr "Stato componenti esplosi"
+
+#. module: order_bom_explode_report
+#: selection:component.status.report.wizard,mode:0
+msgid "TODO hw and component"
+msgstr "DA FARE semilavorati e componenti"
+
+#. module: order_bom_explode_report
+#: help:component.status.report.wizard,negative_start:0
+msgid "Total check month for negative start"
+msgstr "Totale mesi di controllo per partenza negativa"
+
+#. module: order_bom_explode_report
+#: field:component.status.report.wizard,with_deadline:0
+msgid "With deadline period"
+msgstr "Con periodo scadenza"
+
+#. module: order_bom_explode_report
+#: field:component.status.report.wizard,with_type_ids:0
+msgid "With type"
+msgstr "Con tipo"
+
+#. module: order_bom_explode_report
+#: field:component.status.report.wizard,without_type_ids:0
+msgid "Without type"
+msgstr "Senza tipo"
 
 #. module: order_bom_explode_report
 #: view:component.status.report.wizard:order_bom_explode_report.component_status_report_wizard_view

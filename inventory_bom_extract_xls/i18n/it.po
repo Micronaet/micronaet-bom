@@ -1,0 +1,90 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* inventory_bom_extract_xls
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-07-27 16:25+0000\n"
+"PO-Revision-Date: 2017-08-05 22:32+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: it\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#. module: inventory_bom_extract_xls
+#: view:product.inventory.extract.xls.wizard:inventory_bom_extract_xls.product_inventory_extract_xls_wizard_view
+msgid "Cancel"
+msgstr "Annulla"
+
+#. module: inventory_bom_extract_xls
+#: field:product.inventory.extract.xls.wizard,create_uid:0
+msgid "Created by"
+msgstr "Creato da"
+
+#. module: inventory_bom_extract_xls
+#: field:product.inventory.extract.xls.wizard,create_date:0
+msgid "Created on"
+msgstr "Creato il"
+
+#. module: inventory_bom_extract_xls
+#: view:product.inventory.extract.xls.wizard:inventory_bom_extract_xls.product_inventory_extract_xls_wizard_view
+msgid "Extract"
+msgstr "Estrai"
+
+#. module: inventory_bom_extract_xls
+#: view:product.inventory.extract.xls.wizard:inventory_bom_extract_xls.product_inventory_extract_xls_wizard_view
+msgid "Extract (reload cost/revenue)"
+msgstr "Estrai (ricarica costo / ricavo)"
+
+#. module: inventory_bom_extract_xls
+#: model:ir.actions.act_window,name:inventory_bom_extract_xls.action_product_inventory_extract_xls_wizard
+#: model:ir.ui.menu,name:inventory_bom_extract_xls.menu_product_inventory_extract_xls_wizard
+msgid "Extract inventory"
+msgstr "Estrai inventario"
+
+#. module: inventory_bom_extract_xls
+#: field:product.inventory.extract.xls.wizard,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: inventory_bom_extract_xls
+#: field:product.product,inv_first_supplier:0
+msgid "Inv. First supplier"
+msgstr "Inv. primo fornitore"
+
+#. module: inventory_bom_extract_xls
+#: field:product.product,inv_cost_account:0
+#: field:product.product,inv_revenue_account:0
+msgid "Inv. cost account"
+msgstr "Inv. costo conto"
+
+#. module: inventory_bom_extract_xls
+#: field:product.inventory.extract.xls.wizard,write_uid:0
+msgid "Last Updated by"
+msgstr "Aggiornato da"
+
+#. module: inventory_bom_extract_xls
+#: field:product.inventory.extract.xls.wizard,write_date:0
+msgid "Last Updated on"
+msgstr "Aggiornato il"
+
+#. module: inventory_bom_extract_xls
+#: model:ir.model,name:inventory_bom_extract_xls.model_product_product
+msgid "Product"
+msgstr "Prodotto"
+
+#. module: inventory_bom_extract_xls
+#: view:product.inventory.extract.xls.wizard:inventory_bom_extract_xls.product_inventory_extract_xls_wizard_view
+msgid "Wizard"
+msgstr "Wizard"
+
+#. module: inventory_bom_extract_xls
+#: field:product.inventory.extract.xls.wizard,year:0
+msgid "Year"
+msgstr "Anno"

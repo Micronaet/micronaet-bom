@@ -1,0 +1,35 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* bom_pipe_autocode
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-07-27 16:23+0000\n"
+"PO-Revision-Date: 2017-08-04 14:37+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: it\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#. module: bom_pipe_autocode
+#: view:product.product:bom_pipe_autocode.view_product_is_pipe_form
+#: view:product.product:bom_pipe_autocode.view_product_product_pipes_form
+msgid "Is pipe"
+msgstr "E' un tubo"
+
+#. module: bom_pipe_autocode
+#: model:ir.model,name:bom_pipe_autocode.model_product_product
+msgid "Product"
+msgstr "Prodotto"
+
+#. module: bom_pipe_autocode
+#: code:addons/bom_pipe_autocode/autocode.py:98
+#, python-format
+msgid "Tubo %s Diam. %s Spess. %s Lungh. %s"
+msgstr "Tubo %s Diam. %s Spess. %s Lungh. %s"

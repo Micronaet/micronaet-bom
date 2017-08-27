@@ -1,0 +1,136 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* bom_production_cost
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-07-27 16:23+0000\n"
+"PO-Revision-Date: 2017-08-04 14:43+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: it\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#. module: bom_production_cost
+#: field:product.template,medium_mrp_cost:0
+msgid "Cost m(x)"
+msgstr "Costo medio"
+
+#. module: bom_production_cost
+#: field:mrp.production.employee.cost,create_uid:0
+msgid "Created by"
+msgstr "Creato da"
+
+#. module: bom_production_cost
+#: field:mrp.production.employee.cost,create_date:0
+msgid "Created on"
+msgstr "Creato il"
+
+#. module: bom_production_cost
+#: code:addons/bom_production_cost/production_cost.py:74
+#, python-format
+msgid "Date %s non present if hour cost period!"
+msgstr "Data %s non presente se periodo costo orario"
+
+#. module: bom_production_cost
+#: field:mrp.production.employee.cost,name:0
+msgid "Description"
+msgstr "Descrizione"
+
+#. module: bom_production_cost
+#: view:mrp.production.employee.cost:bom_production_cost.view_mrp_production_employee_cost_form
+#: view:mrp.production.employee.cost:bom_production_cost.view_mrp_production_employee_cost_tree
+msgid "Employee cost"
+msgstr "Costo impiegato"
+
+#. module: bom_production_cost
+#: model:ir.actions.act_window,name:bom_production_cost.action_view_product_template_cost
+#: model:ir.ui.menu,name:bom_production_cost.menu_view_product_template_cost
+msgid "Family cost"
+msgstr "Costo famiglia"
+
+#. module: bom_production_cost
+#: field:product.template,medium_mrp_cost_forced:0
+msgid "Forced Cost m(x)"
+msgstr "Forza costo medio"
+
+#. module: bom_production_cost
+#: field:mrp.production.employee.cost,from_date:0
+msgid "From date"
+msgstr "Dalla data"
+
+#. module: bom_production_cost
+#: model:ir.model,name:bom_production_cost.model_mrp_production_employee_cost
+#: field:mrp.production.employee.cost,hour_cost:0
+msgid "Hour cost"
+msgstr "Costo orario"
+
+#. module: bom_production_cost
+#: field:mrp.production.employee.cost,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: bom_production_cost
+#: code:addons/bom_production_cost/production_cost.py:89
+#, python-format
+msgid "Insert cost in MRP cost management"
+msgstr "Inserisci il costo nella gestione costi produzione"
+
+#. module: bom_production_cost
+#: field:mrp.production.employee.cost,write_uid:0
+msgid "Last Updated by"
+msgstr "Aggiornato da"
+
+#. module: bom_production_cost
+#: field:mrp.production.employee.cost,write_date:0
+msgid "Last Updated on"
+msgstr "Aggiornato il"
+
+#. module: bom_production_cost
+#: model:ir.actions.act_window,name:bom_production_cost.action_mrp_production_employee_cost
+#: model:ir.ui.menu,name:bom_production_cost.menu_mrp_production_employee_cost
+msgid "MRP hour cost"
+msgstr "Costo orario produzione"
+
+#. module: bom_production_cost
+#: model:res.groups,name:bom_production_cost.group_mrp_hour_cost_manager
+msgid "MRP hour cost manager"
+msgstr "Manager costi orari produzione"
+
+#. module: bom_production_cost
+#: help:product.template,medium_mrp_cost:0
+msgid "Medium cost of production for family"
+msgstr "Costo medio produzione per famiglia"
+
+#. module: bom_production_cost
+#: help:product.template,medium_mrp_cost_forced:0
+msgid "Medium cost of production for family froced"
+msgstr "Costo medio di produzione per famiglia forzata"
+
+#. module: bom_production_cost
+#: code:addons/bom_production_cost/production_cost.py:73
+#: code:addons/bom_production_cost/production_cost.py:88
+#, python-format
+msgid "No hour cost"
+msgstr "Nessun costo orario"
+
+#. module: bom_production_cost
+#: view:product.template:bom_production_cost.view_product_template_cost_tree
+msgid "Product"
+msgstr "Prodotto"
+
+#. module: bom_production_cost
+#: model:ir.model,name:bom_production_cost.model_product_template
+msgid "Product Template"
+msgstr "Modello Prodotto"
+
+#. module: bom_production_cost
+#: view:product.template:bom_production_cost.view_product_template_cost_tree
+msgid "Update medium cost"
+msgstr "Aggiorna costo medio"

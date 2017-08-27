@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-17 09:11+0000\n"
-"PO-Revision-Date: 2016-10-17 11:12+0100\n"
+"POT-Creation-Date: 2017-07-27 16:31+0000\n"
+"PO-Revision-Date: 2017-08-09 00:01+0100\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -23,6 +23,28 @@ msgid "Aluminium"
 msgstr "Alluminio"
 
 #. module: product_pipes
+#: field:product.pipe.material,code:0
+msgid "Code"
+msgstr "Codice"
+
+#. module: product_pipes
+#: field:product.pipe.material,create_uid:0
+#: field:product.pipe.material.lot,create_uid:0
+msgid "Created by"
+msgstr "Creato da"
+
+#. module: product_pipes
+#: field:product.pipe.material,create_date:0
+#: field:product.pipe.material.lot,create_date:0
+msgid "Created on"
+msgstr "Creato il"
+
+#. module: product_pipes
+#: field:product.pipe.material.lot,diameter:0
+msgid "Diameter mm."
+msgstr "Diameter mm."
+
+#. module: product_pipes
 #: view:product.product:product_pipes.view_product_product_pipes_form
 msgid "Dimension:"
 msgstr "Dimensione:"
@@ -33,9 +55,24 @@ msgid "First Supplier"
 msgstr "Primo fornitore"
 
 #. module: product_pipes
+#: field:product.pipe.material,first_supplier_id:0
+msgid "First supplier"
+msgstr "Primo fornitore"
+
+#. module: product_pipes
+#: help:product.product,pipe_diameter2:0
+msgid "For elliptic pipes"
+msgstr "Per tubi ellittici"
+
+#. module: product_pipes
 #: view:product.product:product_pipes.view_product_product_pipes_search
 msgid "Group By..."
 msgstr "Raggruppa per..."
+
+#. module: product_pipes
+#: field:product.pipe.material,id:0 field:product.pipe.material.lot,id:0
+msgid "ID"
+msgstr "ID"
 
 #. module: product_pipes
 #: selection:product.product,pipe_material:0
@@ -45,7 +82,24 @@ msgstr "Ferro"
 #. module: product_pipes
 #: field:product.product,is_pipe:0
 msgid "Is Pipe"
-msgstr "E' tubo"
+msgstr "E' un tubo"
+
+#. module: product_pipes
+#: field:product.pipe.material,write_uid:0
+#: field:product.pipe.material.lot,write_uid:0
+msgid "Last Updated by"
+msgstr "Aggiornato da"
+
+#. module: product_pipes
+#: field:product.pipe.material,write_date:0
+#: field:product.pipe.material.lot,write_date:0
+msgid "Last Updated on"
+msgstr "Aggiornato il"
+
+#. module: product_pipes
+#: field:product.pipe.material,last_price:0
+msgid "Last price"
+msgstr "Ultimo prezzo"
 
 #. module: product_pipes
 #: field:mrp.bom.line,length_cut:0
@@ -53,9 +107,32 @@ msgid "Length cut"
 msgstr "Lunghezza taglio"
 
 #. module: product_pipes
+#: field:product.pipe.material.lot,material_id:0
+#: field:product.product,pipe_material_id:0
+msgid "Material"
+msgstr "Materiale"
+
+#. module: product_pipes
+#: field:product.pipe.material.lot,order_lot:0
+msgid "Min. lot"
+msgstr "Lotto min."
+
+#. module: product_pipes
+#: view:product.pipe.material:product_pipes.view_product_pipe_material_form
+#: field:product.pipe.material,note:0
+msgid "Note"
+msgstr "Note"
+
+#. module: product_pipes
 #: help:mrp.bom.line,part_x_pipe:0
 msgid "Number of parts for create component in a bar"
 msgstr "Numero di parti per creare il componente da una barra"
+
+#. module: product_pipes
+#: view:product.pipe.material:product_pipes.view_product_pipe_material_form
+#: field:product.pipe.material,lot_ids:0
+msgid "Order lot"
+msgstr "Lotto ordine"
 
 #. module: product_pipes
 #: help:mrp.bom.line,length_cut:0 help:mrp.bom.line,waste_cut:0
@@ -68,9 +145,19 @@ msgid "Part per pipe"
 msgstr "Parti per tubo"
 
 #. module: product_pipes
+#: model:ir.model,name:product_pipes.model_product_pipe_material
+msgid "Pipe description"
+msgstr "Descrizione tubo"
+
+#. module: product_pipes
 #: view:product.product:product_pipes.view_product_product_pipes_search
 msgid "Pipe diameter"
 msgstr "Diametro tubo"
+
+#. module: product_pipes
+#: field:product.product,pipe_diameter2:0
+msgid "Pipe diameter 2 mm."
+msgstr "Diametro tubo 2 mm."
 
 #. module: product_pipes
 #: view:product.product:product_pipes.view_product_product_pipes_search
@@ -83,6 +170,11 @@ msgid "Pipe length mm."
 msgstr "Lunghezza tubo mm."
 
 #. module: product_pipes
+#: model:ir.actions.act_window,name:product_pipes.action_product_pipe_material_form
+#: model:ir.ui.menu,name:product_pipes.menu_action_product_product_pipes_material_tree
+#: view:product.pipe.material:product_pipes.view_product_pipe_material_form
+#: view:product.pipe.material:product_pipes.view_product_pipe_material_tree
+#: field:product.pipe.material,name:0
 #: view:product.product:product_pipes.view_product_product_pipes_search
 #: field:product.product,pipe_material:0
 msgid "Pipe material"
@@ -99,9 +191,9 @@ msgid "Pipe order"
 msgstr "Ordine tubo"
 
 #. module: product_pipes
-#: field:mrp.bom.line,pipe_total:0
-msgid "Pipe per part"
-msgstr "Parti per tubo"
+#: model:ir.model,name:product_pipes.model_product_pipe_material_lot
+msgid "Pipe order lot"
+msgstr "Lotto ordine prodotto"
 
 #. module: product_pipes
 #: field:product.product,pipe_resistence:0
@@ -138,6 +230,27 @@ msgid "Product"
 msgstr "Prodotto"
 
 #. module: product_pipes
+#: view:product.pipe.material:product_pipes.view_product_pipe_material_form
+#: view:product.pipe.material:product_pipes.view_product_pipe_material_tree
+msgid "Recalculate pipe cost"
+msgstr "Ricalcola il costo tubo"
+
+#. module: product_pipes
+#: view:product.product:product_pipes.view_product_product_pipes_form
+msgid "Refresh current price"
+msgstr "Aggiorna prezzo corrente"
+
+#. module: product_pipes
+#: field:product.pipe.material,resistence:0
+msgid "Resistence"
+msgstr "Resistenza"
+
+#. module: product_pipes
+#: field:mrp.bom.line,pipe_total:0
+msgid "Total pipes"
+msgstr "Totale tubi"
+
+#. module: product_pipes
 #: help:mrp.bom.line,pipe_total:0
 msgid "Total pipes for create the part"
 msgstr "Totale tubo per creare la parte"
@@ -146,3 +259,13 @@ msgstr "Totale tubo per creare la parte"
 #: field:mrp.bom.line,waste_cut:0
 msgid "Waste cut"
 msgstr "Spreco taglio"
+
+#. module: product_pipes
+#: view:product.product:product_pipes.view_product_product_pipes_form
+msgid "Weight Kg. (calc.)"
+msgstr "Peso Kg. (calc.)"
+
+#. module: product_pipes
+#: field:product.pipe.material,weight_specific:0
+msgid "Weight specific (Kg/dm3)"
+msgstr "Peso specifico (Kg/dm3)"

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-17 15:17+0000\n"
-"PO-Revision-Date: 2016-11-17 16:18+0100\n"
+"POT-Creation-Date: 2017-07-27 16:23+0000\n"
+"PO-Revision-Date: 2017-07-27 18:43+0100\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,6 +16,11 @@ msgstr ""
 "Plural-Forms: \n"
 "Language: it\n"
 "X-Generator: Poedit 1.6.10\n"
+
+#. module: bom_check_problem_wizard
+#: field:mrp.bom.check.problem.wizard,component:0
+msgid "> # component"
+msgstr "> # componente"
 
 #. module: bom_check_problem_wizard
 #: selection:mrp.bom.check.problem.wizard,only:0
@@ -54,9 +59,19 @@ msgid "Date >="
 msgstr "Data >="
 
 #. module: bom_check_problem_wizard
+#: selection:mrp.bom.check.problem.wizard,mode:0
+msgid "Excluded product"
+msgstr "Prodotto escluso"
+
+#. module: bom_check_problem_wizard
 #: field:mrp.bom.check.problem.wizard,from_date:0
 msgid "From"
 msgstr "Da"
+
+#. module: bom_check_problem_wizard
+#: field:mrp.bom.check.problem.wizard,from_order:0
+msgid "From order"
+msgstr "Da ordine"
 
 #. module: bom_check_problem_wizard
 #: selection:mrp.bom.check.problem.wizard,mode:0
@@ -79,6 +94,11 @@ msgid "Last Updated on"
 msgstr "Ultimo aggiornamento il"
 
 #. module: bom_check_problem_wizard
+#: field:mrp.bom.check.problem.wizard,no_bom_product:0
+msgid "No BOM product"
+msgstr "No DB prodotto"
+
+#. module: bom_check_problem_wizard
 #: selection:mrp.bom.check.problem.wizard,only:0
 msgid "Only error"
 msgstr "Solo errori"
@@ -86,7 +106,7 @@ msgstr "Solo errori"
 #. module: bom_check_problem_wizard
 #: selection:mrp.bom.check.problem.wizard,only:0
 msgid "Only error and overrided"
-msgstr "Solo errori e sovrascrizioni"
+msgstr "Solo errori e sovrascizioni"
 
 #. module: bom_check_problem_wizard
 #: field:mrp.bom.check.problem.wizard,only:0
@@ -115,19 +135,35 @@ msgstr "Stampa"
 
 #. module: bom_check_problem_wizard
 #: selection:mrp.bom.check.problem.wizard,mode:0
-msgid "Product BOM"
-msgstr "DB prodotto"
+msgid "Product BOM from order"
+msgstr "DB prodotto da ordinato"
+
+#. module: bom_check_problem_wizard
+#: code:addons/bom_check_problem_wizard/wizard/bom_report_wizard.py:80
+#, python-format
+msgid "Product list"
+msgstr "Lista prodotto"
 
 #. module: bom_check_problem_wizard
 #: selection:mrp.bom.check.problem.wizard,mode:0
-msgid "Product BOM from order"
-msgstr "DB prodotto da ordinato"
+msgid "Product presence bom"
+msgstr "DB presenza prodotto"
+
+#. module: bom_check_problem_wizard
+#: selection:mrp.bom.check.problem.wizard,mode:0
+msgid "Product result BOM"
+msgstr "DB prodotto risultante"
 
 #. module: bom_check_problem_wizard
 #: field:mrp.bom.check.problem.wizard,modal:0
 #: field:mrp.bom.check.problem.wizard,mode:0
 msgid "Report mode"
 msgstr "Modalità report"
+
+#. module: bom_check_problem_wizard
+#: view:mrp.bom.check.problem.wizard:bom_check_problem_wizard.mrp_bom_check_problem_wizard_view
+msgid "Show list"
+msgstr "Mostra lista"
 
 #. module: bom_check_problem_wizard
 #: field:mrp.bom.check.problem.wizard,start_code:0

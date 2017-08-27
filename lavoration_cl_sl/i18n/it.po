@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-03 17:45+0000\n"
-"PO-Revision-Date: 2016-12-03 18:44+0100\n"
+"POT-Creation-Date: 2017-07-27 16:28+0000\n"
+"PO-Revision-Date: 2017-08-06 10:28+0100\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,6 +16,70 @@ msgstr ""
 "Plural-Forms: \n"
 "Language: it\n"
 "X-Generator: Poedit 1.6.10\n"
+
+#. module: lavoration_cl_sl
+#: code:addons/lavoration_cl_sl/lavoration.py:172
+#, python-format
+msgid ""
+"\n"
+"            <style>\n"
+"                    .table_mrp {\n"
+"                         border:1px \n"
+"                         padding: 3px;\n"
+"                         solid black;\n"
+"                     }\n"
+"                    .table_mrp td {\n"
+"                         border:1px \n"
+"                         solid black;\n"
+"                         padding: 3px;\n"
+"                         text-align: center;\n"
+"                     }\n"
+"                    .table_mrp th {\n"
+"                         border:1px \n"
+"                         solid black;\n"
+"                         padding: 3px;\n"
+"                         text-align: center;\n"
+"                         background-color: grey;\n"
+"                         color: white;\n"
+"                     }\n"
+"                </style>\n"
+"            <table class='table_mrp'>\n"
+"                <tr class='table_bf'>\n"
+"                    <th>Code</th>\n"
+"                    <th>Q.</th>\n"
+"                    <th>Category</th>\n"
+"                    <th>Component</th>                    \n"
+"                </tr>%s</table>"
+msgstr ""
+"\n"
+"            <style>\n"
+"                    .table_mrp {\n"
+"                         border:1px \n"
+"                         padding: 3px;\n"
+"                         solid black;\n"
+"                     }\n"
+"                    .table_mrp td {\n"
+"                         border:1px \n"
+"                         solid black;\n"
+"                         padding: 3px;\n"
+"                         text-align: center;\n"
+"                     }\n"
+"                    .table_mrp th {\n"
+"                         border:1px \n"
+"                         solid black;\n"
+"                         padding: 3px;\n"
+"                         text-align: center;\n"
+"                         background-color: grey;\n"
+"                         color: white;\n"
+"                     }\n"
+"                </style>\n"
+"            <table class='table_mrp'>\n"
+"                <tr class='table_bf'>\n"
+"                    <th>Codice</th>\n"
+"                    <th>Q.</th>\n"
+"                    <th>Categoria</th>\n"
+"                    <th>Componente</th>                    \n"
+"                </tr>%s</table>"
 
 #. module: lavoration_cl_sl
 #: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
@@ -39,9 +103,43 @@ msgid "Company lavoration parameter"
 msgstr "Parametri aziendali"
 
 #. module: lavoration_cl_sl
+#: field:stock.picking.device,create_uid:0
+msgid "Created by"
+msgstr "Creato da"
+
+#. module: lavoration_cl_sl
+#: field:stock.picking.device,create_date:0
+msgid "Created on"
+msgstr "Creato il"
+
+#. module: lavoration_cl_sl
+#: view:mrp.production:lavoration_cl_sl.default_mrp_production_form_view
+#: field:mrp.production,linked_picking_ids:0
+msgid "Cut"
+msgstr "Taglio"
+
+#. module: lavoration_cl_sl
+#: selection:stock.picking,dep_mode:0
+msgid "Cut department"
+msgstr "Dipartimento taglio"
+
+#. module: lavoration_cl_sl
 #: field:stock.move,product_fail_qty:0
 msgid "Damaged"
 msgstr "Danneggiati"
+
+#. module: lavoration_cl_sl
+#: field:stock.picking,dep_mode:0
+msgid "Department mode"
+msgstr "Modalità dipartimento"
+
+#. module: lavoration_cl_sl
+#: field:stock.picking,device_id:0
+#: view:stock.picking.device:lavoration_cl_sl.view_stock_picking_device_form
+#: view:stock.picking.device:lavoration_cl_sl.view_stock_picking_device_tree
+#: field:stock.picking.device,name:0
+msgid "Device"
+msgstr "Componente"
 
 #. module: lavoration_cl_sl
 #: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
@@ -54,7 +152,7 @@ msgid "Enable lavoration"
 msgstr "Abilita lavorazione"
 
 #. module: lavoration_cl_sl
-#: code:addons/lavoration_cl_sl/lavoration.py:155
+#: code:addons/lavoration_cl_sl/lavoration.py:233
 #, python-format
 msgid "Error"
 msgstr "Errore"
@@ -65,21 +163,65 @@ msgid "Fail"
 msgstr "Danneggiati"
 
 #. module: lavoration_cl_sl
+#: field:stock.picking.device,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: lavoration_cl_sl
 #: field:stock.picking,is_mrp_lavoration:0
 msgid "Is Lavoration"
 msgstr "E' lavorazione"
 
 #. module: lavoration_cl_sl
+#: field:stock.picking.device,write_uid:0
+msgid "Last Updated by"
+msgstr "Aggiornato da"
+
+#. module: lavoration_cl_sl
+#: field:stock.picking.device,write_date:0
+msgid "Last Updated on"
+msgstr "Aggiornato il"
+
+#. module: lavoration_cl_sl
+#: view:mrp.production:lavoration_cl_sl.default_mrp_production_form_view
+msgid "Lavoration"
+msgstr "Lavorazione"
+
+#. module: lavoration_cl_sl
+#: model:ir.ui.menu,name:lavoration_cl_sl.menu_stock_picking_lavoration_area_root
+msgid "Lavoration area"
+msgstr "Area lavorazione"
+
+#. module: lavoration_cl_sl
+#: model:ir.actions.act_window,name:lavoration_cl_sl.action_stock_picking_cut_cl_closed_tree
+#: model:ir.ui.menu,name:lavoration_cl_sl.menu_stock_picking_cut_cl_closed_tree
+msgid "Lavoration cut list (all)"
+msgstr "Lista taglio lavorazioni (tutte)"
+
+#. module: lavoration_cl_sl
+#: model:ir.actions.act_window,name:lavoration_cl_sl.action_stock_picking_cut_cl_tree
+#: model:ir.ui.menu,name:lavoration_cl_sl.menu_stock_picking_cut_cl
+msgid "Lavoration cut list (open)"
+msgstr "Lista taglio lavorazioni (aperte)"
+
+#. module: lavoration_cl_sl
+#: model:ir.actions.act_window,name:lavoration_cl_sl.action_open_stock_picking_device
+#: model:ir.model,name:lavoration_cl_sl.model_stock_picking_device
+#: model:ir.ui.menu,name:lavoration_cl_sl.menu_open_stock_picking_device
+msgid "Lavoration device"
+msgstr "Lavorazione componente"
+
+#. module: lavoration_cl_sl
 #: model:ir.actions.act_window,name:lavoration_cl_sl.action_stock_picking_cl_closed_tree
 #: model:ir.ui.menu,name:lavoration_cl_sl.menu_stock_picking_cl_closed_tree
-msgid "Lavoration list (all)"
-msgstr "Lista lavorazioni (tutte)"
+msgid "Lavoration workshop list (all)"
+msgstr "Lista lavorazioni laboratorio (tutte)"
 
 #. module: lavoration_cl_sl
 #: model:ir.actions.act_window,name:lavoration_cl_sl.action_stock_picking_cl_tree
 #: model:ir.ui.menu,name:lavoration_cl_sl.menu_stock_picking_cl
-msgid "Lavoration list (open)"
-msgstr "Lista lavorazioni (aperte)"
+msgid "Lavoration workshop list (open)"
+msgstr "Lista lavorazioni laboratorio (aperte)"
 
 #. module: lavoration_cl_sl
 #: field:stock.move,linked_cl_stock_move_id:0
@@ -98,8 +240,28 @@ msgstr "Collega a movimenti SL"
 
 #. module: lavoration_cl_sl
 #: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
+msgid "MRP info"
+msgstr "Info produzione"
+
+#. module: lavoration_cl_sl
+#: field:stock.picking,linked_mrp_id:0
+msgid "MRP linked"
+msgstr "Produzione collegata"
+
+#. module: lavoration_cl_sl
+#: field:stock.picking,mrp_material_info:0
+msgid "MRP material info"
+msgstr "Info maratiale produzione"
+
+#. module: lavoration_cl_sl
+#: model:ir.model,name:lavoration_cl_sl.model_mrp_production
+msgid "Manufacturing Order"
+msgstr "Ordine di Produzione"
+
+#. module: lavoration_cl_sl
+#: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
 msgid "Movement"
-msgstr "Movementi"
+msgstr "Movimenti"
 
 #. module: lavoration_cl_sl
 #: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
@@ -107,9 +269,15 @@ msgid "Movimenti di Magazzino"
 msgstr "Movimenti di Magazzino"
 
 #. module: lavoration_cl_sl
+#: view:stock.picking.device:lavoration_cl_sl.view_stock_picking_device_form
+#: field:stock.picking.device,note:0
+msgid "Note"
+msgstr "Note"
+
+#. module: lavoration_cl_sl
 #: model:ir.model,name:lavoration_cl_sl.model_stock_picking
 msgid "Picking List"
-msgstr "Prelievi"
+msgstr "Lista prelievo"
 
 #. module: lavoration_cl_sl
 #: view:res.company:lavoration_cl_sl.view_res_company_cl_sl_picking_ref_tree
@@ -122,14 +290,26 @@ msgid "Pieces"
 msgstr "Pezzi"
 
 #. module: lavoration_cl_sl
+#: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
+msgid "Q. Magazzino"
+msgstr "Q. Magazzino"
+
+#. module: lavoration_cl_sl
 #: model:ir.model,name:lavoration_cl_sl.model_stock_quant
 msgid "Quants"
-msgstr "Quants"
+msgstr "Quant."
 
 #. module: lavoration_cl_sl
 #: field:res.company,sl_mrp_lavoration_id:0
 msgid "SL Lavoration"
 msgstr "SL Lavorazione"
+
+#. module: lavoration_cl_sl
+#: code:addons/lavoration_cl_sl/lavoration.py:246
+#: code:addons/lavoration_cl_sl/lavoration.py:257
+#, python-format
+msgid "SL from %s"
+msgstr "SL da %s"
 
 #. module: lavoration_cl_sl
 #: field:stock.picking,linked_sl_id:0
@@ -142,16 +322,21 @@ msgid "SL movement"
 msgstr "SL movimenti"
 
 #. module: lavoration_cl_sl
-#: code:addons/lavoration_cl_sl/lavoration.py:210
+#: code:addons/lavoration_cl_sl/lavoration.py:300
 #, python-format
 msgid "SL-LAV-%s"
 msgstr "SL-LAV-%s"
 
 #. module: lavoration_cl_sl
-#: code:addons/lavoration_cl_sl/lavoration.py:156
+#: code:addons/lavoration_cl_sl/lavoration.py:234
 #, python-format
 msgid "Set up in company location for stock and mrp1!"
 msgstr "Imposta "
+
+#. module: lavoration_cl_sl
+#: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
+msgid "Stock"
+msgstr "Magazzino"
 
 #. module: lavoration_cl_sl
 #: model:ir.model,name:lavoration_cl_sl.model_stock_move
@@ -159,14 +344,30 @@ msgid "Stock Move"
 msgstr "Movimento di magazzino"
 
 #. module: lavoration_cl_sl
+#: field:stock.picking,sl_quants_ids:0
+msgid "Stock quants"
+msgstr "Quant. magazzino"
+
+#. module: lavoration_cl_sl
 #: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
+#: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_tree
 msgid "String"
 msgstr "Stringa"
 
 #. module: lavoration_cl_sl
+#: field:stock.picking,total_prepare:0
+msgid "Tot. prepare H."
+msgstr "Tot. prep. H."
+
+#. module: lavoration_cl_sl
+#: field:stock.picking,total_stop:0
+msgid "Tot. stop H."
+msgstr "Tot. stop H."
+
+#. module: lavoration_cl_sl
 #: field:stock.picking,total_work:0
-msgid "Tot. H."
-msgstr "Tot. H."
+msgid "Tot. work H."
+msgstr "Tot. lav. H."
 
 #. module: lavoration_cl_sl
 #: view:stock.picking:lavoration_cl_sl.view_stock_picking_cl_form
@@ -177,3 +378,8 @@ msgstr "Sblocca"
 #: field:stock.picking,workers:0
 msgid "Workers"
 msgstr "Addetti"
+
+#. module: lavoration_cl_sl
+#: selection:stock.picking,dep_mode:0
+msgid "Workshop department"
+msgstr "Laboratorio"

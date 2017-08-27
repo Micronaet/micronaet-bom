@@ -1,21 +1,19 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* order_bom
+#	* order_bom
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-14 07:38+0000\n"
-"PO-Revision-Date: 2016-12-14 08:39+0100\n"
+"POT-Creation-Date: 2017-07-27 16:28+0000\n"
+"PO-Revision-Date: 2017-07-27 16:28+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
+"Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
-"Language: it\n"
-"X-Generator: Poedit 1.6.10\n"
 
 #. module: order_bom
 #: code:addons/order_bom/report/hw_status_parser.py:63
@@ -79,7 +77,7 @@ msgstr "Linea: %s"
 #: model:ir.actions.report.xml,name:order_bom.aeroo_final_component_bom_product_component_check_report_id
 #: model:ir.actions.report.xml,name:order_bom.aeroo_order_bom_product_component_check_report_id
 msgid "Order bom component check"
-msgstr "Controllo componenti DB su ordinato"
+msgstr "Controllo componenti distinta su ordinato"
 
 #. module: order_bom
 #: model:ir.actions.report.xml,name:order_bom.aeroo_product_in_bom_report_check
@@ -95,3 +93,4 @@ msgstr "Prodotti non in DB"
 #: model:ir.model,name:order_bom.model_sale_order
 msgid "Sales Order"
 msgstr "Ordine di vendita"
+

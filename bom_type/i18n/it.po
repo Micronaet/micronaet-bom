@@ -1,0 +1,76 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* bom_type
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-07-27 16:23+0000\n"
+"PO-Revision-Date: 2017-08-04 14:45+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: it\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#. module: bom_type
+#: code:addons/bom_type/mode.py:67
+#, python-format
+msgid "BOM used"
+msgstr "DB usata"
+
+#. module: bom_type
+#: code:addons/bom_type/mode.py:60
+#, python-format
+msgid "Error"
+msgstr "Errore"
+
+#. module: bom_type
+#: selection:product.product,relative_type:0
+msgid "Halfworked BOM"
+msgstr "DB semilavorato"
+
+#. module: bom_type
+#: code:addons/bom_type/mode.py:61
+#, python-format
+msgid "No BOM found where this product was used!"
+msgstr "DB non trovato dove viene utilizzato il prodotto!"
+
+#. module: bom_type
+#: selection:product.product,relative_type:0
+msgid "None"
+msgstr "Nessuno"
+
+#. module: bom_type
+#: selection:product.product,relative_type:0
+msgid "Parent BOM"
+msgstr "DB padre"
+
+#. module: bom_type
+#: model:ir.model,name:bom_type.model_product_product
+msgid "Product"
+msgstr "Prodotto"
+
+#. module: bom_type
+#: view:product.product:bom_type.view_product_product_BOM_relative_type_form
+msgid "Related BOM"
+msgstr "DB relativa"
+
+#. module: bom_type
+#: field:product.product,relative_type:0
+msgid "Relative BOM type"
+msgstr "Tipo DB relativa"
+
+#. module: bom_type
+#: view:product.product:bom_type.view_product_product_BOM_relative_type_form
+msgid "Relative BOM:"
+msgstr "DB relativa:"
+
+#. module: bom_type
+#: view:product.product:bom_type.view_product_product_BOM_relative_type_form
+msgid "Used in BOM"
+msgstr "Usato in DB"

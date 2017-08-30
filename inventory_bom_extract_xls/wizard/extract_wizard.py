@@ -132,7 +132,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             _logger.info('End extract %s sheet: %s' % (xls_file, name))
             return            
 
-        def xls_sheet_write_list(WB, name, value, title):
+        def xls_sheet_write_table(WB, name, value, title):
             ''' Write a simple list on Excel file
                 WB: Excel workbook
                 name: Sheet name
@@ -348,8 +348,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
 
         xls_sheet_write(
             WB, '5. Materiali utilizzati', materials, header_product)
-        import pdb; pdb.set_trace()    
-        xls_sheet_write_list(
+        xls_sheet_write_table(
             WB, '6. Materiali saltati', jumped, 'Codice materiale')
                         
     _columns = {

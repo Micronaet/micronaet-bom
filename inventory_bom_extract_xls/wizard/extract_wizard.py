@@ -194,6 +194,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         product.inv_revenue_account,
                         product.inv_cost_account,
                         product.inv_first_supplier,
+                        get_cost(product),            
                         )
             return not_selected            
         
@@ -490,7 +491,9 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             WB, '5. Materiali utilizzati', materials, material_product)
         xls_sheet_write_table(
             WB, '6. Materiali saltati', jumped, (
-                'Codice materiale', 'Nome', 'Costo', 'Ricavo', 'Fornitore'))
+                'Codice materiale', 'Nome', 'Costo', 'Ricavo', 'Fornitore', 
+                'Prezzo',
+                ))
                         
     _columns = {
         'year': fields.integer('Year', required=True),

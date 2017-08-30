@@ -136,7 +136,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             ''' Write a simple list on Excel file
                 WB: Excel workbook
                 name: Sheet name
-                value: list of data
+                value: dict with data
                 title: string for title
             '''
             WS = WB.add_worksheet(name)
@@ -144,8 +144,10 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             row = 0
             for item in sorted(value):
                 row += 1
-                for col in range(0, len(item)):
-                    WS.write(row, col, item[col])
+                WS.write(row, 0, item) # code
+                data = valua[item]
+                for col in range(0, data):
+                    WS.write(row, col + 1, data[col])
             return    
             
         def clean_float(value):
@@ -193,6 +195,13 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             'Codice', 'Inv. iniz.', 'Gen.', 'Feb.', 'Mar.', 'Apr.', 
             'Mag.', 'Giu.', 'Lug.', 'Ago.', 'Set.', 'Ott.', 'Nov.', 
             'Dic.', 'Inv. fin.'
+            ]
+        material_product = [
+            'Codice', 'Gen.', 'Feb.', 'Mar.', 'Apr.', 'Mag.', 'Giu.', 'Lug.', 
+            'Ago.', 'Set.', 'Ott.', 'Nov.', 'Dic.',
+            'Gen.', 'Feb.', 'Mar.', 'Apr.', 'Mag.', 'Giu.', 'Lug.', 
+            'Ago.', 'Set.', 'Ott.', 'Nov.', 'Dic.',
+            'Costo', 'Ricavo', 'Fornitore', 'Costo',
             ]
 
         # ---------------------------------------------------------------------
@@ -307,17 +316,27 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # D. Extra material from sales
         # ---------------------------------------------------------------------
         materials = {}
-        jumped = [] # Material not managed
+        jumped = {} # Material not managed
+        temp = 0 # TODO remove
         for default_code, unload_list in inventory_product.iteritems():
             _logger.info('Extract material for code: %s' % default_code)
+            temp += 1 # TODO remove
             for col in range (0, 12):
                 product_qty = unload_list[col]
                 bom_line_ids = products[default_code].dynamic_bom_line_ids
                 if not bom_line_ids:
                     if default_code not in materials: # Product with no BOM
-                        materials[default_code] = \
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]         
-                    materials[default_code][col] += product_qty # TODO cost
+                        materials[default_code] = [
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                            products[default_code].inv_revenue_account,
+                            products[default_code].inv_cost_account,
+                            products[default_code].inv_first_supplier,
+                            products[default_code].standard_price, # TODO Change
+                            ]
+                    materials[default_code][col] += product_qty
+                    materials[default_code][col + 12] += product_qty * \
+                        products[default_code].standard_price
                     continue
                             
                 for line in bom_line_ids: # has bom
@@ -329,25 +348,36 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                             and component.inv_cost_account not in \
                             ledger_selection and component.inv_first_supplier \
                             not in supplier_selection:
+                            
                         if component_code not in jumped: 
                             # log jumped material (with useful information)
-                            jumped.append((
-                                component_code, 
+                            jumped[component_code] = ( 
                                 component.inv_revenue_account,
                                 component.inv_cost_account,
                                 component.inv_first_supplier,
-                                ))                           
+                                )
                         continue
 
                     if component_code not in materials:
-                        materials[component_code] = \
-                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                        materials[component_code] = [
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                            component.inv_revenue_account,
+                            component.inv_cost_account,
+                            component.inv_first_supplier,
+                            component.standard_price, # TODO Change
+                            ]
                     materials[component_code][col] += \
-                        product_qty * line.product_qty # TODO real cost
-            break # TODO remove    
+                        product_qty * line.product_qty
+                    materials[component_code][col + 12] += \
+                        product_qty * line.product_qty * \
+                        component.standard_price
+                        
+            if temp > 50:
+                break # TODO remove    
 
         xls_sheet_write(
-            WB, '5. Materiali utilizzati', materials, header_product)
+            WB, '5. Materiali utilizzati', materials, material_product)
         xls_sheet_write_table(
             WB, '6. Materiali saltati', jumped, 'Codice materiale')
                         

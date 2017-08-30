@@ -139,14 +139,20 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 value: dict with data
                 title: string for title
             '''
+            # Write name of sheet:
             WS = WB.add_worksheet(name)
-            WS.write(0, 0, title)
+            
+            # Write header:
+            for col in range(0, len(title)):
+                WS.write(0, col, title[col])
+                
+            # Write data lines:    
             row = 0
             for item in sorted(value):
                 row += 1
                 WS.write(row, 0, item) # code
-                data = valua[item]
-                for col in range(0, data):
+                data = value[item]
+                for col in range(0, len(data)):
                     WS.write(row, col + 1, data[col])
             return    
             
@@ -352,6 +358,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         if component_code not in jumped: 
                             # log jumped material (with useful information)
                             jumped[component_code] = ( 
+                                component.name,
                                 component.inv_revenue_account,
                                 component.inv_cost_account,
                                 component.inv_first_supplier,
@@ -379,7 +386,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         xls_sheet_write(
             WB, '5. Materiali utilizzati', materials, material_product)
         xls_sheet_write_table(
-            WB, '6. Materiali saltati', jumped, 'Codice materiale')
+            WB, '6. Materiali saltati', jumped, (
+                'Codice materiale', 'Nome', 'Costo', 'Ricavo', 'Fornitore'))
                         
     _columns = {
         'year': fields.integer('Year', required=True),

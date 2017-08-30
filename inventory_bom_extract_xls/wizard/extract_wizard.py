@@ -20,7 +20,6 @@
 #
 ###############################################################################
 
-
 import os
 import sys
 import logging
@@ -480,7 +479,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                                 materials,
                                 )
                         continue # no other material        
-                                        
+
                     # ---------------------------------------------------------
                     # Prime material in product explose:
                     # ---------------------------------------------------------
@@ -496,9 +495,9 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         product_qty * line.product_qty, 
                         materials,
                         )
-                        
-            if temp > 1000:
-                break # TODO remove    
+
+            #if temp > 1000:
+            #    break # TODO remove    
 
         xls_sheet_write(
             WB, '5. Materiali utilizzati', materials, material_product)

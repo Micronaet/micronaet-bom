@@ -421,10 +421,12 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 # Prime material:
                 # -------------------------------------------------------------
                 if not dynamic_ids and not bom_line_ids:
+                    # Not used:
                     if not_in_inventory_selection(
                             products[default_code], jumped):
                         continue # jump not used!
-
+                        
+                    # Add in inventory:
                     setup_materials(products[default_code], materials)
                     setup_materials_q(
                         products[default_code], col, product_qty, materials)
@@ -437,9 +439,18 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     component = line.product_id
                     component_code = component.default_code
                     
-                    # TODO check cost / revenue / supplier value
+                    # Not used:
                     if not_in_inventory_selection(component, jumped):
                         continue
+
+                    # Add to inventory:
+                    setup_materials(component, materials)
+                    setup_materials_q(
+                        component, col, 
+                        product_qty * line.product_qty, 
+                        materials,
+                        )
+                    continue
 
                 # -------------------------------------------------------------
                 # Product explose:
@@ -457,10 +468,11 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                             hw_product = hw_line.product_id
                             hw_product_code = hw_product.default_code
                             
-                            # TODO check cost / revenue / supplier value
+                            # Not used:
                             if not_in_inventory_selection(hw_product, jumped):                                
                                 continue # jump not used!
-
+                            
+                            # Add to inventory:
                             setup_materials(hw_product, materials)
                             setup_materials_q(
                                 hw_product, col, 
@@ -472,10 +484,11 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     # ---------------------------------------------------------
                     # Prime material in product explose:
                     # ---------------------------------------------------------
-                    # TODO check cost / revenue / supplier value
+                    # Not used:
                     if not_in_inventory_selection(component, jumped):
                         continue # jump not used
 
+                    # Add to inventory:
                     if component_code not in materials:
                         setup_materials(component, materials)
                     setup_materials_q(
@@ -484,8 +497,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         materials,
                         )
                         
-            #if temp > 1000:
-            #    break # TODO remove    
+            if temp > 1000:
+                break # TODO remove    
 
         xls_sheet_write(
             WB, '5. Materiali utilizzati', materials, material_product)

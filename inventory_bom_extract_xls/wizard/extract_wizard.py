@@ -171,13 +171,19 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 Add in jumped list
             '''
             ledger_selection = (
-                '37.00101', '37.00103', '37.00105', '37.00106', '37.00108',            
+                '37.00101', # Tessuto c/acquisti
+                '37.00103', # Ferro c/acquisti
+                '37.00105', # Cartoni c/acquisti
+                '37.00106', # Cellophan c/acquisti
+                '37.00108', # Copriteste e pinze c/acquisti
                 )
-            supplier_selection = ('20.01330', )
+            supplier_selection = (
+                '20.01330', # La Industrial Algodonera
+                )
 
             # cost, revenue, supplier all different:
-            not_selected = product.inv_revenue_account not in ledger_selection \
-                and product.inv_cost_account not in ledger_selection \
+            not_selected = product.inv_revenue_account not in ledger_selection\
+                and product.inv_cost_account not in ledger_selection\
                 and product.inv_first_supplier not in supplier_selection
                 
             if not_selected:
@@ -191,9 +197,20 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         )
             return not_selected            
         
+        def get_cost(product):
+            ''' Check cost for this product
+            '''
+            # TODO write a better method
+            default_code = product.default_code
+            if default_code and default_code in of_cost:
+                return of_cost[default_code]
+            else:     
+                return product.standard_price
+
         def setup_materials(product, materials):
             ''' Utility for append product in material list (initial setup)
             '''
+            price = get_cost(product)
             if product.default_code not in materials:
                 materials[product.default_code] = [
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -201,24 +218,28 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     product.inv_revenue_account,
                     product.inv_cost_account,
                     product.inv_first_supplier,
-                    product.standard_price, # TODO Change
+                    price, 
                     ]            
             return
             
         def setup_materials_q(product, col, qty, materials):
             ''' Add data for product passed in right column with right cost
             '''
+            price = get_cost(product)
+            
             default_code = product.default_code
             # Add q:
             materials[default_code][col] += qty
             # Add total TODO change cost value:
-            materials[default_code][col + 12] += qty * products.standard_price            
-            return 
+            materials[default_code][col + 12] += qty * price
+            return
             
         if context is None: 
             context = {}    
-            
+
+        # ---------------------------------------------------------------------            
         # Parameters:        
+        # ---------------------------------------------------------------------            
         code_part = 6
         xls_file = '/home/administrator/photo/xls/stock/inventory_%s.xlsx'
         xls_infile = '/home/administrator/photo/xls/stock/use_inv_%s.xlsx'
@@ -227,6 +248,25 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # Read parameter from wizard:
         wiz_browse = self.browse(cr, uid, ids, context=context)[0]
         year = wiz_browse.year
+
+        # ---------------------------------------------------------------------            
+        # Load cost from order:
+        # ---------------------------------------------------------------------            
+        of_cost = {}
+        po_pool = self.pool.get('purchase.order')
+        po_ids = po_pool.search(cr, uid, [
+            ('state', 'in', ('approved', )),
+            ('date_order', '>=', '%s-01-01' % year),
+            ('date_order', '<=', '%s-12-31' % year),
+            ], context=context)
+        for po in po_pool.browse(cr, uid, po_ids, context=context):
+            for line in po.order_line:
+                if not line.price_unit:
+                    continue # jump no price line
+                product = line.product_id
+                default_code = product.default_code
+                if default_code and default_code not in of_cost:                    
+                    of_cost[default_code] = line.price_unit
         
         # Insert year in filename:
         xls_file = xls_file % year
@@ -367,14 +407,14 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         materials = {}
         jumped = {} # Material not managed
-        #temp = 0 # TODO remove
+        temp = 0 # TODO remove
         for default_code, unload_list in inventory_product.iteritems():
             _logger.info('Extract material for code: %s' % default_code)
-            #temp += 1 # TODO remove
+            temp += 1 # TODO remove
             for col in range (0, 12):
                 product_qty = unload_list[col]
                 dynamic_ids = products[default_code].dynamic_bom_line_ids
-                bom_line_ids = products[default_code].bom_line_ids
+                bom_line_ids = products[default_code].bom_ids
                 
                 # -------------------------------------------------------------
                 # Prime material:
@@ -411,8 +451,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     # ---------------------------------------------------------
                     # HW in product explose:
                     # ---------------------------------------------------------
-                    if component.bom_line_ids:
-                        for hw_line in component.bom_line_ids:
+                    if component.bom_ids:
+                        for hw_line in component.bom_ids:
                             hw_product = hw_line.product_id
                             hw_product_code = hw_product.default_code
                             
@@ -443,8 +483,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         materials,
                         )
                         
-            #if temp > 50:
-            #    break # TODO remove    
+            if temp > 1000:
+                break # TODO remove    
 
         xls_sheet_write(
             WB, '5. Materiali utilizzati', materials, material_product)

@@ -144,7 +144,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             row = 0
             for item in sorted(value):
                 row += 1
-                WS.write(row, 0, item)
+                for col in range(0, len(item)):
+                    WS.write(row, col, item[col])
             return    
             
         def clean_float(value):
@@ -343,9 +344,11 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
                     materials[component_code][col] += \
                         product_qty * line.product_qty # TODO real cost
+            break # TODO remove    
 
         xls_sheet_write(
             WB, '5. Materiali utilizzati', materials, header_product)
+        import pdb; pdb.set_trace()    
         xls_sheet_write_list(
             WB, '6. Materiali saltati', jumped, 'Codice materiale')
                         

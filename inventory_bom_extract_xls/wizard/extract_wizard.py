@@ -484,8 +484,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         materials,
                         )
                         
-            if temp > 1000:
-                break # TODO remove    
+            #if temp > 1000:
+            #    break # TODO remove    
 
         xls_sheet_write(
             WB, '5. Materiali utilizzati', materials, material_product)

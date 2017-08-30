@@ -165,6 +165,55 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             except:
                 #_logger.warning('Float value not present: %s' % value)
                 return 0.0
+        
+        def not_in_inventory_selection(product, jumped):
+            ''' Check if the product need to be used:
+                Add in jumped list
+            '''
+            ledger_selection = (
+                '37.00101', '37.00103', '37.00105', '37.00106', '37.00108',            
+                )
+            supplier_selection = ('20.01330', )
+
+            # cost, revenue, supplier all different:
+            not_selected = product.inv_revenue_account not in ledger_selection \
+                and product.inv_cost_account not in ledger_selection \
+                and product.inv_first_supplier not in supplier_selection
+                
+            if not_selected:
+                if product.default_code not in jumped: 
+                    # log jumped material (with useful information)
+                    jumped[product.default_code] = ( 
+                        product.name,
+                        product.inv_revenue_account,
+                        product.inv_cost_account,
+                        product.inv_first_supplier,
+                        )
+            return not_selected            
+        
+        def setup_materials(product, materials):
+            ''' Utility for append product in material list (initial setup)
+            '''
+            if product.default_code not in materials:
+                materials[product.default_code] = [
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    product.inv_revenue_account,
+                    product.inv_cost_account,
+                    product.inv_first_supplier,
+                    product.standard_price, # TODO Change
+                    ]            
+            return
+            
+        def setup_materials_q(product, col, qty, materials):
+            ''' Add data for product passed in right column with right cost
+            '''
+            default_code = product.default_code
+            # Add q:
+            materials[default_code][col] += qty
+            # Add total TODO change cost value:
+            materials[default_code][col + 12] += qty * products.standard_price            
+            return 
             
         if context is None: 
             context = {}    
@@ -174,12 +223,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         xls_file = '/home/administrator/photo/xls/stock/inventory_%s.xlsx'
         xls_infile = '/home/administrator/photo/xls/stock/use_inv_%s.xlsx'
         start_row = 2 # first data row (start from 0)
-        
-        ledger_selection = (
-            '37.00101', '37.00103', '37.00105', '37.00106', '37.00108',            
-            )
-        supplier_selection = ('20.01330', )
-        
+                
         # Read parameter from wizard:
         wiz_browse = self.browse(cr, uid, ids, context=context)[0]
         year = wiz_browse.year
@@ -323,65 +367,84 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         materials = {}
         jumped = {} # Material not managed
-        temp = 0 # TODO remove
+        #temp = 0 # TODO remove
         for default_code, unload_list in inventory_product.iteritems():
             _logger.info('Extract material for code: %s' % default_code)
-            temp += 1 # TODO remove
+            #temp += 1 # TODO remove
             for col in range (0, 12):
                 product_qty = unload_list[col]
-                bom_line_ids = products[default_code].dynamic_bom_line_ids
-                if not bom_line_ids:
-                    if default_code not in materials: # Product with no BOM
-                        materials[default_code] = [
-                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                            products[default_code].inv_revenue_account,
-                            products[default_code].inv_cost_account,
-                            products[default_code].inv_first_supplier,
-                            products[default_code].standard_price, # TODO Change
-                            ]
-                    materials[default_code][col] += product_qty
-                    materials[default_code][col + 12] += product_qty * \
-                        products[default_code].standard_price
+                dynamic_ids = products[default_code].dynamic_bom_line_ids
+                bom_line_ids = products[default_code].bom_line_ids
+                
+                # -------------------------------------------------------------
+                # Prime material:
+                # -------------------------------------------------------------
+                if not dynamic_ids and not bom_line_ids:
+                    if not_in_inventory_selection(
+                            products[default_code], jumped):
+                        continue # jump not used!
+
+                    setup_materials(products[default_code], materials)
+                    setup_materials_q(
+                        products[default_code], col, product_qty, materials)
                     continue
-                            
-                for line in bom_line_ids: # has bom
+
+                # -------------------------------------------------------------
+                # Halfwork explose:                
+                # -------------------------------------------------------------
+                for line in bom_line_ids:
                     component = line.product_id
                     component_code = component.default_code
                     
                     # TODO check cost / revenue / supplier value
-                    if component.inv_revenue_account not in ledger_selection \
-                            and component.inv_cost_account not in \
-                            ledger_selection and component.inv_first_supplier \
-                            not in supplier_selection:
-                            
-                        if component_code not in jumped: 
-                            # log jumped material (with useful information)
-                            jumped[component_code] = ( 
-                                component.name,
-                                component.inv_revenue_account,
-                                component.inv_cost_account,
-                                component.inv_first_supplier,
-                                )
+                    if not_in_inventory_selection(component, jumped):
                         continue
 
+                # -------------------------------------------------------------
+                # Product explose:
+                # -------------------------------------------------------------
+                for line in dynamic_ids: # has bom
+                    # TODO change product_qty
+                    component = line.product_id
+                    component_code = component.default_code
+
+                    # ---------------------------------------------------------
+                    # HW in product explose:
+                    # ---------------------------------------------------------
+                    if component.bom_line_ids:
+                        for hw_line in component.bom_line_ids:
+                            hw_product = hw_line.product_id
+                            hw_product_code = hw_product.default_code
+                            
+                            # TODO check cost / revenue / supplier value
+                            if not_in_inventory_selection(hw_product, jumped):                                
+                                continue # jump not used!
+
+                            setup_materials(hw_product, materials)
+                            setup_materials_q(
+                                hw_product, col, 
+                                product_qty * hw_line.product_qty, # q.
+                                materials,
+                                )
+                        continue # no other material        
+                                        
+                    # ---------------------------------------------------------
+                    # Prime material in product explose:
+                    # ---------------------------------------------------------
+                    # TODO check cost / revenue / supplier value
+                    if not_in_inventory_selection(component, jumped):
+                        continue # jump not used
+
                     if component_code not in materials:
-                        materials[component_code] = [
-                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                            component.inv_revenue_account,
-                            component.inv_cost_account,
-                            component.inv_first_supplier,
-                            component.standard_price, # TODO Change
-                            ]
-                    materials[component_code][col] += \
-                        product_qty * line.product_qty
-                    materials[component_code][col + 12] += \
-                        product_qty * line.product_qty * \
-                        component.standard_price
+                        setup_materials(component, materials)
+                    setup_materials_q(
+                        component, col, 
+                        product_qty * line.product_qty, 
+                        materials,
+                        )
                         
-            if temp > 50:
-                break # TODO remove    
+            #if temp > 50:
+            #    break # TODO remove    
 
         xls_sheet_write(
             WB, '5. Materiali utilizzati', materials, material_product)

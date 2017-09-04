@@ -41,7 +41,6 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
-
 class ProductInventoryExtractXLSWizard(orm.TransientModel):
     ''' Wizard for extracting inventory wizard
     '''

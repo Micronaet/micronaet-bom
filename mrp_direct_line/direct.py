@@ -76,8 +76,10 @@ class MrpProductionStatsPallet(orm.Model):
     _order = 'sequence,id'
     
     _columns = {
+        'create_date': fields.date('Create date'),
         'sequence': fields.integer('Seq.'),
         'stats_id': fields.many2one('mrp.production.stats', 'Stats'),
+        # TODO total pieces
         }
 
 class MrpProductionStatsPalletRow(orm.Model):
@@ -93,7 +95,8 @@ class MrpProductionStatsPalletRow(orm.Model):
         'sequence': fields.integer('Seq.'),
         'pallet_id': fields.many2one('mrp.production.stats.pallet', 'Pallet'),
         'sol_id': fields.many2one('sale.order.line', 'Line'),
-        # TODO related
+        'quantity': fields.integer('Q.', required=True),
+        # TODO related (partner, destination, code)
         }
 
 class MrpProductionStatsPallet(orm.Model):
@@ -138,6 +141,8 @@ class MrpProductionStat(orm.Model):
         return True
 
     _columns = {
+        'pallet_ids': fields.one2many(
+            'mrp.production.stats.pallet', 'stats_id', 'Pallet'),
         'working_ids': fields.one2many(
             'sale.order.line', 'working_line_id', 'Working line',
             help='Sale order line working on this day'),

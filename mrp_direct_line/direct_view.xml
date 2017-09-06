@@ -60,6 +60,25 @@
                         </page>
                         <page string="Pallet">
                             <group colspan="4" col="4">
+                                <separator string="Pallet" colspan="4"/>
+                                <field name="pallet_ids" colspan="4" nolabel="1" >
+                                    <tree string="Pallet">
+                                        <field name="sequence" />
+                                        <field name="create_date" />                                        
+                                    </tree>
+                                    <form string="Pallet">
+                                        <field name="sequence" />
+                                        <field name="create_date" />
+                                        <separator string="Content" colspan="4"/>
+                                        <field name="content_ids" editable="bottom" nolabel="1">
+                                           <tree string="Content">
+                                               <field name="sequence" />
+                                               <field name="quantity" />
+                                           </tree>
+                                        </field>
+                                                                                
+                                    </form>
+                                </field>    
                             </group>                                                    
                         </page>
                     </notebook>

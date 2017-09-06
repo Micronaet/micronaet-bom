@@ -77,13 +77,15 @@
                                             <group colspan="2" col="2">
                                                 <field name="qrcode_image" widget="image" />
                                             </group>    
-                                            <separator string="Content" colspan="4"/>
-                                            <field name="content_ids" editable="bottom" nolabel="1">
-                                               <tree string="Content">
-                                                   <field name="sequence" />
-                                                   <field name="quantity" />
-                                               </tree>
-                                            </field>
+                                            <group colspan="4" col="4">
+                                                <separator string="Content" colspan="4"/>
+                                                <field name="content_ids" editable="bottom" nolabel="1">
+                                                   <tree string="Content">
+                                                       <field name="sequence" />
+                                                       <field name="quantity" />
+                                                   </tree>
+                                                </field>
+                                            </group>                                                                                                                                
                                         </group>                                                                                
                                     </form>
                                 </field>    

@@ -21,6 +21,7 @@ import os
 import sys
 import logging
 import openerp
+import qrcode
 import openerp.netsvc as netsvc
 import openerp.addons.decimal_precision as dp
 from openerp.osv import fields, osv, expression, orm
@@ -75,10 +76,48 @@ class MrpProductionStatsPallet(orm.Model):
     _rec_name = 'sequence'
     _order = 'sequence,id'
     
+    def _create_qr_code_package(self, cr, uid, ids, fields, args, context=None):
+        ''' Fields function for calculate 
+        '''
+        import StringIO
+        import base64
+        
+        res = {}
+        for pallet in self.browse(cr, uid, ids, context=context):
+            res[pallet.id] = {}
+            qrcode_text = _(
+                'ID: %s [%s in MRP: %s]\nFamily %s\nDate: %s') % (
+                    pallet.id, 
+                    pallet.sequence,
+                    pallet.stats_id.mrp_id.name,
+                    pallet.stats_id.mrp_id.product_id.name, # Family
+                    pallet.create_date,
+                    )
+            res[pallet.id]['qrcode'] = qrcode_text
+            #import pdb; pdb.set_trace()
+            img = qrcode.make(qrcode_text)
+            s = StringIO.StringIO()
+            img.save(s)#, 'jpg')
+            img_bin = base64.b64encode(s.getvalue())
+
+            res[pallet.id]['qrcode_image'] = img_bin
+                    
+        return res
+    
     _columns = {
         'create_date': fields.date('Create date'),
         'sequence': fields.integer('Seq.'),
         'stats_id': fields.many2one('mrp.production.stats', 'Stats'),
+        'ean13': fields.char('EAN 13', size=13),
+        'qrcode': fields.function(
+            _create_qr_code_package, method=True, 
+            type='char', size=100, string='QR Code', store=False, 
+            readonly=True, multi=True,
+            ), 
+        'qrcode_image': fields.function(
+            _create_qr_code_package, string='QR Code image',method=True, 
+            type='binary', store=False, readonly=True, multi=True
+            ),
         # TODO total pieces
         }
 

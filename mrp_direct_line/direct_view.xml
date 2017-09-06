@@ -1,6 +1,24 @@
 <?xml version="1.0"?>
 <openerp>
     <data>        
+        <record model="ir.ui.view" id="view_mrp_production_stats_line_tree">
+            <field name="name">MRP Stats for line</field>
+            <field name="model">mrp.production.stats</field>
+            <field name="priority" eval="40"/>
+            <field name="arch" type="xml">
+                <tree string="MRP stats">
+	                <field name="workcenter_id"/>
+	                <field name="date" />
+	                <field name="workers" />
+	                <field name="startup" widget="float_time" />
+	                <field name="hour" widget="float_time" />
+	                <field name="total" />
+                    <field name="working_done" invisible="1"/>
+                    <button name="working_mark_done" string="Close Day" type="object" class="oe_highlight" attrs="{'invisible': [('working_done','=',True)]}"/>
+                </tree>
+            </field>
+        </record>
+
         <record model="ir.ui.view" id="view_mrp_production_stats_line_form">
             <field name="name">MRP Stats for line</field>
             <field name="model">mrp.production.stats</field>
@@ -9,7 +27,8 @@
                 <sheet position="before">
                     <header>
                         <button name="working_print_all_label" string="Print all label" type="object" icon="STOCK_PRINT"/>
-                        <button name="close_day" string="Close Day" type="object" class="oe_highlight"/>
+                        <button name="working_mark_done" string="Close Day" type="object" class="oe_highlight" attrs="{'invisible': [('working_done','=',True)]}"/>
+                        <field name="working_done"  invisible="1"/>
                     </header>                    
                 </sheet>
                 <field name="total" position="after">
@@ -33,7 +52,41 @@
                 </field>
             </field>
         </record>
-        
+        <record model="ir.ui.view" id="view_mrp_production_stats_for_line_form">
+           <field name="name">MRP Stats for line</field>
+            <field name="model">mrp.production.stats</field>
+            <field name="arch" type="xml">
+                <form string="String" version="7.0">        
+                    <sheet>
+                        <group col="4" colspan="4">
+                            <field name="workcenter_id" />                            
+                            <field name="date" />
+                            
+                        </group>
+                    </sheet>        
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_day_open_working_manager">
+            <field name="name">Work days open</field>
+            <field name="res_model">mrp.production.stats</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_mrp_production_stats_line_tree"/>
+            <field name="context">{}</field>
+            <field name="domain">[('working_done', '=', False)]</field>
+        </record>
+        <record model="ir.actions.act_window" id="action_day_open_working_4_line">
+            <field name="name">Work days for line</field>
+            <field name="res_model">mrp.production.stats</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_mrp_production_stats_line_tree"/>
+            <field name="context">{'form_view_ref': 'mrp_direct_line.view_mrp_production_stats_for_line_form'}</field>
+            <field name="domain">[('working_done', '=', False)]</field>
+            <field name="auto_refresh">10</field>
+        </record>
     
         <menuitem 
             parent="mrp.menu_mrp_manufacturing"
@@ -41,6 +94,21 @@
             sequence="40"
             name="Line management"
             />        
+            <menuitem 
+                parent="menu_mrp_manufacturing_line_root"
+                id="menu_mrp_manufacturing_line_days" 
+                sequence="20"
+                action="action_day_open_working_manager"
+                name="Working days"
+                />        
+            <menuitem 
+                parent="menu_mrp_manufacturing_line_root"
+                id="menu_mrp_manufacturing_line_for_line_days" 
+                sequence="30"
+                action="action_day_open_working_4_line"
+                name="Working days for line"
+                />        
+            
     </data>
 </openerp>
 

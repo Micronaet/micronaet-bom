@@ -68,15 +68,20 @@ class CreateNewMrpLineDayWizard(orm.TransientModel):
             'mrp_id': wiz_proxy.mrp_id.id,
             'workcenter_id': wiz_proxy.line_id.id,
             'total': 0,
+            'working_done': False,
             }, context=context)
 
         # ---------------------------------------------------------------------
         # Migrate sale order line in this production day:
         # ---------------------------------------------------------------------
         sol_ids = []
+        
         for sol in wiz_proxy.mrp_id.order_line_ids:
-            if sol.product_uom_qty - sol.delivered_qty - \
-                    sol.product_uom_maked_sync <= 0:
+            if sol.delivered_qty > sol.product_uom_maked_sync_qty:
+                test = sol.product_uom_qty - sol.delivered_qty 
+            else:    
+                test = sol.product_uom_qty - sol.product_uom_maked_sync_qty
+            if test <= 0:
                 continue # no production
             sol_ids.append(sol.id)
         if sol_ids:

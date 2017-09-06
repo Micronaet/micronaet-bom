@@ -51,13 +51,6 @@ class SaleOrderLine(orm.Model):
         '''    
         return True
 
-    def working_mark_done(self, cr, uid, ids, context=None):
-        ''' Print single label
-        '''
-        return self.write(cr, uid, ids, {
-            'working_done': True,
-            }, context=context)
-        
     _columns = {
         'working_line_id': fields.many2one(
             'mrp.production.stats', 'Working on'),
@@ -74,6 +67,13 @@ class MrpProductionStat(orm.Model):
     # -------------------------------------------------------------------------
     # Button event:    
     # -------------------------------------------------------------------------
+    def working_mark_done(self, cr, uid, ids, context=None):
+        ''' Print single label
+        '''
+        return self.write(cr, uid, ids, {
+            'working_done': True,
+            }, context=context)
+
     def working_print_all_label(self, cr, uid, ids, context=None):
         ''' Print single label
         '''    
@@ -83,6 +83,7 @@ class MrpProductionStat(orm.Model):
         'working_ids': fields.one2many(
             'sale.order.line', 'working_line_id', 'Working line',
             help='Sale order line working on this day'),
+        'working_done': fields.boolean('Done'),            
         }
     
 

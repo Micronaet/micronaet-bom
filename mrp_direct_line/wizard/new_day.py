@@ -54,19 +54,39 @@ class CreateNewMrpLineDayWizard(orm.TransientModel):
         '''
         if context is None: 
             context = {}        
+        
+        # Pool used:
+        stats_pool = self.pool.get('mrp.production.stats')
+        sol_pool = self.pool.get('sale.order.line')
+            
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
         
-        # Create the statistic event mrp.production.stats
-        stats_pool = self.pool.get('mrp.production.stats')
+        
+        # Create the statistic event mrp.production.stats        
         stats_id = stats_pool.create(cr, uid, {
             'date': wiz_proxy.date,
             'mrp_id': wiz_proxy.mrp_id.id,
             'workcenter_id': wiz_proxy.line_id.id,
-            'total': 1,
+            'total': 0,
             }, context=context)
+
+        # ---------------------------------------------------------------------
+        # Migrate sale order line in this production day:
+        # ---------------------------------------------------------------------
+        sol_ids = []
+        for sol in wiz_proxy.mrp_id.order_line_ids:
+            if sol.product_uom_qty - sol.delivered_qty - \
+                    sol.product_uom_maked_sync <= 0:
+                continue # no production
+            sol_ids.append(sol.id)
+        if sol_ids:
+            sol_pool.write(cr, uid, sol_ids, {
+                'working_line_id': stats_id,
+                }, context=context)
         
-        #model_pool = self.pool.get('ir.model.data')
-        #view_id = model_pool.get_object_reference('module_name', 'view_name')[1]    
+        # ---------------------------------------------------------------------
+        # Return in production management for this day:
+        # ---------------------------------------------------------------------
         return {
             'type': 'ir.actions.act_window',
             'name': _('Day production'),

@@ -8,26 +8,32 @@
             <field name="arch" type="xml">
                 <sheet position="before">
                     <header>
+                        <button name="working_print_all_label" string="Print all label" type="object" icon="STOCK_PRINT"/>
                         <button name="close_day" string="Close Day" type="object" class="oe_highlight"/>
                     </header>                    
                 </sheet>
                 <field name="total" position="after">
                     <separator string="Production" colspan="4"/>
-                    <field name="working_ids" colspan="4" editable="bottom" nolabel="1">
-                        <!--Button for unlink-->
-                        <field name="working_sequence" />
-                        <field name="partner_id" readonly="1"/>
-                        <field name="default_code" readonly="1" />
-                        <field name="product_uom_qty" readonly="1" />
-                        <field name="delivered_qty" readonly="1" />
-                        <field name="working_qty" />
-                        <!--Button for force all-->
-                        <field name="product_uom_maked_sync" />
-                        <field name="production_note" />
+                    <field name="working_ids" colspan="4" nolabel="1" >
+                        <tree colors="green:working_mark_done==True" editable="bottom">
+                            <!--Button for unlink-->
+                            <field name="working_sequence" />
+                            <field name="partner_id" readonly="1"/>
+                            <field name="default_code" readonly="1" />
+                            <field name="product_uom_qty" readonly="1" />
+                            <field name="delivered_qty" readonly="1" />
+                            <field name="working_qty" />
+                            <!--Button for force all-->
+                            <field name="product_uom_maked_sync_qty" />
+                            <field name="production_note" />
+                            <button name="working_print_single_label" string="Print label" type="object" icon="STOCK_PRINT"/>                        
+                            <button name="working_mark_done" string="Done" type="object" icon="gtk-ok"/>                        
+                        </tree>    
                     </field>
                 </field>
             </field>
         </record>
+        
     
         <menuitem 
             parent="mrp.menu_mrp_manufacturing"

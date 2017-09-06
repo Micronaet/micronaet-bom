@@ -42,19 +42,43 @@ class SaleOrderLine(orm.Model):
     ''' Link line for stats
     '''
     _inherit = 'sale.order.line'
-    
+
+    # -------------------------------------------------------------------------
+    # Button event:    
+    # -------------------------------------------------------------------------
+    def working_print_single_label(self, cr, uid, ids, context=None):
+        ''' Print single label
+        '''    
+        return True
+
+    def working_mark_done(self, cr, uid, ids, context=None):
+        ''' Print single label
+        '''
+        return self.write(cr, uid, ids, {
+            'working_done': True,
+            }, context=context)
+        
     _columns = {
         'working_line_id': fields.many2one(
             'mrp.production.stats', 'Working on'),
         'working_sequence': fields.integer('Working seq.'),
         'working_qty': fields.integer('Working q.'),
+        'working_done': fields.boolean('Done'),
         }
     
 class MrpProductionStat(orm.Model):
     ''' Statistic data
     '''
     _inherit = 'mrp.production.stats'
-    
+
+    # -------------------------------------------------------------------------
+    # Button event:    
+    # -------------------------------------------------------------------------
+    def working_print_all_label(self, cr, uid, ids, context=None):
+        ''' Print single label
+        '''    
+        return True
+
     _columns = {
         'working_ids': fields.one2many(
             'sale.order.line', 'working_line_id', 'Working line',

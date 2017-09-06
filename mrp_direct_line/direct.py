@@ -65,7 +65,48 @@ class SaleOrderLine(orm.Model):
         'working_qty': fields.integer('Working q.'),
         'working_done': fields.boolean('Done'),
         }
+
+class MrpProductionStatsPallet(orm.Model):
+    """ Model name: MrpProductionStatsPallet
+    """
     
+    _name = 'mrp.production.stats.pallet'
+    _description = 'Pallet produced'
+    _rec_name = 'sequence'
+    _order = 'sequence,id'
+    
+    _columns = {
+        'sequence': fields.integer('Seq.'),
+        'stats_id': fields.many2one('mrp.production.stats', 'Stats'),
+        }
+
+class MrpProductionStatsPalletRow(orm.Model):
+    """ Model name: MrpProductionStatsPallet
+    """
+    
+    _name = 'mrp.production.stats.pallet.row'
+    _description = 'Pallet row produced'
+    _rec_name = 'sol_id'
+    _order = 'sequence,id'
+    
+    _columns = {
+        'sequence': fields.integer('Seq.'),
+        'pallet_id': fields.many2one('mrp.production.stats.pallet', 'Pallet'),
+        'sol_id': fields.many2one('sale.order.line', 'Line'),
+        # TODO related
+        }
+
+class MrpProductionStatsPallet(orm.Model):
+    """ Model name: MrpProductionStatsPallet
+    """
+    
+    _inherit = 'mrp.production.stats.pallet'
+    
+    _columns = {
+        'content_ids': fields.one2many(
+            'mrp.production.stats.pallet.row', 'pallet_id', 'Content'),
+        }
+
 class MrpProductionStat(orm.Model):
     ''' Statistic data
     '''
@@ -73,7 +114,17 @@ class MrpProductionStat(orm.Model):
 
     # -------------------------------------------------------------------------
     # Button event:    
-    # -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------    
+    def working_new_pallet(self, cr, uid, ids, context=None):
+        ''' New pallet
+        '''    
+        return True
+        
+    def working_end_pallet(self, cr, uid, ids, context=None):
+        ''' End pallet
+        '''    
+        return True
+    
     def working_mark_as_done(self, cr, uid, ids, context=None):
         ''' Print single label
         '''

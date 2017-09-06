@@ -32,24 +32,38 @@
                     </header>                    
                 </sheet>
                 <field name="total" position="after">
-                    <separator string="Production" colspan="4"/>
-                    <field name="working_ids" colspan="4" nolabel="1" >
-                        <tree colors="green:working_done==True" editable="bottom">
-                            <!--Button for unlink-->
-                            <field name="working_sequence" />
-                            <field name="partner_id" readonly="1"/>
-                            <field name="default_code" readonly="1" />
-                            <field name="product_uom_qty" readonly="1" />
-                            <field name="delivered_qty" readonly="1" />
-                            <field name="working_qty" />
-                            <!--Button for force all-->
-                            <field name="product_uom_maked_sync_qty" />
-                            <field name="production_note" />
-                            <button name="working_print_single_label" string="Print label" type="object" icon="STOCK_PRINT"/>
-                            <field name="working_done" invisible="1"/>
-                            <button name="working_mark_as_done" string="Done" type="object" icon="gtk-ok"  attrs="{'invisible': [('working_done','=',True)]}"/>
-                        </tree>    
-                    </field>
+                    <notebook colspan="4">
+                        <page string="Production">
+                            <group colspan="4" col="4">
+                                <separator string="Production" colspan="4"/>
+                                <button name="working_new_pallet" string="New pallet" type="object" colspan="1" />
+                                <button name="working_end_pallet" string="End pallet" type="object" colspan="1" />
+                                <newline/>
+                                <field name="working_ids" colspan="4" nolabel="1" >
+                                    <tree colors="green:working_done==True" editable="bottom">
+                                        <!--Button for unlink-->
+                                        <field name="working_sequence" />
+                                        <field name="partner_id" readonly="1"/>
+                                        <field name="default_code" readonly="1" />
+                                        <field name="product_uom_qty" readonly="1" />
+                                        <field name="delivered_qty" readonly="1" />
+                                        <field name="working_qty" />
+                                        <!--Button for force all-->
+                                        <field name="product_uom_maked_sync_qty" />
+                                        <field name="production_note" />
+                                        <button name="working_print_single_label" string="Print label" type="object" icon="STOCK_PRINT"/>
+                                        <field name="working_done" invisible="1"/>
+                                        <button name="working_mark_as_done" string="Done" type="object" icon="gtk-ok"  attrs="{'invisible': [('working_done','=',True)]}"/>
+                                    </tree>    
+                                </field>
+                            </group>
+                        </page>
+                        <page string="Pallet">
+                            <group colspan="4" col="4">
+                            </group>                                                    
+                        </page>
+                    </notebook>
+
                 </field>
             </field>
         </record>

@@ -39,7 +39,7 @@
     'init_xml': [],
     'demo': [],
     'data': [
-        #'security/ir.model.access.csv',    
+        'security/ir.model.access.csv',    
         'direct_view.xml',
         'wizard/new_day_wizard_view.xml',
         ],

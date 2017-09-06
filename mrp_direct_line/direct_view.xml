@@ -14,7 +14,7 @@
 	                <field name="hour" widget="float_time" />
 	                <field name="total" />
                     <field name="working_done" invisible="1"/>
-                    <button name="working_mark_done" string="Close Day" type="object" class="oe_highlight" attrs="{'invisible': [('working_done','=',True)]}"/>
+                    <button name="working_mark_as_done" string="Close Day" type="object" class="oe_highlight" attrs="{'invisible': [('working_done','=',True)]}"/>
                 </tree>
             </field>
         </record>
@@ -27,14 +27,14 @@
                 <sheet position="before">
                     <header>
                         <button name="working_print_all_label" string="Print all label" type="object" icon="STOCK_PRINT"/>
-                        <button name="working_mark_done" string="Close Day" type="object" class="oe_highlight" attrs="{'invisible': [('working_done','=',True)]}"/>
+                        <button name="working_mark_as_done" string="Close Day" type="object" class="oe_highlight" attrs="{'invisible': [('working_done','=',True)]}"/>
                         <field name="working_done"  invisible="1"/>
                     </header>                    
                 </sheet>
                 <field name="total" position="after">
                     <separator string="Production" colspan="4"/>
                     <field name="working_ids" colspan="4" nolabel="1" >
-                        <tree colors="green:working_mark_done==True" editable="bottom">
+                        <tree colors="green:working_done==True" editable="bottom">
                             <!--Button for unlink-->
                             <field name="working_sequence" />
                             <field name="partner_id" readonly="1"/>
@@ -45,8 +45,9 @@
                             <!--Button for force all-->
                             <field name="product_uom_maked_sync_qty" />
                             <field name="production_note" />
-                            <button name="working_print_single_label" string="Print label" type="object" icon="STOCK_PRINT"/>                        
-                            <button name="working_mark_done" string="Done" type="object" icon="gtk-ok"/>                        
+                            <button name="working_print_single_label" string="Print label" type="object" icon="STOCK_PRINT"/>
+                            <field name="working_done" invisible="1"/>
+                            <button name="working_mark_as_done" string="Done" type="object" icon="gtk-ok"  attrs="{'invisible': [('working_done','=',True)]}"/>
                         </tree>    
                     </field>
                 </field>
@@ -67,7 +68,6 @@
                 </form>
             </field>
         </record>
-
         <record model="ir.actions.act_window" id="action_day_open_working_manager">
             <field name="name">Work days open</field>
             <field name="res_model">mrp.production.stats</field>
@@ -77,7 +77,10 @@
             <field name="context">{}</field>
             <field name="domain">[('working_done', '=', False)]</field>
         </record>
-        <record model="ir.actions.act_window" id="action_day_open_working_4_line">
+
+
+        <!--Auto refresh board:-->
+        <record model="ir.actions.act_window" id="action_day_open_working_for_line">
             <field name="name">Work days for line</field>
             <field name="res_model">mrp.production.stats</field>
             <field name="view_type">form</field>
@@ -85,8 +88,33 @@
             <field name="view_id" ref="view_mrp_production_stats_line_tree"/>
             <field name="context">{'form_view_ref': 'mrp_direct_line.view_mrp_production_stats_for_line_form'}</field>
             <field name="domain">[('working_done', '=', False)]</field>
-            <field name="auto_refresh">10</field>
+            <!--<field name="auto_refresh">10</field>-->
         </record>
+        <record id="board_your_object_auto_refresh_form" model="ir.ui.view">
+            <field name="name">mrp.production.stats.board</field>
+            <field name="model">board.board</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Your Object">
+                    <hpaned>
+                        <child1>
+                            <action colspan="4"  height="100" name="%(action_day_open_working_for_line)d" string="Line status"/>
+                       </child1>                       
+                   </hpaned>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_board_your_object_auto_refresh_form">
+            <field name="name">Line board</field>
+            <field name="res_model">board.board</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="auto_refresh">4</field>
+            <field name="usage">menu</field>            
+            <field name="view_id" ref="board_your_object_auto_refresh_form"/>
+            <field name="context">{}</field>
+            <field name="domain">[]</field>
+        </record>        
     
         <menuitem 
             parent="mrp.menu_mrp_manufacturing"
@@ -101,13 +129,21 @@
                 action="action_day_open_working_manager"
                 name="Working days"
                 />        
+            
+            <!--<menuitem 
+                parent="menu_mrp_manufacturing_line_root"
+                id="menu_mrp_manufacturing_line_for_line_days" 
+                sequence="30"
+                action="action_board_your_object_auto_refresh_form"
+                name="Working days for line"
+                />-->
             <menuitem 
                 parent="menu_mrp_manufacturing_line_root"
                 id="menu_mrp_manufacturing_line_for_line_days" 
                 sequence="30"
-                action="action_day_open_working_4_line"
+                action="action_day_open_working_for_line"
                 name="Working days for line"
-                />        
+                />
             
     </data>
 </openerp>

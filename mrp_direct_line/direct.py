@@ -46,6 +46,13 @@ class SaleOrderLine(orm.Model):
     # -------------------------------------------------------------------------
     # Button event:    
     # -------------------------------------------------------------------------
+    def working_mark_as_done(self, cr, uid, ids, context=None):
+        ''' Print single label
+        '''
+        return self.write(cr, uid, ids, {
+            'working_done': True,
+            }, context=context)
+
     def working_print_single_label(self, cr, uid, ids, context=None):
         ''' Print single label
         '''    
@@ -67,7 +74,7 @@ class MrpProductionStat(orm.Model):
     # -------------------------------------------------------------------------
     # Button event:    
     # -------------------------------------------------------------------------
-    def working_mark_done(self, cr, uid, ids, context=None):
+    def working_mark_as_done(self, cr, uid, ids, context=None):
         ''' Print single label
         '''
         return self.write(cr, uid, ids, {

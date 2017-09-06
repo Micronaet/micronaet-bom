@@ -68,7 +68,7 @@ class CreateNewMrpLineDayWizard(orm.TransientModel):
             'mrp_id': wiz_proxy.mrp_id.id,
             'workcenter_id': wiz_proxy.line_id.id,
             'total': 0,
-            'working_done': False,
+            #'working_done': False,
             }, context=context)
 
         # ---------------------------------------------------------------------

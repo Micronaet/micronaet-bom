@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+       <!-- mrp.production.new.line.day.wizard -->
+       <record id="mrp_production_new_line_day_wizard_view" model="ir.ui.view">
+            <field name="name">Wizard MRP line generation</field>
+            <field name="model">mrp.production.new.line.day.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Wizard create lavoration day" version="7.0">
+                   <header>
+                       <button string="Cancel" special="cancel" />
+                       <button name="action_done" string="Done" type="object" icon="gtk-jump-to" class="oe_highlight" />
+                   </header>                   
+                   <group colspan="4" col="4">
+                        <field name="date" />
+                        <field name="line_id" />
+                        <field name="mrp_id" domain="[('state','=','draft')]"/>
+                   </group>
+                </form>
+            </field>
+      </record>
+      <record model="ir.actions.act_window" id="action_mrp_production_new_line_day_wizard">
+          <field name="name">MRP line day generation</field>
+          <field name="res_model">mrp.production.new.line.day.wizard</field>
+          <field name="view_type">form</field>
+          <field name="view_mode">form</field>
+          <field name="target">new</field>
+          <field name="view_id" ref="mrp_production_new_line_day_wizard_view"/>
+      </record>
+      
+      <menuitem 
+          parent="menu_mrp_manufacturing_line_root"
+          id="menu_mrp_manufacturing_line_new_day"          
+          sequence="10"
+          action="action_mrp_production_new_line_day_wizard"
+          />
+    </data>
+</openerp>

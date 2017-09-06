@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>        
+        <record model="ir.ui.view" id="view_mrp_production_stats_line_form">
+            <field name="name">MRP Stats for line</field>
+            <field name="model">mrp.production.stats</field>
+            <field name="inherit_id" ref="production_accounting_external_stats.view_mrp_production_stats_form"/>
+            <field name="arch" type="xml">
+                <sheet position="before">
+                    <header>
+                        <button name="close_day" string="Close Day" type="object" class="oe_highlight"/>
+                    </header>                    
+                </sheet>
+                <field name="total" position="after">
+                    <separator string="Production" colspan="4"/>
+                    <field name="working_ids" colspan="4" editable="bottom" nolabel="1">
+                        <!--Button for unlink-->
+                        <field name="working_sequence" />
+                        <field name="partner_id" readonly="1"/>
+                        <field name="default_code" readonly="1" />
+                        <field name="product_uom_qty" readonly="1" />
+                        <field name="delivered_qty" readonly="1" />
+                        <field name="working_qty" />
+                        <!--Button for force all-->
+                        <field name="product_uom_maked_sync" />
+                        <field name="production_note" />
+                    </field>
+                </field>
+            </field>
+        </record>
+    
+        <menuitem 
+            parent="mrp.menu_mrp_manufacturing"
+            id="menu_mrp_manufacturing_line_root" 
+            sequence="40"
+            name="Line management"
+            />        
+    </data>
+</openerp>
+

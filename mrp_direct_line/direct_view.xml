@@ -68,8 +68,6 @@
                                         <field name="product_uom_maked_sync_qty" />
                                         <field name="production_note" />
                                         <button name="working_print_single_label" string="Print label" type="object" icon="STOCK_PRINT"/>
-                                        <field name="working_done" invisible="1"/>
-                                        <button name="working_mark_as_done" string="Done" type="object" icon="gtk-ok"  attrs="{'invisible': [('working_done','=',True)]}"/>
                                     </tree>    
                                 </field>
                             </group>

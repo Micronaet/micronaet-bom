@@ -60,13 +60,6 @@ class SaleOrderLine(orm.Model):
                 current_proxy.working_qty,
             }, context=context)
         
-    def working_mark_as_done(self, cr, uid, ids, context=None):
-        ''' Print single label
-        '''
-        return self.write(cr, uid, ids, {
-            'working_done': True,
-            }, context=context)
-
     def working_print_single_label(self, cr, uid, ids, context=None):
         ''' Print single label
         '''    
@@ -77,7 +70,7 @@ class SaleOrderLine(orm.Model):
             'mrp.production.stats', 'Working on'),
         'working_sequence': fields.integer('Working seq.'),
         'working_qty': fields.integer('Working q.'),
-        'working_done': fields.boolean('Done'),
+        'working_done': fields.boolean('Done'), #TODO remove > test working_qty
         }
 
 class MrpProductionStatsPallet(orm.Model):
@@ -252,21 +245,20 @@ class MrpProductionStat(orm.Model):
                 DEFAULT_SERVER_DATETIME_FORMAT,
                 )
             import pdb; pdb.set_trace()    
-            hour = duration.hours + (duration.seconds / 60.0) + (
-                duration.days * 24.0)
+            hour = (duration.seconds / 3600.0 )  + (duration.days * 24.0)
         else:        
             hour = 0.0
 
         # Auto total count:
-        working_end_total = stats_pool.get_current_production_number(
+        working_end_total = self.get_current_production_number(
             cr, uid, ids, context=context)        
-        total = working_end_total - current_proxy.working_start_total    
+        total = (working_end_total - current_proxy.working_start_total) / 60.0
         if total <= 0:
             total = 0
             
         return self.write(cr, uid, ids, {
             'total': total,
-            'crono_stop': crono_stop,
+            'crono_stop': crono_stop.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
             'hour': hour,
             'working_done': True,
             }, context=context)

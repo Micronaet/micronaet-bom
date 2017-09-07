@@ -97,7 +97,6 @@ class MrpProductionStatsPallet(orm.Model):
                     pallet.create_date,
                     )
             res[pallet.id]['qrcode'] = qrcode_text
-            #import pdb; pdb.set_trace()
             img = qrcode.make(qrcode_text)
             s = StringIO.StringIO()
             img.save(s)#, 'jpg')
@@ -136,7 +135,8 @@ class MrpProductionStatsPalletRow(orm.Model):
     
     _columns = {
         'sequence': fields.integer('Seq.'),
-        'pallet_id': fields.many2one('mrp.production.stats.pallet', 'Pallet'),
+        'pallet_id': fields.many2one('mrp.production.stats.pallet', 'Pallet',
+            ondelete='cascade'),
         'sol_id': fields.many2one('sale.order.line', 'Line'),
         'quantity': fields.integer('Q.', required=True),
         'default_code': fields.related('sol_id', 'default_code',
@@ -147,7 +147,7 @@ class MrpProductionStatsPalletRow(orm.Model):
         'order_id': fields.related(
             'sol_id', 'order_id', 
             type='many2one', relation='sale.order', string='Order'),
-        # TODO related (partner, destination, code)
+        # TODO other related?
         }
 
 class MrpProductionStatsPallet(orm.Model):
@@ -244,7 +244,6 @@ class MrpProductionStat(orm.Model):
                 current_proxy.crono_start,
                 DEFAULT_SERVER_DATETIME_FORMAT,
                 )
-            import pdb; pdb.set_trace()    
             hour = (duration.seconds / 3600.0 )  + (duration.days * 24.0)
         else:        
             hour = 0.0

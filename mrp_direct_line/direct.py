@@ -113,13 +113,13 @@ class MrpProductionStatsPallet(orm.Model):
             res[pallet.id]['qrcode_image'] = img_bin
                     
         return res
-    
+
     _columns = {
-        'create_date': fields.date('Create date'),
+        'id': fields.integer('QRcode ID'),
+        'create_date': fields.datetime('Create date'),
         'sequence': fields.integer('Seq.'),
         'stats_id': fields.many2one('mrp.production.stats', 'Stats'),
         'ean13': fields.char('EAN 13', size=13),
-        'id': fields.integer('QRcode ID'),
         'qrcode': fields.function(
             _create_qr_code_package, method=True, 
             type='char', size=100, string='QR Code', store=False, 
@@ -151,6 +151,9 @@ class MrpProductionStatsPalletRow(orm.Model):
         'partner_id': fields.related(
             'sol_id', 'partner_id', 
             type='many2one', relation='res.partner', string='Partner'),    
+        'order_id': fields.related(
+            'sol_id', 'order_id', 
+            type='many2one', relation='sale.order', string='Order'),
         # TODO related (partner, destination, code)
         }
 

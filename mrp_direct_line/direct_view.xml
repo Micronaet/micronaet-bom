@@ -130,6 +130,7 @@
                                     <field name="quantity" />
                                     <field name="default_code" />
                                     <field name="partner_id" />
+                                    <field name="order_id" />
                                </tree>
                             </field>
                         </group>                                                                                                                                

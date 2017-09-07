@@ -22,6 +22,8 @@ import sys
 import logging
 import openerp
 import qrcode
+import StringIO
+import base64
 import openerp.netsvc as netsvc
 import openerp.addons.decimal_precision as dp
 from openerp.osv import fields, osv, expression, orm
@@ -90,9 +92,6 @@ class MrpProductionStatsPallet(orm.Model):
     def _create_qr_code_package(self, cr, uid, ids, fields, args, context=None):
         ''' Fields function for calculate 
         '''
-        import StringIO
-        import base64
-        
         res = {}
         for pallet in self.browse(cr, uid, ids, context=context):
             res[pallet.id] = {}
@@ -120,6 +119,7 @@ class MrpProductionStatsPallet(orm.Model):
         'sequence': fields.integer('Seq.'),
         'stats_id': fields.many2one('mrp.production.stats', 'Stats'),
         'ean13': fields.char('EAN 13', size=13),
+        'id': fields.integer('QRcode ID'),
         'qrcode': fields.function(
             _create_qr_code_package, method=True, 
             type='char', size=100, string='QR Code', store=False, 

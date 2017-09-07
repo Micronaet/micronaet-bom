@@ -96,10 +96,10 @@
             <field name="domain">[('working_done', '=', False)]</field>
         </record>
 
-        <!--mrp.production.stats.pallet.row-->
-        <record model="ir.ui.view" id="view_start_pallet_row_tree">
-            <field name="name">mrp.production.stats.pallet.row.tree</field>
-            <field name="model">mrp.production.stats.pallet.row</field>
+        <!--mrp.production.stats.pallet-->
+        <record model="ir.ui.view" id="view_start_pallet_tree">
+            <field name="name">mrp.production.stats.pallet.tree</field>
+            <field name="model">mrp.production.stats.pallet</field>
             <field name="arch" type="xml">
                 <tree string="Pallet">
                     <field name="sequence" />
@@ -108,9 +108,9 @@
                 </tree>
             </field>
         </record>
-        <record model="ir.ui.view" id="view_start_pallet_row_form">
-            <field name="name">mrp.production.stats.pallet.row.form</field>
-            <field name="model">mrp.production.stats.pallet.row</field>
+        <record model="ir.ui.view" id="view_start_pallet_form">
+            <field name="name">mrp.production.stats.pallet.form</field>
+            <field name="model">mrp.production.stats.pallet</field>
             <field name="arch" type="xml">
                 <form string="Pallet" version="7.0">
                     <group colspan="4" col="4">                                        
@@ -136,6 +136,29 @@
                     </group>                                                                                
                 </form>
             </field>
+        </record>
+        <record model="ir.ui.view" id="view_start_pallet_search">
+            <field name="name">mrp.production.stats.pallet.form</field>
+            <field name="model">mrp.production.stats.pallet</field>
+            <field name="arch" type="xml">
+                <search string="Pallet" version="7.0">        
+                    <field name="id" filter_domain="[('id','=',self)]"/>
+                    <!--<filter name="state_draft" string="Draft state" domain="[('state','=','draft')]"/>
+                    <group expand="0" string="Group By...">
+                        <filter name="group_partner" string="Partner" context="{'group_by': 'partner_id'}"/>
+                        <filter string="Status" context="{'group_by': 'state'}" />
+                    </group>-->
+                </search>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_stats_pallet">
+            <field name="name">Pallet</field>
+            <field name="res_model">mrp.production.stats.pallet</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_start_pallet_tree"/>
+            <field name="context">{}</field>
+            <field name="domain">[]</field>
         </record>
 
         <!--Auto refresh board:-->
@@ -203,6 +226,14 @@
                 action="action_day_open_working_for_line"
                 name="Working days for line"
                 />
+            <menuitem 
+                parent="menu_mrp_manufacturing_line_root"
+                id="menu_mrp_manufacturing_pallet" 
+                sequence="40"
+                action="action_stats_pallet"
+                name="Pallet"
+                />
+
             
     </data>
 </openerp>

@@ -37,9 +37,7 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
     DATETIME_FORMATS_MAP, 
     float_compare)
 
-
 _logger = logging.getLogger(__name__)
-
 
 class CreateNewMrpLineDayWizard(orm.TransientModel):
     ''' Wizard for new line day
@@ -62,7 +60,7 @@ class CreateNewMrpLineDayWizard(orm.TransientModel):
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
         
         
-        # Create the statistic event mrp.production.stats        
+        # Create the statistic event mrp.production.stats                
         stats_id = stats_pool.create(cr, uid, {
             'date': wiz_proxy.date,
             'mrp_id': wiz_proxy.mrp_id.id,
@@ -90,7 +88,17 @@ class CreateNewMrpLineDayWizard(orm.TransientModel):
                     'working_line_id': stats_id,
                     'working_qty': remain,
                     }, context=context)
+                    
+        # Create first status point for pallet management:            
+        stats_pool.working_new_pallet(cr, uid, [stats_id], context=context)
         
+        # Save total at start up:
+        working_start_total = stats_pool.get_current_production_number(
+            cr, uid, [stats_id], context=context)        
+        stats_pool.write(cr, uid, [stats_ids], {
+            'working_start_total': working_start_total,
+            }, context=context)
+            
         # ---------------------------------------------------------------------
         # Return in production management for this day:
         # ---------------------------------------------------------------------

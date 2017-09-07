@@ -27,19 +27,31 @@
                 <sheet position="before">
                     <header>
                         <button name="working_print_all_label" string="Print all label" type="object" icon="STOCK_PRINT"/>
-                        <button name="working_mark_as_done" string="Close Day" type="object" class="oe_highlight" attrs="{'invisible': [('working_done','=',True)]}"/>
+                                                
+                        <button name="working_crono_start" string="Start Day" type="object" class="oe_highlight" attrs="{'invisible': [('working_done','=',True)]}" help="Start time for automated hour calc when close the day" />
+                        <button name="working_mark_as_done" string="Close Day" type="object" class="oe_highlight" attrs="{'invisible': [('working_done','=',True)]}" help="Stop time, calc total product and mark as close"/>
+                        
                         <field name="working_done"  invisible="1"/>
                     </header>                    
                 </sheet>
+                <field name="date" position="after">
+                    <field name="crono_start" />
+                    <field name="crono_stop" />
+                </field>
                 <field name="total" position="after">
                     <notebook colspan="4">
                         <page string="Production">
                             <group colspan="4" col="4">
                                 <separator string="Production" colspan="4"/>
+                                
                                 <field name="mrp_id" readonly="1" />
+                                <newline/>
+                                
                                 <button name="working_new_pallet" string="New pallet" type="object" colspan="1" />
                                 <button name="working_end_pallet" string="End pallet" type="object" colspan="1" attrs="{'invisible': [('working_pallet','=',False)]}"/>
+                                <button name="nothing" string="Pallet created" type="object" icon="gtk-fullscreen" attrs="{'invisible': [('working_pallet','=',False)]}"/>
                                 <field name="working_pallet" invisible="1" />
+                                
                                 <newline/>
                                 <field name="working_ids" colspan="4" nolabel="1" >
                                     <tree colors="green:working_qty==0" editable="bottom">

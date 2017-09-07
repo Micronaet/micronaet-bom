@@ -174,6 +174,17 @@ class MrpProductionStat(orm.Model):
     _inherit = 'mrp.production.stats'
 
     # -------------------------------------------------------------------------
+    # Utility:
+    # -------------------------------------------------------------------------
+    def get_current_production_number(self, cr, uid, ids, context=None):
+        ''' Calculate current production data sync
+        '''
+        total = 0
+        for line in self.browse(cr, uid, ids, context=context)[0].working_ids:
+            total += line.product_uom_maked_sync_qty            
+        return total
+
+    # -------------------------------------------------------------------------
     # Button event:    
     # -------------------------------------------------------------------------    
     def working_new_pallet(self, cr, uid, ids, context=None):
@@ -221,10 +232,42 @@ class MrpProductionStat(orm.Model):
             }, context=context)            
         return True
     
+    # Start / Stop management:
+    def working_crono_start(self, cr, uid, ids, context=None):
+        ''' Start event:
+        '''
+        return self.write(cr, uid, ids, {
+            'crono_start': datetime.now().strftime(
+                DEFAULT_SERVER_DATETIME_FORMAT),
+            }, context=context)
+        
     def working_mark_as_done(self, cr, uid, ids, context=None):
         ''' Print single label
         '''
+        current_proxy = self.browse(cr, uid, ids, context=context)[0]
+        crono_stop = datetime.now()
+        if current_proxy.crono_start:
+            duration = crono_stop - datetime.strptime(
+                current_proxy.crono_start,
+                DEFAULT_SERVER_DATETIME_FORMAT,
+                )
+            import pdb; pdb.set_trace()    
+            hour = duration.hours + (duration.seconds / 60.0) + (
+                duration.days * 24.0)
+        else:        
+            hour = 0.0
+
+        # Auto total count:
+        working_end_total = stats_pool.get_current_production_number(
+            cr, uid, ids, context=context)        
+        total = working_end_total - current_proxy.working_start_total    
+        if total <= 0:
+            total = 0
+            
         return self.write(cr, uid, ids, {
+            'total': total,
+            'crono_stop': crono_stop,
+            'hour': hour,
             'working_done': True,
             }, context=context)
 
@@ -233,7 +276,42 @@ class MrpProductionStat(orm.Model):
         '''    
         return True
 
+    def nothing(self, cr, uid, ids, context=None):
+        ''' Do nothing
+        '''
+        return True     
+
+    # Fields function:
+    def _get_working_line_status(self, cr, uid, ids, fields, args, context=None):
+        ''' Fields function for calculate 
+        '''
+        res = {}
+        for stats in self.browse(cr, uid, ids, context=context):
+            res[stats.id] = {}
+            res[stats.id]['working_line_current'] = ''
+            res[stats.id]['working_line_next'] = ''            
+        return res
+        
     _columns = {
+        # If use crono automatic:
+        'crono_start': fields.datetime(
+            'Start time', 
+            help='Start time for automated hour calc when close the day',
+            ),
+        'crono_stop': fields.datetime('Stop time'),
+        'working_start_total': fields.integer('Start total ', 
+            help='Used for get total at the end of the day'),
+        
+        # Line data:
+        'working_line_current': fields.function(
+            _get_working_line_status, method=True, 
+            type='text', string='Current', 
+            store=False, multi=True), 
+        'working_line_next': fields.function(
+            _get_working_line_status, method=True, 
+            type='text', string='Next', 
+            store=False, multi=True), 
+        
         'pallet_ids': fields.one2many(
             'mrp.production.stats.pallet', 'stats_id', 'Pallet'),
         'working_ids': fields.one2many(

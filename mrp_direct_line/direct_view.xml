@@ -120,7 +120,7 @@
                             <field name="qrcode" colpan="4"/>
                         </group>    
                         <group colspan="2" col="2">
-                            <field name="qrcode_image" widget="image" />
+                            <field name="qrcode_image" widget="image" nolabel="1"/>
                         </group>    
                         <group colspan="4" col="4">
                             <separator string="Content" colspan="4"/>

@@ -65,38 +65,10 @@
                         <page string="Pallet">
                             <group colspan="4" col="4">
                                 <separator string="Pallet" colspan="4"/>
-                                <field name="pallet_ids" colspan="4" nolabel="1" >
-                                    <tree string="Pallet">
-                                        <field name="sequence" />
-                                        <field name="create_date" />    
-                                        <field name="qrcode" />                                    
-                                    </tree>
-                                    <form string="Pallet">
-                                        <group colspan="4" col="4">                                        
-                                            <group colspan="2" col="2">
-                                                <field name="sequence" />
-                                                <field name="create_date" />
-                                                <field name="qrcode" colpan="4"/>
-                                            </group>    
-                                            <group colspan="2" col="2">
-                                                <field name="qrcode_image" widget="image" />
-                                            </group>    
-                                            <group colspan="4" col="4">
-                                                <separator string="Content" colspan="4"/>
-                                                <field name="content_ids" editable="bottom" nolabel="1">
-                                                   <tree string="Content">
-                                                       <field name="sequence" />
-                                                       <field name="quantity" />
-                                                   </tree>
-                                                </field>
-                                            </group>                                                                                                                                
-                                        </group>                                                                                
-                                    </form>
-                                </field>    
+                                <field name="pallet_ids" colspan="4" nolabel="1" />
                             </group>                                                    
                         </page>
                     </notebook>
-
                 </field>
             </field>
         </record>
@@ -109,7 +81,6 @@
                         <group col="4" colspan="4">
                             <field name="workcenter_id" />                            
                             <field name="date" />
-                            
                         </group>
                     </sheet>        
                 </form>
@@ -125,6 +96,47 @@
             <field name="domain">[('working_done', '=', False)]</field>
         </record>
 
+        <!--mrp.production.stats.pallet.row-->
+        <record model="ir.ui.view" id="view_start_pallet_row_tree">
+            <field name="name">mrp.production.stats.pallet.row.tree</field>
+            <field name="model">mrp.production.stats.pallet.row</field>
+            <field name="arch" type="xml">
+                <tree string="Pallet">
+                    <field name="sequence" />
+                    <field name="create_date" />    
+                    <field name="qrcode" />                                    
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_start_pallet_row_form">
+            <field name="name">mrp.production.stats.pallet.row.form</field>
+            <field name="model">mrp.production.stats.pallet.row</field>
+            <field name="arch" type="xml">
+                <form string="Pallet" version="7.0">
+                    <group colspan="4" col="4">                                        
+                        <group colspan="2" col="2">
+                            <field name="sequence" />
+                            <field name="create_date" />
+                            <field name="qrcode" colpan="4"/>
+                        </group>    
+                        <group colspan="2" col="2">
+                            <field name="qrcode_image" widget="image" />
+                        </group>    
+                        <group colspan="4" col="4">
+                            <separator string="Content" colspan="4"/>
+                            <field name="content_ids" editable="bottom" nolabel="1">
+                               <tree string="Content">
+                                    <field name="sequence" />
+                                    <field name="quantity" />
+                                    <field name="default_code" />
+                                    <field name="partner_id" />
+                               </tree>
+                            </field>
+                        </group>                                                                                                                                
+                    </group>                                                                                
+                </form>
+            </field>
+        </record>
 
         <!--Auto refresh board:-->
         <record model="ir.actions.act_window" id="action_day_open_working_for_line">

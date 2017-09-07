@@ -146,6 +146,11 @@ class MrpProductionStatsPalletRow(orm.Model):
         'pallet_id': fields.many2one('mrp.production.stats.pallet', 'Pallet'),
         'sol_id': fields.many2one('sale.order.line', 'Line'),
         'quantity': fields.integer('Q.', required=True),
+        'default_code': fields.related('sol_id', 'default_code',
+            type='char', string='Default code'),
+        'partner_id': fields.related(
+            'sol_id', 'partner_id', 
+            type='many2one', relation='res.partner', string='Partner'),    
         # TODO related (partner, destination, code)
         }
 
@@ -193,7 +198,7 @@ class MrpProductionStat(orm.Model):
         pallet_id = pallet_pool.create(cr, uid, {
             'sequence': sequence, 
             #'create_date':,             
-            'stat_id': ids[0],
+            'stats_id': ids[0],
             }, context=context)
         sequence = 0    
         for line in job_proxy.working_ids:

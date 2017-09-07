@@ -251,7 +251,7 @@ class MrpProductionStat(orm.Model):
         # Auto total count:
         working_end_total = self.get_current_production_number(
             cr, uid, ids, context=context)        
-        total = (working_end_total - current_proxy.working_start_total) / 60.0
+        total = working_end_total - current_proxy.working_start_total
         if total <= 0:
             total = 0
             

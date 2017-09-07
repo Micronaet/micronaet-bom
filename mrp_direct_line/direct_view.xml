@@ -93,8 +93,10 @@
                         <group col="4" colspan="4">
                             <field name="workcenter_id" />                            
                             <field name="date" />
-                            <field name="working_line_current" widget="html" nolabel="1" readonly="1"/>
-                            <field name="working_line_next" widget="html" nolabel="1" readonly="1" />
+                            <separator string="Current:" colspan="4"/>
+                            <field name="working_line_current" widget="html" nolabel="1" readonly="1" colspan="4"/>
+                            <separator string="Next:" colspan="4"/>
+                            <field name="working_line_next" widget="html" nolabel="1" readonly="1" colspan="4"/>
                         </group>
                     </sheet>        
                 </form>

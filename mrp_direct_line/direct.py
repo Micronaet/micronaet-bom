@@ -276,11 +276,97 @@ class MrpProductionStat(orm.Model):
     def _get_working_line_status(self, cr, uid, ids, fields, args, context=None):
         ''' Fields function for calculate 
         '''
+        css = '''
+            <style>
+                .table_bf {
+                     border:1px 
+                     padding: 3px;
+                     solid black;
+                 }
+                .table_bf td {
+                     border:1px 
+                     solid black;
+                     padding: 3px;
+                     text-align: center;
+                 }
+                .table_bf th {
+                     border:1px 
+                     solid black;
+                     padding: 3px;
+                     text-align: center;
+                     background-color: grey;
+                     color: white;
+                 }
+            </style>
+            '''
+        max_second = 3
         res = {}
+        #import pdb; pdb.set_trace()
         for stats in self.browse(cr, uid, ids, context=context):
-            res[stats.id] = {}
+            res[stats.id] = {}            
             res[stats.id]['working_line_current'] = ''
-            res[stats.id]['working_line_next'] = ''            
+            res[stats.id]['working_line_next'] = '''
+                  %s
+                  <table class='table_bf'>
+                        <tr>
+                            <td>Partner</td>
+                            <td>Order</td>
+                            <td>Code</td>
+                            <td>Work q.</td>
+                        </tr>
+                  ''' % css
+
+            first = False
+            second = 0
+            for line in sorted(stats.working_ids, 
+                    key=lambda x: (x.working_sequence, x.mrp_sequence)):
+                # Check if is done:
+                if not line.working_qty:
+                    continue
+                #if line.product_uom_qty <= line.product_uom_maked_sync_qty:
+                #    continue
+                if not first:
+                    first = True
+                    res[stats.id]['working_line_current'] = '''
+                        %s
+                        <p>
+                            <b>%s</b>
+                        </p>
+                        <table class='table_bf'>
+                            <tr>
+                                <td>Partner</td><td>Order</td>
+                                <td>Code</td><td>Work q.</td>
+                            </tr>
+                            <tr>
+                                <td>%s</td><td>%s</td>
+                                <td>%s</td><td>%s</td>
+                            </tr>                       
+                        </table>
+                        ''' % (
+                            css,
+                            _('ETICHETTA PERSONALIZZATA!!!') if \
+                                line.partner_id.has_custom_label else \
+                                    _('ETICHETTA MAGAZZINO'),
+                            line.partner_id.name,
+                            line.order_id.name,
+                            line.default_code,
+                            line.working_qty,
+                            )
+                else: # second
+                    second += 1
+                    if second > max_second:
+                        break
+                    res[stats.id]['working_line_next'] += '''
+                        <tr>
+                            <td>%s</td><td>%s</td><td>%s</td><td>%s</td>
+                        </tr>''' % (
+                            line.partner_id.name,
+                            line.order_id.name,
+                            line.default_code,
+                            line.working_qty,                                
+                            )
+
+            res[stats.id]['working_line_next'] += '</table>'
         return res
         
     _columns = {

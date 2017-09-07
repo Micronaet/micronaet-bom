@@ -74,20 +74,22 @@ class CreateNewMrpLineDayWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Migrate sale order line in this production day:
         # ---------------------------------------------------------------------
-        sol_ids = []
+        sol_update = []
         
         for sol in wiz_proxy.mrp_id.order_line_ids:
             if sol.delivered_qty > sol.product_uom_maked_sync_qty:
-                test = sol.product_uom_qty - sol.delivered_qty 
+                remain = sol.product_uom_qty - sol.delivered_qty 
             else:    
-                test = sol.product_uom_qty - sol.product_uom_maked_sync_qty
-            if test <= 0:
+                remain = sol.product_uom_qty - sol.product_uom_maked_sync_qty
+            if remain <= 0:
                 continue # no production
-            sol_ids.append(sol.id)
-        if sol_ids:
-            sol_pool.write(cr, uid, sol_ids, {
-                'working_line_id': stats_id,
-                }, context=context)
+            sol_update.append((sol.id, remain))
+        if sol_update:
+            for item_id, remain in sol_update:
+                sol_pool.write(cr, uid, item_id, {
+                    'working_line_id': stats_id,
+                    'working_qty': remain,
+                    }, context=context)
         
         # ---------------------------------------------------------------------
         # Return in production management for this day:
@@ -117,8 +119,5 @@ class CreateNewMrpLineDayWizard(orm.TransientModel):
         
     _defaults = {
         'date': lambda *x: datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT),
-        }    
-
+        }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
-
-

@@ -47,6 +47,17 @@ class SaleOrderLine(orm.Model):
     # -------------------------------------------------------------------------
     # Button event:    
     # -------------------------------------------------------------------------
+    def working_qty_is_done(self, cr, uid, ids, context=None):
+        ''' Set as done this line for the job
+        '''
+        current_proxy = self.browse(cr, uid, ids, context=context)[0]
+        return self.write(cr, uid, ids, {
+            'working_qty': 0,
+            'product_uom_maked_sync_qty': 
+                current_proxy.product_uom_maked_sync_qty + \
+                current_proxy.working_qty,
+            }, context=context)
+        
     def working_mark_as_done(self, cr, uid, ids, context=None):
         ''' Print single label
         '''
@@ -159,12 +170,47 @@ class MrpProductionStat(orm.Model):
     # -------------------------------------------------------------------------    
     def working_new_pallet(self, cr, uid, ids, context=None):
         ''' New pallet
-        '''    
+        '''
+        working_pallet = {}
+        for line in self.browse(cr, uid, ids, context=context)[0].working_ids:
+            if line.product_uom_maked_sync_qty:
+                working_pallet[line.id] = line.product_uom_maked_sync_qty
+        self.write(cr, uid, ids, {
+            'working_pallet': '%s' % (working_pallet, )
+            }, context=context)
         return True
         
     def working_end_pallet(self, cr, uid, ids, context=None):
         ''' End pallet
-        '''    
+        ''' 
+        pallet_pool = self.pool.get('mrp.production.stats.pallet')
+        row_pool = self.pool.get('mrp.production.stats.pallet.row')
+        
+        job_proxy = self.browse(cr, uid, ids, context=context)[0]
+        
+        previous_pallet = eval(job_proxy.working_pallet) or {}
+        sequence = 1 # TODO get last!
+        pallet_id = pallet_pool.create(cr, uid, {
+            'sequence': sequence, 
+            #'create_date':,             
+            'stat_id': ids[0],
+            }, context=context)
+        sequence = 0    
+        for line in job_proxy.working_ids:
+            previous = previous_pallet.get(line.id, 0)
+            current = line.product_uom_maked_sync_qty
+            pallet_qty = current - previous
+            if pallet_qty > 0:
+                sequence += 1
+                row_pool.create(cr, uid, {
+                    'sequence': sequence,
+                    'quantity': pallet_qty,
+                    'pallet_id': pallet_id,
+                    'sol_id': line.id,
+                    }, context=context)
+        self.write(cr, uid, ids, {
+            'working_pallet': False,
+            }, context=context)            
         return True
     
     def working_mark_as_done(self, cr, uid, ids, context=None):
@@ -185,7 +231,10 @@ class MrpProductionStat(orm.Model):
         'working_ids': fields.one2many(
             'sale.order.line', 'working_line_id', 'Working line',
             help='Sale order line working on this day'),
-        'working_done': fields.boolean('Done'),            
+        'working_done': fields.boolean('Done'),
+        'working_pallet': fields.text(
+            'Working pallet situation', 
+            help='Not visible: store the data for new pallet situation'),
         }
     
 

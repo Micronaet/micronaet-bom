@@ -36,19 +36,23 @@
                         <page string="Production">
                             <group colspan="4" col="4">
                                 <separator string="Production" colspan="4"/>
+                                <field name="mrp_id" readonly="1" />
                                 <button name="working_new_pallet" string="New pallet" type="object" colspan="1" />
-                                <button name="working_end_pallet" string="End pallet" type="object" colspan="1" />
+                                <button name="working_end_pallet" string="End pallet" type="object" colspan="1" attrs="{'invisible': [('working_pallet','=',False)]}"/>
+                                <field name="working_pallet" invisible="1" />
                                 <newline/>
                                 <field name="working_ids" colspan="4" nolabel="1" >
-                                    <tree colors="green:working_done==True" editable="bottom">
+                                    <tree colors="green:working_qty==0" editable="bottom">
                                         <!--Button for unlink-->
+                                        <field name="working_sequence" widget="handle"/>
                                         <field name="working_sequence" />
+                                        <field name="mrp_sequence" />
                                         <field name="partner_id" readonly="1"/>
                                         <field name="default_code" readonly="1" />
                                         <field name="product_uom_qty" readonly="1" />
                                         <field name="delivered_qty" readonly="1" />
                                         <field name="working_qty" />
-                                        <!--Button for force all-->
+                                        <button name="working_qty_is_done" string=">>" type="object" />
                                         <field name="product_uom_maked_sync_qty" />
                                         <field name="production_note" />
                                         <button name="working_print_single_label" string="Print label" type="object" icon="STOCK_PRINT"/>

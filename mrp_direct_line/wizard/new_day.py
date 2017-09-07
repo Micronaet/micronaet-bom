@@ -95,7 +95,7 @@ class CreateNewMrpLineDayWizard(orm.TransientModel):
         # Save total at start up:
         working_start_total = stats_pool.get_current_production_number(
             cr, uid, [stats_id], context=context)        
-        stats_pool.write(cr, uid, [stats_ids], {
+        stats_pool.write(cr, uid, [stats_id], {
             'working_start_total': working_start_total,
             }, context=context)
             

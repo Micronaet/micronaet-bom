@@ -1,9 +1,11 @@
 <?php
-/*$user      = 'admin';
-$password  = '30mcrt983';
-$dbname    = 'poliambulatorio';
-$server_url = 'http://192.168.100.71:8069/xmlrpc/';
-$userId    = -1;*/
+/*
+$user      = 'admin';
+$password  = 'password';
+$dbname    = 'database';
+$server_url = 'http://192.168.1.1:8069/xmlrpc/';
+$userId    = -1;
+*/
 
 class OpenErpConnection
 {

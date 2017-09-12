@@ -29,6 +29,7 @@
     // ----------------------------------------------------------------------------
     // CONFIRM PRODUCTION:
     // ----------------------------------------------------------------------------
+    $mode = $_GET['mode'];
     $sol_id = $_GET['sol_id'];
     $redirect_url = $_GET['redirect_url'];
     
@@ -39,8 +40,9 @@
     $msg->addParam(new xmlrpcval($uid, "int"));
     $msg->addParam(new xmlrpcval($password, "string"));
     $msg->addParam(new xmlrpcval("mrp.production.stats", "string"));
-    $msg->addParam(new xmlrpcval("set_sol_done_xmlrpc", "string"));
+    $msg->addParam(new xmlrpcval("print_label_from_php", "string"));
     $msg->addParam(new xmlrpcval($sol_id, "int"));
+    $msg->addParam(new xmlrpcval($mode, "string"));
 
     $resp = $sock->send($msg);
     if ($resp->faultCode()) {

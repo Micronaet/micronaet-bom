@@ -39,6 +39,18 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+class SaleOrderLine(orm.Model):
+    """ Model name: SaleOrderLine
+    """
+    
+    _inherit = 'sale.order.line'
+    
+    def print_label_from_php(self, cr, uid, sol_id, mode, context=None):
+        ''' Print action
+        '''
+        _logger.warning('Print PHP')
+        return True
+        
 class MrpProductionXmlrpcAgent(orm.Model):
     """ Model name: MrpProductionXmlrpcAgent
     """    

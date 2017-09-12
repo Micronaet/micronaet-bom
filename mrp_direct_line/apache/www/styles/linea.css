@@ -53,6 +53,10 @@ table tr {
     border-spacing: 0px;
     }
 
+.table_preview td {
+    color: #D0D0E1;
+    }
+
 .print_button {
     background: url(/images/print48.png) no-repeat;
     text-align: 'center';

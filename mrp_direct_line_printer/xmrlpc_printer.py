@@ -48,7 +48,8 @@ class SaleOrderLine(orm.Model):
     def print_label_from_php(self, cr, uid, sol_id, mode, context=None):
         ''' Print action
         '''
-        _logger.warning('Print PHP')
+        _logger.warning('Print PHP: ID %s mode %s' % (
+            sol_id, mode))
         return True
         
 class MrpProductionXmlrpcAgent(orm.Model):

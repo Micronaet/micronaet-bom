@@ -1,16 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <?php
+    include('../config.php');
     include('../xmlrpc/xmlrpc.inc');
-    // ----------------------------------------------------------------------------
-    // PARAMETER:
-    // ----------------------------------------------------------------------------
-    $user = 'admin';
-    $password = 'cgp.fmsp6';
-    $dbname = 'Fiam2017S';
-    $server = 'localhost';
-    $port = '18069';
-    $type_connection = 'http';
-    $server_url = "http://$server:$port/xmlrpc";
+
 
     // ----------------------------------------------------------------------------
     // LOGIN 

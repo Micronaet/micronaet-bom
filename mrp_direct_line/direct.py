@@ -199,9 +199,12 @@ class MrpProductionStat(orm.Model):
             def add_domain_note(self, cr, uid, line, block='pr', context=None):
                 ''' Add domain note after seahch
                 '''
-                label_image = '''<img src="/images/label.jpg" 
+                label_image = '''
+                    <img src="/images/label.jpg" 
                     alt="Etichetta personalizzata" 
-                    ''' #style="width:304px;height:228px;">
+                    style="width:16px;height:16px;"
+                    title="Etichetta personalizzata"/> 
+                    ''' 
                     
                 # Pool used:
                 product_pool = self.pool.get('product.product')    
@@ -217,10 +220,11 @@ class MrpProductionStat(orm.Model):
                 note_text = ''    
                 for note in note_pool.browse(
                         cr, uid, note_ids, context=context):    
-                    note_text += '<b>%s</b> %s%s<br/>' % (
+                    note_text += '<p class="p_note %s"%s>%s<b>%s</b> %s</p>' % (
+                        '"fg_red"' if note.print_label else '',
+                        label_image if note.print_label else '',
                         note.name or '', 
                         note.description or '',
-                        label_image if note.print_label else '',
                         )
                 return note_text        
             
@@ -411,7 +415,8 @@ class MrpProductionStat(orm.Model):
                     res += _('''
                         <tr>
                             <td>
-                                <img alt="Foto" src="data:image/png;base64,%s" />
+                                <img alt="Immagine non trovata" 
+                                    src="data:image/png;base64,%s" />
                             </td>
                             <td colspan="6" class="text_note">
                                 %s<p>%s</p>

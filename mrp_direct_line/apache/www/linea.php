@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <?php
-    include_once('config.inc.php');
+    eval(include_once('config.inc.php'));
     include('xmlrpc/xmlrpc.inc');
 
     // Show error:

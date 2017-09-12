@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <?php
-    include_once('config.inc.php');
+    //include_once('config.inc.php');
     include('xmlrpc/xmlrpc.inc');
 
     // Show error:
@@ -10,9 +10,20 @@
     $page = "";//$_SERVER['PHP_SELF'];
     $sec = "20";
 
-    // ----------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
+    // XMLRPC CONNECT PARAMETER:
+    // ------------------------------------------------------------------------
+    $user = 'admin';
+    $password = 'cgp.fmsp6';
+    $dbname = 'Fiam2017S';
+    $server = 'localhost';
+    $port = '18069';
+    $type_connection = 'http';
+    $server_url = "http://$server:$port/xmlrpc";
+
+    // ------------------------------------------------------------------------
     // LOGIN 
-    // ----------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     $sock = new xmlrpc_client("$server_url/common");
     $msg = new xmlrpcmsg("login");
     $msg->addParam(new xmlrpcval($dbname, "string"));
@@ -22,9 +33,9 @@
     $val = $resp->value();
     $uid = $val->scalarval(); 
 
-    // ----------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // READ:
-    // ----------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // Leggo i dati del paziente
     $aggiornamento = "Aggiornato alle: ".date("h:i:sa");
     $redirect_url =  'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];

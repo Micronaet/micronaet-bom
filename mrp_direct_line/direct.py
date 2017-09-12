@@ -234,14 +234,30 @@ class MrpProductionStat(orm.Model):
                 #    continue
                 if not first:
                     first = True
+                    # ---------------------------------------------------------
+                    # Print part:
+                    # ---------------------------------------------------------
                     res += _('''
                         <tr>
                             <td colspan="6">
-                                 <a href="php/print.php?mode=all+sol_id=%s">
-                                     <img src="images/print48.png" alt="Print all internal image"/>
-                                 </a>
+                                <form action="/php/print.php" method="get">
+                                    <input type="submit" value="Print all internal image" class="print_botton" />
+                                    <a href="#" onclick="submit();">
+                                        <img src="images/print48.png" alt="Print all internal image" />
+                                    <input type="hidden" name="sol_id" value="%s">
+                                    <input type="hidden" name="mode" value="all">
+                                    <input type="hidden" name="redirect_url" value="%s">
+                                </form>
                             </td>
-                        </tr>
+                        </tr>''') % (
+                            line.id, redirect_url,
+                            )
+                            
+                        
+                    # ---------------------------------------------------------
+                    # Header block (print button and title)
+                    # ---------------------------------------------------------
+                    res += _('''    
                         <tr>
                             <td colspan="6"><div class="red">%s</div></td>
                         </tr>
@@ -250,6 +266,16 @@ class MrpProductionStat(orm.Model):
                             <td>Codice</td><td>Pezzi</td>
                             <td colsnap="2">Conferma</td>
                         </tr>
+                        ''') % (
+                            _('ETICHETTA PERSONALIZZATA!!!') if \
+                                line.partner_id.has_custom_label else \
+                                    _('ETICHETTA MAGAZZINO'),
+                            )        
+                    
+                    # ---------------------------------------------------------
+                    # Current record:
+                    # ---------------------------------------------------------
+                    res += _('''    
                         <tr>
                             <td>%s</td><td>%s</td>
                             <td>%s</td><td>%s</td>
@@ -261,33 +287,31 @@ class MrpProductionStat(orm.Model):
                                     <input type="hidden" name="redirect_url" value="%s">
                                 </form>
                             </td>
-                        </tr>
+                        </tr>''') % (
+                            line.partner_id.name, line.order_id.name,
+                            line.default_code, line.working_qty,
+                            # Confirm form:
+                            line.id, redirect_url,
+                            )
+                                                    
+                    # ---------------------------------------------------------
+                    # Extra info for current record:
+                    # ---------------------------------------------------------
+                    res += _('''
                         <tr>
                             <td>
                                 <img alt="Foto" src="data:image/png;base64,%s" />
                             </td>
                             <td colspan="5">&nbsp;</td>
                         </tr>
-                        </table>                        
+                        </table>''') % line.order_id.company_id.logo or ''
                         
-                        <!--NEXT:-->
-                        <p></p>
-                        <table>                                               
-                        ''') % (
-                            line.id,
-                            _('ETICHETTA PERSONALIZZATA!!!') if \
-                                line.partner_id.has_custom_label else \
-                                    _('ETICHETTA MAGAZZINO'),
-                            line.partner_id.name,
-                            line.order_id.name,
-                            line.default_code,
-                            line.working_qty,
-                            line.id,
-                            redirect_url,
-                            #line.partner_id.image or '',
-                            line.order_id.company_id.logo or '',
-                            )
-                    res += '''
+                    # ---------------------------------------------------------
+                    # Next element from here:
+                    # ---------------------------------------------------------
+                    res += _('''<p></p><table>''') 
+
+                    res += _('''
                         <tr>
                             <td colspan="4"><b>PROSSIME:</b></td>
                         </tr>
@@ -297,7 +321,8 @@ class MrpProductionStat(orm.Model):
                            <td>Codice</td>
                            <td>Pezzi</td>
                        </tr>
-                        '''
+                        ''')
+                        
                 else: # second
                     second += 1
                     if second > max_queue:

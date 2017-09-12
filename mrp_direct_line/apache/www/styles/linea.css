@@ -47,3 +47,8 @@ red {
     font-size: 12px; 
     font-weight: bold;
     }
+
+print_button {
+    background:url(/images/print48.png) no-repeat;
+    height: 70px;
+    }    

@@ -220,7 +220,7 @@ class MrpProductionStat(orm.Model):
                 note_text = ''    
                 for note in note_pool.browse(
                         cr, uid, note_ids, context=context):    
-                    note_text += '<p class="p_note %s">%s<b>%s</b> %s</p>' % (
+                    note_text += '<div class="p_note %s">%s<b>%s</b> %s</div>' % (
                         '"fg_red"' if note.print_label else '',
                         label_image if note.print_label else '',
                         note.name or '', 

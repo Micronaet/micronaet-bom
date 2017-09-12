@@ -61,6 +61,7 @@
     $msg->addParam(new xmlrpcval("print_label_from_php", "string"));
     $msg->addParam(new xmlrpcval($sol_id, "int"));
     $msg->addParam(new xmlrpcval($mode, "string"));
+    $msg->addParam(new xmlrpcval($total, "int"));
 
     $resp = $sock->send($msg);
     if ($resp->faultCode()) {

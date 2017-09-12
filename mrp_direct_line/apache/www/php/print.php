@@ -30,7 +30,7 @@
     // CONFIRM PRODUCTION:
     // ----------------------------------------------------------------------------
     var_dump();
-    die($_GET['all']);
+    die();
     $mode = $_GET['mode'];
     $sol_id = $_GET['sol_id'];
     $redirect_url = $_GET['redirect_url'];

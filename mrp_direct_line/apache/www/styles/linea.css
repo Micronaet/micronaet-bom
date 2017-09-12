@@ -53,6 +53,7 @@ red {
     text-align: 'center';
     vertical-align: 'bottom';
     border-radius: 8px;
+    border: 2px solid #4CAF50;
     height: 70px;
     width: 60px;
     }    

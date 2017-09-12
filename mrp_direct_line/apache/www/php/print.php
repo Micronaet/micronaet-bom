@@ -31,13 +31,13 @@
     // ----------------------------------------------------------------------------
     //var_dump($_GET);
     //die();
-    if (isset($_POST['all'])) { 
+    if (isset($_GET['all'])) { 
         $mode = 'all'; 
         } 
-    elseif (isset($_POST['internal'])) { 
+    elseif (isset($_GET['internal'])) { 
         $mode = 'internal'; 
         } 
-    elseif (isset($_POST['external'])) { 
+    elseif (isset($_GET['external'])) { 
         $mode = 'external'; 
         } 
     //$mode = $_GET['mode'];

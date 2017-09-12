@@ -52,6 +52,7 @@ red {
     background: url(/images/print48.png) no-repeat;
     text-align: 'center';
     vertical-align: 'bottom';
+    border-radius: 8px;
     height: 70px;
     width: 60px;
     }    

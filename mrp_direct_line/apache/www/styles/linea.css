@@ -48,7 +48,8 @@ table tr {
     border: 1px solid black;
     width: 1000px;
     font-size: 11px; 
-    color: #D0D0E1;
+    border-color: #D0D0E1;
+    color: #DDDDDD;
     margin: 5px;
     border-spacing: 0px;
     }

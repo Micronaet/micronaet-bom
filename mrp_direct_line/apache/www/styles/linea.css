@@ -58,6 +58,7 @@ table tr {
 .text_note {
     text-align: left;
     vertical-align: top;
+    padding: 2px;
     }
     
 /* COLORS: */

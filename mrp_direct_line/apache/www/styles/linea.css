@@ -60,6 +60,11 @@ table tr {
     vertical-align: top;
     padding: 2px;
     }
+
+.category_note {
+    border-style: solid;
+    border-bottom: thick dotted #ff0000;
+    }
     
 /* COLORS: */
 .fg_red {

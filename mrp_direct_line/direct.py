@@ -189,6 +189,80 @@ class MrpProductionStat(orm.Model):
     def get_xmlrpc_html(self, cr, uid, line_code, redirect_url, context=None):
         ''' Return HTML view for result php call
         '''
+        # ---------------------------------------------------------------------
+        # UTILITY:
+        # ---------------------------------------------------------------------
+        # TODO move in note system:
+        def get_notesystem_for_line(self, cr, uid, line, context=None):
+            ''' Note system for line
+            '''
+            def add_domain_note(self, cr, uid, line, block='pr', context=None):
+                ''' Add domain note after seahch
+                '''
+                # Pool used:
+                product_pool = self.pool.get('product.product')    
+                note_pool = self.pool.get('note.note')
+
+                domain = product_pool.get_domain_note_event_filter(
+                    cr, uid, line, block=block, context=context)                
+                note_ids = note_pool.search(
+                    cr, uid, domain, context=context)
+
+                note_text = ''    
+                for note in note_pool.browse(
+                        cr, uid, note_ids, context=context):    
+                    note_text += '<b>%s</b> %s<br/>' % (
+                        note.name or '', 
+                        note.description or ''
+                        )
+                return note_text        
+            
+            note_text = ''
+            # TODO add only category for production in filter!
+            
+            # Product note:
+            res = add_domain_note(
+                self, cr, uid, line, block='pr', context=context)            
+            if res:
+                note_text += '<b class="category">Note prodotto: </b><br/>%s' % res
+            # Partner note:
+            res = add_domain_note(
+                self, cr, uid, line, block='pa', context=context)            
+            if res:
+                note_text += '<b>Note partner: </b><br/>%s' % res
+            # Address note:
+            res = add_domain_note(
+                self, cr, uid, line, block='ad', context=context)
+            if res:
+                note_text += '<b>Note indirizzo: </b><br/>%s' % res
+            # Order note:
+            res = add_domain_note(
+                self, cr, uid, line, block='or', context=context)
+            if res:
+                note_text += '<b>Note ordine: </b><br/>%s' % res
+            # Partner product note:
+            res = add_domain_note(
+                self, cr, uid, line, block='pr-pa', context=context)
+            if res:
+                note_text += '<b>Note prodotto cliente: </b><br/>%s' % res
+            # Address product note:
+            res = add_domain_note(
+                self, cr, uid, line, block='pr-ad', context=context)
+            if res:
+                note_text += '<b>Note prodotto indirizzo: </b><br/>%s' % res
+            # Address product order note:
+            res = add_domain_note(
+                self, cr, uid, line, block='pr-or', context=context)
+            if res:
+                note_text += '<b>Note prodotto ordine: </b><br/>%s' % res
+            # Detail note:
+            res = add_domain_note(
+                self, cr, uid, line, block='pr-de', context=context)
+            if res:
+                note_text += '<b>Note dettaglio: </b><br/>%s' % res
+            
+            return note_text
+        
         # Pool used:
         product_pool = self.pool.get('product.product')
         note_pool = self.pool.get('note.note')
@@ -244,18 +318,11 @@ class MrpProductionStat(orm.Model):
                 if not first:
                     first = True
 
-                    # Note information:
-                    note_domain = product_pool.open_button_note_event(
-                        cr, uid, [line.product_id.id], block='all', 
-                        context=context)['domain']
-                    note_ids = note_pool.search(
-                        cr, uid, note_domain, context=context)    
-                        
-                    note_text = ''    
-                    for note in note_pool.browse(
-                            cr, uid, note_ids, context=context):    
-                        note_text += '<b>%s</b> %s<br/>' % (
-                            note.name, note.description)
+                    # ---------------------------------------------------------
+                    #                  INFORMATION NOTE:
+                    # ---------------------------------------------------------
+                    note_text = get_notesystem_for_line(
+                        self, cr, uid, line, context=context)
                     
                     # ---------------------------------------------------------
                     # Print part:

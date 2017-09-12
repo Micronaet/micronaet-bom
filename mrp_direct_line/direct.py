@@ -327,7 +327,7 @@ class MrpProductionStat(orm.Model):
                             <td>
                                 <img alt="Foto" src="data:image/png;base64,%s" />
                             </td>
-                            <td colspan="5" text_note><p class="text_note">%s</p></td>
+                            <td colspan="5" class="text_note"><p>%s</p></td>
                         </tr>
                         </table>''') % (
                             line.product_id.product_image_context,

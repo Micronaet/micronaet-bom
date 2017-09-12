@@ -178,6 +178,170 @@ class MrpProductionStat(orm.Model):
         return total
 
     # -------------------------------------------------------------------------
+    # XMLRPC Function:
+    # -------------------------------------------------------------------------
+    def set_sol_done_xmlrpc(self, cr, uid, sol_id, context=None):
+        ''' Mark as confirmed:
+        '''
+        _logger.warning('Confirmed from XMLRPC')
+        return self.pool.get('sale.order.line').working_qty_is_done(
+            cr, uid, [sol_id], context=context)
+    
+    def get_xmlrpc_html(self, cr, uid, line_code, redirect_url, context=None):
+        ''' Return HTML view for result php call
+        '''
+        _logger.warning('Status for XMLRPC')
+        now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+
+        line_pool = self.pool.get('mrp.workcenter')
+        line_ids = line_pool.search(cr, uid, [
+            ('code', '=', line_code),
+            ], context=context)
+        if not line_ids:
+            return _('<p>Line not present</p>')
+            
+        stats_ids = self.search(cr, uid, [
+            ('working_done', '=', False),
+            ('workcenter_id', '=', line_ids[0]),
+            ('date', '=', now[:10]),
+            ], context=context)
+        if not stats_ids:
+            return _('<p>Nothing to work in line %s today!</p>') % line_code
+        
+        # ---------------------------------------------------------------------
+        # CSS        
+        # ---------------------------------------------------------------------
+        """css = '''
+            <style>
+                .table_bf {
+                     border:1px 
+                     padding: 3px;
+                     solid black;
+                 }
+                .table_bf td {
+                     border:1px 
+                     solid black;
+                     padding: 3px;
+                     text-align: center;
+                 }
+                .table_bf th {
+                     border:1px 
+                     solid black;
+                     padding: 3px;
+                     text-align: center;
+                     background-color: grey;
+                     color: white;
+                 }
+            </style>
+            '''"""
+
+        # ---------------------------------------------------------------------
+        # Header:
+        # ---------------------------------------------------------------------
+        res = ''
+        max_queue = 3
+        for stats in self.browse(cr, uid, stats_ids, context=context)[0]: # XXX only first?
+            res = '''
+                <table>
+                    <tr>
+                        <th colspan="4">%s</th><th colspan="2">Aggiornato il: %s</th>
+                    </tr>
+                ''' % (
+                    stats.workcenter_id.name,        
+                    now,
+                    )
+
+            first = False
+            second = 0
+            for line in sorted(stats.working_ids, 
+                    key=lambda x: (x.working_sequence, x.mrp_sequence)):
+                    
+                # Check if is done:
+                if not line.working_qty:
+                    continue
+                #if line.product_uom_qty <= line.product_uom_maked_sync_qty:
+                #    continue
+                if not first:
+                    first = True
+                    res += _('''
+                        <!--<tr>
+                            <td colspan="6"><b>CORRENTE:</b></td>
+                        </tr>-->
+                        <tr>
+                            <td colspan="6"><b>%s</b></td>
+                        </tr>
+                        <tr>
+                            <td>Partner</td><td>Ordine</td>
+                            <td>Codice</td><td>Pezzi</td>
+                            <td colsnap="2">Conferma</td>
+                        </tr>
+                        <tr>
+                            <td>%s</td><td>%s</td>
+                            <td>%s</td><td>%s</td>
+                            <td colsnap="2">
+                                <form action="confirm.php" method="get">
+                                    <!--<img src="images/bat_logingreen.gif" onclick="submit();"/>-->
+                                    <input type="submit" value="FATTI!">
+                                    <input type="hidden" name="sol_id" value="%s">
+                                    <input type="hidden" name="redirect_url" value="%s">
+                                </form>    
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <img alt="Foto" src="data:image/png;base64,%s" />
+                            </td>
+                            <td colspan="5">&nbsp;</td>
+                        </tr>
+                        </table>
+                        
+                        
+                        <!--NEXT:-->
+                        <p></p>
+                        <table>                                               
+                        ''') % (
+                            _('ETICHETTA PERSONALIZZATA!!!') if \
+                                line.partner_id.has_custom_label else \
+                                    _('ETICHETTA MAGAZZINO'),
+                            line.partner_id.name,
+                            line.order_id.name,
+                            line.default_code,
+                            line.working_qty,
+                            line.id,
+                            redirect_url,
+                            #line.partner_id.image or '',
+                            line.order_id.company_id.logo or '',
+                            )
+                    res += '''
+                        <tr>
+                            <td colspan="4"><b>PROSSIME:</b></td>
+                        </tr>
+                        <tr>
+                           <td>Partner</td>
+                           <td>Ordine</td>
+                           <td>Codice</td>
+                           <td>Pezzi</td>
+                       </tr>
+                        '''
+                else: # second
+                    second += 1
+                    if second > max_queue:
+                        break
+                    res += '''
+                        <tr>
+                            <td>%s</td><td>%s</td><td>%s</td><td>%s</td>
+                        </tr>''' % (
+                            line.partner_id.name,
+                            line.order_id.name,
+                            line.default_code,
+                            line.working_qty,                                
+                            )
+            
+        res += '</table>'
+                
+        return res
+        
+    # -------------------------------------------------------------------------
     # Button event:    
     # -------------------------------------------------------------------------    
     def working_new_pallet(self, cr, uid, ids, context=None):

@@ -1,0 +1,44 @@
+body {
+    margin: 0px;
+    font-size: 12px; 
+    color: #333333; 
+    }
+
+div {
+    margin: 0px;
+    font-size: 12px;     
+    color: #2E9AFE;
+    }
+    
+table {
+    border: 1px solid black;
+    width: 600px;
+    font-size: 11px; 
+    margin: 5px;
+    border-spacing: 0px;
+    }
+
+table th {
+    background-color: #6E6E6E;
+    border: 1px solid black;
+    padding: 0px;
+    font-size: 12px; 
+    color: #FFFFFF;
+    text-align: center;
+    border-spacing: 0px;
+    }
+
+table td {
+    text-align: center;
+    border: 1px solid black;
+    border-spacing: 0px;
+    }
+
+table tr {
+    background-color: #EEEEEE;
+    color: #333333;
+    border: 1px solid black;
+    padding: 5px;
+    border-spacing: 0px;
+    }
+

@@ -49,6 +49,7 @@ red {
     }
 
 print_button {
-    background:url(/images/print48.png) no-repeat;
+    background: url(/images/print48.png) no-repeat;
     height: 70px;
+    width: 70px;
     }    

@@ -40,6 +40,13 @@
     elseif (isset($_GET['external'])) { 
         $mode = 'external'; 
         } 
+
+    if (isset($_GET['total'])) { 
+        $total = $_GET['total']; 
+        } 
+    else {
+        $total = 0;
+        }
     //$mode = $_GET['mode'];
     $sol_id = $_GET['sol_id'];
     $redirect_url = $_GET['redirect_url'];

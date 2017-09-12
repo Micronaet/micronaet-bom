@@ -45,11 +45,11 @@ class SaleOrderLine(orm.Model):
     
     _inherit = 'sale.order.line'
     
-    def print_label_from_php(self, cr, uid, sol_id, mode, context=None):
+    def print_label_from_php(self, cr, uid, sol_id, mode, total, context=None):
         ''' Print action
         '''
-        _logger.warning('Print PHP: ID %s mode %s' % (
-            sol_id, mode))
+        _logger.warning('Print PHP: ID %s mode %s [Total: %s]' % (
+            sol_id, mode, total))
         return True
         
 class MrpProductionXmlrpcAgent(orm.Model):

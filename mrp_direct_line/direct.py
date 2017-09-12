@@ -379,7 +379,8 @@ class MrpProductionStat(orm.Model):
                     res += _('''    
                         <tr>
                             <td>%s</td><td>%s</td><td>%s</td>
-                            <td>%s</td><td>%s</td>
+                            <td><b>%s</b></td>
+                            <td><b>%s</b></td>
                             <td colsnap="2">
                                 <form action="/php/confirm.php" method="get">
                                     <input type="submit" value="FATTI!">
@@ -441,8 +442,9 @@ class MrpProductionStat(orm.Model):
                         break
                     res += '''
                         <tr>
-                            <td>%s</td><td>%s</td><td>%s</td><td>%s</td>
-                            <td>%s</td>
+                            <td>%s</td><td>%s</td><td>%s</td>
+                            <td><b>%s</b></td>
+                            <td><b>%s</b></td>
                         </tr>''' % (
                             line.partner_id.name,
                             line.order_id.destination_partner_id.name or \

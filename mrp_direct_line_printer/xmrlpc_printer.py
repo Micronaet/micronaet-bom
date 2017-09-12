@@ -48,6 +48,7 @@ class SaleOrderLine(orm.Model):
     def print_label_from_php(self, cr, uid, sol_id, mode, context=None):
         ''' Print action
         '''
+        import pdb; pdb.set_trace()
         _logger.warning('Print PHP')
         return True
         

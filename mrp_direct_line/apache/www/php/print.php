@@ -39,7 +39,7 @@
     $msg->addParam(new xmlrpcval($dbname, "string"));
     $msg->addParam(new xmlrpcval($uid, "int"));
     $msg->addParam(new xmlrpcval($password, "string"));
-    $msg->addParam(new xmlrpcval("mrp.production.stats", "string"));
+    $msg->addParam(new xmlrpcval("sale.order.line", "string"));
     $msg->addParam(new xmlrpcval("print_label_from_php", "string"));
     $msg->addParam(new xmlrpcval($sol_id, "int"));
     $msg->addParam(new xmlrpcval($mode, "string"));

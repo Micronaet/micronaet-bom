@@ -241,7 +241,7 @@ class MrpProductionStat(orm.Model):
                         <tr>
                             <td colspan="6">
                                 <form action="/php/print.php" method="get">
-                                    <input type="submit" value="Print all internal image" class="print_button" />
+                                    <input type="submit" value="All" class="print_button" />
                                     <a href="#" onclick="submit();">
                                         <img src="images/print48.png" alt="Print all internal image" />
                                     <input type="hidden" name="sol_id" value="%s">

@@ -48,7 +48,7 @@ red {
     font-weight: bold;
     }
 
-print_button {
+.print_button {
     background: url(/images/print48.png) no-repeat;
     height: 70px;
     width: 70px;

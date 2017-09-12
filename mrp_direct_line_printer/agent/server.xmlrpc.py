@@ -34,6 +34,7 @@ config.read(['./openerp.cfg'])
 xmlrpc_host = config.get('XMLRPC', 'host') 
 xmlrpc_port = eval(config.get('XMLRPC', 'port'))
 
+# Folder:
 root_folder = eval(config.get('Folder', 'root'))
 
 # -----------------------------------------------------------------------------

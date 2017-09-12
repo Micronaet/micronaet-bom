@@ -424,7 +424,7 @@ class MrpProductionStat(orm.Model):
                     # ---------------------------------------------------------
                     # Next element from here:
                     # ---------------------------------------------------------
-                    res += _('''<p></p><table class="table_preview">''') 
+                    res += _('''<table class="table_preview">''') 
 
                     res += _('''
                         <tr>

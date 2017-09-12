@@ -189,9 +189,18 @@ class MrpProductionStat(orm.Model):
     def get_xmlrpc_html(self, cr, uid, line_code, redirect_url, context=None):
         ''' Return HTML view for result php call
         '''
-        now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-
+        # Pool used:
+        product_pool = self.pool.get('product.product')
+        note_pool = self.pool.get('note.note')
         line_pool = self.pool.get('mrp.workcenter')
+
+        if context is None: 
+            context = {}
+        
+        now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        album_ctx = context['album_code'] = 'CHROMA'
+
+        # Line information:
         line_ids = line_pool.search(cr, uid, [
             ('code', '=', line_code),
             ], context=context)
@@ -234,6 +243,20 @@ class MrpProductionStat(orm.Model):
                 #    continue
                 if not first:
                     first = True
+
+                    # Note information:
+                    note_domain = product_pool.open_button_note_event(
+                        cr, uid, [line.product_id.id], block='all', 
+                        context=context)['domain']
+                    note_ids = note_pool.search(
+                        cr, uid, note_domain, context=context)    
+                        
+                    note_text = ''    
+                    for note in note_pool.browse(
+                            cr, uid, note_ids, context=context):    
+                        note_text += '<p><b>%s</b>%s</p>' % (
+                            note.name, note.description)
+                    
                     # ---------------------------------------------------------
                     # Print part:
                     # ---------------------------------------------------------
@@ -304,9 +327,13 @@ class MrpProductionStat(orm.Model):
                             <td>
                                 <img alt="Foto" src="data:image/png;base64,%s" />
                             </td>
-                            <td colspan="5">&nbsp;</td>
+                            <td colspan="5">%s</td>
                         </tr>
-                        </table>''') % line.order_id.company_id.logo or ''
+                        </table>''') % (
+                            line.product_id.product_image_context,
+                            note_text,
+                            )
+                    #line.order_id.company_id.logo or ''
                         
                     # ---------------------------------------------------------
                     # Next element from here:

@@ -32,6 +32,7 @@
     'depends': [
         'base',
         'sale',
+        'product_image_base',
         ],
     'init_xml': [],
     'demo': [],

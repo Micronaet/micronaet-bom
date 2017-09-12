@@ -44,16 +44,6 @@ table tr {
     border-spacing: 0px;
     }
 
-.fg_red {
-    color: #FF0000;    
-    font-size: 12px; 
-    font-weight: bold;
-    }
-
-.bg_blue {
-    background-color: #3399ff;
-    }
-    
 .print_button {
     background: url(/images/print48.png) no-repeat;
     text-align: 'center';
@@ -64,3 +54,16 @@ table tr {
     height: 70px;
     width: 50px;
     }    
+
+/* COLORS: */
+.fg_red {
+    color: #FF0000;    
+    font-size: 12px; 
+    font-weight: bold;
+    }
+
+.bg_blue {
+    background-color: #3399ff;
+    }
+    
+

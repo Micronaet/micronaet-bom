@@ -35,6 +35,7 @@
         'production_accounting_external',
         'label_system_mrp',        
         'production_accounting_external_stats',
+        'note_system_management',
         ],
     'init_xml': [],
     'demo': [],

@@ -254,7 +254,7 @@ class MrpProductionStat(orm.Model):
                     note_text = ''    
                     for note in note_pool.browse(
                             cr, uid, note_ids, context=context):    
-                        note_text += '<p><b>%s</b>%s</p>' % (
+                        note_text += '<b>%s</b> %s<br/>' % (
                             note.name, note.description)
                     
                     # ---------------------------------------------------------
@@ -327,7 +327,7 @@ class MrpProductionStat(orm.Model):
                             <td>
                                 <img alt="Foto" src="data:image/png;base64,%s" />
                             </td>
-                            <td colspan="5"><p class="text_note">%s</p></td>
+                            <td colspan="5" text_note><p class="text_note">%s</p></td>
                         </tr>
                         </table>''') % (
                             line.product_id.product_image_context,

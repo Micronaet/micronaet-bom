@@ -43,6 +43,10 @@ table tr {
     border-spacing: 0px;
     }
 
+.table_preview {
+    opacity: 0.5;
+    filter: alpha(opacity=50); /* For IE8 and earlier */
+    }
 /*.table_preview {
     border: 1px solid black;
     width: 1000px;

@@ -263,7 +263,7 @@ class MrpProductionStat(orm.Model):
                         <tr>
                             <td colspan="6"><div class="fg_red">%s</div></td>
                         </tr>
-                        <tr>
+                        <tr class="bg_blue">
                             <td>Partner</td><td>Ordine</td>
                             <td>Codice</td><td>Pezzi</td>
                             <td colsnap="2">Conferma</td>
@@ -317,7 +317,7 @@ class MrpProductionStat(orm.Model):
                         <tr>
                             <td colspan="4"><b>PROSSIME:</b></td>
                         </tr>
-                        <tr>
+                        <tr class="bg_blue">
                            <td>Partner</td>
                            <td>Ordine</td>
                            <td>Codice</td>

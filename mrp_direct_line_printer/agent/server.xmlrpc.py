@@ -55,8 +55,7 @@ server.register_introspection_functions()
 #                                 Functions
 # -----------------------------------------------------------------------------
 def execute(operation):
-    ''' ID of batch file to launch
-    
+    ''' ID of batch file to launch    
         @return esit of operation
     '''
     print '[INFO] Run operation: %s' % operation
@@ -78,15 +77,12 @@ def execute(operation):
     return 'OK'
 
 # -----------------------------------------------------------------------------
-#                  Register Function in XML-RPC server:
+#                                     MAIN:                 
 # -----------------------------------------------------------------------------
+# Register Function in XML-RPC server:
 server.register_function(execute, 'execute')
 
-# -----------------------------------------------------------------------------
-#                       Run the server's main loop:
-# -----------------------------------------------------------------------------
-# Log connection:
+# Run the server's main loop (Log connection):
 print 'Start XMLRPC server on %s:%s' % (xmlrpc_host, xmlrpc_port)
-
 server.serve_forever()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

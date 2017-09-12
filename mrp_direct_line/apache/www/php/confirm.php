@@ -55,7 +55,6 @@
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
         <link type="text/css" rel="stylesheet" href="/styles/linea.css" />
     </head>
-<body>
-    <?=$html?>
-</body>
+    <body>    
+    </body>
 </html>

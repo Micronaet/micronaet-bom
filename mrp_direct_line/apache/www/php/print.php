@@ -34,6 +34,12 @@
     if (isset($_POST['all'])) { 
         $mode = 'all'; 
         } 
+    elseif (isset($_POST['internal'])) { 
+        $mode = 'internal'; 
+        } 
+    elseif (isset($_POST['external'])) { 
+        $mode = 'external'; 
+        } 
     //$mode = $_GET['mode'];
     $sol_id = $_GET['sol_id'];
     $redirect_url = $_GET['redirect_url'];

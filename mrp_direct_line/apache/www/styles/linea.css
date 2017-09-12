@@ -62,8 +62,9 @@ table tr {
     }
 
 .category_note {
+    backgroun-color: #ffff99;
     text-align: center;
-    border-bottom: 1px dotted #ff0000;
+    /*border-bottom: 1px dotted #ff0000;*/
     }
     
 /* COLORS: */

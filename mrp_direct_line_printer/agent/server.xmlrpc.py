@@ -90,4 +90,3 @@ print 'Start XMLRPC server on %s:%s' % (xmlrpc_host, xmlrpc_port)
 
 server.serve_forever()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
-

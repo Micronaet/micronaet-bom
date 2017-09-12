@@ -241,9 +241,12 @@ class MrpProductionStat(orm.Model):
                         <tr>
                             <td colspan="6">
                                 <form action="/php/print.php" method="get">
-                                    <input type="submit" value="All" class="print_button" />
+                                    <input type="submit" value="All" class="print_button" name="all"/>
+                                    &nbsp;
                                     <input type="submit" value="Internal" class="print_button" />
+                                    &nbsp;
                                     <input type="submit" value="External" class="print_button" />
+                                    &nbsp;
                                     <input type="hidden" name="sol_id" value="%s">
                                     <input type="hidden" name="mode" value="all">
                                     <input type="hidden" name="redirect_url" value="%s">

@@ -237,13 +237,13 @@ class MrpProductionStat(orm.Model):
                     res += _('''
                         <tr>
                             <td colspan="6">
-                                 <a href="php/print.php?mode=all">
+                                 <a href="php/print.php?mode=all+sol_id=%s">
                                      <img src="images/print48.png" alt="Print all internal image"/>
                                  </a>
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="6"><b>%s</b></td>
+                            <td colspan="6" class="red"><b>%s</b></td>
                         </tr>
                         <tr>
                             <td>Partner</td><td>Ordine</td>
@@ -275,6 +275,7 @@ class MrpProductionStat(orm.Model):
                         <p></p>
                         <table>                                               
                         ''') % (
+                            line.id,
                             _('ETICHETTA PERSONALIZZATA!!!') if \
                                 line.partner_id.has_custom_label else \
                                     _('ETICHETTA MAGAZZINO'),

@@ -55,6 +55,11 @@ table tr {
     width: 50px;
     }    
 
+.text_note {
+    text-align: 'left';
+    vertical-align: 'top';
+    }
+    
 /* COLORS: */
 .fg_red {
     color: #FF0000;    

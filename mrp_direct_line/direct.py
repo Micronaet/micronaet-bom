@@ -252,7 +252,7 @@ class MrpProductionStat(orm.Model):
                             <td>%s</td><td>%s</td>
                             <td>%s</td><td>%s</td>
                             <td colsnap="2">
-                                <form action="confirm.php" method="get">
+                                <form action="/php/confirm.php" method="get">
                                     <!--<img src="images/bat_logingreen.gif" onclick="submit();"/>-->
                                     <input type="submit" value="FATTI!">
                                     <input type="hidden" name="sol_id" value="%s">

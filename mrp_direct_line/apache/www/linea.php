@@ -73,7 +73,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
         <meta http-equiv="refresh" content="<?php echo $sec?>;URL='<?php echo $page?>'">
 
-        <link type="text/css" rel="stylesheet" href="linea.css" />
+        <link type="text/css" rel="stylesheet" href="/styles/linea.css" />
 
     </head>
 <body>

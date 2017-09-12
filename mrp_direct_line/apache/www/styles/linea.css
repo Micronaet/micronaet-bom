@@ -42,12 +42,16 @@ table tr {
     border-spacing: 0px;
     }
 
-red {
+.fg_red {
     color: #FF0000;    
     font-size: 12px; 
     font-weight: bold;
     }
 
+.bk_blue {
+    background-color: #3399ff;
+    }
+    
 .print_button {
     background: url(/images/print48.png) no-repeat;
     text-align: 'center';

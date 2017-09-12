@@ -49,13 +49,12 @@ table tr {
     width: 1000px;
     font-size: 11px; 
     border-color: #D0D0E1;
-    color: #DDDDDD;
     margin: 5px;
     border-spacing: 0px;
     }
 
 .table_preview td {
-    color: #D0D0E1;
+    color: #DDDDDD;
     }
 
 .print_button {

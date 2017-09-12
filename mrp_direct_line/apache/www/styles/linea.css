@@ -50,6 +50,8 @@ red {
 
 .print_button {
     background: url(/images/print48.png) no-repeat;
+    text-align: 'center';
+    vertical-align: 'bottom';
     height: 70px;
-    width: 70px;
+    width: 60px;
     }    

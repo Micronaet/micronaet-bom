@@ -62,6 +62,7 @@ table tr {
     }
 
 .category_note {
+    text-align: center;
     border-style: solid;
     border-bottom: thick dotted #ff0000;
     }

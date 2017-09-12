@@ -224,42 +224,42 @@ class MrpProductionStat(orm.Model):
             res = add_domain_note(
                 self, cr, uid, line, block='pr', context=context)            
             if res:
-                note_text += '<b class="category">Note prodotto: </b><br/>%s' % res
+                note_text += '<b class="category_note">Note prodotto: </b><br/>%s' % res
             # Partner note:
             res = add_domain_note(
                 self, cr, uid, line, block='pa', context=context)            
             if res:
-                note_text += '<b>Note partner: </b><br/>%s' % res
+                note_text += '<b class="category_note">Note partner: </b><br/>%s' % res
             # Address note:
             res = add_domain_note(
                 self, cr, uid, line, block='ad', context=context)
             if res:
-                note_text += '<b>Note indirizzo: </b><br/>%s' % res
+                note_text += '<b class="category_note">Note indirizzo: </b><br/>%s' % res
             # Order note:
             res = add_domain_note(
                 self, cr, uid, line, block='or', context=context)
             if res:
-                note_text += '<b>Note ordine: </b><br/>%s' % res
+                note_text += '<b class="category_note">Note ordine: </b><br/>%s' % res
             # Partner product note:
             res = add_domain_note(
                 self, cr, uid, line, block='pr-pa', context=context)
             if res:
-                note_text += '<b>Note prodotto cliente: </b><br/>%s' % res
+                note_text += '<b class="category_note">Note prodotto cliente: </b><br/>%s' % res
             # Address product note:
             res = add_domain_note(
                 self, cr, uid, line, block='pr-ad', context=context)
             if res:
-                note_text += '<b>Note prodotto indirizzo: </b><br/>%s' % res
+                note_text += '<b class="category_note">Note prodotto indirizzo: </b><br/>%s' % res
             # Address product order note:
             res = add_domain_note(
                 self, cr, uid, line, block='pr-or', context=context)
             if res:
-                note_text += '<b>Note prodotto ordine: </b><br/>%s' % res
+                note_text += '<b class="category_note">Note prodotto ordine: </b><br/>%s' % res
             # Detail note:
             res = add_domain_note(
                 self, cr, uid, line, block='pr-de', context=context)
             if res:
-                note_text += '<b>Note dettaglio: </b><br/>%s' % res
+                note_text += '<b class="category_note">Note dettaglio: </b><br/>%s' % res
             
             return note_text
         

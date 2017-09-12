@@ -205,6 +205,8 @@ class MrpProductionStat(orm.Model):
 
                 domain = product_pool.get_domain_note_event_filter(
                     cr, uid, line, block=block, context=context)                
+                if domain == False: # no domain
+                    return ''
                 note_ids = note_pool.search(
                     cr, uid, domain, context=context)
 
@@ -221,45 +223,47 @@ class MrpProductionStat(orm.Model):
             # TODO add only category for production in filter!
             
             # Product note:
+            mask = '<b class="category_note">NOTE %s: </b><br/>%s'
             res = add_domain_note(
                 self, cr, uid, line, block='pr', context=context)            
             if res:
-                note_text += '<b class="category_note">Note prodotto: </b><br/>%s' % res
+                note_text += mask % ('PRODOTTO', res)
             # Partner note:
             res = add_domain_note(
                 self, cr, uid, line, block='pa', context=context)            
             if res:
-                note_text += '<b class="category_note">Note partner: </b><br/>%s' % res
+                note_text += mask % ('PARTNER', res)
             # Address note:
             res = add_domain_note(
                 self, cr, uid, line, block='ad', context=context)
             if res:
-                note_text += '<b class="category_note">Note indirizzo: </b><br/>%s' % res
+                note_text += mask % ('INDIRIZZO', res)
             # Order note:
             res = add_domain_note(
                 self, cr, uid, line, block='or', context=context)
             if res:
-                note_text += '<b class="category_note">Note ordine: </b><br/>%s' % res
-            # Partner product note:
-            res = add_domain_note(
-                self, cr, uid, line, block='pr-pa', context=context)
-            if res:
-                note_text += '<b class="category_note">Note prodotto cliente: </b><br/>%s' % res
-            # Address product note:
-            res = add_domain_note(
-                self, cr, uid, line, block='pr-ad', context=context)
-            if res:
-                note_text += '<b class="category_note">Note prodotto indirizzo: </b><br/>%s' % res
-            # Address product order note:
-            res = add_domain_note(
-                self, cr, uid, line, block='pr-or', context=context)
-            if res:
-                note_text += '<b class="category_note">Note prodotto ordine: </b><br/>%s' % res
+                note_text += mask % ('ORDINE', res)
             # Detail note:
             res = add_domain_note(
                 self, cr, uid, line, block='pr-de', context=context)
             if res:
-                note_text += '<b class="category_note">Note dettaglio: </b><br/>%s' % res
+                note_text += mask % ('DETTAGLIO', res)
+
+            # Partner product note:
+            res = add_domain_note(
+                self, cr, uid, line, block='pr-pa', context=context)
+            if res:
+                note_text += mask % ('PRODOTTO-CLIENTE', res)
+            # Address product note:
+            res = add_domain_note(
+                self, cr, uid, line, block='pr-ad', context=context)
+            if res:
+                note_text += mask % ('PRODOTTO-INDIRIZZO', res)
+            # Address product order note:
+            res = add_domain_note(
+                self, cr, uid, line, block='pr-or', context=context)
+            if res:
+                note_text += mask % ('PRODOTTO-ORDINE', res)
             
             return note_text
         
@@ -329,7 +333,9 @@ class MrpProductionStat(orm.Model):
                     # ---------------------------------------------------------
                     res += _('''
                         <tr>
-                            <td colspan="6">
+                            <td colspan="4">
+                            </td>                            
+                            <td colspan="2">
                                 <form action="/php/print.php" method="get">
                                     <input type="submit" value="Tutte" class="print_button" name="all"/>
                                     &nbsp;
@@ -349,20 +355,13 @@ class MrpProductionStat(orm.Model):
                     # ---------------------------------------------------------
                     # Header block (print button and title)
                     # ---------------------------------------------------------
-                    res += _('''    
-                        <tr>
-                            <td colspan="6"><div class="fg_red">%s</div></td>
-                        </tr>
+                    res += _('''                            
                         <tr class="bg_blue">
                             <td>Partner</td><td>Ordine</td>
                             <td>Codice</td><td>Pezzi</td>
-                            <td colsnap="2">Conferma</td>
+                            <td colspan="2">Conferma</td>
                         </tr>
-                        ''') % (
-                            _('ETICHETTA PERSONALIZZATA!!!') if \
-                                line.partner_id.has_custom_label else \
-                                    _('ETICHETTA MAGAZZINO'),
-                            )        
+                        ''')      
                     
                     # ---------------------------------------------------------
                     # Current record:
@@ -394,10 +393,15 @@ class MrpProductionStat(orm.Model):
                             <td>
                                 <img alt="Foto" src="data:image/png;base64,%s" />
                             </td>
-                            <td colspan="5" class="text_note"><p>%s</p></td>
+                            <td colspan="5" class="text_note">
+                                %s<p>%s</p>
+                            </td>
                         </tr>
                         </table>''') % (
                             line.product_id.product_image_context,
+                            _('<p class="fg_red">ETICHETTA PERSONALIZZATA</p>'
+                                ) if line.partner_id.has_custom_label else \
+                                    _('<p>ETICHETTA MAGAZZINO</p>'),                              
                             note_text,
                             )
                     #line.order_id.company_id.logo or ''
@@ -405,7 +409,7 @@ class MrpProductionStat(orm.Model):
                     # ---------------------------------------------------------
                     # Next element from here:
                     # ---------------------------------------------------------
-                    res += _('''<p></p><table>''') 
+                    res += _('''<p></p><table class="table_preview">''') 
 
                     res += _('''
                         <tr>

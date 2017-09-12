@@ -44,6 +44,15 @@ table tr {
     border-spacing: 0px;
     }
 
+.table_preview {
+    border: 1px solid black;
+    width: 1000px;
+    font-size: 11px; 
+    color: #D0D0E1;
+    margin: 5px;
+    border-spacing: 0px;
+    }
+
 .print_button {
     background: url(/images/print48.png) no-repeat;
     text-align: 'center';

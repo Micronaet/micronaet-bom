@@ -235,9 +235,6 @@ class MrpProductionStat(orm.Model):
                 if not first:
                     first = True
                     res += _('''
-                        <!--<tr>
-                            <td colspan="6"><b>CORRENTE:</b></td>
-                        </tr>-->
                         <tr>
                             <td colspan="6"><b>%s</b></td>
                         </tr>

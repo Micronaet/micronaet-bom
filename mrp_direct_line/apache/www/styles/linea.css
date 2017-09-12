@@ -43,7 +43,7 @@ table tr {
     border-spacing: 0px;
     }
 
-.table_preview {
+/*.table_preview {
     border: 1px solid black;
     width: 1000px;
     font-size: 11px; 
@@ -54,7 +54,7 @@ table tr {
 
 .table_preview td {
     color: #AAAAAA;
-    }
+    }*/
 
 .print_button {
     background: url(/images/print48.png) no-repeat;

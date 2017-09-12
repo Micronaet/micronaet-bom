@@ -80,7 +80,7 @@ class MrpProductionXmlrpcAgent(orm.Model):
         # Generate batch file
         
         # Generate command to lauch:
-        print_report = 'dir' # TODO Change
+        print_report = 'prova.bat' # TODO Change
         
         # Launch with agent:
         xmlrpc_server = self._get_xmlrpc_server(

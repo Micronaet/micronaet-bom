@@ -1,7 +1,59 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
-
+        <!--mrp.production.xmlrpc.agent-->
+        <record model="ir.ui.view" id="view_mrp_production_xmlrpc_agent_tree">
+            <field name="name">mrp.production.xmlrpc.agent.tree</field>
+            <field name="model">mrp.production.xmlrpc.agent</field>
+            <field name="arch" type="xml">
+                <tree string="String">
+                    <field name="hostname" />
+                    <field name="port" />
+                    <field name="workcenter_id" />
+                    <field name="note" />
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_mrp_production_xmlrpc_agent_form">
+            <field name="name">mrp.production.xmlrpc.agent.form</field>
+            <field name="model">mrp.production.xmlrpc.agent</field>
+            <field name="arch" type="xml">
+                <form string="String" version="7.0">
+                    <sheet>
+                        <group colspan="4" col="4">
+                            <field name="hostname" />
+                            <field name="port" />
+                            <field name="workcenter_id" />
+                            <separator string="Note" colspan="4"/>
+                            <field name="note" colspan="4" nolabel="1"/>
+                        </group>    
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_mrp_production_xmlrpc_agent">
+            <field name="name">Printer agent</field>
+            <field name="res_model">mrp.production.xmlrpc.agent</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_mrp_production_xmlrpc_agent_tree"/>
+            <field name="context">{}</field>
+            <field name="domain">[]</field>
+        </record>
+        
+        <menuitem 
+            parent="mrp.menu_mrp_configuration" 
+            id="menu_action_mrp_production_xmlrpc_agent" 
+            name="XMLRPC Print agent"
+            sequence="30"            
+            />
+            <menuitem 
+                parent="menu_action_mrp_production_xmlrpc_agent" 
+                id="menu_action_mrp_production_xmlrpc_agent_server" 
+                name="Windows agent"
+                action="action_mrp_production_xmlrpc_agent"                
+                sequence="10"
+                />        
     </data>
 </openerp>
 

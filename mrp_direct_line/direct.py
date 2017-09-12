@@ -236,6 +236,13 @@ class MrpProductionStat(orm.Model):
                     first = True
                     res += _('''
                         <tr>
+                            <td colspan="6">
+                                 <a href="php/print.php?mode=all">
+                                     <img src="images/print48.png" alt="Print all internal image"/>
+                                 </a>
+                            </td>
+                        </tr>
+                        <tr>
                             <td colspan="6"><b>%s</b></td>
                         </tr>
                         <tr>
@@ -252,7 +259,7 @@ class MrpProductionStat(orm.Model):
                                     <input type="submit" value="FATTI!">
                                     <input type="hidden" name="sol_id" value="%s">
                                     <input type="hidden" name="redirect_url" value="%s">
-                                </form>    
+                                </form>
                             </td>
                         </tr>
                         <tr>

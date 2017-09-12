@@ -302,7 +302,7 @@ class MrpProductionStat(orm.Model):
             res = '''
                 <table>
                     <tr>
-                        <th colspan="4">%s</th><th colspan="2">Aggiornato il: %s</th>
+                        <th colspan="5">%s</th><th colspan="2">Aggiornato il: %s</th>
                     </tr>
                 ''' % (
                     stats.workcenter_id.name,        
@@ -333,22 +333,31 @@ class MrpProductionStat(orm.Model):
                     # ---------------------------------------------------------
                     res += _('''
                         <tr>
-                            <td colspan="4">
-                            </td>                            
+                            <td colspan="5">
+                                <b>Produzione: %s [%s]</b>
+                            </td>
                             <td colspan="2">
                                 <form action="/php/print.php" method="get">
-                                    <input type="submit" value="Tutte" class="print_button" name="all"/>
+                                    <input type="submit" value="Tutte" 
+                                        class="print_button" name="all"/>
                                     &nbsp;
-                                    <input type="submit" value="Interna" class="print_button" name="internal"/>
+                                    <input type="submit" value="Interna" 
+                                        class="print_button" name="internal"/>
                                     &nbsp;
-                                    <input type="submit" value="Esterna" class="print_button" name="external" />
+                                    <input type="submit" value="Esterna" 
+                                        class="print_button" name="external"/>
                                     &nbsp;
-                                    <input type="hidden" name="sol_id" value="%s">
-                                    <input type="hidden" name="redirect_url" value="%s">
-                                    <input type="input" name="total" value="">                                    
+                                    <input type="hidden" name="sol_id" 
+                                        value="%s">
+                                    <input type="hidden" name="redirect_url" 
+                                        value="%s">
+                                    <input type="input" name="total" value="" 
+                                        maxlength="4" size="4">
                                 </form>
                             </td>
                         </tr>''') % (
+                            line.mrp_id.name,
+                            line.mrp_id.bom_id.name,
                             line.id, redirect_url,
                             )                            
                         
@@ -357,7 +366,8 @@ class MrpProductionStat(orm.Model):
                     # ---------------------------------------------------------
                     res += _('''                            
                         <tr class="bg_blue">
-                            <td>Partner</td><td>Ordine</td>
+                            <td>Partner</td><td>Destinazione</td>
+                            <td>Ordine</td>
                             <td>Codice</td><td>Pezzi</td>
                             <td colspan="2">Conferma</td>
                         </tr>
@@ -368,18 +378,22 @@ class MrpProductionStat(orm.Model):
                     # ---------------------------------------------------------
                     res += _('''    
                         <tr>
-                            <td>%s</td><td>%s</td>
+                            <td>%s</td><td>%s</td><td>%s</td>
                             <td>%s</td><td>%s</td>
                             <td colsnap="2">
                                 <form action="/php/confirm.php" method="get">
-                                    <!--<img src="images/bat_logingreen.gif" onclick="submit();"/>-->
                                     <input type="submit" value="FATTI!">
-                                    <input type="hidden" name="sol_id" value="%s">
-                                    <input type="hidden" name="redirect_url" value="%s">
+                                    <input type="hidden" name="sol_id" 
+                                        value="%s">
+                                    <input type="hidden" name="redirect_url" 
+                                        value="%s">
                                 </form>
                             </td>
                         </tr>''') % (
-                            line.partner_id.name, line.order_id.name,
+                            line.partner_id.name, 
+                            line.order_id.destination_partner_id.name or \
+                                '&nbsp;', 
+                            line.order_id.name,
                             line.default_code, line.working_qty,
                             # Confirm form:
                             line.id, redirect_url,
@@ -393,7 +407,7 @@ class MrpProductionStat(orm.Model):
                             <td>
                                 <img alt="Foto" src="data:image/png;base64,%s" />
                             </td>
-                            <td colspan="5" class="text_note">
+                            <td colspan="6" class="text_note">
                                 %s<p>%s</p>
                             </td>
                         </tr>
@@ -413,13 +427,11 @@ class MrpProductionStat(orm.Model):
 
                     res += _('''
                         <tr>
-                            <td colspan="4"><b>PROSSIME:</b></td>
+                            <td colspan="7"><b>PROSSIME:</b></td>
                         </tr>
                         <tr class="bg_blue">
-                           <td>Partner</td>
-                           <td>Ordine</td>
-                           <td>Codice</td>
-                           <td>Pezzi</td>
+                           <td>Partner</td><td>Destinazione</td><td>Ordine</td>
+                           <td>Codice</td><td>Pezzi</td>
                        </tr>
                         ''')
                         
@@ -430,8 +442,11 @@ class MrpProductionStat(orm.Model):
                     res += '''
                         <tr>
                             <td>%s</td><td>%s</td><td>%s</td><td>%s</td>
+                            <td>%s</td>
                         </tr>''' % (
                             line.partner_id.name,
+                            line.order_id.destination_partner_id.name or \
+                                '&nbsp;',
                             line.order_id.name,
                             line.default_code,
                             line.working_qty,                                

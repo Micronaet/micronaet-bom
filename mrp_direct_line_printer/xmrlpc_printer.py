@@ -21,6 +21,7 @@ import os
 import sys
 import logging
 import openerp
+import xmlrpclib
 import openerp.netsvc as netsvc
 import openerp.addons.decimal_precision as dp
 from openerp.osv import fields, osv, expression, orm
@@ -40,13 +41,58 @@ _logger = logging.getLogger(__name__)
 
 class MrpProductionXmlrpcAgent(orm.Model):
     """ Model name: MrpProductionXmlrpcAgent
-    """
-    
+    """    
     _name = 'mrp.production.xmlrpc.agent'
     _description = 'XMLRPC Print agent'
     _rec_name = 'hostname'
     _order = 'hostname'
+
+    def _clean_as_ascii(self, value):
+        ''' Procedure for clean not ascii char in string
+        '''
+        res = ''
+        for c in value:
+            if ord(c) <127:
+                res += c
+            else:
+                res += '#'           
+        return res
+        
+    def _get_xmlrpc_server(self, cr, uid, printer_id, context=None):
+        ''' Connect with server and return obj
+        '''
+        server_proxy = self.browse(cr, uid, printer_ids, context=context)
+        
+        try:
+            xmlrpc_server = 'http://%s:%s' % (
+                server_proxy.hostname, server_proxy.port)
+        except:
+            return False
+        return xmlrpclib.ServerProxy(xmlrpc_server)
     
+    def launch_operation_printer(self, cr, uid, ids, context=None):
+        ''' Generate report and launch command:
+        '''
+        # Reload data for report
+        
+        # Generate PDF
+        
+        # Generate batch file
+        
+        # Generate command to lauch:
+        print_report = 'dir' # TODO Change
+        
+        # Launch with agent:
+        xmlrpc_server = self._get_xmlrpc_server(
+            cr, uid, ids[0], context=context)
+        
+        res = xmlrpc_server.execute(print_report)
+        if res == 'OK':
+            return True
+        else:
+            return False    
+        return 
+        
     _columns = {
         'hostname': fields.char('IP address', size=64, required=True, 
             help='Use format: 192.168.1.1'),

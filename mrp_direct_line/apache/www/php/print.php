@@ -29,9 +29,12 @@
     // ----------------------------------------------------------------------------
     // CONFIRM PRODUCTION:
     // ----------------------------------------------------------------------------
-    var_dump($_GET);
-    die();
-    $mode = $_GET['mode'];
+    //var_dump($_GET);
+    //die();
+    if (isset($_POST['all'])) { 
+        $mode = 'all'; 
+        } 
+    //$mode = $_GET['mode'];
     $sol_id = $_GET['sol_id'];
     $redirect_url = $_GET['redirect_url'];
     

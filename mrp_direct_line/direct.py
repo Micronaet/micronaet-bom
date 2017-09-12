@@ -183,14 +183,12 @@ class MrpProductionStat(orm.Model):
     def set_sol_done_xmlrpc(self, cr, uid, sol_id, context=None):
         ''' Mark as confirmed:
         '''
-        _logger.warning('Confirmed from XMLRPC')
         return self.pool.get('sale.order.line').working_qty_is_done(
             cr, uid, [sol_id], context=context)
     
     def get_xmlrpc_html(self, cr, uid, line_code, redirect_url, context=None):
         ''' Return HTML view for result php call
         '''
-        _logger.warning('Status for XMLRPC')
         now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
         line_pool = self.pool.get('mrp.workcenter')

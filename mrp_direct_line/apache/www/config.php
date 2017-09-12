@@ -2,9 +2,9 @@
 // XMLRPC CONNECT PARAMETER:
 // ----------------------------------------------------------------------------
 $user = 'admin';
-$password = 'cgp.fmsp6';
-$dbname = 'Fiam2017S';
+$password = 'password';
+$dbname = 'Database';
 $server = 'localhost';
-$port = '18069';
+$port = '8069';
 $type_connection = 'http';
 $server_url = "http://$server:$port/xmlrpc";

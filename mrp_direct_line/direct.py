@@ -209,33 +209,6 @@ class MrpProductionStat(orm.Model):
             return _('<p>Nothing to work in line %s today!</p>') % line_code
         
         # ---------------------------------------------------------------------
-        # CSS        
-        # ---------------------------------------------------------------------
-        """css = '''
-            <style>
-                .table_bf {
-                     border:1px 
-                     padding: 3px;
-                     solid black;
-                 }
-                .table_bf td {
-                     border:1px 
-                     solid black;
-                     padding: 3px;
-                     text-align: center;
-                 }
-                .table_bf th {
-                     border:1px 
-                     solid black;
-                     padding: 3px;
-                     text-align: center;
-                     background-color: grey;
-                     color: white;
-                 }
-            </style>
-            '''"""
-
-        # ---------------------------------------------------------------------
         # Header:
         # ---------------------------------------------------------------------
         res = ''

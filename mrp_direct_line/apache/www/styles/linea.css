@@ -80,8 +80,9 @@ table tr {
     }
 
 .p_note {
-    margin: 1px;
+    margin: 0px;
     }
+    
 .category_note {
     margin-top: 3px;
     background-color: #ffff99;

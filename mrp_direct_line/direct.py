@@ -62,7 +62,7 @@ class SaleOrderLine(orm.Model):
         
     def working_print_single_label(self, cr, uid, ids, context=None):
         ''' Print single label
-        '''    
+        '''
         return True
 
     _columns = {
@@ -348,20 +348,31 @@ class MrpProductionStat(orm.Model):
                             <td colspan="2">
                                 <form action="/php/print.php" method="get">
                                     <input type="submit" value="Tutte" 
-                                        class="print_button" name="all"/>
+                                        class="print_button" name="all"
+                                        title="Stampa tutte le etichette del 
+                                        job attuale (giornata)"
+                                        />
                                     &nbsp;
                                     <input type="submit" value="Interna" 
-                                        class="print_button" name="internal"/>
+                                        class="print_button" name="internal"
+                                        title="Stampa le etichette interne del 
+                                        job attuale (giornata)"
+                                        />
                                     &nbsp;
                                     <input type="submit" value="Esterna" 
-                                        class="print_button" name="external"/>
+                                        class="print_button" name="external"
+                                        title="Stampa le etichette esterne del 
+                                        job attuale (giornata)"
+                                        />
                                     &nbsp;
                                     <input type="hidden" name="sol_id" 
                                         value="%s">
                                     <input type="hidden" name="redirect_url" 
                                         value="%s">
                                     <input type="input" name="total" value="" 
-                                        maxlength="4" size="4">
+                                        maxlength="4" size="4" 
+                                        title="Q. per stampare la sola 
+                                        etichetta corrente">
                                 </form>
                             </td>
                         </tr>''') % (
@@ -555,7 +566,7 @@ class MrpProductionStat(orm.Model):
 
     def working_print_all_label(self, cr, uid, ids, context=None):
         ''' Print single label
-        '''    
+        '''
         return True
 
     def nothing(self, cr, uid, ids, context=None):

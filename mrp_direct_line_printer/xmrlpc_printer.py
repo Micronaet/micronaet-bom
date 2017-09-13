@@ -50,6 +50,33 @@ class SaleOrderLine(orm.Model):
         '''
         _logger.warning('Print PHP: ID %s mode %s [Total: %s]' % (
             sol_id, mode, total))
+            
+        # TODO Be moved!!!!!
+        # Pool used:
+        mrp_pool = self.pool.get('mrp.production')
+        
+        if context is None:
+            context = {}
+
+        # Get used elements:        
+        current_proxy = self.browse(cr, uid, sol_id, context=context)
+        mrp = current_proxy.mrp_id
+        job = current_proxy.working_line_id
+                
+        # Select job line with q. for label printing:
+        ctx = dict.copy(context)
+        ctx['sol_job'] = {}
+        ctx['sol_job_mode'] = mode
+
+        if total: # Only the current line with total passed:
+            ctx['sol_job'][sol_id] = total
+        else: # all remain qty                
+            for line in job.working_ids:
+                if line.working_qty:
+                    ctx['sol_job'][line.id] = line.working_qty
+                    
+        _logger.warning('Generate remain job label:')
+        mrp_pool.generate_label_job(cr, uid, [mrp.id], context=ctx)
         return True
         
 class MrpProductionXmlrpcAgent(orm.Model):

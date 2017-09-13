@@ -349,20 +349,17 @@ class MrpProductionStat(orm.Model):
                                 <form action="/php/print.php" method="get">
                                     <input type="submit" value="Tutte" 
                                         class="print_button" name="all"
-                                        title="Stampa tutte le etichette del 
-                                        job attuale (giornata)"
+                                        title="Stampa tutte le etichette del job attuale (giornata)"
                                         />
                                     &nbsp;
                                     <input type="submit" value="Interna" 
                                         class="print_button" name="internal"
-                                        title="Stampa le etichette interne del 
-                                        job attuale (giornata)"
+                                        title="Stampa le etichette interne del job attuale (giornata)"
                                         />
                                     &nbsp;
                                     <input type="submit" value="Esterna" 
                                         class="print_button" name="external"
-                                        title="Stampa le etichette esterne del 
-                                        job attuale (giornata)"
+                                        title="Stampa le etichette esterne del job attuale (giornata)"
                                         />
                                     &nbsp;
                                     <input type="hidden" name="sol_id" 
@@ -371,8 +368,7 @@ class MrpProductionStat(orm.Model):
                                         value="%s">
                                     <input type="input" name="total" value="" 
                                         maxlength="4" size="4" 
-                                        title="Q. per stampare la sola 
-                                        etichetta corrente">
+                                        title="Q. per stampare la sola etichetta corrente">
                                 </form>
                             </td>
                         </tr>''') % (

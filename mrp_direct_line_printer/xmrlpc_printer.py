@@ -77,6 +77,13 @@ class SaleOrderLine(orm.Model):
                     
         _logger.warning('Generate remain job label:')
         mrp_pool.generate_label_job(cr, uid, [mrp.id], context=ctx)
+        
+        _logger.warning('Generate print job label in PDF:')
+        mrp_pool.merge_pdf_mrp_label_jobs(
+            cr, uid, [mrp.id], context=ctx)
+        
+        # TODO read batch to launched
+        # TODO launch in batch mode via agent    
         return True
         
 class MrpProductionXmlrpcAgent(orm.Model):

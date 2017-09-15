@@ -39,6 +39,7 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+
 class SaleOrderLine(orm.Model):
     """ Model name: SaleOrderLine
     """
@@ -54,6 +55,7 @@ class SaleOrderLine(orm.Model):
         # TODO Be moved!!!!!
         # Pool used:
         mrp_pool = self.pool.get('mrp.production')
+        agent_pool = self.pool.get('mrp.production.xmlrpc.agent')
         
         if context is None:
             context = {}
@@ -63,10 +65,18 @@ class SaleOrderLine(orm.Model):
         mrp = current_proxy.mrp_id
         job = current_proxy.working_line_id
                 
+        # Get launch agent for line:
+        agent_ids = agent_pool.search(cr, uid, [
+            ('workcenter_id', '=', job.workcenter_id.id)], context=context)
+        if not agent_ids:
+            _logger.error('Error no agent for current line')
+        agent_id = agent_ids    
+
         # Select job line with q. for label printing:
         ctx = dict.copy(context)
         ctx['sol_job'] = {}
         ctx['sol_job_mode'] = mode
+        ctx['collect_label'] = True # for return structure of label 
 
         if total: # Only the current line with total passed:
             ctx['sol_job'][sol_id] = total
@@ -74,16 +84,27 @@ class SaleOrderLine(orm.Model):
             for line in job.working_ids:
                 if line.working_qty:
                     ctx['sol_job'][line.id] = line.working_qty
-                    
+
         _logger.warning('Generate remain job label:')
         mrp_pool.generate_label_job(cr, uid, [mrp.id], context=ctx)
         
         _logger.warning('Generate print job label in PDF:')
-        mrp_pool.merge_pdf_mrp_label_jobs(
+        collect_label_db = mrp_pool.merge_pdf_mrp_label_jobs(
             cr, uid, [mrp.id], context=ctx)
+
+        # XXX Note: for now the dabase is full of data (for print also one label
+        # now we use only print all function
         
-        # TODO read batch to launched
-        # TODO launch in batch mode via agent    
+        # Generate command for print the label generated:
+        print_all_label = collect_label_db.values()
+        print_command = ''
+        for seq, command in sorted(print_all_label):
+            print_command += '%s\n\r' % command
+
+        # Launch operation from remote agent:
+        _logger.info('Launch print command remotely')
+        agent_pool.launch_operation_printer(
+            cr, uid, agent_id, print_command, context=context)
         return True
         
 class MrpProductionXmlrpcAgent(orm.Model):
@@ -105,10 +126,10 @@ class MrpProductionXmlrpcAgent(orm.Model):
                 res += '#'           
         return res
         
-    def _get_xmlrpc_server(self, cr, uid, printer_id, context=None):
+    def _get_xmlrpc_server(self, cr, uid, agent_id, context=None):
         ''' Connect with server and return obj
         '''
-        server_proxy = self.browse(cr, uid, printer_ids, context=context)
+        server_proxy = self.browse(cr, uid, agent_id, context=context)
         
         try:
             xmlrpc_server = 'http://%s:%s' % (
@@ -117,23 +138,14 @@ class MrpProductionXmlrpcAgent(orm.Model):
             return False
         return xmlrpclib.ServerProxy(xmlrpc_server)
     
-    def launch_operation_printer(self, cr, uid, ids, context=None):
+    def launch_operation_printer(self, cr, uid, agent_id, command, context=None):
         ''' Generate report and launch command:
         '''
-        # Reload data for report
-        
-        # Generate PDF
-        
-        # Generate batch file
-        
-        # Generate command to lauch:
-        print_report = 'prova.bat' # TODO Change
-        
         # Launch with agent:
         xmlrpc_server = self._get_xmlrpc_server(
-            cr, uid, ids[0], context=context)
+            cr, uid, agent_id, context=context)
         
-        res = xmlrpc_server.execute(print_report)
+        res = xmlrpc_server.execute(command)
         if res == 'OK':
             return True
         else:

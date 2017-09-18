@@ -35,7 +35,7 @@ xmlrpc_host = config.get('XMLRPC', 'host')
 xmlrpc_port = eval(config.get('XMLRPC', 'port'))
 
 # Folder:
-root_folder = eval(config.get('Folder', 'root'))
+root_folder = config.get('Folder', 'root')
 
 # -----------------------------------------------------------------------------
 #                         Restrict to a particular path

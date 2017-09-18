@@ -165,7 +165,7 @@ class MrpProduction(orm.Model):
                 #hw_fabric[product.default_code][2] += comp_remain                                    
                 #total[0] += comp_remain
             else:
-                stock = product.mx_net_qty
+                stock = product.mx_net_qty # XXX mx_net_mrp_qty?
                 stock_mt = stock * mt
                 hw_fabric[product.default_code] = [
                     stock, # 0. Stock HW

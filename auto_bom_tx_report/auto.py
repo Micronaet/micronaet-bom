@@ -288,7 +288,7 @@ class MrpProduction(orm.Model):
             
             # Create row data:
             line1 = [
-                ('%s (31/12: N.D.)' % o.default_code, format_header),
+                ('%s' % o.default_code, format_header),
                 ('', format_header),
                 ('Set.', format_header),
                 ('Ott.', format_header),
@@ -314,7 +314,8 @@ class MrpProduction(orm.Model):
             
             # Create row data:
             line2 = [
-                ('Inv. %s: %s' % (o.mx_start_date or '', inv), format_text),
+                ('Inv. %s: %s' % (
+                    o.mx_start_date or '', inv), format_text),
                 ('MM', get_xls_format('text_center')),
                 (mm[0], format_number),
                 (mm[1], format_number),

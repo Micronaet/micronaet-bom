@@ -354,7 +354,7 @@ class MrpProductionStat(orm.Model):
                     <tr>
                         <th colspan="1">
                             <a href="./default.php">
-                                <image src="./images/home.jpg"
+                                <image src="./images/home.jpg" height="32px"
                             </a>
                         </th>
                         <th colspan="4">%s</th>
@@ -390,7 +390,10 @@ class MrpProductionStat(orm.Model):
                     res += _('''
                         <tr>
                             <td colspan="1">
-                                <image src="./images/distinta.jpg" alt="Distinta base" />
+                                <a href="./php/bom.php?product_id=%s">
+                                <image src="./images/distinta.jpg" 
+                                    alt="Distinta base" />
+                                </a>    
                             </td>
                             <td colspan="4">
                                 <b>Produzione: %s [%s]</b>
@@ -422,6 +425,7 @@ class MrpProductionStat(orm.Model):
                                 </form>
                             </td>
                         </tr>''') % (
+                            line.product_id.id,
                             line.mrp_id.name,
                             line.mrp_id.bom_id.name,
                             line.id, redirect_url,

@@ -165,6 +165,14 @@ class MrpProductionStat(orm.Model):
     ''' Statistic data
     '''
     _inherit = 'mrp.production.stats'
+    
+    _php_button_bar = '''
+        <a href="/default.php">
+            <image src="/images/home.jpg" height="32px" /></a>
+        &nbsp;
+        <a href="#" onclick="history.back()">
+            <image src="/images/back.jpg" height="32px" /></a>
+        '''
 
     # -------------------------------------------------------------------------
     # Utility:
@@ -230,7 +238,54 @@ class MrpProductionStat(orm.Model):
     def get_xmlrpc_bom_html(self, cr, uid, product_id, context=None):
         ''' PHP call for get BOM
         '''   
-        res = 'BOM' # TODO Change
+        bom = ''
+        product_pool = self.pool.get('product.product')
+        product_proxy = product_pool.browse(
+            cr, uid, product_id, context=context)
+        
+        # ---------------------------------------------------------------------
+        # BOM Lines:
+        # ---------------------------------------------------------------------
+        for item in product_proxy.dynamic_bom_line_ids:
+            # if halfworked:            
+            bom += '''
+                <tr>
+                    <td colspan="2">%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>%s</td>
+                </tr>
+                ''' % (
+                    item.product_id.default_code,
+                    item.product_id.name,
+                    item.category_id.name,
+                    0#,item.qty,
+                    )                    
+            
+        # ---------------------------------------------------------------------
+        # Add header:    
+        # ---------------------------------------------------------------------
+        res = _('''
+            <table>
+                <tr>
+                    <th colspan="2">%s</th>
+                    <th colspan="3">%s [%s]</th>
+                </tr>
+                <tr>
+                    <th colspan="2">Codice</th>
+                    <th>Descrizione</th>
+                    <th>Categoria</th>
+                    <th>Q.</th>
+                </tr>
+                %s
+            </table>            
+            ''') % (
+                self._php_button_bar,
+                product_proxy.default_code,
+                product_proxy.name,
+                bom,
+                )
+            
         return res
         
     def get_xmlrpc_html(self, cr, uid, line_code, redirect_url, context=None):
@@ -359,14 +414,13 @@ class MrpProductionStat(orm.Model):
                 <table>
                     <tr>
                         <th colspan="1">
-                            <a href="./default.php">
-                                <image src="./images/home.jpg" height="32px"
-                            </a>
+                            %s
                         </th>
                         <th colspan="4">%s</th>
                         <th colspan="2">Aggiornato il: %s</th>
                     </tr>
                 ''' % (
+                    self._php_button_bar,
                     stats.workcenter_id.name,        
                     now,
                     )

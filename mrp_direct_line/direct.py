@@ -352,7 +352,13 @@ class MrpProductionStat(orm.Model):
             res = '''
                 <table>
                     <tr>
-                        <th colspan="5">%s</th><th colspan="2">Aggiornato il: %s</th>
+                        <th colspan="1">
+                            <a href="./default.php">
+                                <image src="./images/home.jpg"
+                            </a>
+                        </th>
+                        <th colspan="4">%s</th>
+                        <th colspan="2">Aggiornato il: %s</th>
                     </tr>
                 ''' % (
                     stats.workcenter_id.name,        

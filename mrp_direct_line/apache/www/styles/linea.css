@@ -14,7 +14,15 @@ body {
     
 table {
     border: 1px solid black;
-    width: 1000px;
+    width: 950px;
+    font-size: 11px; 
+    margin: 5px;
+    border-spacing: 0px;
+    }
+
+.hide_table {
+    border: 0px solid black;
+    width: 950px;
     font-size: 11px; 
     margin: 5px;
     border-spacing: 0px;

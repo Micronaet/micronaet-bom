@@ -195,16 +195,32 @@ class MrpProductionStat(orm.Model):
         if context is None: 
             context = {}
 
-        res = '<table class="topic"><tr>'
         total_col = 3
+        res = '''
+            <table class="topics">
+                <tr><th colspan="%s">Linee di produzione [%s]</tr>   
+                <tr>''' % (
+                    total_col,
+                    datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT),
+                    )
         col = 0
         for line in line_pool.browse(cr, uid, line_ids, context=context):
             col += 1
             if col == total_col + 1:
                 col = 0
-                res += '</tr><tr class="topic">'
+                res += '</tr><tr class="topics">'
 
-            res += '<td class="topic">%s</td>' % line.name
+            res += '''
+                <td class="topics">
+                    <a href="./linea.php?linea=%s">
+                        <image src="linea.jpg" alt="%s" /></a>
+                    %s [%s]
+                </td>''' % (
+                    line.code,
+                    line.name,
+                    line.name,
+                    line.code,
+                    )
                         
         if col == total_col:
             res += '</tr>'

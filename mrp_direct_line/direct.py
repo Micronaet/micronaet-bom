@@ -195,16 +195,16 @@ class MrpProductionStat(orm.Model):
         if context is None: 
             context = {}
 
-        res = '<table class="hide_table"><tr>'
+        res = '<table class="topic"><tr>'
         total_col = 3
         col = 0
         for line in line_pool.browse(cr, uid, line_ids, context=context):
             col += 1
             if col == total_col + 1:
                 col = 0
-                res += '</tr><tr class="hide_table">'
+                res += '</tr><tr class="topic">'
 
-            res += '<td class="hide_table">%s</td>' % line.name
+            res += '<td class="topic">%s</td>' % line.name
                         
         if col == total_col:
             res += '</tr>'

@@ -64,19 +64,19 @@ table tr {
 .bom .halfworked {
     /*height: 200px;*/    
     font-size: 12px; 
-    background-color: #00DD00;
+    background-color: #b3e6ff;
     }
 
 .bom .component {
     /*height: 200px;*/    
     font-size: 12px; 
-    background-color: #00DDDD;
+    background-color: #cceeff;
     }
 
 .bom .material {
     /*height: 200px;*/    
     font-size: 12px; 
-    background-color: #DDDDDD;
+    background-color: #ffffcc; 
     }
     
 /* Generaric setup: */

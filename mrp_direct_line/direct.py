@@ -248,8 +248,12 @@ class MrpProductionStat(orm.Model):
         # ---------------------------------------------------------------------
         for item in product_proxy.dynamic_bom_line_ids:
             product = item.product_id
-            tag_class = 'halfworked' if item.relative_type == 'half'\
-                 else 'component'
+            
+            # if item.relative_type == 'half'\
+            if product.half_bom_id:
+                tag_class = 'halfworked' 
+            else:
+                tag_class = 'component'
             
             bom += '''
                 <tr class="%s">
@@ -267,7 +271,7 @@ class MrpProductionStat(orm.Model):
                     item.product_uom.name,
                     )                    
             # Add sub elements (for halfworked)        
-            """if cmpt in product.bom_line_ids:                
+            for cmpt in product.half_bom_id.bom_line_ids:                
                 bom += '''
                 <tr class="material">
                     <td>>>></td>
@@ -281,7 +285,7 @@ class MrpProductionStat(orm.Model):
                     cmpt.product_id.name,
                     cmpt.product_qty,
                     cmpt.product_uom.name,
-                    )                    """
+                    )                   
                 
                             
         # ---------------------------------------------------------------------

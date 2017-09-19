@@ -383,7 +383,10 @@ class MrpProductionStat(orm.Model):
                     # ---------------------------------------------------------
                     res += _('''
                         <tr>
-                            <td colspan="5">
+                            <td colspan="1">
+                                <image src="./images/distinta.jpg" alt="Distinta base" />
+                            </td>
+                            <td colspan="4">
                                 <b>Produzione: %s [%s]</b>
                             </td>
                             <td colspan="2">

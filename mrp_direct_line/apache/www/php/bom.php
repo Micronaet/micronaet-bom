@@ -43,7 +43,7 @@
     $msg->addParam(new xmlrpcval($password, "string"));
     $msg->addParam(new xmlrpcval("mrp.production.stats", "string"));
     $msg->addParam(new xmlrpcval("get_xmlrpc_bom_html", "string"));
-    $msg->addParam(new xmlrpcval($_GET("product_id"), "int"));
+    $msg->addParam(new xmlrpcval($_GET["product_id"], "int"));
 
     $resp = $sock->send($msg);
     $html = "";

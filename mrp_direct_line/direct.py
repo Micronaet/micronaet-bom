@@ -224,7 +224,13 @@ class MrpProductionStat(orm.Model):
                         
         if col == total_col:
             res += '</tr>'
-        res += '</table>'
+        res += '</table>'        
+        return res
+        
+    def get_xmlrpc_bom_html(self, cr, uid, product_id, context=None):
+        ''' PHP call for get BOM
+        '''   
+        res = 'BOM' # TODO Change
         return res
         
     def get_xmlrpc_html(self, cr, uid, line_code, redirect_url, context=None):

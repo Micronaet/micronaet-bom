@@ -50,6 +50,34 @@ table tr {
 .topics tr {
     height: 200px;
     }
+
+/*Table for BOM element:*/
+.bom {
+    border: 0px solid black;
+    width: 950px;
+    font-size: 11px; 
+    margin: 5px;
+    border-spacing: 0px;
+    text-align: left;
+    }
+
+.bom .halfworked {
+    /*height: 200px;*/    
+    font-size: 12px; 
+    background-color: #00DD00;
+    }
+
+.bom .component {
+    /*height: 200px;*/    
+    font-size: 12px; 
+    background-color: #00DDDD;
+    }
+
+.bom .material {
+    /*height: 200px;*/    
+    font-size: 12px; 
+    background-color: #DDDDDD;
+    }
     
 /* Generaric setup: */
 .table_preview {

@@ -247,26 +247,48 @@ class MrpProductionStat(orm.Model):
         # BOM Lines:
         # ---------------------------------------------------------------------
         for item in product_proxy.dynamic_bom_line_ids:
-            # if halfworked:            
+            product = item.product_id
+            tag_class = 'halfworked' if item.relative_type == 'half'\
+                 else 'component'
+            
             bom += '''
-                <tr>
+                <tr class="%s">
                     <td colspan="2">%s</td>
                     <td>%s</td>
                     <td>%s</td>
-                    <td>%s</td>
+                    <td>%s %s</td>
                 </tr>
                 ''' % (
-                    item.product_id.default_code,
-                    item.product_id.name,
+                    tag_class,
+                    product.default_code,
+                    product.name,
                     item.category_id.name,
-                    0#,item.qty,
+                    item.product_qty,
+                    item.product_uom.name,
                     )                    
-            
+            # Add sub elements (for halfworked)        
+            """if cmpt in product.bom_line_ids:                
+                bom += '''
+                <tr class="material">
+                    <td>>>></td>
+                    <td>%s</td>
+                    <td>%s</td>
+                    <td>&nbsp;</td>
+                    <td>%s %s</td>
+                </tr>
+                ''' % (
+                    cmpt.product_id.default_code,
+                    cmpt.product_id.name,
+                    cmpt.product_qty,
+                    cmpt.product_uom.name,
+                    )                    """
+                
+                            
         # ---------------------------------------------------------------------
         # Add header:    
         # ---------------------------------------------------------------------
         res = _('''
-            <table>
+            <table class="bom">
                 <tr>
                     <th colspan="2">%s</th>
                     <th colspan="3">%s [%s]</th>

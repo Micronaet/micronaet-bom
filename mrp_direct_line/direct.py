@@ -202,9 +202,9 @@ class MrpProductionStat(orm.Model):
             col += 1
             if col == total_col + 1:
                 col = 0
-                res += '</tr><tr>'
+                res += '</tr><tr class="hide_table">'
 
-            res += '<td>%s</td>' % line.name
+            res += '<td class="hide_table">%s</td>' % line.name
                         
         if col == total_col:
             res += '</tr>'

@@ -78,6 +78,12 @@ table tr {
     font-size: 12px; 
     background-color: #ffffcc;
     }
+
+.bom .placeholder {
+    /*height: 200px;*/    
+    font-size: 12px; 
+    background-color: #ffcccc;
+    }
     
 /* Generaric setup: */
 .table_preview {

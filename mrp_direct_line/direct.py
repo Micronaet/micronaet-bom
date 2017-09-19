@@ -246,11 +246,17 @@ class MrpProductionStat(orm.Model):
         # ---------------------------------------------------------------------
         # BOM Lines:
         # ---------------------------------------------------------------------
-        for item in product_proxy.dynamic_bom_line_ids:
+        for item in sorted(product_proxy.dynamic_bom_line_ids, 
+                key=lambda x: (
+                    not(x.product_id.half_bom_id), 
+                    x.product_id.default_code,
+                    )):
             product = item.product_id
             
             # if item.relative_type == 'half'\
-            if product.half_bom_id:
+            if product.bom_placeholder:
+                tag_class = 'placeholder'                
+            elif product.half_bom_id:
                 tag_class = 'halfworked' 
             else:
                 tag_class = 'component'

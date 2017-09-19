@@ -213,7 +213,7 @@ class MrpProductionStat(orm.Model):
             res += '''
                 <td class="topics">
                     <a href="./linea.php?linea=%s">
-                        <image src="linea.jpg" alt="%s" /></a>
+                        <image src="./images/linea.jpg" alt="%s" /></a><br />
                     %s [%s]
                 </td>''' % (
                     line.code,

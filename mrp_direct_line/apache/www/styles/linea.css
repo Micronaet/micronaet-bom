@@ -67,16 +67,16 @@ table tr {
     background-color: #b3e6ff;
     }
 
-.bom .component {
-    /*height: 200px;*/    
-    font-size: 12px; 
-    background-color: #cceeff;
-    }
-
 .bom .material {
     /*height: 200px;*/    
     font-size: 12px; 
-    background-color: #ffffcc; 
+    background-color: #cceeff; 
+    }
+
+.bom .component {
+    /*height: 200px;*/    
+    font-size: 12px; 
+    background-color: #ffffcc;
     }
     
 /* Generaric setup: */

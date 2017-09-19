@@ -178,7 +178,7 @@ class MrpProductionStat(orm.Model):
         return total
 
     # -------------------------------------------------------------------------
-    # XMLRPC Function:
+    # XMLRPC Function PHP calls:
     # -------------------------------------------------------------------------
     def set_sol_done_xmlrpc(self, cr, uid, sol_id, context=None):
         ''' Mark as confirmed:
@@ -186,6 +186,34 @@ class MrpProductionStat(orm.Model):
         return self.pool.get('sale.order.line').working_qty_is_done(
             cr, uid, [sol_id], context=context)
     
+    def get_xmlrpc_lines_html(self, cr, uid, context=None):
+        ''' Page default.php for all line
+        '''
+        line_pool = self.pool.get('mrp.workcenter')
+        line_ids = line_pool.search(cr, uid, [], context=context)        
+
+        if context is None: 
+            context = {}
+
+        res = '<table>'
+        total_col = 3
+        col = 0
+        for line in self.browse(cr, uid, line_ids, context=context):
+            col += 1
+            if col == 1:
+                res += '<tr>'
+               
+            if col == total_col:
+                col = 0
+                res += '</tr>'
+            
+            res += '''<td>%s</td>''' % line.name
+                        
+        if col == total_col:
+            res += '</tr>'
+        res += '</table>'
+        return res
+        
     def get_xmlrpc_html(self, cr, uid, line_code, redirect_url, context=None):
         ''' Return HTML view for result php call
         '''

@@ -84,6 +84,14 @@ table tr {
     font-size: 12px; 
     background-color: #ffcccc;
     }
+
+.bom td {
+    /*height: 200px;*/    
+    font-size: 12px; 
+    background-color: #ffcccc;
+    text-align: left;
+    }
+    
     
 /* Generaric setup: */
 .table_preview {

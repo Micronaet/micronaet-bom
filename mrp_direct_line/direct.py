@@ -274,7 +274,7 @@ class MrpProductionStat(orm.Model):
                     product.name,
                     item.category_id.name,
                     item.product_qty,
-                    item.product_uom.name,
+                    item.product_uom.name.lower(),
                     )                    
             # Add sub elements (for halfworked)        
             for cmpt in product.half_bom_id.bom_line_ids:                
@@ -290,7 +290,7 @@ class MrpProductionStat(orm.Model):
                     cmpt.product_id.default_code,
                     cmpt.product_id.name,
                     cmpt.product_qty,
-                    cmpt.product_uom.name,
+                    cmpt.product_uom.name.lower(),
                     )                   
                 
                             

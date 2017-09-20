@@ -60,7 +60,7 @@ class PurchaseOrderXLSX(orm.Model):
         product_pool = self.pool.get('product.product')
         line_pool = self.pool.get('purchase.order.xlsx.line') 
         
-        current_browse = self.browse(cr, uid, ids, context=context)[0]
+        current_proxy = self.browse(cr, uid, ids, context=context)[0]
         xslx_id = current_proxy.id
         month_db = {
             # Previous year:
@@ -71,6 +71,8 @@ class PurchaseOrderXLSX(orm.Model):
             12: '07', 13: '08',
             }
             
+        # Parameters:    
+        row_start = 0            
         month_current = datetime.now().month
         year_current =  datetime.now().year
         if month_current in [9, 10, 11, 12]:
@@ -95,18 +97,22 @@ class PurchaseOrderXLSX(orm.Model):
                 )
                 
         WS = WB.sheet_by_index(0)        
-        row = -1
+
+        pos = -1
         for row in range(row_start, WS.nrows):
-            row += 1
-            
-            if row == 2: 
-                default_code = WS.cell(row, 3).value
+            pos += 1
+            if pos == 1: 
+                # -------------------------------------------------------------
+                # Read product code:
+                # -------------------------------------------------------------
+                default_code = WS.cell(row, 0).value
+                _logger.info('Find material: %s' % default_code)
 
                 product_id = False           
                   
                 # Manage code error:
                 if not default_code:
-                    pass # TODO  
+                    _logger.error('No material code')
                     continue
 
                 # Search product:
@@ -116,21 +122,35 @@ class PurchaseOrderXLSX(orm.Model):
                     
                 # Manage product error:
                 if not product_ids: 
-                    pass # TODO no code
+                    _logger.error('No product with code: %s' % default_code)
                     continue
                     
                 # TODO manage warning more than one product
-                elif len(product_ids) > 1: 
+                elif len(product_ids) > 1:
+                    _logger.error('More material code: %s' % default_code)
                     pass # TODO multi code
                 
                 product_id = product_ids[0]    
                 product_proxy = product_pool.browse(cr, uid, product_id, 
                     context=context)
 
-                # TODO search supplier:    
-                partner_id = False                
+                # -------------------------------------------------------------
+                # Search supplier:
+                # -------------------------------------------------------------
+                # 1. Procurements:
+                if product_proxy.seller_ids:
+                    partner_id = product_proxy.seller_ids[0].name.id
+                
+                # 2. First supplier
+                elif product_proxy.first_supplier_id:
+                    partner_id = product_proxy.first_supplier_id.id
+                else:   
+                    partner_id = False                    
                     
-            elif row == 6: # order qty                
+            elif pos == 6: # order qty                
+                # -------------------------------------------------------------
+                # Read quantity and get deadline:
+                # -------------------------------------------------------------
                 for col in range(2, 14):
                     quantity = WS.cell(row, col).value
                     if not quantity:
@@ -144,13 +164,17 @@ class PurchaseOrderXLSX(orm.Model):
                         year = year_b    
                     
                     line_pool.create(cr, uid, {
+                        'xlsx_id': ids[0],
                         'product_id': product_id,
                         'partner_id': partner_id,
                         'quantity': quantity,
                         'deadline': '%s-%s-%s' % (year, month, day),
-                        }, context=context    
-        
-        #
+                        }, context=context)
+            elif pos in (7, 8) and not WS.cell(row, 0).value:
+                _logger.warning('Reset pos, row: %s' % row)
+                pos = -1            
+
+        # Update status of import record
         return self.write(cr, uid, ids, {
             'mode': 'imported',
             }, context=context)
@@ -183,10 +207,10 @@ class PurchaseOrderXLSXLine(orm.Model):
     _columns = {
         'sequence': fields.integer('Sequence'),
         'product_id': fields.many2one(
-            'product.product', 'Product', required=True),
-        'deadline': fields.date('Deadline', required=True),
+            'product.product', 'Product'),
+        'deadline': fields.date('Deadline'),
         'partner_id': fields.many2one('res.partner', 'Supplier'),
-        'quantity': fields.float('Q.ty', digits=(16, 3), required=False),
+        'quantity': fields.float('Q.ty', digits=(16, 3)),
         'xlsx_id': fields.many2one(
             'purchase.order.xlsx', 'Import wizard', 
             required=False),

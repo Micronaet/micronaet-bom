@@ -2,6 +2,16 @@
 <openerp>
     <data>
        <!-- purchase.order.xlsx -->
+       <record id="purchase_order_xlsx_tree_view" model="ir.ui.view">
+            <field name="name">Import order for material</field>
+            <field name="model">purchase.order.xlsx</field>
+            <field name="arch" type="xml">
+                <tree string="Import order">
+                     <field name="name" />
+                     <field name="mode" />
+                </tree>
+            </field>
+      </record>
        <record id="purchase_order_xlsx_view" model="ir.ui.view">
             <field name="name">Import order for material</field>
             <field name="model">purchase.order.xlsx</field>
@@ -18,7 +28,7 @@
 
                         <separator string="Details:" colspan="4"/>
                         <field name="line_ids" colspan="4" nolabel="1">
-                            <tree string="Order details:">
+                            <tree string="Order details:" colors="red:partner_id==False or product_id==False or deadline==False or quantity&lt;=0.001" editable="bottom">
                                  <field name="partner_id" />
                                  <field name="product_id" />
                                  <field name="quantity" />
@@ -33,9 +43,8 @@
           <field name="name">Import purchase order</field>
           <field name="res_model">purchase.order.xlsx</field>
           <field name="view_type">form</field>
-          <field name="view_mode">form</field>
-          <field name="target">new</field>
-          <field name="view_id" ref="purchase_order_xlsx_view"/>
+          <field name="view_mode">tree,form</field>
+          <field name="view_id" ref="purchase_order_xlsx_tree_view"/>
       </record>
       <menuitem 
           parent="purchase.menu_purchase_rfq" 
@@ -44,4 +53,3 @@
           />      
     </data>
 </openerp>
-

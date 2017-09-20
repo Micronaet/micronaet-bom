@@ -37,9 +37,9 @@
     'init_xml': [],
     'demo': [],
     'data': [
+        'security/ir.model.access.csv',
+        'import_view.xml',
         'scheduler.xml',
-
-        'wizard/create_order_view.xml',
         ],
     'active': False,
     'installable': True,

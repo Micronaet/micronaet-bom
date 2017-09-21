@@ -26,15 +26,27 @@
                         <field name="file" colspan="4" />
                         <field name="mode" invisible="1" />
 
-                        <separator string="Details:" colspan="4"/>
-                        <field name="line_ids" colspan="4" nolabel="1">
-                            <tree string="Order details:" colors="red:partner_id==False or product_id==False or deadline==False or quantity&lt;=0.001" editable="bottom">
-                                 <field name="partner_id" />
-                                 <field name="product_id" />
-                                 <field name="quantity" />
-                                 <field name="deadline" />                            
-                            </tree>
-                        </field>
+                        <notebook colspan="4">
+                            <page string="Detail">
+                                <group colspan="4" col="4">
+                                    <separator string="Details:" colspan="4"/>
+                                    <field name="line_ids" colspan="4" nolabel="1">
+                                        <tree string="Order details:" colors="red:partner_id==False or product_id==False or deadline==False or quantity&lt;=0.001" editable="bottom">
+                                             <field name="partner_id" />
+                                             <field name="product_id" />
+                                             <field name="quantity" />
+                                             <field name="deadline" />                            
+                                        </tree>
+                                    </field>
+                                </group>
+                            </page>
+                            <page string="Order">
+                                <group colspan="4" col="4">
+                                    <separator string="Order:" colspan="4"/>
+                                    <field name="purchase_ids" colspan="4" nolabel="1"/>
+                                </group>
+                            </page>
+                        </notebook>
                    </group>
                 </form>
             </field>

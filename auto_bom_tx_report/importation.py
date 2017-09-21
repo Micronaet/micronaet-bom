@@ -50,6 +50,106 @@ class PurchaseOrderXLSX(orm.Model):
     # --------------------
     # Wizard button event:
     # --------------------
+    def action_create_order(self, cr, uid, ids, context=None):
+        ''' Create purchase order:
+        '''
+        
+        # Pool used:
+        purchase_pool = self.pool.get('purchase.order')
+        pol_pool = self.pool.get('purchase.order.line')
+        location_pool = self.pool.get('stock.location')
+        
+        purchase_db = {} # list of purchase order per partner
+        for line in self.browse(cr, uid, ids, context=context)[0].line_ids:
+            partner = line.partner_id
+            if not partner.id:
+                raise osv.except_osv(
+                    _('No partner'), 
+                    _('Set all partner for create invoice!'),
+                    )
+                
+            # -----------------------------------------------------------------
+            # Header:
+            # -----------------------------------------------------------------
+            if partner.id not in purchase_db:
+                # Location: (XXX find better mode!)
+                location_ids = location_pool.search(cr, uid, [
+                    ('name', '=', 'Stock'),
+                    ], context=context)
+
+                res = purchase_pool.onchange_partner_id(cr, uid, False, 
+                    partner.id, context=context)
+                data = res.get('value', {})
+                    
+                # Generate header:
+                data.update({
+                    'partner_id': partner.id,
+                    'date_order': datetime.now().strftime(
+                        DEFAULT_SERVER_DATETIME_FORMAT),
+                    'location_id': location_ids[0],
+                    })
+                purchase_id = purchase_pool.create(cr, uid, data, 
+                    context=context)
+                purchase_db[partner.id] = purchase_pool.browse(
+                    cr, uid, purchase_id, context=context)
+                    
+            # -----------------------------------------------------------------
+            # Details:
+            # -----------------------------------------------------------------
+            purchase = purchase_db[partner.id]
+            data_line = {}
+
+            # onchange product_id:
+            purchase_id = purchase.id
+            pricelist_id = purchase.pricelist_id.id
+            product_id = line.product_id.id
+            partner_id = purchase.partner_id.id
+            name = purchase.name
+            fiscal_position = purchase.fiscal_position.id
+            date_order = purchase.date_order
+            date_planned = line.deadline
+            qty = line.quantity
+            uom_id = line.product_id.uom_id.id
+            
+            res = pol_pool.onchange_product_id(cr, uid, False, 
+                pricelist_id, product_id, 0, False, partner_id, date_order,
+                fiscal_position, date_planned, False, False, 'draft', 
+                context=context)
+            data_line.update(res.get('value', {}))
+                        
+            # onchange product_qty:
+            res = pol_pool.onchange_product_id(cr, uid, False,
+                pricelist_id, product_id, qty, uom_id, partner_id, date_order, 
+                fiscal_position, date_planned, name, False, 'draft', 
+                context=context)
+            data_line.update(res.get('value', {}))
+            
+            # onchange uom:
+            res = pol_pool.onchange_product_uom(cr, uid, False,
+                pricelist_id, product_id, qty, uom_id, partner_id, date_order,
+                fiscal_position, date_planned, name, False, 'draft', 
+                context=context) 
+            data_line.update(res.get('value', {}))
+
+            if 'taxes_id' in data_line:
+                taxes_id = [(6, 0, data_line['taxes_id'])]
+                
+            data_line.update({
+                'product_id': product_id,
+                'order_id': purchase_id,
+                'taxes_id': taxes_id,
+                # TODO link link with file?
+                })
+            
+            pol_pool.create(cr, uid, data_line, context=context)
+                    
+        # Link purchase order to import record
+        purchase_ids = [po.id for po in purchase_db.values()]
+        purchase_pool.write(cr, uid, purchase_ids, {
+            'xlsx_id': ids[0],
+            }, context=context)
+        return True
+        
     def action_import_order(self, cr, uid, ids, context=None):
         ''' Event for button done
         '''
@@ -96,7 +196,7 @@ class PurchaseOrderXLSX(orm.Model):
                 _('Cannot read XLS file: %s' % filename),
                 )
                 
-        WS = WB.sheet_by_index(0)        
+        WS = WB.sheet_by_index(0)
 
         pos = -1
         for row in range(row_start, WS.nrows):
@@ -215,6 +315,18 @@ class PurchaseOrderXLSXLine(orm.Model):
             'purchase.order.xlsx', 'Import wizard', 
             required=False),
         }
+
+class PurchaseOrder(orm.Model):
+    """ Model name: PurchaseOrder
+    """
+    
+    _inherit = 'purchase.order'
+
+    _columns = {
+        'xlsx_id': fields.many2one(
+            'purchase.order.xlsx', 'Import record', 
+            required=False),
+        }
     
 class PurchaseOrderXLSX(orm.Model):
     """ Model name: PurchaseOrderXLSX
@@ -224,6 +336,8 @@ class PurchaseOrderXLSX(orm.Model):
     _columns = {
         'line_ids': fields.one2many(
             'purchase.order.xlsx.line', 'xlsx_id', 'Line'),
+        'purchase_ids': fields.one2many(
+            'purchase.order', 'xlsx_id', 'Purchase order'),
         }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

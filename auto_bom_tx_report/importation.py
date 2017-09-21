@@ -22,6 +22,7 @@ import sys
 import logging
 import openerp
 import xlrd
+import base64
 import openerp.netsvc as netsvc
 import openerp.addons.decimal_precision as dp
 from openerp.osv import fields, osv, expression, orm
@@ -161,6 +162,22 @@ class PurchaseOrderXLSX(orm.Model):
         line_pool = self.pool.get('purchase.order.xlsx.line') 
         
         current_proxy = self.browse(cr, uid, ids, context=context)[0]
+        
+        # ---------------------------------------------------------------------
+        # Save file passed:
+        # ---------------------------------------------------------------------
+        if not current_proxy.file:
+            raise osv.except_osv(
+                _('No file:'), 
+                _('Please pass a XLSX file for import order'),
+                )
+        b64_file = base64.decodestring(current_proxy.file)
+        now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        filename = '/tmp/tx_%s.xlsx' % now.replace(':', '_').replace('-', '_')
+        f = open(filename, 'wb')
+        f.write(b64_file)
+        f.close()
+        
         xslx_id = current_proxy.id
         month_db = {
             # Previous year:
@@ -182,9 +199,6 @@ class PurchaseOrderXLSX(orm.Model):
             year_a = year_current - 1
             year_b = year_current
             
-        # TODO import procedure
-        filename = '/home/thebrush/Scrivania/Stato_tessuti_inventario_parziale.xlsx' # TODO save from binary
-        
         # ---------------------------------------------------------------------
         # Load force name (for web publish)
         # ---------------------------------------------------------------------
@@ -275,8 +289,10 @@ class PurchaseOrderXLSX(orm.Model):
                 pos = -1            
 
         # Update status of import record
+        _logger.info('Imported: %s' % filename)
         return self.write(cr, uid, ids, {
             'mode': 'imported',
+            'file': False, # reset file for clean database!
             }, context=context)
     
     _columns = {

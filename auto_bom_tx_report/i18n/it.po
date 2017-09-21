@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-27 16:23+0000\n"
-"PO-Revision-Date: 2017-07-27 18:39+0100\n"
+"POT-Creation-Date: 2017-09-21 11:02+0000\n"
+"PO-Revision-Date: 2017-09-21 13:06+0100\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -18,12 +18,225 @@ msgstr ""
 "X-Generator: Poedit 1.6.10\n"
 
 #. module: auto_bom_tx_report
-#: code:addons/auto_bom_tx_report/auto.py:477
+#: view:purchase.order.xlsx:auto_bom_tx_report.purchase_order_xlsx_view
+msgid "Cancel"
+msgstr "Annulla"
+
+#. module: auto_bom_tx_report
+#: code:addons/auto_bom_tx_report/importation.py:210
+#, python-format
+msgid "Cannot read XLS file: %s"
+msgstr "Impossibile leggere il file XLSX: %s"
+
+#. module: auto_bom_tx_report
+#: view:purchase.order.xlsx:auto_bom_tx_report.purchase_order_xlsx_view
+msgid "Create order"
+msgstr "Crea ordine di acquisto"
+
+#. module: auto_bom_tx_report
+#: selection:purchase.order.xlsx,mode:0
+msgid "Created"
+msgstr "Creato"
+
+#. module: auto_bom_tx_report
+#: field:purchase.order.xlsx,create_uid:0
+#: field:purchase.order.xlsx.line,create_uid:0
+msgid "Created by"
+msgstr "Creato da"
+
+#. module: auto_bom_tx_report
+#: field:purchase.order.xlsx,create_date:0
+#: field:purchase.order.xlsx.line,create_date:0
+msgid "Created on"
+msgstr "Creato il"
+
+#. module: auto_bom_tx_report
+#: field:purchase.order.xlsx.line,deadline:0
+msgid "Deadline"
+msgstr "Scadenza"
+
+#. module: auto_bom_tx_report
+#: view:purchase.order.xlsx:auto_bom_tx_report.purchase_order_xlsx_view
+msgid "Detail"
+msgstr "Dettaglio"
+
+#. module: auto_bom_tx_report
+#: view:purchase.order.xlsx:auto_bom_tx_report.purchase_order_xlsx_view
+msgid "Details:"
+msgstr "Dettagli:"
+
+#. module: auto_bom_tx_report
+#: selection:purchase.order.xlsx,mode:0
+msgid "Draft"
+msgstr "Bozza"
+
+#. module: auto_bom_tx_report
+#: code:addons/auto_bom_tx_report/importation.py:209
+#, python-format
+msgid "Error XLSX"
+msgstr "Errore XLSX"
+
+#. module: auto_bom_tx_report
+#: code:addons/auto_bom_tx_report/auto.py:478
 #, python-format
 msgid "Fabric"
 msgstr "Tessuto"
 
 #. module: auto_bom_tx_report
+#: field:purchase.order.xlsx,id:0 field:purchase.order.xlsx.line,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: auto_bom_tx_report
+#: view:purchase.order.xlsx:auto_bom_tx_report.purchase_order_xlsx_view
+msgid "Import"
+msgstr "Importa"
+
+#. module: auto_bom_tx_report
+#: view:purchase.order.xlsx:auto_bom_tx_report.purchase_order_xlsx_tree_view
+#: view:purchase.order.xlsx:auto_bom_tx_report.purchase_order_xlsx_view
+msgid "Import order"
+msgstr "Importa ordine"
+
+#. module: auto_bom_tx_report
+#: model:ir.actions.act_window,name:auto_bom_tx_report.action_purchase_order_xlsx_view
+#: model:ir.ui.menu,name:auto_bom_tx_report.menu_purchase_order_xlsx
+msgid "Import purchase order"
+msgstr "Importa ordine di acquisto"
+
+#. module: auto_bom_tx_report
+#: field:purchase.order,xlsx_id:0
+msgid "Import record"
+msgstr "Importa il record"
+
+#. module: auto_bom_tx_report
+#: field:purchase.order.xlsx.line,xlsx_id:0
+msgid "Import wizard"
+msgstr "Procedura di importazione"
+
+#. module: auto_bom_tx_report
+#: selection:purchase.order.xlsx,mode:0
+msgid "Imported"
+msgstr "Importato"
+
+#. module: auto_bom_tx_report
+#: model:ir.model,name:auto_bom_tx_report.model_purchase_order_xlsx
+msgid "Imported order"
+msgstr "Ordine importato"
+
+#. module: auto_bom_tx_report
+#: model:ir.model,name:auto_bom_tx_report.model_purchase_order_xlsx_line
+msgid "Imported order line"
+msgstr "Righe ordine importate"
+
+#. module: auto_bom_tx_report
+#: code:addons/auto_bom_tx_report/importation.py:309
+#, python-format
+msgid "Imported: %s"
+msgstr "Importato: %s"
+
+#. module: auto_bom_tx_report
+#: field:purchase.order.xlsx,write_uid:0
+#: field:purchase.order.xlsx.line,write_uid:0
+msgid "Last Updated by"
+msgstr "Ultimo aggiornamento di"
+
+#. module: auto_bom_tx_report
+#: field:purchase.order.xlsx,write_date:0
+#: field:purchase.order.xlsx.line,write_date:0
+msgid "Last Updated on"
+msgstr "Ultimo aggiornamento il"
+
+#. module: auto_bom_tx_report
+#: field:purchase.order.xlsx,line_ids:0
+msgid "Line"
+msgstr "Linea"
+
+#. module: auto_bom_tx_report
 #: model:ir.model,name:auto_bom_tx_report.model_mrp_production
 msgid "Manufacturing Order"
 msgstr "Ordine di Produzione"
+
+#. module: auto_bom_tx_report
+#: field:purchase.order.xlsx,mode:0
+msgid "Mode"
+msgstr "Modalità"
+
+#. module: auto_bom_tx_report
+#: field:purchase.order.xlsx,name:0
+msgid "Name"
+msgstr "Nome"
+
+#. module: auto_bom_tx_report
+#: code:addons/auto_bom_tx_report/importation.py:171
+#, python-format
+msgid "No file:"
+msgstr "No file:"
+
+#. module: auto_bom_tx_report
+#: code:addons/auto_bom_tx_report/importation.py:68
+#, python-format
+msgid "No partner"
+msgstr "No partner"
+
+#. module: auto_bom_tx_report
+#: view:purchase.order.xlsx:auto_bom_tx_report.purchase_order_xlsx_view
+msgid "Order"
+msgstr "Ordine"
+
+#. module: auto_bom_tx_report
+#: view:purchase.order.xlsx:auto_bom_tx_report.purchase_order_xlsx_view
+msgid "Order details:"
+msgstr "Dettagli ordine:"
+
+#. module: auto_bom_tx_report
+#: view:purchase.order.xlsx:auto_bom_tx_report.purchase_order_xlsx_view
+msgid "Order:"
+msgstr "Ordine:"
+
+#. module: auto_bom_tx_report
+#: code:addons/auto_bom_tx_report/importation.py:172
+#, python-format
+msgid "Please pass a XLSX file for import order"
+msgstr "Prego passare un file XLSX nella procedura di importazione!"
+
+#. module: auto_bom_tx_report
+#: field:purchase.order.xlsx.line,product_id:0
+msgid "Product"
+msgstr "Prodotto"
+
+#. module: auto_bom_tx_report
+#: model:ir.model,name:auto_bom_tx_report.model_purchase_order
+msgid "Purchase Order"
+msgstr "Ordine Acquisto"
+
+#. module: auto_bom_tx_report
+#: field:purchase.order.xlsx,purchase_ids:0
+msgid "Purchase order"
+msgstr "Ordine di acquisto"
+
+#. module: auto_bom_tx_report
+#: field:purchase.order.xlsx.line,quantity:0
+msgid "Q.ty"
+msgstr "Q.tà"
+
+#. module: auto_bom_tx_report
+#: field:purchase.order.xlsx.line,sequence:0
+msgid "Sequence"
+msgstr "Seq."
+
+#. module: auto_bom_tx_report
+#: code:addons/auto_bom_tx_report/importation.py:69
+#, python-format
+msgid "Set all partner for create invoice!"
+msgstr "Imposta tutti i partner, necessari per la creazione documento!"
+
+#. module: auto_bom_tx_report
+#: field:purchase.order.xlsx.line,partner_id:0
+msgid "Supplier"
+msgstr "Fornitore"
+
+#. module: auto_bom_tx_report
+#: field:purchase.order.xlsx,file:0
+msgid "XLSX file"
+msgstr "File XLSX"

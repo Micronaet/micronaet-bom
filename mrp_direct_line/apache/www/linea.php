@@ -40,6 +40,12 @@
     $aggiornamento = "Aggiornato alle: ".date("h:i:sa");
     $redirect_url =  'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
     $line_code = $_GET['linea'];
+    if (isset($_GET['mode'])){
+        $mode = $_GET['mode'];        
+        }
+    else {
+        $mode = 'line'; // else 'pre'
+        }    
 
     $args_read = array(
         new xmlrpcval("html", "string"),
@@ -54,6 +60,7 @@
     $msg->addParam(new xmlrpcval("get_xmlrpc_html", "string"));
     $msg->addParam(new xmlrpcval($line_code, "string"));
     $msg->addParam(new xmlrpcval($redirect_url, "string"));
+    $msg->addParam(new xmlrpcval($mode, "string"));
     //$msg->addParam(new xmlrpcval(array(new xmlrpcval($line_id, "int")), "array"));
     //$msg->addParam(new xmlrpcval($args_read, "array"));
 

@@ -71,6 +71,8 @@ class SaleOrderLine(orm.Model):
         'working_sequence': fields.integer('Working seq.'),
         'working_qty': fields.integer('Working q.'),
         'working_done': fields.boolean('Done'), #TODO remove > test working_qty
+        'working_ready': fields.boolean('Ready for input', 
+            help='Line component are ready in line position'),
         }
 
 class MrpProductionStatsPallet(orm.Model):
@@ -320,7 +322,8 @@ class MrpProductionStat(orm.Model):
             
         return res
         
-    def get_xmlrpc_html(self, cr, uid, line_code, redirect_url, context=None):
+    def get_xmlrpc_html(self, cr, uid, line_code, redirect_url, mode='line',
+            context=None):
         ''' Return HTML view for result php call
         '''
         # ---------------------------------------------------------------------
@@ -461,10 +464,15 @@ class MrpProductionStat(orm.Model):
             second = 0
             for line in sorted(stats.working_ids, 
                     key=lambda x: (x.working_sequence, x.mrp_sequence)):
-                    
-                # Check if is done:
-                if not line.working_qty:
-                    continue
+
+                # -------------------------------------------------------------                    
+                # Jump record not used:
+                # -------------------------------------------------------------                    
+                if mode == 'line' and not line.working_qty:
+                    continue # line and production done
+                if mode == 'pre' and line.working_ready: 
+                    continue # pre line and yet prepared
+                
                 #if line.product_uom_qty <= line.product_uom_maked_sync_qty:
                 #    continue
                 if not first:
@@ -529,8 +537,7 @@ class MrpProductionStat(orm.Model):
                     res += _('''                            
                         <tr class="bg_blue">
                             <td>Partner</td><td>Destinazione</td>
-                            <td>Ordine</td>
-                            <td>Codice</td><td>Pezzi</td>
+                            <td>Ordine</td><td>Codice</td><td>Pezzi</td>
                             <td colspan="2">Conferma</td>
                         </tr>
                         ''')      
@@ -565,23 +572,36 @@ class MrpProductionStat(orm.Model):
                     # ---------------------------------------------------------
                     # Extra info for current record:
                     # ---------------------------------------------------------
-                    res += _('''
-                        <tr>
-                            <td>
-                                <img alt="Immagine non trovata" 
-                                    src="data:image/png;base64,%s" />
-                            </td>
-                            <td colspan="6" class="text_note">
-                                %s<p>%s</p>
-                            </td>
-                        </tr>
-                        </table>''') % (
-                            line.product_id.product_image_context,
-                            _('<p class="fg_red">ETICHETTA PERSONALIZZATA</p>'
-                                ) if line.partner_id.has_custom_label else \
-                                    _('<p>ETICHETTA MAGAZZINO</p>'),                              
-                            note_text,
-                            )
+                    if mode == 'line':
+                        res += _('''
+                            <tr>
+                                <td>
+                                    <img alt="Immagine non trovata" 
+                                        src="data:image/png;base64,%s" />
+                                </td>
+                                <td colspan="6" class="text_note">
+                                    %s<p>%s</p>
+                                </td>
+                            </tr>
+                            </table>''') % (
+                                line.product_id.product_image_context,
+                                _('<p class="fg_red">ETICHETTA PERSONALIZZATA</p>'
+                                    ) if line.partner_id.has_custom_label else \
+                                        _('<p>ETICHETTA MAGAZZINO</p>'),                              
+                                note_text,
+                                )
+                    else: # 'pre'
+                        res += _('''
+                            <tr>
+                                <td>
+                                    Approntato!                                    
+                                </td>
+                                <td colspan="6" class="text_note">
+                                    <p>Distita base</p>
+                                </td>
+                            </tr>
+                            </table>''')
+                                
                     #line.order_id.company_id.logo or ''
                         
                     # ---------------------------------------------------------
@@ -615,10 +635,8 @@ class MrpProductionStat(orm.Model):
                             line.order_id.name,
                             line.default_code,
                             line.working_qty,                                
-                            )
-            
-        res += '</table>'
-                
+                            )            
+        res += '</table>'                
         return res
         
     # -------------------------------------------------------------------------

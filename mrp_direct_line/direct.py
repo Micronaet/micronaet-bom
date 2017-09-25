@@ -60,6 +60,14 @@ class SaleOrderLine(orm.Model):
                 current_proxy.working_qty,
             }, context=context)
         
+    def working_mpr_is_ready(self, cr, uid, ids, context=None):
+        ''' Set as done this line for the job
+        '''
+        current_proxy = self.browse(cr, uid, ids, context=context)[0]
+        return self.write(cr, uid, ids, {
+            'working_ready': True,
+            }, context=context)
+        
     def working_print_single_label(self, cr, uid, ids, context=None):
         ''' Print single label
         '''
@@ -190,11 +198,15 @@ class MrpProductionStat(orm.Model):
     # -------------------------------------------------------------------------
     # XMLRPC Function PHP calls:
     # -------------------------------------------------------------------------
-    def set_sol_done_xmlrpc(self, cr, uid, sol_id, context=None):
+    def set_sol_done_xmlrpc(self, cr, uid, sol_id, mode='line', context=None):
         ''' Mark as confirmed:
-        '''
-        return self.pool.get('sale.order.line').working_qty_is_done(
-            cr, uid, [sol_id], context=context)
+        '''        
+        if mode == 'line':
+            return self.pool.get('sale.order.line').working_qty_is_done(
+                cr, uid, [sol_id], context=context)
+        else: # 'pre'
+            return self.pool.get('sale.order.line').working_mpr_is_ready(
+                cr, uid, [sol_id], context=context)
     
     def get_xmlrpc_lines_html(self, cr, uid, context=None):
         ''' Page default.php for all line
@@ -545,6 +557,15 @@ class MrpProductionStat(orm.Model):
                     # ---------------------------------------------------------
                     # Current record:
                     # ---------------------------------------------------------
+                    if mode == 'line':
+                        button_confirm = 'FATTI!'
+                        hidden_mode = '''
+                           <input type="hidden" name="mode" value="line">'''
+                    else:
+                        button_confirm = 'APPRONTATI!'
+                        hidden_mode = '''
+                           <input type="hidden" name="mode" value="pre">'''
+
                     res += _('''    
                         <tr>
                             <td>%s</td><td>%s</td><td>%s</td>
@@ -552,11 +573,12 @@ class MrpProductionStat(orm.Model):
                             <td><b>%s</b></td>
                             <td colsnap="2">
                                 <form action="/php/confirm.php" method="get">
-                                    <input type="submit" value="FATTI!">
+                                    <input type="submit" value="%s">
                                     <input type="hidden" name="sol_id" 
                                         value="%s">
                                     <input type="hidden" name="redirect_url" 
                                         value="%s">
+                                    %s    
                                 </form>
                             </td>
                         </tr>''') % (
@@ -566,7 +588,10 @@ class MrpProductionStat(orm.Model):
                             line.order_id.name,
                             line.default_code, line.working_qty,
                             # Confirm form:
-                            line.id, redirect_url,
+                            button_confirm,
+                            line.id, 
+                            redirect_url,
+                            hidden_mode,
                             )
                                                     
                     # ---------------------------------------------------------
@@ -593,11 +618,8 @@ class MrpProductionStat(orm.Model):
                     else: # 'pre'
                         res += _('''
                             <tr>
-                                <td>
-                                    Approntato!                                    
-                                </td>
-                                <td colspan="6" class="text_note">
-                                    <p>Distita base</p>
+                                <td colspan="7" class="text_note">
+                                    <p>Distinta base</p>
                                 </td>
                             </tr>
                             </table>''')

@@ -87,6 +87,7 @@ class CreateNewMrpLineDayWizard(orm.TransientModel):
                 sol_pool.write(cr, uid, item_id, {
                     'working_line_id': stats_id,
                     'working_qty': remain,
+                    'working_ready': False, # reset every time
                     }, context=context)
                     
         # Create first status point for pallet management:            

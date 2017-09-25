@@ -40,7 +40,7 @@
     $aggiornamento = "Aggiornato alle: ".date("h:i:sa");
     $redirect_url =  'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
     $line_code = $_GET['linea'];
-    if (isset($_GET['mode'])){
+    if (isset($_GET['mode'])) {
         $mode = $_GET['mode'];        
         }
     else {

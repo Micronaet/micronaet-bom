@@ -637,7 +637,7 @@ class MrpProductionStat(orm.Model):
                         </tr>
                         <tr class="bg_blue">
                            <td>Partner</td><td>Destinazione</td><td>Ordine</td>
-                           <td>Codice</td><td>Pezzi</td>
+                           <td>Codice</td><td>Pezzi</td><td>OK</td>
                        </tr>
                         ''')
                         
@@ -650,14 +650,22 @@ class MrpProductionStat(orm.Model):
                             <td>%s</td><td>%s</td><td>%s</td>
                             <td><b>%s</b></td>
                             <td><b>%s</b></td>
+                            <td>
+                                <image src="./images/%s.gif" 
+                                    title="%s" />
+                            </td>
                         </tr>''' % (
                             line.partner_id.name,
                             line.order_id.destination_partner_id.name or \
                                 '&nbsp;',
                             line.order_id.name,
                             line.default_code,
-                            line.working_qty,                                
-                            )            
+                            line.working_qty,                 
+                            'green' if line.working_ready else 'red',
+                            _('Materiale pronto per la produzione') if\
+                                line.working_ready else _(
+                                    'Materiale non pronto per la produzione'),
+                            )
         res += '</table>'                
         return res
         

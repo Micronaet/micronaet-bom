@@ -22,6 +22,7 @@ import sys
 import logging
 import openerp
 import qrcode
+import copy
 import StringIO
 import base64
 import openerp.netsvc as netsvc
@@ -260,7 +261,20 @@ class MrpProductionStat(orm.Model):
         
     def get_xmlrpc_bom_html(self, cr, uid, product_id, context=None):
         ''' PHP call for get BOM
+            context parameters:
+                > 'noheader': hide header
+                > 'show_ready': show only show ready category
+                > 'expand': expand halfwork
+                > 'qty': calculate total for qty producey
         '''   
+        # Read parameters:
+        if context is None:
+            context = {}
+        noheader = context.get('noheader', False)
+        show_ready = context.get('show_ready', False)
+        expand = context.get('expand', True)
+        qty = context.get('qty', 1.0)
+
         bom = ''
         product_pool = self.pool.get('product.product')
         product_proxy = product_pool.browse(
@@ -274,7 +288,11 @@ class MrpProductionStat(orm.Model):
                     not(x.product_id.half_bom_id), 
                     x.product_id.default_code,
                     )):
+            category = item.category_id
             product = item.product_id
+            
+            if show_ready and not category.show_ready:
+                continue # jump category not in show ready status                
             
             # if item.relative_type == 'half'\
             if product.bom_placeholder:
@@ -296,30 +314,63 @@ class MrpProductionStat(orm.Model):
                     product.default_code,
                     product.name,
                     item.category_id.name,
-                    item.product_qty,
+                    item.product_qty * qty,
                     item.product_uom.name.lower(),
                     )                    
-            # Add sub elements (for halfworked)        
-            for cmpt in product.half_bom_id.bom_line_ids:                
-                bom += '''
-                <tr class="material">
-                    <td>>>></td>
-                    <td>%s</td>
-                    <td>%s</td>
-                    <td>&nbsp;</td>
-                    <td>%s %s</td>
-                </tr>
-                ''' % (
-                    cmpt.product_id.default_code,
-                    cmpt.product_id.name,
-                    cmpt.product_qty,
-                    cmpt.product_uom.name.lower(),
-                    )                   
+                    
+            # Add sub elements (for halfworked)
+            if expand: 
+                for cmpt in product.half_bom_id.bom_line_ids:                
+                    bom += '''
+                    <tr class="material">
+                        <td>>>></td>
+                        <td>%s</td>
+                        <td>%s</td>
+                        <td>&nbsp;</td>
+                        <td>%s %s</td>
+                    </tr>
+                    ''' % (
+                        cmpt.product_id.default_code,
+                        cmpt.product_id.name,
+                        cmpt.product_qty,
+                        cmpt.product_uom.name.lower(),
+                        )                   
                 
                             
         # ---------------------------------------------------------------------
         # Add header:    
         # ---------------------------------------------------------------------
+        if noheader:
+            header_title = ''
+        else:     
+            header_title = '''
+                <tr>
+                    <th colspan="2">%s</th>
+                    <th colspan="3">%s [%s]</th>
+                </tr>
+                ''' % (
+                    self._php_button_bar,
+                    product_proxy.default_code,
+                    product_proxy.name,
+                    )
+            
+        res = _('''
+            <table class="bom">
+                %s
+                <tr>
+                    <th colspan="2">Codice</th>
+                    <th>Descrizione</th>
+                    <th>Categoria</th>
+                    <th>Q.</th>
+                </tr>
+                %s
+            </table>            
+            ''') % (
+                header_title,
+                bom,
+                )
+            
+        
         res = _('''
             <table class="bom">
                 <tr>
@@ -483,9 +534,15 @@ class MrpProductionStat(orm.Model):
 
             first = False
             second = 0
+            
+            # Context for pre mode: XXX only for pre check? 
+            ctx = copy.deepcopy(context)
+            ctx['noheader'] = True
+            ctx['show_ready'] = True
+            ctx['expand'] = False
             for line in sorted(stats.working_ids, 
                     key=lambda x: (x.working_sequence, x.mrp_sequence)):
-
+                
                 # -------------------------------------------------------------                    
                 # Jump record not used:
                 # -------------------------------------------------------------                    
@@ -493,6 +550,9 @@ class MrpProductionStat(orm.Model):
                     continue # line and production done
                 if mode == 'pre' and line.working_ready: 
                     continue # pre line and yet prepared
+
+                product = line.product_id
+                ctx['qty'] = line.working_qty # only working           
                 
                 #if line.product_uom_qty <= line.product_uom_maked_sync_qty:
                 #    continue
@@ -628,10 +688,13 @@ class MrpProductionStat(orm.Model):
                         res += _('''
                             <tr>
                                 <td colspan="7" class="text_note">
-                                    <p>Distinta base</p>
+                                    <p>%s</p>
                                 </td>
                             </tr>
-                            </table>''')
+                            </table>''') % (
+                                self.get_xmlrpc_bom_html(
+                                    cr, uid, product.id, context=ctx),
+                                )
                                 
                     #line.order_id.company_id.logo or ''
                         

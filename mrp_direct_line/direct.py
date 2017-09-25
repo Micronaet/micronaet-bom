@@ -236,6 +236,7 @@ class MrpProductionStat(orm.Model):
                 <td class="topics">
                     <a href="./linea.php?linea=%s&mode=pre">
                         <image src="./images/pre.jpg" title="%s" /></a>
+                    &nbsp;    
                     <a href="./linea.php?linea=%s">
                         <image src="./images/linea.jpg" title="%s" /></a>
                     <br />

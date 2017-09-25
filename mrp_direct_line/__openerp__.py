@@ -36,6 +36,7 @@
         'label_system_mrp',        
         'production_accounting_external_stats',
         'note_system_management',
+        'bom_dynamic_structured',
         ],
     'init_xml': [],
     'demo': [],

@@ -901,5 +901,15 @@ class MrpProductionStat(orm.Model):
             help='Not visible: store the data for new pallet situation'),
         }
     
+class MrpBomStructureCategory(orm.Model):
+    """ Model name: Manage structure for show bom
+    """
+    
+    _inherit = 'mrp.bom.structure.category'
+    
+    _columns = {
+        'show_ready':fields.boolean('Show ready',
+            help='Show in PHP view for MRP status'),
+        }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

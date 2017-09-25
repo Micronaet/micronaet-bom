@@ -1,6 +1,27 @@
 <?xml version="1.0"?>
 <openerp>
     <data>        
+        <record model="ir.ui.view" id="view_mrp_bom_structure_category_show_form">
+            <field name="name">mrp.bom.structure.category.showready</field>
+            <field name="model">mrp.bom.structure.category</field>
+            <field name="inherit_id" ref="bom_dynamic_structured.view_mrp_bom_structure_category_form"/>
+            <field name="arch" type="xml">
+                <field name="name" position="before">
+                    <field name="show_ready" />
+                </field>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_mrp_bom_structure_category_show_tree">
+            <field name="name">mrp.bom.structure.category.showready</field>
+            <field name="model">mrp.bom.structure.category</field>
+            <field name="inherit_id" ref="bom_dynamic_structured.view_mrp_bom_structure_category_tree"/>
+            <field name="arch" type="xml">
+                <field name="name" position="before">
+                    <field name="show_ready" />
+                </field>
+            </field>
+        </record>
+        
         <record model="ir.ui.view" id="view_mrp_production_stats_line_tree">
             <field name="name">MRP Stats for line</field>
             <field name="model">mrp.production.stats</field>

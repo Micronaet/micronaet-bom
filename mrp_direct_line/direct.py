@@ -234,12 +234,20 @@ class MrpProductionStat(orm.Model):
 
             res += '''
                 <td class="topics">
+                    <a href="./linea.php?linea=%s&mode=pre">
+                        <image src="./images/pre.jpg" title="%s" /></a>
                     <a href="./linea.php?linea=%s">
-                        <image src="./images/linea.jpg" alt="%s" /></a><br />
+                        <image src="./images/linea.jpg" title="%s" /></a>
+                    <br />
                     %s [%s]
                 </td>''' % (
+                    # Pre
                     line.code,
-                    line.name,
+                    _('Preparazione linea: %s') % line.name,
+                    # Line
+                    line.code,
+                    _('Linea di produzione: %s') % line.name,
+                    # Comment:
                     line.name,
                     line.code,
                     )

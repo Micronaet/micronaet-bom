@@ -270,6 +270,7 @@ class MrpProductionStat(orm.Model):
         # Read parameters:
         if context is None:
             context = {}
+
         noheader = context.get('noheader', False)
         show_ready = context.get('show_ready', False)
         expand = context.get('expand', True)
@@ -314,7 +315,7 @@ class MrpProductionStat(orm.Model):
                     product.default_code,
                     product.name,
                     item.category_id.name,
-                    item.product_qty * qty,
+                    int(item.product_qty * qty),
                     item.product_uom.name.lower(),
                     )                    
                     
@@ -341,7 +342,11 @@ class MrpProductionStat(orm.Model):
         # Add header:    
         # ---------------------------------------------------------------------
         if noheader:
-            header_title = ''
+            header_title = '''
+                <tr>
+                    <th colspan="5">Componenti da approntare:</th>
+                </tr>
+                '''
         else:     
             header_title = '''
                 <tr>
@@ -369,29 +374,6 @@ class MrpProductionStat(orm.Model):
                 header_title,
                 bom,
                 )
-            
-        
-        res = _('''
-            <table class="bom">
-                <tr>
-                    <th colspan="2">%s</th>
-                    <th colspan="3">%s [%s]</th>
-                </tr>
-                <tr>
-                    <th colspan="2">Codice</th>
-                    <th>Descrizione</th>
-                    <th>Categoria</th>
-                    <th>Q.</th>
-                </tr>
-                %s
-            </table>            
-            ''') % (
-                self._php_button_bar,
-                product_proxy.default_code,
-                product_proxy.name,
-                bom,
-                )
-            
         return res
         
     def get_xmlrpc_html(self, cr, uid, line_code, redirect_url, mode='line',
@@ -619,7 +601,7 @@ class MrpProductionStat(orm.Model):
                         <tr class="bg_blue">
                             <td>Partner</td><td>Destinazione</td>
                             <td>Ordine</td><td>Codice</td><td>Pezzi</td>
-                            <td colspan="2">Conferma</td>
+                            <td>Conferma</td><td>OK</td>
                         </tr>
                         ''')      
                     
@@ -640,7 +622,7 @@ class MrpProductionStat(orm.Model):
                             <td>%s</td><td>%s</td><td>%s</td>
                             <td><b>%s</b></td>
                             <td><b>%s</b></td>
-                            <td colsnap="2">
+                            <td>
                                 <form action="/php/confirm.php" method="get">
                                     <input type="submit" value="%s">
                                     <input type="hidden" name="sol_id" 
@@ -649,6 +631,10 @@ class MrpProductionStat(orm.Model):
                                         value="%s">
                                     %s    
                                 </form>
+                            </td>
+                            <td>
+                                <image src="./images/%s.gif" 
+                                    title="%s" />                                
                             </td>
                         </tr>''') % (
                             line.partner_id.name, 
@@ -661,6 +647,11 @@ class MrpProductionStat(orm.Model):
                             line.id, 
                             redirect_url,
                             hidden_mode,
+                            'green' if line.working_ready else 'red',
+                            _('Materiale pronto per la produzione') if\
+                                line.working_ready else _(
+                                    'Materiale non pronto per la produzione'),
+                            
                             )
                                                     
                     # ---------------------------------------------------------

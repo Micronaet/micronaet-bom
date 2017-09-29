@@ -123,7 +123,7 @@ class ResCompany(orm.Model):
         # ---------------------------------------------------------------------
         invoice_pool = self.pool.get('account.invoice')
         invoice_ids = invoice_pool.search(cr, uid, [
-            ('date_invoice', '>=', '2017-01-01'),
+            ('date_invoice', '>=', '2017-09-01'),
             ], order='number', context=context)
         _logger.info('Invoice: %s' % len(invoice_ids))    
             

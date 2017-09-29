@@ -118,7 +118,7 @@ class Parser(report_sxw.rml_parse):
         
         #reference_date = '2016-10-15 00:00:00' 
         # 04/01/2017 Change after inventory
-        reference_date = '2017-01-01 00:00:00' # TODO keep in parameter
+        reference_date = '2017-09-01 00:00:00' # TODO keep in parameter
         
         limit_date = '%s 23:59:59' % (
             datetime.now() + timedelta(days=days)).strftime(

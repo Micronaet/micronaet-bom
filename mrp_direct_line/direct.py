@@ -344,7 +344,7 @@ class MrpProductionStat(orm.Model):
         if noheader:
             header_title = '''
                 <tr>
-                    <th colspan="5">Componenti da approntare:</th>
+                    <th colspan="9">Componenti da approntare:</th>
                 </tr>
                 '''
         else:     
@@ -360,6 +360,7 @@ class MrpProductionStat(orm.Model):
                     )
             
         res = _('''
+            <tr colspan="9">
             <table class="bom">
                 %s
                 <tr>
@@ -370,6 +371,7 @@ class MrpProductionStat(orm.Model):
                 </tr>
                 %s
             </table>            
+            </tr>
             ''') % (
                 header_title,
                 bom,
@@ -506,7 +508,7 @@ class MrpProductionStat(orm.Model):
                             %s
                         </th>
                         <th colspan="4">%s</th>
-                        <th colspan="2">Aggiornato il: %s</th>
+                        <th colspan="4">Aggiornato il: %s</th>
                     </tr>
                 ''' % (
                     self._php_button_bar,
@@ -534,6 +536,9 @@ class MrpProductionStat(orm.Model):
                     continue # pre line and yet prepared
 
                 product = line.product_id
+                q_x_pack = int(product.q_x_pack) # item_per_box
+                item_per_pallet = int(product.item_per_pallet)
+                
                 ctx['qty'] = line.working_qty # only working           
                 
                 #if line.product_uom_qty <= line.product_uom_maked_sync_qty:
@@ -561,7 +566,7 @@ class MrpProductionStat(orm.Model):
                             <td colspan="4">
                                 <b>Produzione: %s [%s]</b>
                             </td>
-                            <td colspan="2">
+                            <td colspan="4">
                                 <form action="/php/print.php" method="get">
                                     <input type="submit" value="Tutte" 
                                         class="print_button" name="all"
@@ -601,6 +606,7 @@ class MrpProductionStat(orm.Model):
                         <tr class="bg_blue">
                             <td>Partner</td><td>Destinazione</td>
                             <td>Ordine</td><td>Codice</td><td>Pezzi</td>
+                            <td>Q. x sc.</td><td>Q. x ban.</td>
                             <td>Conferma</td><td>OK</td>
                         </tr>
                         ''')      
@@ -622,6 +628,7 @@ class MrpProductionStat(orm.Model):
                             <td>%s</td><td>%s</td><td>%s</td>
                             <td><b>%s</b></td>
                             <td><b>%s</b></td>
+                            <td>%s</td><td>%s</td>
                             <td>
                                 <form action="/php/confirm.php" method="get">
                                     <input type="submit" value="%s">
@@ -633,8 +640,8 @@ class MrpProductionStat(orm.Model):
                                 </form>
                             </td>
                             <td>
-                                <image src="./images/%s.gif" 
-                                    title="%s" />                                
+                                <image src="./images/%s.gif"
+                                    title="%s" />
                             </td>
                         </tr>''') % (
                             line.partner_id.name, 
@@ -642,6 +649,8 @@ class MrpProductionStat(orm.Model):
                                 '&nbsp;', 
                             line.order_id.name,
                             line.default_code, line.working_qty,
+                            q_x_pack, item_per_pallet,
+                            
                             # Confirm form:
                             button_confirm,
                             line.id, 
@@ -664,7 +673,7 @@ class MrpProductionStat(orm.Model):
                                     <img alt="Immagine non trovata" 
                                         src="data:image/png;base64,%s" />
                                 </td>
-                                <td colspan="6" class="text_note">
+                                <td colspan="8" class="text_note">
                                     %s<p>%s</p>
                                 </td>
                             </tr>
@@ -696,11 +705,13 @@ class MrpProductionStat(orm.Model):
 
                     res += _('''
                         <tr>
-                            <td colspan="7"><b>PROSSIME:</b></td>
+                            <td colspan="9"><b>PROSSIME:</b></td>
                         </tr>
                         <tr class="bg_blue">
                            <td>Partner</td><td>Destinazione</td><td>Ordine</td>
-                           <td>Codice</td><td>Pezzi</td><td>OK</td>
+                           <td>Codice</td><td>Pezzi</td>
+                           <td>Q. x sc.</td><td>Q. x ban.</td>
+                           <td>OK</td>
                        </tr>
                         ''')
                         
@@ -713,9 +724,9 @@ class MrpProductionStat(orm.Model):
                             <td>%s</td><td>%s</td><td>%s</td>
                             <td><b>%s</b></td>
                             <td><b>%s</b></td>
+                            <td>%s</td><td>%s</td>
                             <td>
-                                <image src="./images/%s.gif" 
-                                    title="%s" />
+                                <image src="./images/%s.gif" title="%s" />
                             </td>
                         </tr>''' % (
                             line.partner_id.name,
@@ -724,6 +735,8 @@ class MrpProductionStat(orm.Model):
                             line.order_id.name,
                             line.default_code,
                             line.working_qty,                 
+                            q_x_pack, 
+                            item_per_pallet,
                             'green' if line.working_ready else 'red',
                             _('Materiale pronto per la produzione') if\
                                 line.working_ready else _(

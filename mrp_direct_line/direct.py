@@ -135,6 +135,24 @@ class MrpProductionStatsPallet(orm.Model):
         # TODO total pieces
         }
 
+class MrpProductionStatsMaterial(orm.Model):
+    """ Model name: MrpProductionStatsPallet
+    """
+    
+    _name = 'mrp.production.stats.material'
+    _description = 'Produce material'
+    _rec_name = 'product_id'
+    
+    _columns = {
+        'stats_id': fields.many2one('mrp.production.stats', 'Stats'),
+        'sol_id': fields.many2one('sale.order.line', 'Order line'),
+        'product_id': fields.many2one('product.product', 'Material'),
+        'product_qty': fields.float('Q.ty', digits=(16, 3)),
+        'ready_qty': fields.float('Ready', digits=(16, 3)),
+        'bom_qty': fields.float('BOM Qty', digits=(16, 3), 
+            help='Q.ty for make 1 product (used for check total prod.'),
+        }
+
 class MrpProductionStatsPalletRow(orm.Model):
     """ Model name: MrpProductionStatsPallet
     """
@@ -336,8 +354,7 @@ class MrpProductionStat(orm.Model):
                         cmpt.product_qty,
                         cmpt.product_uom.name.lower(),
                         )                   
-                
-                            
+                                            
         # ---------------------------------------------------------------------
         # Add header:    
         # ---------------------------------------------------------------------
@@ -747,7 +764,34 @@ class MrpProductionStat(orm.Model):
         
     # -------------------------------------------------------------------------
     # Button event:    
-    # -------------------------------------------------------------------------    
+    # -------------------------------------------------------------------------   
+    def generate_material_planned_bom(self, cr, uid, ids, context=None):
+        ''' Generate material list for working product in lavoration
+        '''
+        material_pool = self.pool.get('mrp.production.stats.material')
+        
+        stats_proxy = self.browse(cr, uid, ids, context=context)[0]
+        
+        # Delete material before:
+        material_ids = [m.id for m in stats_proxy.material_ids]
+        material_pool.inlink(cr, uid, material_ids, context=context)
+        
+        for line in stats_proxy.working_ids:
+            for material in line.product_id.dynamic_bom_line_ids):
+                product = material.product_id            
+                if not item.category_id.show_ready:
+                    continue # jump category not in show ready status
+                
+                material_pool.create(cr, uid, {  
+                    'stats_id': ids[0],
+                    'sol_id': line.id,
+                    'product_id': product.id,
+                    'product_qty': material.product_qty * line.working_qty,
+                    'bom_qty': material.product_qty,
+                    'ready_qty': 0.0,                                       
+                    }, context=context)
+        return True        
+ 
     def working_new_pallet(self, cr, uid, ids, context=None):
         ''' New pallet
         '''
@@ -869,7 +913,7 @@ class MrpProductionStat(orm.Model):
             '''
         max_second = 3
         res = {}
-        #import pdb; pdb.set_trace()
+
         for stats in self.browse(cr, uid, ids, context=context):
             res[stats.id] = {}            
             res[stats.id]['working_line_current'] = ''
@@ -956,7 +1000,9 @@ class MrpProductionStat(orm.Model):
             _get_working_line_status, method=True, 
             type='text', string='Next', 
             store=False, multi=True), 
-        
+            
+        'material_ids': fields.one2many(
+            'mrp.production.stats.material', 'stats_id', 'Material'),
         'pallet_ids': fields.one2many(
             'mrp.production.stats.pallet', 'stats_id', 'Pallet'),
         'working_ids': fields.one2many(
@@ -979,4 +1025,43 @@ class MrpBomStructureCategory(orm.Model):
             help='Show in PHP view for MRP status'),
         }
 
+class SaleOrderLine(orm.Model):
+    ''' Link line for stats
+    '''
+    _inherit = 'sale.order.line'
+
+    def _get_check_material_ready(self, cr, uid, ids, fields, args, 
+            context=None):
+        ''' Fields function for calculate 
+        '''
+        res = {}
+        for sol in self.browse(cr, uid, ids, context=context):
+            res[sol.id] = {}
+            res[sol.id]['material_ready'] = True
+            res[sol.id]['material_max'] = sol.working_qty # this prod. to work
+            
+            for material in sol.material_ids:
+                ready_qty = material.ready_qty
+                product_qty = material.product_qty
+                if ready_qty < product_qty: # material not all present
+                    # If one component non present ready is false:
+                    res[sol.id]['material_ready'] = False
+                    material_max = ready_qty / bom_qty # TODO round(, 0)?
+                    
+                    # Max verification:
+                    if material_max < res[sol.id]['material_max']:
+                        res[sol.id]['material_max'] = material_max
+        return res    
+
+    _columns = {
+        # Not in views only for calculated field:
+        'material_ids': fields.one2many(
+            'mrp.production.stats.material', 'sol_id', 'Materials'),
+        'material_max': fields.function(
+            _get_check_material_ready, method=True, multi=True,
+            type='float', string='Max production', store=False),
+        'material_ready': fields.function(
+            _get_check_material_ready, method=True, multi=True,
+            type='boolean', string='Ready', store=False),
+        }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

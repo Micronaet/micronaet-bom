@@ -90,7 +90,9 @@ class CreateNewMrpLineDayWizard(orm.TransientModel):
                     'working_ready': False, # reset every time
                     }, context=context)
                     
-        # Create first status point for pallet management:            
+        # Create first status point for pallet management:
+        stats_pool.generate_material_planned_bom(
+            cr, uid, [stats_id], context=context)
         stats_pool.working_new_pallet(cr, uid, [stats_id], context=context)
         
         # Save total at start up:

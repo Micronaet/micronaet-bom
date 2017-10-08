@@ -102,6 +102,25 @@ table tr {
     filter: alpha(opacity=100); /* For IE8 and earlier */
     }    
 
+.ready_button {
+    background: url(/images/ok.png) no-repeat;
+    text-align: 'center';
+    vertical-align: 'baseline';
+    border-radius: 8px;
+    padding: 40px 4px 0px 4px;
+    /*border: 2px solid #4CAF50;*/
+    height: 70px;
+    width: 50px;
+
+    opacity: 0.7;
+    filter: alpha(opacity=70); /* For IE8 and earlier */
+    }    
+
+.ready_button:hover {
+    opacity: 1.0;
+    filter: alpha(opacity=100); /* For IE8 and earlier */
+    }
+
 .print_button {
     background: url(/images/print48.png) no-repeat;
     text-align: 'center';

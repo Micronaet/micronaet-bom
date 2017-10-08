@@ -395,9 +395,58 @@ class MrpProductionStat(orm.Model):
                 )
         return res
         
+    def generate_php_material(self, cr, uid, stats, res, redirect_url,
+            context=None): 
+        ''' Manage material mode
+        '''
+        res += '''
+            <tr>
+                <th>Codice</th>
+                <th colspan="3">Materiale</th>
+                <th>Totale</th>
+                <th>Attuale</th>
+                <th>Conferma</th>
+            </tr>
+            '''
+        for material in sorted(stats.material_ids, 
+                key=lambda x: x.product_id.default_code):
+            # TODO generate total before
+            res += '''
+                <tr>
+                    <td>%s</td>
+                    <td colspan="3">%s</td>
+                    <td>%s</td>
+                    <td>
+                        <input type="input" name="ready_qty" value="%s" 
+                            maxlength="4" size="4" 
+                            title="Q. recuperata e pronta">
+                    </td>
+                    <td>
+                            <input type="submit" value="Pronti" 
+                                class="ready_button" name="pronti"
+                                title="Tutto pronto"
+                                />
+                            <input type="hidden" name="sol_id" 
+                                value="%s">
+                            <input type="hidden" name="redirect_url" 
+                                value="%s">
+                    </td>
+                </tr>             
+                ''' % (
+                    material.product_id.default_code,
+                    material.product_id.name,
+                    material.product_qty,
+                    material.ready_qty,
+                    material.sol_id.id,
+                    redirect_url,
+                    )
+        res += '</table>'
+        return res
+        
     def get_xmlrpc_html(self, cr, uid, line_code, redirect_url, mode='line',
             context=None):
-        ''' Return HTML view for result php call
+        ''' Return HTML view for result php call:
+                manage: line, pre, old mode (last in externa function)
         '''
         # ---------------------------------------------------------------------
         # UTILITY:
@@ -482,8 +531,7 @@ class MrpProductionStat(orm.Model):
             res = add_domain_note(
                 self, cr, uid, line, block='pr-or', context=context)
             if res:
-                note_text += mask % ('PRODOTTO-ORDINE', res)
-            
+                note_text += mask % ('PRODOTTO-ORDINE', res)            
             return note_text
         
         # Pool used:
@@ -541,6 +589,12 @@ class MrpProductionStat(orm.Model):
             ctx['noheader'] = True
             ctx['show_ready'] = True
             ctx['expand'] = False
+            
+            if mode == 'pre': 
+                return self.generate_php_material(cr, uid, stats, res,
+                    redirect_url, context=context)
+                    
+            # XXX else line and old (old mode):
             for line in sorted(stats.working_ids, 
                     key=lambda x: (x.working_sequence, x.mrp_sequence)):
                 
@@ -549,8 +603,8 @@ class MrpProductionStat(orm.Model):
                 # -------------------------------------------------------------                    
                 if mode == 'line' and not line.working_qty:
                     continue # line and production done
-                if mode == 'pre' and line.working_ready: 
-                    continue # pre line and yet prepared
+                if mode == 'old' and line.working_ready: 
+                    continue # old line and yet prepared # XXX TODO remove?
 
                 product = line.product_id
                 q_x_pack = int(product.q_x_pack) # item_per_box
@@ -635,7 +689,7 @@ class MrpProductionStat(orm.Model):
                         button_confirm = 'FATTI!'
                         hidden_mode = '''
                            <input type="hidden" name="mode" value="line">'''
-                    else:
+                    else: # old
                         button_confirm = 'APPRONTATI!'
                         hidden_mode = '''
                            <input type="hidden" name="mode" value="pre">'''
@@ -700,7 +754,7 @@ class MrpProductionStat(orm.Model):
                                         _('<p>ETICHETTA MAGAZZINO</p>'),                              
                                 note_text,
                                 )
-                    else: # 'pre'
+                    else: # 'old'
                         res += _('''
                             <tr>
                                 <td colspan="7" class="text_note">

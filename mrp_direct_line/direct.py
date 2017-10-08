@@ -516,7 +516,7 @@ class MrpProductionStat(orm.Model):
         # Header:
         # ---------------------------------------------------------------------
         res = ''
-        max_queue = 3
+        max_queue = 5
         for stats in self.browse(cr, uid, stats_ids, context=context)[0]: # XXX only first?
             res = '''
                 <table>
@@ -676,8 +676,7 @@ class MrpProductionStat(orm.Model):
                             'green' if line.working_ready else 'red',
                             _('Materiale pronto per la produzione') if\
                                 line.working_ready else _(
-                                    'Materiale non pronto per la produzione'),
-                            
+                                    'Materiale non pronto per la produzione'),                            
                             )
                                                     
                     # ---------------------------------------------------------
@@ -722,15 +721,15 @@ class MrpProductionStat(orm.Model):
 
                     res += _('''
                         <tr>
-                            <td colspan="9"><b>PROSSIME:</b></td>
+                            <td colspan="9"><b>PROSSIME %s:</b></td>
                         </tr>
                         <tr class="bg_blue">
                            <td>Partner</td><td>Destinazione</td><td>Ordine</td>
                            <td>Codice</td><td>Pezzi</td>
                            <td>Q. x sc.</td><td>Q. x ban.</td>
                            <td>OK</td>
-                       </tr>
-                        ''')
+                        </tr>
+                        ''' % max_queue)
                         
                 else: # second
                     second += 1
@@ -774,12 +773,12 @@ class MrpProductionStat(orm.Model):
         
         # Delete material before:
         material_ids = [m.id for m in stats_proxy.material_ids]
-        material_pool.inlink(cr, uid, material_ids, context=context)
+        material_pool.unlink(cr, uid, material_ids, context=context)
         
         for line in stats_proxy.working_ids:
-            for material in line.product_id.dynamic_bom_line_ids):
+            for material in line.product_id.dynamic_bom_line_ids:
                 product = material.product_id            
-                if not item.category_id.show_ready:
+                if not material.category_id.show_ready:
                     continue # jump category not in show ready status
                 
                 material_pool.create(cr, uid, {  

@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <openerp>
     <data>        
+        <!--mrp.bom.structure.category-->
         <record model="ir.ui.view" id="view_mrp_bom_structure_category_show_form">
             <field name="name">mrp.bom.structure.category.showready</field>
             <field name="model">mrp.bom.structure.category</field>
@@ -40,6 +41,7 @@
             </field>
         </record>
 
+        <!--mrp.production.stats-->
         <record model="ir.ui.view" id="view_mrp_production_stats_line_form">
             <field name="name">MRP Stats for line</field>
             <field name="model">mrp.production.stats</field>
@@ -94,6 +96,27 @@
                                     </tree>    
                                 </field>
                             </group>
+                        </page>
+                        <page string="Material">
+                            <group colspan="4" col="4">
+                                <separator string="Material" colspan="4"/>
+                                    <group colspan="4" col="4">
+                                        <button name="generate_material_planned_bom" 
+                                                string="Generate material" type="object" 
+                                                alert="Regenerate operation will delete all marked ready q., confirm?" 
+                                                icon="gtk-refresh" />
+                                        <field name="material_ids" colspan="4" nolabel="1">
+                                            <tree string="Material" editable="bottom">
+                                                <field name="stats_id" invisible="1" />
+                                                <field name="sol_id" invisible="1"/>
+                                                <field name="product_id" readonly="1"/>
+                                                <field name="bom_qty" readonly="1"/>
+                                                <field name="product_qty" readonly="1"/>                                        
+                                                <field name="ready_qty" />
+                                            </tree>
+                                        </field>
+                                    </group>
+                            </group>                                   
                         </page>
                         <page string="Pallet">
                             <group colspan="4" col="4">

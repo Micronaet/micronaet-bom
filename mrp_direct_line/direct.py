@@ -408,36 +408,50 @@ class MrpProductionStat(orm.Model):
                 <th>Conferma</th>
             </tr>
             '''
-        for material in sorted(stats.material_ids, 
-                key=lambda x: x.product_id.default_code):
-            # TODO generate total before
+        row = {}
+        for material in stats.material_ids:
+            product = material.product_id
+            if product in row:  
+                row[product][1] += material.product_qty  
+                row[product][2] += material.ready_qty             
+            else:
+                row[product] = [
+                    material, 
+                    material.product_qty, 
+                    material.ready_qty,
+                    ]
+        
+        for product in sorted(row, key=lambda x: x.default_code):
+            material, product_qty, ready_qty = row[product]
             res += '''
                 <tr>
-                    <td>%s</td>
-                    <td colspan="3">%s</td>
-                    <td>%s</td>
-                    <td>
-                        <input type="input" name="ready_qty" value="%s" 
-                            maxlength="4" size="4" 
-                            title="Q. recuperata e pronta">
-                    </td>
-                    <td>
+                    <form action="/php/ready.php" method="get">
+                        <td>%s</td>
+                        <td colspan="3">%s</td>
+                        <td>%s</td>
+                        <td>
+                            <input type="input" name="ready_qty" value="%s" 
+                                maxlength="4" size="4" 
+                                title="Q. recuperata e pronta">
+                        </td>
+                        <td>
                             <input type="submit" value="Pronti" 
                                 class="ready_button" name="pronti"
                                 title="Tutto pronto"
                                 />
                             <input type="hidden" name="sol_id" 
-                                value="%s">
+                                value="0">
                             <input type="hidden" name="redirect_url" 
                                 value="%s">
-                    </td>
+                        </td>
+                    </form>
                 </tr>             
                 ''' % (
-                    material.product_id.default_code,
-                    material.product_id.name,
-                    material.product_qty,
-                    material.ready_qty,
-                    material.sol_id.id,
+                    product.default_code,
+                    product.name,
+                    product_qty,
+                    ready_qty,
+                    #material.sol_id.id, # TODO!!!
                     redirect_url,
                     )
         res += '</table>'
@@ -1096,6 +1110,7 @@ class SaleOrderLine(orm.Model):
             for material in sol.material_ids:
                 ready_qty = material.ready_qty
                 product_qty = material.product_qty
+                bom_qty = material.bom_qty
                 if ready_qty < product_qty: # material not all present
                     # If one component non present ready is false:
                     res[sol.id]['material_ready'] = False

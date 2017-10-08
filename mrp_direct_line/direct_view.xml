@@ -87,6 +87,8 @@
                                         <field name="partner_id" readonly="1"/>
                                         <field name="default_code" readonly="1" />
                                         <field name="product_uom_qty" readonly="1" />
+                                        <field name="material_max" readonly="1" />
+                                        <field name="material_ready" readonly="1" />
                                         <field name="delivered_qty" readonly="1" />
                                         <field name="working_qty" />
                                         <button name="working_qty_is_done" string=">>" type="object" />

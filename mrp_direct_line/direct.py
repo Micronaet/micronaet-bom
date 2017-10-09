@@ -778,7 +778,7 @@ class MrpProductionStat(orm.Model):
                                     %s    
                                 </form>
                             </td>
-                            <td>%s</td>
+                            <td><b>%s</b></td>
                         </tr>''') % (
                             'bg_green' if material_ready else 'bg_red',
                             line.partner_id.name, 
@@ -848,7 +848,7 @@ class MrpProductionStat(orm.Model):
                             <td><b>%s</b></td>
                             <td><b>%s</b></td>
                             <td>%s</td><td>%s</td>
-                            <td>%s</td>
+                            <td><b>%s</b></td>
                         </tr>''' % (
                             'bg_green' if material_ready else 'bg_red',
                             line.partner_id.name,

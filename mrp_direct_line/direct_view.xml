@@ -108,7 +108,7 @@
                                                 confirm="Regenerate operation will delete all marked ready q., confirm?" 
                                                 icon="gtk-refresh" />
                                         <field name="material_ids" colspan="4" nolabel="1">
-                                            <tree string="Material" editable="bottom" colors="orange:ready_qty&gt; & ready_qty&lt;product_qty;red:ready_qty&lt;product_qty;green:ready_qty&gt;=product_qty">
+                                            <tree string="Material" editable="bottom" colors="red:ready_qty&lt;product_qty;green:ready_qty&gt;=product_qty">
                                                 <field name="stats_id" invisible="1" />
                                                 <field name="sol_id" invisible="1"/>
                                                 <field name="product_id" readonly="1"/>

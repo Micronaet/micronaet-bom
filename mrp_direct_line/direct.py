@@ -217,6 +217,15 @@ class MrpProductionStat(orm.Model):
     # -------------------------------------------------------------------------
     # XMLRPC Function PHP calls:
     # -------------------------------------------------------------------------
+    def set_product_ready_xmlrpc(self, cr, uid, product_id, qty, context=None): 
+        ''' Set product_id ready for production (0 all instead write correct
+            ready product
+        '''
+        # TODO
+        import pdb; pdb.set_trace()
+        return True
+        
+    
     def set_sol_done_xmlrpc(self, cr, uid, sol_id, mode='line', context=None):
         ''' Mark as confirmed:
         '''        
@@ -430,7 +439,7 @@ class MrpProductionStat(orm.Model):
                         <td colspan="3">%s</td>
                         <td>%s</td>
                         <td>
-                            <input type="input" name="ready_qty" value="%s" 
+                            <input type="input" name="quantity" value="%s" 
                                 maxlength="4" size="4" 
                                 title="Q. recuperata e pronta">
                         </td>
@@ -439,8 +448,8 @@ class MrpProductionStat(orm.Model):
                                 class="ready_button" name="pronti"
                                 title="Tutto pronto"
                                 />
-                            <input type="hidden" name="sol_id" 
-                                value="0">
+                            <input type="hidden" name="product_id" 
+                                value="%s">
                             <input type="hidden" name="redirect_url" 
                                 value="%s">
                         </td>
@@ -451,7 +460,7 @@ class MrpProductionStat(orm.Model):
                     product.name,
                     product_qty,
                     ready_qty,
-                    #material.sol_id.id, # TODO!!!
+                    product.id,
                     redirect_url,
                     )
         res += '</table>'

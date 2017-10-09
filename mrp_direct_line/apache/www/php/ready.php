@@ -31,10 +31,8 @@
     // ----------------------------------------------------------------------------
     $product_id = $_GET['product_id'];
     $quantity = $_GET['quantity'];
-    die($quantity);
     $redirect_url = $_GET['redirect_url'];
     
-    //$args_read = array(new xmlrpcval("html", "string"),);
     $sock = new xmlrpc_client("$server_url/object");
     $msg = new xmlrpcmsg('execute');
     $msg->addParam(new xmlrpcval($dbname, "string"));
@@ -43,7 +41,7 @@
     $msg->addParam(new xmlrpcval("mrp.production.stats", "string"));
     $msg->addParam(new xmlrpcval("set_product_ready_xmlrpc", "string"));
     $msg->addParam(new xmlrpcval($product_id, "int"));
-    $msg->addParam(new xmlrpcval($quantity, "float"));
+    $msg->addParam(new xmlrpcval($quantity, "string"));
 
     $resp = $sock->send($msg);
     if ($resp->faultCode()) {

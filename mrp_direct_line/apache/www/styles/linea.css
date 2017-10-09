@@ -121,6 +121,10 @@ table tr {
     filter: alpha(opacity=100); /* For IE8 and earlier */
     }
 
+.ready_input {
+    text-align: 'right';
+    }
+    
 .print_button {
     background: url(/images/print48.png) no-repeat;
     text-align: 'center';

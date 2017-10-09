@@ -142,6 +142,7 @@ class MrpProductionStatsMaterial(orm.Model):
     _name = 'mrp.production.stats.material'
     _description = 'Produce material'
     _rec_name = 'product_id'
+    _order = 'product_id'
     
     _columns = {
         'stats_id': fields.many2one('mrp.production.stats', 'Stats'),
@@ -217,12 +218,11 @@ class MrpProductionStat(orm.Model):
     # -------------------------------------------------------------------------
     # XMLRPC Function PHP calls:
     # -------------------------------------------------------------------------
-    def set_product_ready_xmlrpc(self, cr, uid, mrp_id, product_id, qty, 
+    def set_product_ready_xmlrpc(self, cr, uid, stats_id, product_id, qty, 
             context=None): 
         ''' Set product_id ready for production (0 all instead write correct
             ready product
         '''
-        import pdb; pdb.set_trace()
         material_pool = self.pool.get('mrp.production.stats.material')
         try:
             qty = float(qty)
@@ -232,7 +232,7 @@ class MrpProductionStat(orm.Model):
                 
         _logger.info('Register product_id: %s for q: %s' % (product_id, qty))       
         material_ids = material_pool.search(cr, uid, [
-            ('mrp_id', '=', mrp_id),
+            ('stats_id', '=', stats_id),
             ('product_id', '=', product_id),
             ], context=context)
         if not material_ids:    
@@ -475,8 +475,9 @@ class MrpProductionStat(orm.Model):
                         <td colspan="3">%s</td>
                         <td>%s</td>
                         <td>
-                            <input type="input" name="quantity" value="%s" 
-                                maxlength="4" size="4" 
+                            <input class="ready_input" type="input" 
+                                name="quantity" value="%s" 
+                                maxlength="8" size="8" 
                                 title="Q. recuperata e pronta">
                         </td>
                         <td>
@@ -496,8 +497,8 @@ class MrpProductionStat(orm.Model):
                 ''' % (
                     product.default_code,
                     product.name,
-                    product_qty,
-                    ready_qty,
+                    int(product_qty),
+                    int(ready_qty),
                     stats.id,
                     product.id,
                     redirect_url,

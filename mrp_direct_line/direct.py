@@ -657,33 +657,23 @@ class MrpProductionStat(orm.Model):
             first = False
             second = 0
             
-            # Context for pre mode: XXX only for pre check? 
-            ctx = copy.deepcopy(context)
-            ctx['noheader'] = True
-            ctx['show_ready'] = True
-            ctx['expand'] = False
-            
             if mode == 'pre': 
                 return self.generate_php_material(cr, uid, stats, res,
                     redirect_url, context=context)
-                    
-            # XXX else line and old (old mode):
+
+            # mode = line                    
             for line in sorted(stats.working_ids, 
                     key=lambda x: (x.working_sequence, x.mrp_sequence)):
                 
                 # -------------------------------------------------------------                    
                 # Jump record not used:
                 # -------------------------------------------------------------                    
-                if mode == 'line' and not line.working_qty:
+                if not line.working_qty:
                     continue # line and production done
-                if mode == 'old' and line.working_ready: 
-                    continue # old line and yet prepared # XXX TODO remove?
 
                 product = line.product_id
                 q_x_pack = int(product.q_x_pack) # item_per_box
                 item_per_pallet = int(product.item_per_pallet)
-                
-                ctx['qty'] = line.working_qty # only working           
                 
                 #if line.product_uom_qty <= line.product_uom_maked_sync_qty:
                 #    continue
@@ -758,14 +748,9 @@ class MrpProductionStat(orm.Model):
                     # ---------------------------------------------------------
                     # Current record:
                     # ---------------------------------------------------------
-                    if mode == 'line':
-                        button_confirm = 'FATTI!'
-                        hidden_mode = '''
-                           <input type="hidden" name="mode" value="line">'''
-                    else: # old
-                        button_confirm = 'APPRONTATI!'
-                        hidden_mode = '''
-                           <input type="hidden" name="mode" value="pre">'''
+                    button_confirm = 'FATTI!'
+                    hidden_mode = '''
+                       <input type="hidden" name="mode" value="line">'''
 
                     res += _('''    
                         <tr>
@@ -798,45 +783,32 @@ class MrpProductionStat(orm.Model):
                             redirect_url,
                             hidden_mode,
                             'bg_green' if line.material_ready else 'bg_red',
-                            '&nbsp;' if line.material_ready else \
-                                int(line.material_max),
+                            #'&nbsp;' if line.material_ready else \
+                            #    int(line.material_max),
+                            line.material_max,
                             )
-                                                    
                     # ---------------------------------------------------------
                     # Extra info for current record:
                     # ---------------------------------------------------------
-                    if mode == 'line':
-                        res += _('''
-                            <tr>
-                                <td>
-                                    <img alt="Immagine non trovata" 
-                                        src="data:image/png;base64,%s" />
-                                </td>
-                                <td colspan="8" class="text_note">
-                                    %s<p>%s</p>
-                                </td>
-                            </tr>
-                            </table>''') % (
-                                line.product_id.product_image_context,
-                                _('<p class="fg_red">ETICHETTA PERSONALIZZATA</p>'
-                                    ) if line.partner_id.has_custom_label else \
-                                        _('<p>ETICHETTA MAGAZZINO</p>'),                              
-                                note_text,
-                                )
-                    else: # 'old'
-                        res += _('''
-                            <tr>
-                                <td colspan="7" class="text_note">
-                                    <p>%s</p>
-                                </td>
-                            </tr>
-                            </table>''') % (
-                                self.get_xmlrpc_bom_html(
-                                    cr, uid, product.id, context=ctx),
-                                )
+                    res += _('''
+                        <tr>
+                            <td>
+                                <img alt="Immagine non trovata" 
+                                    src="data:image/png;base64,%s" />
+                            </td>
+                            <td colspan="8" class="text_note">
+                                %s<p>%s</p>
+                            </td>
+                        </tr>
+                        </table>''') % (
+                            line.product_id.product_image_context,
+                            _('<p class="fg_red">ETICHETTA PERSONALIZZATA</p>'
+                                ) if line.partner_id.has_custom_label else \
+                                    _('<p>ETICHETTA MAGAZZINO</p>'),                              
+                            note_text,
+                            )
                                 
                     #line.order_id.company_id.logo or ''
-                        
                     # ---------------------------------------------------------
                     # Next element from here:
                     # ---------------------------------------------------------
@@ -875,8 +847,9 @@ class MrpProductionStat(orm.Model):
                             q_x_pack, 
                             item_per_pallet,
                             'bg_green' if line.material_ready else 'bg_red',
-                            '&nbsp;' if line.material_ready else \
-                                int(line.material_max),
+                            #'&nbsp;' if line.material_ready else \
+                            #    int(line.material_max),
+                            line.material_max
                             )
         res += '</table>'                
         return res

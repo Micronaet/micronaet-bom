@@ -516,6 +516,15 @@ class MrpProductionStat(orm.Model):
         res += '</table>'
         return res
         
+    def get_ready_status(self, cr, uid, ids, context=None):
+        ''' 
+        '''
+        item_id = ids[0]
+        sol_pool = self.pool.get('sale.order.line')
+        res = sol_pool._get_check_material_status(
+            cr, uid, ids, False, False, context=context)[item_id]
+        return res['material_ready'], res['material_max']
+        
     def get_xmlrpc_html(self, cr, uid, line_code, redirect_url, mode='line',
             context=None):
         ''' Return HTML view for result php call:
@@ -751,9 +760,10 @@ class MrpProductionStat(orm.Model):
                     button_confirm = 'FATTI!'
                     hidden_mode = '''
                        <input type="hidden" name="mode" value="line">'''
-
+                    material_ready, material_max = self.get_ready_status(
+                        cr, uid, [line.id], context=context)
                     res += _('''    
-                        <tr>
+                        <tr class="%s">
                             <td>%s</td><td>%s</td><td>%s</td>
                             <td><b>%s</b></td>
                             <td><b>%s</b></td>
@@ -768,8 +778,9 @@ class MrpProductionStat(orm.Model):
                                     %s    
                                 </form>
                             </td>
-                            <td class="%s">%s</td>
+                            <td>%s</td>
                         </tr>''') % (
+                            'bg_green' if material_ready else 'bg_red',
                             line.partner_id.name, 
                             line.order_id.destination_partner_id.name or \
                                 '&nbsp;', 
@@ -782,10 +793,7 @@ class MrpProductionStat(orm.Model):
                             line.id, 
                             redirect_url,
                             hidden_mode,
-                            'bg_green' if line.material_ready else 'bg_red',
-                            #'&nbsp;' if line.material_ready else \
-                            #    int(line.material_max),
-                            line.material_max,
+                            'X' if material_ready else int(material_max),
                             )
                     # ---------------------------------------------------------
                     # Extra info for current record:
@@ -830,14 +838,19 @@ class MrpProductionStat(orm.Model):
                     second += 1
                     if second > max_queue:
                         break
+
+                    material_ready, material_max = self.get_ready_status(
+                        cr, uid, [line.id], context=context)
+                        
                     res += '''
-                        <tr>
+                        <tr class="%s">
                             <td>%s</td><td>%s</td><td>%s</td>
                             <td><b>%s</b></td>
                             <td><b>%s</b></td>
                             <td>%s</td><td>%s</td>
-                            <td class="%s">%s</td>
+                            <td>%s</td>
                         </tr>''' % (
+                            'bg_green' if material_ready else 'bg_red',
                             line.partner_id.name,
                             line.order_id.destination_partner_id.name or \
                                 '&nbsp;',
@@ -846,10 +859,7 @@ class MrpProductionStat(orm.Model):
                             line.working_qty,                 
                             q_x_pack, 
                             item_per_pallet,
-                            'bg_green' if line.material_ready else 'bg_red',
-                            #'&nbsp;' if line.material_ready else \
-                            #    int(line.material_max),
-                            line.material_max
+                            'X' if material_ready else int(material_max),
                             )
         res += '</table>'                
         return res
@@ -1122,7 +1132,7 @@ class SaleOrderLine(orm.Model):
     '''
     _inherit = 'sale.order.line'
 
-    def _get_check_material_ready(self, cr, uid, ids, fields, args, 
+    def _get_check_material_status(self, cr, uid, ids, fields, args, 
             context=None):
         ''' Fields function for calculate 
         '''
@@ -1151,10 +1161,10 @@ class SaleOrderLine(orm.Model):
         'material_ids': fields.one2many(
             'mrp.production.stats.material', 'sol_id', 'Materials'),
         'material_max': fields.function(
-            _get_check_material_ready, method=True, multi=True,
+            _get_check_material_status, method=True, multi=True,
             type='float', string='Max production', store=False),
         'material_ready': fields.function(
-            _get_check_material_ready, method=True, multi=True,
+            _get_check_material_status, method=True, multi=True,
             type='boolean', string='Ready', store=False),
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

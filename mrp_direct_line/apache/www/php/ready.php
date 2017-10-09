@@ -29,6 +29,7 @@
     // ----------------------------------------------------------------------------
     // CONFIRM PRODUCTION:
     // ----------------------------------------------------------------------------
+    $mrp_id = $_GET['mrp_id'];
     $product_id = $_GET['product_id'];
     $quantity = $_GET['quantity'];
     $redirect_url = $_GET['redirect_url'];
@@ -40,6 +41,7 @@
     $msg->addParam(new xmlrpcval($password, "string"));
     $msg->addParam(new xmlrpcval("mrp.production.stats", "string"));
     $msg->addParam(new xmlrpcval("set_product_ready_xmlrpc", "string"));
+    $msg->addParam(new xmlrpcval($mrp_id, "int"));
     $msg->addParam(new xmlrpcval($product_id, "int"));
     $msg->addParam(new xmlrpcval($quantity, "string"));
 

@@ -217,11 +217,48 @@ class MrpProductionStat(orm.Model):
     # -------------------------------------------------------------------------
     # XMLRPC Function PHP calls:
     # -------------------------------------------------------------------------
-    def set_product_ready_xmlrpc(self, cr, uid, product_id, qty, context=None): 
+    def set_product_ready_xmlrpc(self, cr, uid, mrp_id, product_id, qty, 
+            context=None): 
         ''' Set product_id ready for production (0 all instead write correct
             ready product
         '''
-        _logger.info('Register product_id: %s for q: %s' % (product_id, qty))
+        import pdb; pdb.set_trace()
+        material_pool = self.pool.get('mrp.production.stats.material')
+        try:
+            qty = float(qty)
+        except:
+            qty = 0
+        all_qty = not qty
+                
+        _logger.info('Register product_id: %s for q: %s' % (product_id, qty))       
+        material_ids = material_pool.search(cr, uid, [
+            ('mrp_id', '=', mrp_id),
+            ('product_id', '=', product_id),
+            ], context=context)
+        if not material_ids:    
+            _logger.warning('No product found: %s' % product_id)   
+            return False
+        
+        update_db = {}
+        for material in sorted(
+                material_pool.browse(cr, uid, material_ids, context=context), 
+                key=lambda x: (
+                    x.sol_id.working_sequence, x.sol_id.mrp_sequence)):
+            product_qty = material.product_qty        
+            if all_qty:
+                update_db[material.id] = product_qty # all is ready
+            else:
+                if qty > product_qty: # covered all
+                    update_db[material.id] = product_qty
+                    qty -= product_qty
+                else: # partial covered (or not covered)
+                    update_db[material.id] = qty
+                    qty = 0
+                        
+        for material_id, ready_qty in update_db.iteritems():
+            material_pool.write(cr, uid, material_id, {
+                'ready_qty': ready_qty,
+                }, context=context)        
         return True
         
     
@@ -447,6 +484,8 @@ class MrpProductionStat(orm.Model):
                                 class="ready_button" name="pronti"
                                 title="Tutto pronto"
                                 />
+                            <input type="hidden" name="mrp_id" 
+                                value="%s">
                             <input type="hidden" name="product_id" 
                                 value="%s">
                             <input type="hidden" name="redirect_url" 
@@ -459,6 +498,7 @@ class MrpProductionStat(orm.Model):
                     product.name,
                     product_qty,
                     ready_qty,
+                    stats.id,
                     product.id,
                     redirect_url,
                     )

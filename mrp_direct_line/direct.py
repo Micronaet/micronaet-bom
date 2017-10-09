@@ -221,8 +221,7 @@ class MrpProductionStat(orm.Model):
         ''' Set product_id ready for production (0 all instead write correct
             ready product
         '''
-        # TODO
-        import pdb; pdb.set_trace()
+        _logger.info('Register product_id: %s for q: %s' % (product_id, qty))
         return True
         
     

@@ -31,6 +31,7 @@
     // ----------------------------------------------------------------------------
     $product_id = $_GET['product_id'];
     $quantity = $_GET['quantity'];
+    die($quantity);
     $redirect_url = $_GET['redirect_url'];
     
     //$args_read = array(new xmlrpcval("html", "string"),);

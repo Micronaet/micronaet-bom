@@ -453,6 +453,14 @@ class MrpProductionStat(orm.Model):
                 <th>Conferma</th>
             </tr>
             '''
+        #button_red = '''<img src="/images/red.gif"     
+        #    style="width:16px;height:16px;"
+        #    title="Non pronto"/> 
+        #    '''
+        #button_green = '''<img src="/images/green.gif"     
+        #    style="width:16px;height:16px;"
+        #    title="Non pronto"/> 
+        #    '''
         row = {}
         for material in stats.material_ids:
             product = material.product_id
@@ -469,7 +477,7 @@ class MrpProductionStat(orm.Model):
         for product in sorted(row, key=lambda x: x.default_code):
             material, product_qty, ready_qty = row[product]
             res += '''
-                <tr>
+                <tr class="%s">
                     <form action="/php/ready.php" method="get">
                         <td>%s</td>
                         <td colspan="3">%s</td>
@@ -478,7 +486,7 @@ class MrpProductionStat(orm.Model):
                             <input class="ready_input" type="input" 
                                 name="quantity" value="%s" 
                                 maxlength="8" size="8" 
-                                title="Q. recuperata e pronta">
+                                title="Q. recuperata e pronta">                            
                         </td>
                         <td>
                             <input type="submit" value="Pronti" 
@@ -493,13 +501,15 @@ class MrpProductionStat(orm.Model):
                                 value="%s">
                         </td>
                     </form>
-                </tr>             
+                </tr>       
                 ''' % (
+                    'bg_green' if ready_qty >= product_qty else 'bg_red',
                     product.default_code,
                     product.name,
                     int(product_qty),
                     int(ready_qty),
-                    stats.id,
+                    #button_green if ready_qty >= product_qty else button_red,
+                    stats.id, # XXX mrp_id non correct
                     product.id,
                     redirect_url,
                     )

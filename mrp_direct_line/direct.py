@@ -637,7 +637,7 @@ class MrpProductionStat(orm.Model):
         # Header:
         # ---------------------------------------------------------------------
         res = ''
-        max_queue = 5
+        max_queue = 10
         for stats in self.browse(cr, uid, stats_ids, context=context)[0]: # XXX only first?
             res = '''
                 <table>
@@ -783,10 +783,7 @@ class MrpProductionStat(orm.Model):
                                     %s    
                                 </form>
                             </td>
-                            <td>
-                                <image src="./images/%s.gif"
-                                    title="%s" />
-                            </td>
+                            <td class="%s">%s</td>
                         </tr>''') % (
                             line.partner_id.name, 
                             line.order_id.destination_partner_id.name or \
@@ -800,10 +797,9 @@ class MrpProductionStat(orm.Model):
                             line.id, 
                             redirect_url,
                             hidden_mode,
-                            'green' if line.working_ready else 'red',
-                            _('Materiale pronto per la produzione') if\
-                                line.working_ready else _(
-                                    'Materiale non pronto per la produzione'),                            
+                            'bg_green' if line.material_ready else 'bg_red',
+                            '&nbsp;' if line.material_ready else \
+                                int(line.material_max),
                             )
                                                     
                     # ---------------------------------------------------------
@@ -868,9 +864,7 @@ class MrpProductionStat(orm.Model):
                             <td><b>%s</b></td>
                             <td><b>%s</b></td>
                             <td>%s</td><td>%s</td>
-                            <td>
-                                <image src="./images/%s.gif" title="%s" />
-                            </td>
+                            <td class="%s">%s</td>
                         </tr>''' % (
                             line.partner_id.name,
                             line.order_id.destination_partner_id.name or \
@@ -880,10 +874,9 @@ class MrpProductionStat(orm.Model):
                             line.working_qty,                 
                             q_x_pack, 
                             item_per_pallet,
-                            'green' if line.working_ready else 'red',
-                            _('Materiale pronto per la produzione') if\
-                                line.working_ready else _(
-                                    'Materiale non pronto per la produzione'),
+                            'bg_green' if line.material_ready else 'bg_red',
+                            '&nbsp;' if line.material_ready else \
+                                int(line.material_max),
                             )
         res += '</table>'                
         return res

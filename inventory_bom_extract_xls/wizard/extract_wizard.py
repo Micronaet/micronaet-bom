@@ -404,25 +404,37 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # D. Extra material from sales
         # ---------------------------------------------------------------------
+        import pdb; pdb.set_trace()
         materials = {}
         jumped = {} # Material not managed
         temp = 0 # TODO remove
         for default_code, unload_list in inventory_product.iteritems():
             _logger.info('Extract material for code: %s' % default_code)
             temp += 1 # TODO remove
+            
+            # ------------------------------
+            # Product data information used:
+            # ------------------------------
+            # Normal product:
+            dynamic_ids = products[default_code].dynamic_bom_line_ids
+            # Halfworked product:
+            half_line_ids = products[default_code].half_bom_ids # bom_ids
+            # relative_type = half
+            
             for col in range (0, 12):
                 product_qty = unload_list[col]
-                dynamic_ids = products[default_code].dynamic_bom_line_ids
-                bom_line_ids = products[default_code].bom_ids
-                
+                if not product_qty: # nothing to do, is empty
+                    #_logger.info('Jumped 0: %s' % default_code)
+                    continue
+                                    
                 # -------------------------------------------------------------
-                # Prime material:
+                # I. Prime material:
                 # -------------------------------------------------------------
-                if not dynamic_ids and not bom_line_ids:
+                if not dynamic_ids and not half_line_ids:
                     # Not used:
                     if not_in_inventory_selection(
                             products[default_code], jumped):
-                        continue # jump not used!
+                        continue # jump not used (update the list)!
                         
                     # Add in inventory:
                     setup_materials(products[default_code], materials)
@@ -431,9 +443,9 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     continue
 
                 # -------------------------------------------------------------
-                # Halfwork explose:                
+                # II. Halfwork explose:                
                 # -------------------------------------------------------------
-                for line in bom_line_ids:
+                for line in half_line_ids:
                     component = line.product_id
                     component_code = component.default_code
                     
@@ -451,7 +463,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     continue
 
                 # -------------------------------------------------------------
-                # Product explose:
+                # III. Product explose:
                 # -------------------------------------------------------------
                 for line in dynamic_ids: # has bom
                     # TODO change product_qty
@@ -459,10 +471,10 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     component_code = component.default_code
 
                     # ---------------------------------------------------------
-                    # HW in product explose:
+                    # a. HW in product explose:
                     # ---------------------------------------------------------
-                    if component.bom_ids:
-                        for hw_line in component.bom_ids:
+                    if component.half_bom_ids:
+                        for hw_line in component.half_bom_ids:
                             hw_product = hw_line.product_id
                             hw_product_code = hw_product.default_code
                             
@@ -480,7 +492,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         continue # no other material        
 
                     # ---------------------------------------------------------
-                    # Prime material in product explose:
+                    # b. Prime material in product explose:
                     # ---------------------------------------------------------
                     # Not used:
                     if not_in_inventory_selection(component, jumped):

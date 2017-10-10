@@ -404,7 +404,6 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # D. Extra material from sales
         # ---------------------------------------------------------------------
-        import pdb; pdb.set_trace()
         materials = {}
         jumped = {} # Material not managed
         temp = 0 # TODO remove

@@ -452,88 +452,106 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     #_logger.info('Jumped 0: %s' % default_code)
                     continue
                                     
-                # -------------------------------------------------------------
-                # I. Prime material:
-                # -------------------------------------------------------------
-                if not dynamic_ids and not half_line_ids:
-                    # Not used:
-                    if not_in_inventory_selection(
-                            products[default_code], jumped):
-                        continue # jump not used (update the list)!
+            # -------------------------------------------------------------
+            # I. Prime material:
+            # -------------------------------------------------------------
+            if not dynamic_ids and not half_line_ids:
+                # Not used:
+                if not_in_inventory_selection(
+                        products[default_code], jumped):
+                    continue # jump not used (update the list)!
+                    
+                # Add in inventory:
+                setup_materials(products[default_code], materials)
+
+                for col in range (0, 12):
+                    product_qty = unload_list[col]
+                    if not product_qty: # nothing to do, is empty
+                        #_logger.info('Jumped 0: %s' % default_code)
+                        continue
                         
-                    # Add in inventory:
-                    setup_materials(products[default_code], materials)
                     setup_materials_q(
                         products[default_code], col, product_qty, materials)
+                continue
+
+            # -------------------------------------------------------------
+            # II. Halfwork explose:                
+            # -------------------------------------------------------------
+            for line in half_line_ids:
+                component = line.product_id
+                component_code = component.default_code
+                
+                # Not used:
+                if not_in_inventory_selection(component, jumped):
                     continue
 
-                # -------------------------------------------------------------
-                # II. Halfwork explose:                
-                # -------------------------------------------------------------
-                for line in half_line_ids:
-                    component = line.product_id
-                    component_code = component.default_code
-                    
-                    # Not used:
-                    if not_in_inventory_selection(component, jumped):
+                # Add to inventory:
+                setup_materials(component, materials)
+                
+                for col in range (0, 12):
+                    product_qty = unload_list[col]
+                    if not product_qty: # nothing to do, is empty
+                        #_logger.info('Jumped 0: %s' % default_code)
                         continue
-
-                    # Add to inventory:
-                    setup_materials(component, materials)
+                
                     setup_materials_q(
                         component, col, 
                         product_qty * line.product_qty, 
                         materials,
                         )
-                    continue
+                continue
 
-                # -------------------------------------------------------------
-                # III. Product explose:
-                # -------------------------------------------------------------
-                for line in dynamic_ids: # has bom
-                    # TODO change product_qty
-                    component = line.product_id
-                    component_code = component.default_code
+            # -------------------------------------------------------------
+            # III. Product explose:
+            # -------------------------------------------------------------
+            for line in dynamic_ids: # has bom
+                # TODO change product_qty
+                component = line.product_id
+                component_code = component.default_code
 
-                    # ---------------------------------------------------------
-                    # a. HW in product explose:
-                    # ---------------------------------------------------------
-                    if component.half_bom_ids:
-                        for hw_line in component.half_bom_ids:
-                            hw_product = hw_line.product_id
-                            hw_product_code = hw_product.default_code
-                            
-                            # Not used:
-                            if not_in_inventory_selection(hw_product, jumped):                                
-                                continue # jump not used!
-                            
-                            # Add to inventory:
-                            setup_materials(hw_product, materials)
+                # ---------------------------------------------------------
+                # a. HW in product explose:
+                # ---------------------------------------------------------
+                if component.half_bom_ids:
+                    for hw_line in component.half_bom_ids:
+                        hw_product = hw_line.product_id
+                        hw_product_code = hw_product.default_code
+                        
+                        # Not used:
+                        if not_in_inventory_selection(hw_product, jumped):                                
+                            continue # jump not used!
+                        
+                        # Add to inventory:
+                        setup_materials(hw_product, materials)
+
+                        for col in range (0, 12):
+                            product_qty = unload_list[col]
+                            if not product_qty: # nothing to do, is empty
+                                #_logger.info('Jumped 0: %s' % default_code)
+                                continue
                             setup_materials_q(
                                 hw_product, col, 
                                 product_qty * hw_line.product_qty, # q.
                                 materials,
                                 )
-                        continue # no other material        
+                    continue # no other material        
 
-                    # ---------------------------------------------------------
-                    # b. Prime material in product explose:
-                    # ---------------------------------------------------------
-                    # Not used:
-                    if not_in_inventory_selection(component, jumped):
-                        continue # jump not used
+                # ---------------------------------------------------------
+                # b. Prime material in product explose:
+                # ---------------------------------------------------------
+                # Not used:
+                if not_in_inventory_selection(component, jumped):
+                    continue # jump not used
 
-                    # Add to inventory:
-                    if component_code not in materials:
-                        setup_materials(component, materials)
-                    setup_materials_q(
-                        component, col, 
-                        product_qty * line.product_qty, 
-                        materials,
-                        )
+                # Add to inventory:
+                if component_code not in materials:
+                    setup_materials(component, materials)
+                setup_materials_q(
+                    component, col, 
+                    product_qty * line.product_qty, 
+                    materials,
+                    )
 
-            #if temp > 1000:
-            #    break # TODO remove    
 
         xls_sheet_write(
             WB, '5. Materiali utilizzati', materials, material_product)

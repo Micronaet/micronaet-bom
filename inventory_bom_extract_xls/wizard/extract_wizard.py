@@ -432,10 +432,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         materials = {}
         jumped = {} # Material not managed
-        temp = 0 # TODO remove
         for default_code, unload_list in inventory_product.iteritems():
             _logger.info('Extract material for code: %s' % default_code)
-            temp += 1 # TODO remove
             
             # ------------------------------
             # Product data information used:

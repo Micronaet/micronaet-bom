@@ -85,10 +85,36 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
     def action_extract_reload(self, cr, uid, ids, context=None):
         ''' Reload cost / revenut before launch normal procedure        
         '''    
+        product_pool = self.pool.get('product.product')
         csv_file = '/home/administrator/photo/xls/stock/costrevenue.csv'
         _logger.info('Import cost and revenue in product: %s' % csv_file)
+        
+        # Load from file cost and revenut:
         self.import_csv_inventory_cost_revenue(
             cr, uid, csv_file, context=context)
+        
+        # Load from product account and first supplier:
+        product_ids = product_pool.search(cr, uid, [], context=context)
+        for product in product_pool.browse(cr, uid, product_ids, 
+                context=context):
+            if product.inv_revenue_account or product.inv_revenue_account:    
+                continue # yet present
+            
+            # Store in new fields for fast search during report:    
+            data = {
+                'inv_revenue_account': 
+                    product.property_account_income.account_ref \
+                        if product.property_account_income else False,
+                'inv_cost_account': 
+                    product.property_account_expense.account_ref \
+                        if product.property_account_expense else False,
+                'inv_first_supplier': 
+                    product.first_supplier_id.id \
+                        if product.first_supplier_id else False,        
+                }
+            product_pool.write(cr, uid, product.id, data, context=context)
+            
+        # Call XLSX produce function:    
         return self.action_extract(cr, uid, ids, context=context)
         
     def action_extract(self, cr, uid, ids, context=None):

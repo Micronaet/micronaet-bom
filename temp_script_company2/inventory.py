@@ -145,6 +145,7 @@ class ResCompany(orm.Model):
             pl_file.write('%s|%s|%s|%s|%s|%s\n' % (
                 'X' if partner.customer else '',
                 'X' if partner.supplier else '',
+                partner.create_date,
                 clean_ascii(partner.name),
                 clean_ascii(partner.city),
                 clean_ascii(partner.country_id.name if \

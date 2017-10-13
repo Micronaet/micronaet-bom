@@ -142,7 +142,7 @@ class ResCompany(orm.Model):
             ], context=None)
         for partner in partner_pool.browse(
                 cr, uid, partner_ids, context=context):
-            pl_file.write('%s|%s|%s|%s|%s|%s\n' % (
+            pl_file.write('%s|%s|%s|%s|%s|%s|%s\n' % (
                 'X' if partner.customer else '',
                 'X' if partner.supplier else '',
                 partner.create_date,

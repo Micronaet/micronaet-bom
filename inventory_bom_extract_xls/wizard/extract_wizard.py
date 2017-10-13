@@ -165,7 +165,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             '''
             # Write name of sheet:
             WS = WB.add_worksheet(name)
-            
+             
             # Write header:
             for col in range(0, len(title)):
                 WS.write(0, col, title[col])
@@ -196,6 +196,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             '''
             ledger_selection = (
                 '37.00101', # Tessuto c/acquisti
+                #'37.00101', # Materie prime c/acquisti
                 '37.00103', # Ferro c/acquisti
                 '37.00105', # Cartoni c/acquisti
                 '37.00106', # Cellophan c/acquisti
@@ -277,6 +278,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------            
         # Load cost from order:
         # ---------------------------------------------------------------------            
+        _logger.info('Check price from purchase')
         of_cost = {}
         po_pool = self.pool.get('purchase.order')
         po_ids = po_pool.search(cr, uid, [
@@ -292,6 +294,24 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 default_code = product.default_code
                 if default_code and default_code not in of_cost:                    
                     of_cost[default_code] = line.price_unit
+
+        # ---------------------------------------------------------------------            
+        # Load cost check costs:
+        # ---------------------------------------------------------------------
+        product_pool = self.pool.get('product.product')
+        _logger.info('Check price from check costs')
+        log_file = os.path.join(os.path.expanduser('~'), 'price.csv')
+        log_f = open(log_file, 'w')
+        product_ids = product_pool.search(cr, uid, [], context=context)
+        for product in product_pool.browse(cr, uid, product_ids, 
+                context=context):
+            default_code = product.default_code
+            if default_code and default_code not in of_cost:                    
+                for seller in product.seller_ids:
+                    for pl in seller.pricelist_ids:
+                        of_cost[default_code] = pl.price
+                        log_f.write('%s|%s|%s\n' % (
+                            default_code, pl.price, pl.date_quotation))
         
         # Insert year in filename:
         xls_file = xls_file % year
@@ -440,8 +460,9 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             # ------------------------------
             # Normal product:
             dynamic_ids = products[default_code].dynamic_bom_line_ids
+            
             # Halfworked product:
-            half_line_ids = products[default_code].half_bom_ids # bom_ids
+            half_line_ids = products[default_code].half_bom_ids # bom_ids            
             # relative_type = half
             
             for col in range (0, 12):

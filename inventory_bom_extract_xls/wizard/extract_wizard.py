@@ -312,7 +312,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         of_cost[default_code] = pl.price
                         log_f.write('%s|%s|%s\n' % (
                             default_code, pl.price, pl.date_quotation))
-        
+
         # Insert year in filename:
         xls_file = xls_file % year
         xls_infile = xls_infile % year

@@ -315,7 +315,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                             default_code, pl.price, pl.date_quotation))
                             
             # Use anagraphic cost: (for pipe)
-            if not of_cost[default_code]:
+            if not of_cost.get(default_code, False):
                 of_cost[default_code] = product.standard_price
 
         # Insert year in filename:

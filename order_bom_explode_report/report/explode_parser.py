@@ -80,7 +80,6 @@ class MrpProduction(orm.Model):
         exclude_inventory_category = data.get(
             'exclude_inventory_category', False)
 
-        import pdb; pdb.set_trace()
         if exclude_inventory_category:
             # TODO load exlude category:
             inventory_pool = self.pool.get(
@@ -268,7 +267,8 @@ class MrpProduction(orm.Model):
                     continue # Jump not in category selected
                 if exclude_inventory_ids and \
                         item.product_id.inventory_category_id.id\
-                        not in exclude_inventory_ids:    
+                        in exclude_inventory_ids:    
+                    _logger.warning('Product category not in report')    
                     continue # Jump BOM element in excluded category    
                     
                 if mode == 'halfwork':
@@ -287,7 +287,8 @@ class MrpProduction(orm.Model):
                     for component in item.product_id.half_bom_ids:
                         if exclude_inventory_ids and \
                                 component.product_id.inventory_category_id.id\
-                                not in exclude_inventory_ids:    
+                                in exclude_inventory_ids:    
+                            _logger.warning('Cmpt. category not in report')    
                             continue # Jump BOM element in excluded category    
                             
                         #if mp_mode == 'fabric':

@@ -77,11 +77,10 @@ class MrpProduction(orm.Model):
         with_type_ids = data.get('with_type_ids', [])
         without_type_ids = data.get('without_type_ids', [])
         only_negative = data.get('only_negative', False)
-
         exclude_inventory_category = data.get(
             'exclude_inventory_category', False)
-            
-        exclude_inventory_ids = [] 
+
+        import pdb; pdb.set_trace()
         if exclude_inventory_category:
             # TODO load exlude category:
             inventory_pool = self.pool.get(

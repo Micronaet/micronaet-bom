@@ -69,6 +69,8 @@ class CcomponentStatusReportWizard(orm.TransientModel):
                 [item.id for item in wiz_browse.without_type_ids],
             'with_deadline': wiz_browse.with_deadline,    
             'only_negative': wiz_browse.only_negative,
+            'exclude_inventory_category': 
+                wiz_browse.exclude_inventory_category,
             }
 
         if wiz_browse.mode == 'mrp':

@@ -71,7 +71,6 @@ class MrpProduction(orm.Model):
             cr, uid, value=False, context=context)
 
         # Read wizard parameters:
-        import pdb; pdb.set_trace()
         mode = data.get('mode', 'halfwork')
         mp_mode = data.get('mp_mode', False)
         first_supplier_id = data.get('first_supplier_id', False)
@@ -272,7 +271,9 @@ class MrpProduction(orm.Model):
                     _logger.warning('Product category not in report')    
                     continue # Jump BOM element in excluded category    
                     
-                if mode == 'halfwork':
+                # in halfwork use only hw component:    
+                half_bom_ids = item.product_id.half_bom_ids    
+                if mode == 'halfwork' and half_bom_ids: # hw with component
                     if first_supplier_id and \
                             first_supplier_id != \
                                 item.product_id.first_supplier_id.id:
@@ -280,16 +281,24 @@ class MrpProduction(orm.Model):
                     category = item.category_id.type_id.name if \
                         item.category_id and item.category_id.type_id else \
                             _('No category')
+                    add_x_item(y_axis, item, category)                                        
+                elif mode == 'component' and not half_bom_ids: # cmpt in BOM
+                    #if first_supplier_id and \
+                    #        first_supplier_id != \
+                    #            item.product_id.first_supplier_id.id:
+                    #    continue # Jump not supplier present    
+                    category = item.category_id.type_id.name if \
+                        item.category_id and item.category_id.type_id else \
+                            _('No category')
+                    # TODO write category as component mode (pipe/fabric)        
                     add_x_item(y_axis, item, category)
-                    
-                else: # mode = 'component' 
+                elif mode == 'component': # >>> component HW and component BOM
                     # TODO log halfcomponent with empty list
                     # relative_type = 'half'
-                    for component in item.product_id.half_bom_ids:
+                    for component in half_bom_ids:
                         if exclude_inventory_ids and \
                                 component.product_id.inventory_category_id.id\
                                 in exclude_inventory_ids:    
-                            _logger.warning('Cmpt. category not in report')    
                             continue # Jump BOM element in excluded category    
                             
                         #if mp_mode == 'fabric':
@@ -308,6 +317,9 @@ class MrpProduction(orm.Model):
                         else:    
                             category = _('Fabric (or extra)')
                         add_x_item(y_axis, component, category)
+                else: 
+                    # no above cases
+                    continue        
                         
         write_xls_line('extra', ('Component / Halfworked selected:', ))            
         for code in y_axis.keys():    

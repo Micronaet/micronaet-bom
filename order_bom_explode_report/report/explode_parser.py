@@ -627,7 +627,8 @@ class MrpProduction(orm.Model):
                     item_code = item.product_id.default_code
                     item_remain = remain * item.product_qty
                     
-                    if mode == 'halfwork':
+                    half_bom_ids = item.product_id.half_bom_ids    
+                    if mode == 'halfwork' and half_bom_ids: # hw with comp.
                         if item_code in y_axis: # OC out item (no prod.):
                             y_axis[item_code][4][pos] -= item_remain # OC block
                             write_xls_line('move', (
@@ -641,7 +642,22 @@ class MrpProduction(orm.Model):
                                     else 'NO CATEGORY',
                                 ))                      
                         # else: TODO log not used        
-                    else: # mode = 'component'
+                        
+                    elif mode == 'component' and not half_bom_ids: # cmpt BOM
+                        if item_code in y_axis: # OC out item (no prod.):
+                            y_axis[item_code][4][pos] -= item_remain # OC block
+                            write_xls_line('move', (
+                                block, 'USED', order.name, '', date, pos, 
+                                product_code, # code
+                                item_code, # MP
+                                '', 0, # +MM
+                                item_remain, # -OC
+                                0, 'OC HALFWORKED REMAIN',
+                                item.category_id.name if item.category_id \
+                                    else 'NO CATEGORY',
+                                ))                      
+                    
+                    elif mode == 'component':
                         for comp in item.product_id.half_bom_ids:
                             comp_code = comp.product_id.default_code
                             comp_remain = item_remain * comp.product_qty
@@ -679,7 +695,9 @@ class MrpProduction(orm.Model):
                                     comp.product_qty, # Component remain
                                     )                            
                         continue # needed?
-                    
+                    else:
+                        continue # no case jump
+                        
         # =====================================================================
         #                  UNLOAD FOR PRODUCTION MRP ORDER
         # =====================================================================

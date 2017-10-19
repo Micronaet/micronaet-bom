@@ -1,7 +1,27 @@
 <?xml version="1.0"?>
 <openerp>
     <data>    
-
+        <!--product.product.inventory.category-->
+        <record model="ir.ui.view" id="view_product_product_inventory_category_no_report_form">
+            <field name="name">product.product.inventory.category.form</field>
+            <field name="model">product.product.inventory.category</field>
+            <field name="inherit_id" ref="inventory_field.view_product_product_inventory_category_form"/>
+            <field name="arch" type="xml">
+                <field name="name" position="before">
+                    <field name="not_in_report" />
+                </field>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_product_product_inventory_category_no_report_tree">
+            <field name="name">product.product.inventory.category.tree</field>
+            <field name="model">product.product.inventory.category</field>
+            <field name="inherit_id" ref="inventory_field.view_product_product_inventory_category_tree"/>
+            <field name="arch" type="xml">
+                <field name="name" position="before">
+                    <field name="not_in_report" />
+                </field>
+            </field>
+        </record>
     </data>
 </openerp>
 

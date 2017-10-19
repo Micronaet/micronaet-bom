@@ -70,7 +70,7 @@ class CcomponentStatusReportWizard(orm.TransientModel):
             'with_deadline': wiz_browse.with_deadline,    
             'only_negative': wiz_browse.only_negative,
             }
-            
+
         if wiz_browse.mode == 'mrp':
             report_name = 'mrp_status_explode_report'            
         elif wiz_browse.mode == 'todo':
@@ -84,6 +84,23 @@ class CcomponentStatusReportWizard(orm.TransientModel):
             'datas': datas,
             }
 
+    # -------------------------------------------------------------------------
+    # Fields function:
+    # -------------------------------------------------------------------------
+    def _get_excluded_inventory(self, cr, uid, context=None):
+        ''' Fields function for calculate 
+        '''
+        inventory_pool = self.pool.get(
+            'product.product.inventory.category')
+        inventory_ids = inventory_pool.search(cr, uid, [
+            ('not_in_report', '=', True),
+            ], context=context)
+        res = ''
+        for category in inventory_pool.browse(cr, uid, inventory_ids, 
+                context=context):
+            res += '[%s] ' % category.name               
+        return res
+        
     _columns = {
         'mode': fields.selection([
             ('halfwork', 'Halfwork'),
@@ -118,11 +135,18 @@ class CcomponentStatusReportWizard(orm.TransientModel):
             'Without type'),    
         'type_id': fields.many2one(
             'mrp.bom.structure.category.type', 'Component category type'),
+        'exclude_inventory_category': fields.boolean(
+            'Escludi categorie inventario'),
+        'exclude_inventory_list': fields.char('Esclusi', size=400, 
+            readonly=True), 
         }
         
     _defaults = {
         'mode': lambda *x: 'halfwork',
         'days': lambda *x: 30,
+        'exclude_inventory_category': lambda *x: True,        
+        'exclude_inventory_list':
+            lambda s, cr, uid, ctx: s._get_excluded_inventory(cr, uid, ctx),
         }    
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

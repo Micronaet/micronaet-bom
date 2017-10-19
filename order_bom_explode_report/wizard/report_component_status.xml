@@ -24,6 +24,8 @@
                         <field name="without_type_ids" widget="many2many_tags" />
                         <field name="with_deadline" attrs="{'invisible': [('mode','!=','todo')]}" />
                         <field name="only_negative" />
+                        <field name="exclude_inventory_category" />
+                        <field name="exclude_inventory_list" attrs="{'invisible': [('exclude_inventory_category','=',False)]}" />
                    </group>
                 </form>
             </field>

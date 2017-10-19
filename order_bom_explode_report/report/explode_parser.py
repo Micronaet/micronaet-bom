@@ -70,16 +70,30 @@ class MrpProduction(orm.Model):
         previous_status = user_pool.set_no_inventory_status(
             cr, uid, value=False, context=context)
 
+        # Read wizard parameters:
         mode = data.get('mode', 'halfwork')
         mp_mode = data.get('mp_mode', False)
         first_supplier_id = data.get('first_supplier_id', False)
         with_type_ids = data.get('with_type_ids', [])
         without_type_ids = data.get('without_type_ids', [])
         only_negative = data.get('only_negative', False)
+
+        exclude_inventory_category = data.get(
+            'exclude_inventory_category', False)
+            
+        exclude_inventory_ids = [] 
+        if exclude_inventory_category:
+            # TODO load exlude category:
+            inventory_pool = self.pool.get(
+                'product.product.inventory.category')
+            exclude_inventory_ids = inventory_pool.search(cr, uid, [
+                ('not_in_report', '=', True),
+                ], context=context)
+        else:                    
+            exclude_inventory_ids = [] 
         
         # Add inventory check block:
-        for_inventory_delta = data.get('for_inventory_delta', False)
-        
+        for_inventory_delta = data.get('for_inventory_delta', False)        
         inventory_delta = {}
         
         # ---------------------------------------------------------------------
@@ -253,6 +267,10 @@ class MrpProduction(orm.Model):
                 if without_type_ids and \
                         item.category_id.type_id.id in without_type_ids:
                     continue # Jump not in category selected
+                if exclude_inventory_ids and \
+                        item.product_id.inventory_category_id.id\
+                        not in exclude_inventory_ids:    
+                    continue # Jump BOM element in excluded category    
                     
                 if mode == 'halfwork':
                     if first_supplier_id and \
@@ -268,6 +286,11 @@ class MrpProduction(orm.Model):
                     # TODO log halfcomponent with empty list
                     # relative_type = 'half'
                     for component in item.product_id.half_bom_ids:
+                        if exclude_inventory_ids and \
+                                component.product_id.inventory_category_id.id\
+                                not in exclude_inventory_ids:    
+                            continue # Jump BOM element in excluded category    
+                            
                         #if mp_mode == 'fabric':
                         #    if component.product_id.id not in fabric_ids:
                         #        continue
@@ -287,8 +310,7 @@ class MrpProduction(orm.Model):
                         
         write_xls_line('extra', ('Component / Halfworked selected:', ))            
         for code in y_axis.keys():    
-            write_xls_line('extra', (code, ))
-        
+            write_xls_line('extra', (code, ))        
         
         # =====================================================================
         # Get parameters for search:
@@ -470,7 +492,7 @@ class MrpProduction(orm.Model):
                     continue    
                 
         # =====================================================================
-        #                  CUSTMER ORDER TO PRODUCE (NOT DELIVERED)
+        #                 CUSTOMER ORDER TO PRODUCE (NOT DELIVERED)
         # =====================================================================
         block = 'OC (not delivered)'
         # XXX Note: used only for manage OC remain: 

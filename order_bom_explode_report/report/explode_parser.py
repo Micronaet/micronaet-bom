@@ -71,6 +71,7 @@ class MrpProduction(orm.Model):
             cr, uid, value=False, context=context)
 
         # Read wizard parameters:
+        import pdb; pdb.set_trace()
         mode = data.get('mode', 'halfwork')
         mp_mode = data.get('mp_mode', False)
         first_supplier_id = data.get('first_supplier_id', False)

@@ -704,87 +704,87 @@ class MrpProduction(orm.Model):
         block = 'MRP (unload component prod.)'
         # XXX Note: used only for manage OC remain: 
         
-        if mode == 'halfwork': # only half explode MRP (comp > lavoration)
-            mrp_ids = mrp_pool.search(cr, uid, [        
-                # State filter:
-                ('state', '!=', 'cancel'), # TODO correct? for unload element?
-                
-                # Period filter:
-                # 04/01/2017 MRP from 1/9 or 1/1 depend on change year
-                ('date_planned', '>=', mm_from), # 1/9 or 1/1
-                ('date_planned', '<=', period_to), 
-                
-                # No customer exclude filter
-                ])
+        #if mode == 'halfwork': # only half explode MRP (comp > lavoration)
+        mrp_ids = mrp_pool.search(cr, uid, [        
+            # State filter:
+            ('state', '!=', 'cancel'), # TODO correct? for unload element?
             
-            for order in mrp_pool.browse(cr, uid, mrp_ids, context=context):
-                date = order.date_planned
+            # Period filter:
+            # 04/01/2017 MRP from 1/9 or 1/1 depend on change year
+            ('date_planned', '>=', mm_from), # 1/9 or 1/1
+            ('date_planned', '<=', period_to),
+            
+            # No customer exclude filter
+            ])
+        
+        for order in mrp_pool.browse(cr, uid, mrp_ids, context=context):
+            date = order.date_planned
+            
+            # Search in order line:
+            for line in order.order_line_ids:
+                product = line.product_id # readability
+                product_code = line.product_id.default_code
+                pos = get_position_season(date)                                
+                qty = line.product_uom_maked_sync_qty
+
+                # XXX No direct production (use lavorat. CL / CL for this):
                 
-                # Search in order line:
-                for line in order.order_line_ids:
-                    product = line.product_id # readability
-                    product_code = line.product_id.default_code
-                    pos = get_position_season(date)                                
-                    qty = line.product_uom_maked_sync_qty
+                if not len(product.dynamic_bom_line_ids): # no bom
+                    write_xls_line('move', (
+                        block, 'NOT USED', order.name, '', date, pos,
+                        product_code, '', # Original product
+                        '', 0, # +MM
+                        0, # -OC
+                        0, 'MRP PRODUCT WITHOUT BOM, Q.: %s' % qty,
+                        '',
+                        ))                      
+                    continue
 
-                    # XXX No direct production (use lavorat. CL / CL for this):
-                    
-                    if not len(product.dynamic_bom_line_ids): # no bom
+                # --------------------
+                # Search in component:
+                # --------------------
+                for comp in product.dynamic_bom_line_ids:
+                    comp_code = comp.product_id.default_code
+                    comp_qty = qty * comp.product_qty 
+
+                    # Check placehoder:
+                    if has_mandatory_placeholder(
+                            product_code, comp.product_id):# bom_alternative?
                         write_xls_line('move', (
-                            block, 'NOT USED', order.name, '', date, pos,
-                            product_code, '', # Original product
-                            '', 0, # +MM
-                            0, # -OC
-                            0, 'MRP PRODUCT WITHOUT BOM, Q.: %s' % qty,
-                            '',
-                            ))                      
+                            block, 'NOT USED', order.name, '', date, 
+                            pos, product_code,
+                            comp_code, # MP
+                            '', -comp_qty,
+                            0, 0, 'MRP PRESENTE UN [DA ASSEGNARE]',
+                            comp.category_id.name if comp.category_id\
+                                 else 'NO CATEGORY',
+                            ))                 
                         continue
-
-                    # --------------------
-                    # Search in component:
-                    # --------------------
-                    for comp in product.dynamic_bom_line_ids:
-                        comp_code = comp.product_id.default_code
-                        comp_qty = qty * comp.product_qty 
-
-                        # Check placehoder:
-                        if has_mandatory_placeholder(
-                                product_code, comp.product_id):# bom_alternative?
-                            write_xls_line('move', (
-                                block, 'NOT USED', order.name, '', date, 
-                                pos, product_code,
-                                comp_code, # MP
-                                '', -comp_qty,
-                                0, 0, 'MRP PRESENTE UN [DA ASSEGNARE]',
-                                comp.category_id.name if comp.category_id\
-                                     else 'NO CATEGORY',
-                                ))                 
-                            continue
-                            
-                        if comp_code in y_axis: # OC out component (no prod.):
-                            y_axis[comp_code][3][pos] -= comp_qty # MM block
-                            y_axis[comp_code][2] -= comp_qty #TSCAR for MRP
-                            write_xls_line('move', (
-                                block, 'USED', order.name, '', date, pos, 
-                                product_code,
-                                comp_code, # MP
-                                '', -comp_qty, # -MM
-                                0, 0, 'MRP COMPONENT UNLOAD (ADD in TSCAR)',
-                                comp.category_id.name if comp.category_id else\
-                                    'NO CATEGORY',
-                                ))                       
-                            continue
-                        else:
-                            write_xls_line('move', (
-                                block, 'NOT USED', order.name, '', date, pos, 
-                                product_code,
-                                comp_code, # MP
-                                '', -comp_qty, # -MM
-                                0, 0, 'MRP COMPONENT NOT IN LIST',
-                                comp.category_id.name if comp.category_id \
-                                    else 'NO CATEGORY',
-                                ))  
-                            continue                         
+                        
+                    if comp_code in y_axis: # OC out component (no prod.):
+                        y_axis[comp_code][3][pos] -= comp_qty # MM block
+                        y_axis[comp_code][2] -= comp_qty #TSCAR for MRP
+                        write_xls_line('move', (
+                            block, 'USED', order.name, '', date, pos, 
+                            product_code,
+                            comp_code, # MP
+                            '', -comp_qty, # -MM
+                            0, 0, 'MRP COMPONENT UNLOAD (ADD in TSCAR)',
+                            comp.category_id.name if comp.category_id else\
+                                'NO CATEGORY',
+                            ))                       
+                        continue
+                    else:
+                        write_xls_line('move', (
+                            block, 'NOT USED', order.name, '', date, pos, 
+                            product_code,
+                            comp_code, # MP
+                            '', -comp_qty, # -MM
+                            0, 0, 'MRP COMPONENT NOT IN LIST',
+                            comp.category_id.name if comp.category_id \
+                                else 'NO CATEGORY',
+                            ))  
+                        continue                         
 
         # ---------------------------------------------------------------------
         # Prepare data for report:

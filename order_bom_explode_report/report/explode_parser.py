@@ -760,7 +760,7 @@ class MrpProduction(orm.Model):
                                  else 'NO CATEGORY',
                             ))                 
                         continue
-                        
+
                     if comp_code in y_axis: # OC out component (no prod.):
                         y_axis[comp_code][3][pos] -= comp_qty # MM block
                         y_axis[comp_code][2] -= comp_qty #TSCAR for MRP

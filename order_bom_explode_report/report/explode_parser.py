@@ -637,7 +637,7 @@ class MrpProduction(orm.Model):
                                 item_code, # MP
                                 '', 0, # +MM
                                 item_remain, # -OC
-                                0, 'OC HALFWORKED REMAIN',
+                                0, 'OC HALFWORKED REMAIN (HW)',
                                 item.category_id.name if item.category_id \
                                     else 'NO CATEGORY',
                                 ))                      
@@ -652,7 +652,7 @@ class MrpProduction(orm.Model):
                                 item_code, # MP
                                 '', 0, # +MM
                                 item_remain, # -OC
-                                0, 'OC HALFWORKED REMAIN',
+                                0, 'OC HALFWORKED REMAIN (HW-0)',
                                 item.category_id.name if item.category_id \
                                     else 'NO CATEGORY',
                                 ))                      
@@ -669,7 +669,7 @@ class MrpProduction(orm.Model):
                                     comp_code, # component
                                     '', 0, # +MM
                                     comp_remain,#-OC
-                                    0, 'COMPONENT NOT IN FILTER X LIST' ,
+                                    0, 'COMPONENT NOT IN FILTER X LIST (CMPT)',
                                     comp.category_id.name if comp.category_id\
                                         else 'NO CATEGORY',
                                     ))

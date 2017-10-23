@@ -40,6 +40,7 @@
     'data': [
         'security/ir.model.access.csv',
         'import_view.xml',
+        'wizard_xls.xml',
         'scheduler.xml',
         ],
     'active': False,

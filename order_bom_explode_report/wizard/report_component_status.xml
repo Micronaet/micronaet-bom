@@ -27,6 +27,16 @@
                         <field name="exclude_inventory_category" />
                         <field name="exclude_inventory_list" attrs="{'invisible': [('exclude_inventory_category','=',False)]}" />
                    </group>
+                   <group colspan="4" col="4" attrs="{'invisible': [('mode','!=','todo')]}">
+                       <separator string="Ordini extra" colspan="4"/>
+                       <field name="line_ids">
+                           <tree string="Linee" editable="bottom">
+                               <field name="parent" />
+                               <field name="quantity" />
+                           </tree>
+                       </field>
+                   </group>
+                   
                 </form>
             </field>
       </record>

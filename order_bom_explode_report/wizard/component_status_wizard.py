@@ -151,4 +151,25 @@ class CcomponentStatusReportWizard(orm.TransientModel):
             lambda s, cr, uid, ctx: s._get_excluded_inventory(cr, uid, ctx),
         }    
 
+class ComponentStatusReportWizard(orm.TransientModel):
+    ''' Wizard for print status
+    '''
+    _name = 'component.status.report.wizard.line'
+
+    _columns = {
+        'parent': fields.char('Cod. padre', size=20, required=True),
+        'quantity': fields.float('Q.', digits=(16, 2), required=True),
+        'wizard_id': fields.many2one(
+            'component.status.report.wizard', 'Wizard'),
+        }
+
+class ComponentStatusReportWizard(orm.TransientModel):
+    ''' Wizard for print status
+    '''
+    _inherit = 'component.status.report.wizard'
+       
+    _columns = {
+        'line_ids': fields.one2many(
+            'component.status.report.wizard.line', 'wizard_id', 'Linee'),
+        }    
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -38,6 +38,16 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+class SaleOrder(orm.Model):
+    """ Model name: SaleOrder
+    """
+    
+    _inherit = 'sale.order'
+    
+    _columns = {
+        'simulation': fields.boolean('Simulation'),
+        }
+
 class ProductProductInventoryCategory(orm.Model):
     """ Model name: ProductProductInventoryCategory
     """

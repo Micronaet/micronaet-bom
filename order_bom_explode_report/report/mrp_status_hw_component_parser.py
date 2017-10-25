@@ -253,6 +253,10 @@ class Parser(report_sxw.rml_parse):
 
         order_ids = company_pool.mrp_domain_sale_order_line(
             cr, uid, context=context)
+        if data.get('simulation_order_ids', False):
+            _logger.info('Add simulated order')
+            order_ids.append(data['simulation_order_ids'])
+            
         for order in sale_pool.browse(cr, uid, order_ids, context=context):
             for line in order.order_line: # order line
                 # Reset log:

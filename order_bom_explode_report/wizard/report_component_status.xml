@@ -29,9 +29,9 @@
                    </group>
                    <group colspan="4" col="4" attrs="{'invisible': [('mode','!=','todo')]}">
                        <separator string="Ordini extra" colspan="4"/>
-                       <field name="line_ids">
+                       <field name="line_ids" nolabel="1">
                            <tree string="Linee" editable="bottom">
-                               <field name="parent" />
+                               <field name="product_id" />
                                <field name="quantity" />
                            </tree>
                        </field>

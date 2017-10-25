@@ -76,6 +76,52 @@ class CcomponentStatusReportWizard(orm.TransientModel):
         if wiz_browse.mode == 'mrp':
             report_name = 'mrp_status_explode_report'            
         elif wiz_browse.mode == 'todo':
+            # Create simulation order:
+            if wiz_browse.line_ids:
+                # Create fake order and put product for simulation:
+                sale_pool = self.pool.get('sale.order')
+                sol_pool = self.pool.get('sale.order.line')
+                partner_id = 1 # XXX company partner
+                data = sale_pool.onchange_partner_id(
+                    cr, uid, False, partner_id, context=context).get(
+                        'value', {})
+                data['simulation'] = True
+                data['partner_id'] = partner_id
+                data['date_order'] = datetime.now().strftime(
+                    DEFAULT_SERVER_DATE_FORMAT)
+                order_id = sale_pool.create(cr, uid, data, context=context)
+                
+                for line in wiz_browse.line_ids:
+                    product_id = line.product_id.id
+                    data_line = sol_pool.product_id_change_with_wh(
+                        cr, uid, False,
+                        data.get('pricelist_id', False),
+                        product_id,
+                        line.quantity,
+                        line.product_id.uom_id.id,
+                        0, # uos qty
+                        line.product_id.uos_id.id,
+                        '', # name
+                        partner_id,
+                        False, #'IT_it',
+                        True, # update tax
+                        data.get('date_order', False),
+                        False, # packaging
+                        data.get('fiscal_position', False),
+                        False, # flag
+                        data.get('warehouse_id', False),
+                        context=context).get('value', {})
+                        
+                    if data_line.get('tax_id', False):
+                        data_line['tax_id'] = (
+                            (6, 0, data_line.get('tax_id')),
+                            )
+                    data_line['order_id'] = order_id
+                    data_line['product_id'] = product_id
+                    data_line['product_uom_qty'] = line.quantity
+                    # TODO onchange product_uom_qty?                    
+                    sol_pool.create(cr, uid, data_line, context=context)                    
+                datas['simulation_order_ids'] = order_id
             report_name = 'mrp_status_hw_cmp_report'
         else: # halfwork, component
             report_name = 'stock_status_explode_report'
@@ -155,9 +201,12 @@ class ComponentStatusReportWizard(orm.TransientModel):
     ''' Wizard for print status
     '''
     _name = 'component.status.report.wizard.line'
+    _rec_name = 'product_id'    
 
     _columns = {
-        'parent': fields.char('Cod. padre', size=20, required=True),
+        #'parent': fields.char('Cod. padre', size=20, required=True),
+        'product_id': fields.many2one('product.product', 'Product', 
+            required=True),
         'quantity': fields.float('Q.', digits=(16, 2), required=True),
         'wizard_id': fields.many2one(
             'component.status.report.wizard', 'Wizard'),

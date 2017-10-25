@@ -215,13 +215,13 @@ msgstr "Lavorazione componente"
 #: model:ir.actions.act_window,name:lavoration_cl_sl.action_stock_picking_cl_closed_tree
 #: model:ir.ui.menu,name:lavoration_cl_sl.menu_stock_picking_cl_closed_tree
 msgid "Lavoration workshop list (all)"
-msgstr "Lista lavorazioni laboratorio (tutte)"
+msgstr "Lista lavorazioni officina (tutte)"
 
 #. module: lavoration_cl_sl
 #: model:ir.actions.act_window,name:lavoration_cl_sl.action_stock_picking_cl_tree
 #: model:ir.ui.menu,name:lavoration_cl_sl.menu_stock_picking_cl
 msgid "Lavoration workshop list (open)"
-msgstr "Lista lavorazioni laboratorio (aperte)"
+msgstr "Lista lavorazioni officina (aperte)"
 
 #. module: lavoration_cl_sl
 #: field:stock.move,linked_cl_stock_move_id:0

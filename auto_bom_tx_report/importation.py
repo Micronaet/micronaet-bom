@@ -213,6 +213,7 @@ class PurchaseOrderXLSX(orm.Model):
         WS = WB.sheet_by_index(0)
 
         pos = -1
+        error = ''
         for row in range(row_start, WS.nrows):
             pos += 1
             if pos == 1: 
@@ -227,6 +228,7 @@ class PurchaseOrderXLSX(orm.Model):
                 # Manage code error:
                 if not default_code:
                     _logger.error('No material code')
+                    error += 'Riga: %s > No codice materiale\n' % row
                     continue
 
                 # Search product:
@@ -237,11 +239,15 @@ class PurchaseOrderXLSX(orm.Model):
                 # Manage product error:
                 if not product_ids: 
                     _logger.error('No product with code: %s' % default_code)
+                    error += 'Riga: %s > No prodotto: %s\n' % (
+                        row, default_code)
                     continue
                     
                 # TODO manage warning more than one product
                 elif len(product_ids) > 1:
                     _logger.error('More material code: %s' % default_code)
+                    error += 'Riga: %s > Codice doppio: %s\n' % (
+                        row, default_code)
                     pass # TODO multi code
                 
                 product_id = product_ids[0]    
@@ -267,6 +273,14 @@ class PurchaseOrderXLSX(orm.Model):
                 # -------------------------------------------------------------
                 for col in range(2, 14):
                     quantity = WS.cell(row, col).value
+                    
+                    try:
+                        # TODO replace . on , ?
+                        quantity = float(quantity)
+                    except:
+                        _logger.warning('Problem convert float: %s' % quantity)
+                        quantity = 0.0
+                        
                     if not quantity:
                         continue
                     
@@ -293,6 +307,7 @@ class PurchaseOrderXLSX(orm.Model):
         return self.write(cr, uid, ids, {
             'mode': 'imported',
             'file': False, # reset file for clean database!
+            'error': error,
             }, context=context)
     
     _columns = {
@@ -303,6 +318,7 @@ class PurchaseOrderXLSX(orm.Model):
             ('imported', 'Imported'),
             ('created', 'Created'),            
             ], 'Mode'),
+        'error': fields.text('Errore'),
         }
     
     _defaults = {

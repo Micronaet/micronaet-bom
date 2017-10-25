@@ -40,6 +40,12 @@
                                     </field>
                                 </group>
                             </page>
+                            <page string="Errore" attrs="{'invisible': [('error','=',False)]}">
+                                <group colspan="4" col="4">
+                                    <separator string="Errore:" colspan="4"/>
+                                    <field name="error" colspan="4" nolabel="1"/>
+                                </group>
+                            </page>
                             <page string="Order">
                                 <group colspan="4" col="4">
                                     <separator string="Order:" colspan="4"/>
@@ -47,7 +53,7 @@
                                 </group>
                             </page>
                         </notebook>
-                   </group>
+                   </group>                   
                 </form>
             </field>
       </record>

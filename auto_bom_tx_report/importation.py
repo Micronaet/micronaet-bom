@@ -51,6 +51,30 @@ class PurchaseOrderXLSX(orm.Model):
     # --------------------
     # Wizard button event:
     # --------------------
+    def extract_line_in_tree(self, cr, uid, ids, context=None):
+        ''' Extract element in list
+        '''
+        model_pool = self.pool.get('ir.model.data')
+        view_id = model_pool.get_object_reference(
+            cr, uid, 'auto_bom_tx_report', 'view_order_line_tree')[1]
+        current_proxy = self.browse(cr, uid, ids, context=context)[0]
+        line_ids = [item.id for item in current_proxy.line_ids]
+        
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Righe'),
+            'view_type': 'form',
+            'view_mode': 'tree',
+            #'res_id': 1,
+            'res_model': 'purchase.order.xlsx.line',
+            'view_id': view_id,
+            'views': [(view_id, 'tree')],
+            'domain': [('id', 'in', line_ids)],
+            'context': context,
+            'target': 'current', # 'new'
+            'nodestroy': False,
+            }
+            
     def action_create_order(self, cr, uid, ids, context=None):
         ''' Create purchase order:
         '''

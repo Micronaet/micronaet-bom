@@ -1,6 +1,39 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+       <!--purchase.order.xlsx.line-->
+       <record model="ir.ui.view" id="view_order_line_search">
+           <field name="name">purchase.order.xlsx.line.search</field>
+           <field name="model">purchase.order.xlsx.line</field>
+           <field name="arch" type="xml">
+               <search string="Righe" version="7.0">        
+                   <field name="partner_id" filter_domain="[('partner_id.name','ilike',self)]"/>
+                   <field name="product_id" filter_domain="['|',('product_id.default_code','ilike',self),('product_id.name','ilike',self)]"/>
+                   
+                   <group expand="0" string="Group By...">
+                       <filter name="group_partner" string="Partner" context="{'group_by': 'partner_id'}"/>
+                       <filter name="group_product" string="Prodotto" context="{'group_by': 'product_id'}"/>
+                       <filter name="group_deadline" string="Scadenza" context="{'group_by': 'deadline'}"/>
+                   </group>                
+               </search>
+           </field>
+       </record>
+       <record model="ir.ui.view" id="view_order_line_tree">
+           <field name="name">purchase.order.xlsx.line.tree</field>
+           <field name="model">purchase.order.xlsx.line</field>
+           <field name="type">form</field>
+           <field name="arch" type="xml">
+               <tree string="Righe" editable="bottom">
+                   <field name="xlsx_id" invisible="1" />
+                   <field name="sequence" invisible="1"/>
+                   <field name="partner_id" />
+                   <field name="product_id" />
+                   <field name="deadline" />
+                   <field name="quantity" />
+               </tree>
+           </field>
+       </record>
+       
        <!-- purchase.order.xlsx -->
        <record id="purchase_order_xlsx_tree_view" model="ir.ui.view">
             <field name="name">Import order for material</field>
@@ -30,6 +63,7 @@
                             <page string="Detail">
                                 <group colspan="4" col="4">
                                     <separator string="Details:" colspan="4"/>
+                                    <button name="extract_line_in_tree" string="Estrai in modo lista" type="object" />
                                     <field name="line_ids" colspan="4" nolabel="1">
                                         <tree string="Order details:" colors="red:partner_id==False or product_id==False or deadline==False or quantity&lt;=0.001" editable="bottom">
                                              <field name="partner_id" />

@@ -364,6 +364,10 @@ class PurchaseOrderXLSXLine(orm.Model):
         'sequence': fields.integer('Sequence'),
         'product_id': fields.many2one(
             'product.product', 'Product'),
+        'uom_id': fields.related(
+            'product_id', 'uom_id', 
+            type='many2one', relation='product.uom', 
+            string='UM'),
         'deadline': fields.date('Deadline'),
         'partner_id': fields.many2one('res.partner', 'Supplier'),
         'quantity': fields.float('Q.ty', digits=(16, 3)),

@@ -29,6 +29,7 @@
                    <field name="partner_id" />
                    <field name="product_id" />
                    <field name="deadline" />
+                   <field name="uom_id" />
                    <field name="quantity" />
                </tree>
            </field>
@@ -68,6 +69,7 @@
                                         <tree string="Order details:" colors="red:partner_id==False or product_id==False or deadline==False or quantity&lt;=0.001" editable="bottom">
                                              <field name="partner_id" />
                                              <field name="product_id" />
+                                             <field name="uom_id" />
                                              <field name="quantity" />
                                              <field name="deadline" />                            
                                         </tree>

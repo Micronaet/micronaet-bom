@@ -62,38 +62,6 @@ class MrpProduction(orm.Model):
             '''
             return datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
             
-        if data is None:
-            data = {}
-
-        # Add status for calc. HW only (filter)?
-        user_pool = self.pool.get('res.users')
-        previous_status = user_pool.set_no_inventory_status(
-            cr, uid, value=False, context=context)
-
-        # Read wizard parameters:
-        mode = data.get('mode', 'halfwork')
-        mp_mode = data.get('mp_mode', False)
-        first_supplier_id = data.get('first_supplier_id', False)
-        with_type_ids = data.get('with_type_ids', [])
-        without_type_ids = data.get('without_type_ids', [])
-        only_negative = data.get('only_negative', False)
-        exclude_inventory_category = data.get(
-            'exclude_inventory_category', False)
-
-        if exclude_inventory_category:
-            # TODO load exlude category:
-            inventory_pool = self.pool.get(
-                'product.product.inventory.category')
-            exclude_inventory_ids = inventory_pool.search(cr, uid, [
-                ('not_in_report', '=', True),
-                ], context=context)
-        else:                    
-            exclude_inventory_ids = [] 
-        
-        # Add inventory check block:
-        for_inventory_delta = data.get('for_inventory_delta', False)        
-        inventory_delta = {}
-        
         # ---------------------------------------------------------------------
         # Utility function embedded:
         # ---------------------------------------------------------------------
@@ -113,6 +81,7 @@ class MrpProduction(orm.Model):
             default_code = product.default_code or ''            
             if default_code in y_axis:
                 return # yet present (for component check)
+                
             y_axis[default_code] = [ # halfworked of component
                 # Reset counter for this product    
                 # 04/01/2017: change inventory with new
@@ -188,6 +157,41 @@ class MrpProduction(orm.Model):
             return True
                         
         # ---------------------------------------------------------------------
+        # Start procedure:
+        # ---------------------------------------------------------------------
+        if data is None:
+            data = {}
+
+        # Add status for calc. HW only (filter)?
+        user_pool = self.pool.get('res.users')
+        previous_status = user_pool.set_no_inventory_status(
+            cr, uid, value=False, context=context)
+
+        # Read wizard parameters:
+        mode = data.get('mode', 'halfwork')
+        mp_mode = data.get('mp_mode', False)
+        first_supplier_id = data.get('first_supplier_id', False)
+        with_type_ids = data.get('with_type_ids', [])
+        without_type_ids = data.get('without_type_ids', [])
+        only_negative = data.get('only_negative', False)
+        exclude_inventory_category = data.get(
+            'exclude_inventory_category', False)
+
+        if exclude_inventory_category:
+            # TODO load exlude category:
+            inventory_pool = self.pool.get(
+                'product.product.inventory.category')
+            exclude_inventory_ids = inventory_pool.search(cr, uid, [
+                ('not_in_report', '=', True),
+                ], context=context)
+        else:                    
+            exclude_inventory_ids = [] 
+        
+        # Add inventory check block:
+        for_inventory_delta = data.get('for_inventory_delta', False)        
+        inventory_delta = {}
+        
+        # ---------------------------------------------------------------------
         # XLS Log file: 
         # ---------------------------------------------------------------------
         xls_log = '/home/administrator/photo/log/report_explode_%s.xlsx' % mode
@@ -254,7 +258,6 @@ class MrpProduction(orm.Model):
 
         # Maybe removed:
         inventory_pos = get_position_season(get_date()) # for inventory mangm.1
-
         for product in product_proxy: # XXX Product ordered for now
             for item in product.dynamic_bom_line_ids: # XXX All Halfworked:
                 
@@ -287,6 +290,9 @@ class MrpProduction(orm.Model):
                     #        first_supplier_id != \
                     #            item.product_id.first_supplier_id.id:
                     #    continue # Jump not supplier present    
+                    if mp_mode == 'fabric' and item.product_id.id not in \
+                            fabric_ids: # jump not fabric
+                        continue
                     category = item.category_id.type_id.name if \
                         item.category_id and item.category_id.type_id else \
                             _('No category')
@@ -296,20 +302,14 @@ class MrpProduction(orm.Model):
                     # TODO log halfcomponent with empty list
                     # relative_type = 'half'
                     for component in half_bom_ids:
+                        if mp_mode == 'fabric' and component.product_id.id \
+                                not in fabric_ids:
+                            continue
+
                         if exclude_inventory_ids and \
                                 component.product_id.inventory_category_id.id\
                                 in exclude_inventory_ids:    
                             continue # Jump BOM element in excluded category    
-                            
-                        #if mp_mode == 'fabric':
-                        #    if component.product_id.id not in fabric_ids:
-                        #        continue
-                        #    # else:    
-                        #    #    XXX jump no fabric element (not necessary!)
-                        #    #    add_x_item(y_axis, component, category)
-                        #    #else:     
-                        #    #    continue 
-                        #else:    
                         
                         # Create ad hoc category:
                         if component.product_id.is_pipe:

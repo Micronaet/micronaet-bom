@@ -88,11 +88,9 @@ class ProductProduct(orm.Model):
             for seller in product.seller_ids:
                 if default_code not in costs:
                     break
-                    
                 for pl in sorted(
                         seller.pricelist_ids, 
-                        lambda x: x.date_quotation,
-                        reverse=True):
+                        lambda x: x.date_quotation, reverse=True):
                     costs[default_code] = pl.price
                     log_f.write('%s|%s|%s\n' % (
                         default_code, pl.price, pl.date_quotation))

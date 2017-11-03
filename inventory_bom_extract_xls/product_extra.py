@@ -80,7 +80,7 @@ class ProductProduct(orm.Model):
         log_f = open(log_file, 'w')
 
         product_ids = product_pool.search(cr, uid, [
-            ('defualt_code', '!=', False),
+            ('default_code', '!=', False),
             ], context=context)
         for product in product_pool.browse(cr, uid, product_ids, 
                 context=context):

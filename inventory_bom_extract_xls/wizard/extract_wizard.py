@@ -188,7 +188,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 #_logger.warning('Float value not present: %s' % value)
                 return 0.0
         
-        def not_in_inventory_selection(product, jumped, of_cost):
+        def not_in_inventory_selection(product, jumped, costs):
             ''' Check if the product need to be used:
                 Add in jumped list
             '''
@@ -217,24 +217,24 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         product.inv_revenue_account,
                         product.inv_cost_account,
                         product.inv_first_supplier,
-                        get_cost(product, of_cost),            
+                        get_cost(product, costs),            
                         )
             return not_selected            
         
-        def get_cost(product, of_cost):
+        def get_cost(product, costs):
             ''' Check cost for this product
             '''
             # TODO write a better method
             default_code = product.default_code
-            if default_code and default_code in of_cost:
-                return of_cost[default_code]
+            if default_code and default_code in costs:
+                return costs[default_code]
             else:     
                 return product.standard_price
 
-        def setup_materials(product, materials, of_cost):
+        def setup_materials(product, materials, costs):
             ''' Utility for append product in material list (initial setup)
             '''
-            price = get_cost(product, of_cost)
+            price = get_cost(product, costs)
             if product.default_code not in materials:
                 materials[product.default_code] = [
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -246,10 +246,10 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     ]            
             return
             
-        def setup_materials_q(product, col, qty, materials, of_cost):
+        def setup_materials_q(product, col, qty, materials, costs):
             ''' Add data for product passed in right column with right cost
             '''
-            price = get_cost(product, of_cost)
+            price = get_cost(product, costs)
             
             default_code = product.default_code
             # Add q:
@@ -275,49 +275,15 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
 
         # ---------------------------------------------------------------------            
         # Load cost from order:
-        # ---------------------------------------------------------------------            
-        _logger.info('Check price from purchase')
-        of_cost = {}
-        po_pool = self.pool.get('purchase.order')
-        po_ids = po_pool.search(cr, uid, [
-            ('state', 'in', ('approved', )),
-            ('date_order', '>=', '%s-01-01' % year),
-            ('date_order', '<=', '%s-12-31' % year),
-            ], context=context)
-        
-        for po in po_pool.browse(cr, uid, po_ids, context=context):
-            for line in po.order_line:
-                if not line.price_unit:
-                    continue # jump no price line
-                product = line.product_id
-                default_code = product.default_code
-                if default_code and default_code not in of_cost:                    
-                    of_cost[default_code] = line.price_unit
-
-        # ---------------------------------------------------------------------            
-        # Load cost check costs:
         # ---------------------------------------------------------------------
+        _logger.info('Check cost for product')
         product_pool = self.pool.get('product.product')
-        _logger.info('Check price from check costs')
-        log_file = os.path.join(os.path.expanduser('~'), 'price.csv')
-        log_f = open(log_file, 'w')
-        product_ids = product_pool.search(cr, uid, [], context=context)
-        for product in product_pool.browse(cr, uid, product_ids, 
-                context=context):
-            default_code = product.default_code
-            if not default_code:
-                continue
-            if default_code not in of_cost:                    
-                for seller in product.seller_ids:
-                    for pl in seller.pricelist_ids:
-                        of_cost[default_code] = pl.price
-                        log_f.write('%s|%s|%s\n' % (
-                            default_code, pl.price, pl.date_quotation))
-                            
-            # Use anagraphic cost: (for pipe)
-            if not of_cost.get(default_code, False):
-                of_cost[default_code] = product.standard_price
+        costs = product_pool.get_purchase_cost_value(
+            cr, uid, context=context)
 
+        # ---------------------------------------------------------------------            
+        # XLS output file:
+        # ---------------------------------------------------------------------            
         # Insert year in filename:
         xls_file = xls_file % year
         xls_infile = xls_infile % year
@@ -482,11 +448,11 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             if not dynamic_ids and not half_line_ids:
                 # Not used:
                 if not_in_inventory_selection(
-                        products[default_code], jumped, of_cost):
+                        products[default_code], jumped, costs):
                     continue # jump not used (update the list)!
                     
                 # Add in inventory:
-                setup_materials(products[default_code], materials, of_cost)
+                setup_materials(products[default_code], materials, costs)
 
                 for col in range (0, 12):
                     product_qty = unload_list[col]
@@ -496,7 +462,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         
                     setup_materials_q(
                         products[default_code], col, product_qty, materials, 
-                        of_cost)
+                        costs)
                 continue
 
             # -------------------------------------------------------------
@@ -507,11 +473,11 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 component_code = component.default_code
                 
                 # Not used:
-                if not_in_inventory_selection(component, jumped, of_cost):
+                if not_in_inventory_selection(component, jumped, costs):
                     continue
 
                 # Add to inventory:
-                setup_materials(component, materials, of_cost)
+                setup_materials(component, materials, costs)
                 
                 for col in range (0, 12):
                     product_qty = unload_list[col]
@@ -523,7 +489,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         component, col, 
                         product_qty * line.product_qty, 
                         materials,
-                        of_cost
+                        costs
                         )
                 continue
 
@@ -545,11 +511,11 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         
                         # Not used:
                         if not_in_inventory_selection(hw_product, jumped, 
-                                of_cost):                                
+                                costs):                                
                             continue # jump not used!
                         
                         # Add to inventory:
-                        setup_materials(hw_product, materials, of_cost)
+                        setup_materials(hw_product, materials, costs)
 
                         for col in range (0, 12):
                             product_qty = unload_list[col]
@@ -560,7 +526,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                                 hw_product, col, 
                                 product_qty * hw_line.product_qty, # q.
                                 materials,
-                                of_cost,
+                                costs,
                                 )
                     continue # no other material        
 
@@ -568,17 +534,17 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 # b. Prime material in product explose:
                 # ---------------------------------------------------------
                 # Not used:
-                if not_in_inventory_selection(component, jumped, of_cost):
+                if not_in_inventory_selection(component, jumped, costs):
                     continue # jump not used
 
                 # Add to inventory:
                 if component_code not in materials:
-                    setup_materials(component, materials, of_cost)
+                    setup_materials(component, materials, costs)
                 setup_materials_q(
                     component, col, 
                     product_qty * line.product_qty, 
                     materials,
-                    of_cost,
+                    costs,
                     )
 
 

@@ -44,6 +44,68 @@ class ProductProduct(orm.Model):
     
     _inherit = 'product.product'
     
+    def get_purchase_cost_value(self, cr, uid, context=None):
+        ''' Check price from purchase order after from 
+        '''
+        _logger.info('Check price from purchase')
+
+        # ---------------------------------------------------------------------        
+        # Start with supplier order price:
+        # ---------------------------------------------------------------------        
+        of_cost = {}
+        po_pool = self.pool.get('purchase.order')
+        po_ids = po_pool.search(cr, uid, [
+            ('state', 'in', ('approved', )),
+            #('date_order', '>=', '%s-01-01' % year),
+            #('date_order', '<=', '%s-12-31' % year),
+            ], order='date_order desc', context=context)
+        
+        for po in po_pool.browse(cr, uid, po_ids, context=context):
+            for line in po.order_line:
+                if not line.price_unit:
+                    continue # jump no price line
+                product = line.product_id
+                default_code = product.default_code
+                if default_code and default_code not in of_cost:                    
+                    of_cost[default_code] = line.price_unit
+
+        # ---------------------------------------------------------------------            
+        # Load cost check costs:
+        # ---------------------------------------------------------------------
+        costs = {}
+        product_pool = self.pool.get('product.product')
+        _logger.info('Check price from check costs')
+
+        log_file = os.path.join(os.path.expanduser('~'), 'price.csv')
+        log_f = open(log_file, 'w')
+
+        product_ids = product_pool.search(cr, uid, [
+            ('defualt_code', '!=', False),
+            ], context=context)
+        for product in product_pool.browse(cr, uid, product_ids, 
+                context=context):
+            default_code = product.default_code            
+            for seller in product.seller_ids:
+                if default_code not in costs:
+                    break
+                    
+                for pl in sorted(
+                        seller.pricelist_ids, 
+                        lambda x: x.date_quotation,
+                        reverse=True):
+                    costs[default_code] = pl.price
+                    log_f.write('%s|%s|%s\n' % (
+                        default_code, pl.price, pl.date_quotation))
+                    break
+                            
+            # -----------------------------------------------------------------
+            # Use anagraphic if not present
+            # -----------------------------------------------------------------
+            if not costs.get(default_code, False):
+                costs[default_code] = \
+                    of_cost.get(default_code, False) or product.standard_price
+        return costs            
+            
     _columns = {
         'inv_cost_account': fields.char('Inv. cost account', size=8),
         'inv_revenue_account': fields.char('Inv. cost account', size=8),

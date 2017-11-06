@@ -90,7 +90,7 @@ class MrpProduction(orm.Model):
             result, extension = openerp.report.render_report(
                 cr, uid, [mrp_id], 'mrp_status_hw_cmp_report', datas, context)
         except:
-            _logger.error('Error generation TX report [%s]' % (
+            _logger.error('Error generation component report [%s]' % (
                 sys.exc_info(),))
             return False            
         attachments = [('Tubi.odt', result)]
@@ -112,8 +112,8 @@ class MrpProduction(orm.Model):
         thread_pool = self.pool.get('mail.thread')
         thread_pool.message_post(cr, uid, False, 
             type='email', 
-            body='Stato telai settimanale', 
-            subject='Invio automatico stato telai: %s' % (
+            body='Stato componenti settimanale', 
+            subject='Invio automatico stato componenti: %s' % (
                 datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT),
                 ),
             partner_ids=[(6, 0, partner_ids)],

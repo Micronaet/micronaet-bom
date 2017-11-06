@@ -93,7 +93,7 @@ class MrpProduction(orm.Model):
             _logger.error('Error generation component report [%s]' % (
                 sys.exc_info(),))
             return False            
-        attachments = [('Tubi.odt', result)]
+        attachments = [('Componenti.odt', result)]
                 
         # ---------------------------------------------------------------------
         # Send report:

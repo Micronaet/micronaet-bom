@@ -52,6 +52,7 @@ class Parser(report_sxw.rml_parse):
             'get_filter': self.get_filter,
             'get_date': self.get_date,
             'get_parent_oc_period': self.get_parent_oc_period,
+            'get_pipe_unused': self.get_pipe_unused,
         })
         
     def get_parent_oc_period(self, parent):
@@ -237,6 +238,7 @@ class Parser(report_sxw.rml_parse):
         sale_pool = self.pool.get('sale.order')
         #sol_pool = self.pool.get('sale.order.line') 
         mrp_pool = self.pool.get('mrp.production')
+        product_pool = self.pool.get('product.product')
         
         _logger.warning('Range period: MRP from %s, Max open MRP <= %s' % (
             reference_date, limit_date or 'no limit'))
@@ -449,6 +451,17 @@ class Parser(report_sxw.rml_parse):
         
         cmpt_present = [] # for remove double orders   
 
+        # ---------------------------------------------------------------------            
+        # List of all pipes present    
+        # ---------------------------------------------------------------------            
+        self.pipe_ids = product_pool.search(cr, uid, [
+            ('is_pipe', '=', True),
+            ], context=context)            
+        _logger.warning('Total pipes: %s' % len(self.pipe_ids))
+        
+        # ---------------------------------------------------------------------            
+        # Generate record for print:
+        # ---------------------------------------------------------------------            
         for parent in sorted(parent_todo):
             record = parent_todo[parent]
             
@@ -517,6 +530,11 @@ class Parser(report_sxw.rml_parse):
                     #                  BLOCK C:
                     # ---------------------------------------------------------
                     cp = cmpt.product_id # readability
+                    
+                    # Remove pipe from list:
+                    if cp.id in self.pipe_ids:
+                        self.pipe_ids.remove(cp.id)
+                    
                     # Check for pipes
                     if not cp or cp.id in cmpt_present:
                         yet_write = True # yet write in report before
@@ -551,7 +569,23 @@ class Parser(report_sxw.rml_parse):
                             
                 if hw_first: # no cmpt data (not in loop)
                     res.append(data_A + data_B + empty_C)
+        _logger.warning('Total pipes: %s' % len(self.pipe_ids))
+
         user_pool.set_no_inventory_status(
             cr, uid, value=previous_status, context=context)            
         return res
+        
+    def get_pipe_unused(self, ):
+        ''' Return pipe unused
+        '''    
+        product_pool = self.pool.get('product.product')
+        # Readability:
+        cr = self.cr
+        uid = self.uid
+        context = {}
+        return sorted(
+            product_pool.browse(cr, uid, self.pipe_ids, context=context),
+            key=lambda x: x.default_code,
+            )
+        
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

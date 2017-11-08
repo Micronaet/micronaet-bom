@@ -50,6 +50,7 @@ class MrpProduction(orm.Model):
             self, cr, uid, context=None):
         ''' Generate PDF with data and send mail
         '''
+        _logger.info('Send report COMPONENT')
         if context is None:
             context = {
                 'lang': 'it_IT',
@@ -88,7 +89,8 @@ class MrpProduction(orm.Model):
                 
         try:
             result, extension = openerp.report.render_report(
-                cr, uid, [mrp_id], 'mrp_status_hw_cmp_report', datas, context)
+                cr, uid, [mrp_id], 'stock_status_explode_report', 
+                datas, context)
         except:
             _logger.error('Error generation component report [%s]' % (
                 sys.exc_info(),))

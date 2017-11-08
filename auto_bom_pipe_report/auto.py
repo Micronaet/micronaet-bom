@@ -50,6 +50,8 @@ class MrpProduction(orm.Model):
             self, cr, uid, context=None):
         ''' Generate PDF with data and send mail
         '''
+        _logger.info('Start auto send PIPE TODO production report')
+        
         if context is None:
             context = {
                 'lang': 'it_IT',

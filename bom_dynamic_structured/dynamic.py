@@ -164,7 +164,7 @@ class ProductProduct(orm.Model):
                           prodotto: %s''') % product_proxy.name,
                     )
             return self.pool.get('structure.structure').create_dynamic_bom(
-                cr, uid, [structure_id.id], context=context)
+                cr, uid, [structure.id], context=context)
 
     def open_current_dynamic_bom(self, cr, uid, ids, context=None):
         ''' Open current BOM with dynamic rule

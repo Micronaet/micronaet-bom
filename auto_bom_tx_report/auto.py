@@ -313,7 +313,7 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             # Merge cell:
             WS.merge_range(row, 0, row, 10, '')
-            WS.merge_range(row, 11, row, 13, '')
+            WS.merge_range(row, 11, row, 15, '')
 
             if sal[11] < 0:
                 format_text = get_xls_format('bg_red')
@@ -337,6 +337,8 @@ class MrpProduction(orm.Model):
                 ('', format_text),
                 ('', format_text),
                 (category, format_text),
+                ('', format_text),
+                ('', format_text),
                 ]        
             write_xls_mrp_line(WS, row, line0)
             row += 1
@@ -345,6 +347,7 @@ class MrpProduction(orm.Model):
             #                            ROW 1
             # -----------------------------------------------------------------
             format_header = get_xls_format('header')
+            format_number = get_xls_format('number')
             
             # Merge cell:            
             WS.merge_range(row, 0, row, 1, '')
@@ -365,6 +368,8 @@ class MrpProduction(orm.Model):
                 ('Giu.', format_header),
                 ('Lug.', format_header),
                 ('Ago.', format_header),
+                ('LEADTIME', format_header),
+                ('LOTTO', format_header),
                 ]
             write_xls_mrp_line(WS, row, line1)
             row += 1
@@ -373,7 +378,6 @@ class MrpProduction(orm.Model):
             #                            ROW 2
             # -----------------------------------------------------------------
             format_text = get_xls_format('text')
-            format_number = get_xls_format('number')
             
             # Create row data:
             line2 = [
@@ -392,6 +396,8 @@ class MrpProduction(orm.Model):
                 (mm[9], format_number),
                 (mm[10], format_number),
                 (mm[11], format_number),
+                ('', format_header),
+                ('', format_header),
                 ]
             write_xls_mrp_line(WS, row, line2)
             row += 1
@@ -414,6 +420,8 @@ class MrpProduction(orm.Model):
                 (oc[9], format_number),
                 (oc[10], format_number),
                 (oc[11], format_number),
+                ('', format_header),
+                ('', format_header),
                 ]
             write_xls_mrp_line(WS, row, line3)
             row += 1
@@ -436,6 +444,8 @@ class MrpProduction(orm.Model):
                 (of[9], format_number),
                 (of[10], format_number),
                 (of[11], format_number),
+                ('', format_header),
+                ('', format_header),
                 ]
             write_xls_mrp_line(WS, row, line4)
             row += 1
@@ -459,6 +469,8 @@ class MrpProduction(orm.Model):
                 (sal[9], format_number),
                 (sal[10], format_number),
                 (sal[11], format_number),
+                ('', format_header),
+                ('', format_header),
                 ]
             write_xls_mrp_line(WS, row, line5)
             row += 1
@@ -470,7 +482,7 @@ class MrpProduction(orm.Model):
             format_order = get_xls_format('bg_order')
             lineOrd = [
                 ('Ordinare:', format_order),
-                ('', format_text),
+                (o.uom_id.name or '?', get_xls_format('text_center')),
                 ]
             # Order only from now to the end of block:    
             for i in range(1, 13):
@@ -478,6 +490,9 @@ class MrpProduction(orm.Model):
                     lineOrd.append(('',  format_order))
                 else:    
                     lineOrd.append(('', format_text))
+            # Extra data (leadtime and order lot):        
+            lineOrd.append((o.leadtime or 0, format_number))
+            lineOrd.append((o.purchase_lot_block or 0, format_number))
                 
             write_xls_mrp_line(WS, row, lineOrd)
             row += 1

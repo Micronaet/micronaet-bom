@@ -559,6 +559,7 @@ class MrpProduction(orm.Model):
         WS.set_column('A:A', 19)
         WS.set_column('B:B', 3)
         WS.set_column('C:N', 8)
+        WS.set_column('O:P', 6)
         
         # Current month cell:
         convert_month = {

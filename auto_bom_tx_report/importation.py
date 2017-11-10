@@ -174,12 +174,23 @@ class PurchaseOrderXLSX(orm.Model):
             'xlsx_id': ids[0],
             }, context=context)
         return True
+
+    def action_import_leadtime_lot(self, cr, uid, ids, context=None):
+        ''' Event for button done force update lead lot
+        '''
+        if context is None: 
+            context = {}
         
+        context['update_lead_lot'] = True
+        return self.action_import_order(cr, uid, ids, context=context)
+
     def action_import_order(self, cr, uid, ids, context=None):
         ''' Event for button done
         '''
         if context is None: 
             context = {}        
+        
+        update_lead_lot = context.get('update_lead_lot', False)
         
         # Pool used:
         product_pool = self.pool.get('product.product')
@@ -302,7 +313,8 @@ class PurchaseOrderXLSX(orm.Model):
                         # TODO replace . on , ?
                         quantity = float(quantity)
                     except:
-                        _logger.warning('Problem convert float: %s' % quantity)
+                        _logger.warning(
+                            'Problem convert float or empty: %s' % quantity)
                         quantity = 0.0
                         
                     if not quantity:
@@ -321,6 +333,11 @@ class PurchaseOrderXLSX(orm.Model):
                         'partner_id': partner_id,
                         'quantity': quantity,
                         'deadline': '%s-%s-%s' % (year, month, day),
+                        }, context=context)
+                if update_lead_lot:
+                    product_pool.write(cr, uid, product_id, {
+                        'leadtime': WS.cell(row, 14).value,
+                        'purchase_lot_block': WS.cell(row, 15).value, 
                         }, context=context)
             elif pos in (7, 8) and not WS.cell(row, 0).value:
                 _logger.warning('Reset pos, row: %s' % row)

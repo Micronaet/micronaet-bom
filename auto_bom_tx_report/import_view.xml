@@ -54,6 +54,7 @@
                    <header>
                        <button string="Cancel" special="cancel" />
                        <button name="action_import_order" string="Import" type="object" icon="gtk-jump-to" class="oe_highlight" attrs="{'invisible': [('mode','!=','draft')]}"/>
+                       <button name="action_import_leadtime_lot" string="Import (con leadtime e lotto)" type="object" class="oe_highlight" icon="gtk-jump-to" attrs="{'invisible': [('mode','!=','draft')]}" assert="Aggiorno leadtime a lotto acquisto?"/>
                        <button name="action_create_order" string="Create order" type="object" icon="gtk-jump-to" class="oe_highlight" attrs="{'invisible': [('mode','!=','imported')]}" assert="Delete if present previous order, will be generated again!"/>
                    </header>                   
                    <group colspan="4" col="4">

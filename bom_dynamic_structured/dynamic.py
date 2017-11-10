@@ -157,6 +157,12 @@ class ProductProduct(orm.Model):
             return self.pool.get('mrp.bom').open_bom_dynamic_lines(
                 cr, uid, [structure.dynamic_bom_id.id], context=context)        
         else: # First time:
+            if not structure:
+                raise osv.except_osv(
+                    _('Errore'), 
+                    _('''Attenzione manda la struttura del codice parlato nel
+                          prodotto: %s''') % product_proxy.name,
+                    )
             return self.pool.get('structure.structure').create_dynamic_bom(
                 cr, uid, [structure_id.id], context=context)
 

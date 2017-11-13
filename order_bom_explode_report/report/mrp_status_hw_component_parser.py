@@ -575,17 +575,27 @@ class Parser(report_sxw.rml_parse):
             cr, uid, value=previous_status, context=context)            
         return res
         
-    def get_pipe_unused(self, ):
+    def get_pipe_unused(self, only_zero=False):
         ''' Return pipe unused
         '''    
-        product_pool = self.pool.get('product.product')
+        min_val = 0.001
+        
         # Readability:
         cr = self.cr
         uid = self.uid
         context = {}
-        return sorted(
-            product_pool.browse(cr, uid, self.pipe_ids, context=context),
-            key=lambda x: x.default_code,
-            )
+
+        # Pool used:        
+        product_pool = self.pool.get('product.product')
         
+        if only_zero:
+            list_browse = [item for item in product_pool.browse(
+                cr, uid, self.pipe_ids, context=context) if 
+                    abs(item.mx_net_mrp_qty) <= min_val]
+        else: # present       
+            list_browse = [item for item in product_pool.browse(
+                cr, uid, self.pipe_ids, context=context) if 
+                    abs(item.mx_net_mrp_qty) > min_val]
+                    
+        return sorted(list_browse, key=lambda x: x.default_code)        
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

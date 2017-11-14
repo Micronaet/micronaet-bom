@@ -95,7 +95,8 @@ class MrpProduction(orm.Model):
             _logger.error('Error generation component report [%s]' % (
                 sys.exc_info(),))
             return False            
-        attachments = [('Componenti.odt', result)]
+        now = datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+        attachments = [('Componenti_%s.odt' % now, result)]
                 
         # ---------------------------------------------------------------------
         # Send report:

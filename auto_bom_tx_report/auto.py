@@ -623,6 +623,7 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         # Report in ODT mode:
         # ---------------------------------------------------------------------
+        now = datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
         if mode == 'odt':                
             report_name = 'stock_status_explode_report'
     
@@ -643,14 +644,14 @@ class MrpProduction(orm.Model):
                 _logger.error('Error generation TX report [%s]' % (
                     sys.exc_info(),))
                 return False            
-            attachments = [('Completo.odt', result)]
+            attachments = [('Completo_%s.odt' % now, result)]
         elif mode == 'xlsx':
             filename = self.extract_mrp_production_report_xlsx(
                 cr, uid, data=datas, context=context)                
 
             # Create attachment block for send after:    
             xlsx_raw = open(filename, 'rb').read()
-            attachments = [('Stato_tessuti.xlsx', xlsx_raw)]            
+            attachments = [('Stato_tessuti_%s.xlsx' % now, xlsx_raw)]            
         else:
             _logger.error('Only odt or xlsx mode for this report!')
             return False

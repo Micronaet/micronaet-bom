@@ -100,7 +100,7 @@ class MrpProduction(orm.Model):
                 category,
                 {}, # (HW that contain fabric) > fabric mode report
                 [0.0], # Total for my of fabrics (fabric report)
-                purchase.get(product.id, '')[:10],
+                purchase.get(product.id, ''),
                 ]
             return
             

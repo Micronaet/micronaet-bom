@@ -321,7 +321,7 @@ class MrpProduction(orm.Model):
                 format_text = get_xls_format('bg_green')
             
             line0 = [
-                ('%s - %s (forn. abit.: %s) [acq. %s]' % (
+                ('%s - %s (forn. abit.: %s) %s' % (
                     o.name,
                     o.colour,
                     o.first_supplier_id.name if o.first_supplier_id else '',

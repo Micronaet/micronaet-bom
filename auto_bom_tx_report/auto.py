@@ -591,16 +591,33 @@ class MrpProduction(orm.Model):
         _logger.warning('Write unused lines in Excel') 
         product_pool = self.pool.get('product.product')
         WS = WB.add_worksheet(_('Non usati'))
-        WS.set_column('A:A', 10)
-        WS.set_column('B:B', 10)
-        row = 0        
-        for product in product_pool.browse(
-                cr, uid, all_component_ids, context=context):
+        WS.set_column('A:A', 30)
+        WS.set_column('B:B', 15)
+        WS.set_column('C:C', 30)
+        WS.set_column('D:E', 15)
+        
+        # Header
+        row = 0                
+        write_xls_mrp_line(WS, row, [
+            'Categoria inv.',
+            'Codice', 
+            'Nome',            
+            'Netto',
+            'Lordo',
+            ])
+
+        # Line:
+        for product in sorted(product_pool.browse(
+                cr, uid, all_component_ids, context=context), 
+                key=lambda x: (x.inventory_category_id.name, x.default_code),
+                ):
             row += 1    
             write_xls_mrp_line(WS, row, [
+                product.inventory_category_id.name,                
                 product.default_code or '', 
                 product.name,
-                # TODO product.mx_net_mrp_qty,
+                product.mx_net_mrp_qty,
+                product.mx_lord_mrp_qty,
                 ])
 
         WB.close()

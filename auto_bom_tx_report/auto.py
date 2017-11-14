@@ -301,8 +301,8 @@ class MrpProduction(orm.Model):
             ''' Write line block for fabric, return new row position
             '''
             # Extract element from line_
-            (inv, tcar, tscar, mm, oc, of, sal, o, category, hw, hw_total) = \
-                line
+            (inv, tcar, tscar, mm, oc, of, sal, o, category, hw, hw_total, 
+                purchase) = line
             
             # Jump pipes:
             if category == 'Pipes':    
@@ -354,7 +354,10 @@ class MrpProduction(orm.Model):
             
             # Create row data:
             line1 = [
-                ('%s' % o.default_code, format_header),
+                ('%s [acq. %s]' % (
+                    o.default_code, 
+                    purchase,
+                    ), format_header),
                 ('', format_header),
                 ('Set.', format_header),
                 ('Ott.', format_header),

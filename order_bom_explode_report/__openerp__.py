@@ -31,6 +31,7 @@
         'base',
         'product',
         'sale',
+        'purchase',
         'mrp',
         'report_aeroo',
         'order_bom',

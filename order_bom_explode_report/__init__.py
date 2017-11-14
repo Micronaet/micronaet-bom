@@ -20,5 +20,6 @@
 from . import inventory
 from . import report
 from . import wizard
+from . import purchase
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

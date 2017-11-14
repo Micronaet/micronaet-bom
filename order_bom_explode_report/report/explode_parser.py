@@ -65,7 +65,7 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         # Utility function embedded:
         # ---------------------------------------------------------------------
-        def add_x_item(y_axis, item, category, mode='line'):
+        def add_x_item(y_axis, item, category, purchase=None, mode='line'):
             ''' Add new item to record
                 y_axis: list of records
                 item: bom browse obj
@@ -77,6 +77,8 @@ class MrpProduction(orm.Model):
                 product = item.product_id
             else: # 'product'
                 product = item
+            if purchase is None:
+                purchase = {}    
                 
             default_code = product.default_code or ''            
             if default_code in y_axis:
@@ -98,6 +100,7 @@ class MrpProduction(orm.Model):
                 category,
                 {}, # (HW that contain fabric) > fabric mode report
                 [0.0], # Total for my of fabrics (fabric report)
+                purchase.get(product.id, '')[:10],
                 ]
             return
             
@@ -223,6 +226,7 @@ class MrpProduction(orm.Model):
         product_pool = self.pool.get('product.product')
         pick_pool = self.pool.get('stock.picking')
         sale_pool = self.pool.get('sale.order')
+        move_pool = self.pool.get('stock.move')
         bom_pool = self.pool.get('mrp.bom')
         mrp_pool = self.pool.get('mrp.production')
         
@@ -230,6 +234,11 @@ class MrpProduction(orm.Model):
         y_axis = {}
         category_fabric = _('Fabric')
         
+        # Get purchase information:
+        _logger.info('Start get purchase information (date)')
+        purchase_db = move_pool._get_purchase_product_last_date(
+            cr, uid, context=context)
+            
         # ADD all fabrics in axis before all check:
         if mp_mode == 'fabric': # fabric
             fabric_list = (
@@ -246,7 +255,10 @@ class MrpProduction(orm.Model):
             fabric_ids = [item[0] for item in cr.fetchall()]
             for fabric in product_pool.browse(
                     cr, uid, fabric_ids, context=context):
-                add_x_item(y_axis, fabric, category_fabric, mode='product')
+                add_x_item(
+                    y_axis, fabric, category_fabric, 
+                    purchase_db, mode='product',
+                    )
                 
         # Get product BOM dyamic lines (from active order):
         product_data = sale_pool.get_component_in_product_order_open(
@@ -284,7 +296,7 @@ class MrpProduction(orm.Model):
                     category = item.category_id.type_id.name if \
                         item.category_id and item.category_id.type_id else \
                             _('No category')
-                    add_x_item(y_axis, item, category)                                        
+                    add_x_item(y_axis, item, category, purchase_db)                                        
                 elif mode == 'component' and not half_bom_ids: # cmpt in BOM
                     #if first_supplier_id and \
                     #        first_supplier_id != \
@@ -297,7 +309,7 @@ class MrpProduction(orm.Model):
                         item.category_id and item.category_id.type_id else \
                             _('No category')
                     # TODO write category as component mode (pipe/fabric)        
-                    add_x_item(y_axis, item, category)
+                    add_x_item(y_axis, item, category, purchase_db)
                 elif mode == 'component': # >>> component HW and component BOM
                     # TODO log halfcomponent with empty list
                     # relative_type = 'half'
@@ -316,7 +328,7 @@ class MrpProduction(orm.Model):
                             category = _('Pipes')
                         else:    
                             category = _('Fabric (or extra)')
-                        add_x_item(y_axis, component, category)
+                        add_x_item(y_axis, component, category, purchase_db)
                 else: 
                     # no above cases
                     continue        
@@ -499,7 +511,8 @@ class MrpProduction(orm.Model):
                         block, 'USED', pick.name, pick.origin,
                         pick.date, pos, '', product_code, # Prod is MP
                         '', -qty, # MM
-                        0, 0, 'BC MOVE Direct sale of component (ADD IN TSCAR)',
+                        0, 0, 
+                        'BC MOVE Direct sale of component (ADD IN TSCAR)',
                         ''
                         ))
                     continue    

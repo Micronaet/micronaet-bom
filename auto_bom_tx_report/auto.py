@@ -579,13 +579,16 @@ class MrpProduction(orm.Model):
         get_xls_format(mode=False, WB=WB)
         
         # Generate data report:
-        res = self.get_explode_report_object(
+        res, all_component_ids = self.get_explode_report_object(
             cr, uid, data=data, context=context)
         
         # Loop all record to write:
         row = 0
         for line in res:
             row = write_xls_block_line(WS, row, line)
+        
+        # TODO write unused lines:
+            
         WB.close()
         _logger.info('End creation file %s' % filename)
         return filename

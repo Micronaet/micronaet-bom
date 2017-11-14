@@ -45,6 +45,20 @@ class MrpProduction(orm.Model):
     """    
     _inherit = 'mrp.production'
     
+    # Utility:
+    def _get_all_product_in_bom(self, cr, uid, context=None):
+        ''' Search product in bom line with particular category:
+        '''
+        line_pool = self.pool.get('mrp.bom.line')
+        line_ids = line_pool.search(cr, uid, [
+            ('bom_id.bom_category', 'in', ('dynamic', 'half', 'parent')),
+            ], context=context)
+        res = []
+        for item in line_pool.browse(cr, uid, line_ids, context=context):
+            if item.product_id.id not in res:
+                res.append(item.product_id.id)
+        return res        
+        
     # Moved here utility for call externally:
     def get_explode_report_object(self, cr, uid, data=None, context=None):
         ''' Search all product elements
@@ -822,13 +836,22 @@ class MrpProduction(orm.Model):
                 )
                 
         write_xls_line('extra', ('Remove lines:', ))
-
+        
+        all_component_ids = self._get_all_product_in_bom(
+            cr, uid, context=context)
+        # TODO remove unwanted category:
+        #
+            
         for key in sorted(y_axis, key=order_mode):
             # -----------------------------------------------------------------    
             # Normal report block:
             # -----------------------------------------------------------------    
             current = y_axis[key] # readability:
             product = current[7]
+            
+            # Remove component for check:
+            if product.id in all_component_ids:
+                all_component_ids.remove(product.id)
 
             total = 0.0 # INV 0.0
             
@@ -897,7 +920,7 @@ class MrpProduction(orm.Model):
         if for_inventory_delta:
             return inventory_delta
         else:    
-            return res    
+            return res, all_component_ids    
     
 class Parser(report_sxw.rml_parse):
     counters = {}
@@ -943,7 +966,9 @@ class Parser(report_sxw.rml_parse):
         cr = self.cr
         uid = self.uid
         context = {}
+        mrp_pool = self.pool.get('mrp.production')
         
-        return self.pool.get('mrp.production').get_explode_report_object(
+        res, all_component_ids = mrp_pool.get_explode_report_object(
             cr, uid, data=data, context=context)
+        return res    
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

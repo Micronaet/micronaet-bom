@@ -35,6 +35,7 @@
         'mrp',
         'report_aeroo',
         'order_bom',
+        'bom_category', 
         'inventory_field', # for inventory field
         'bom_order_utility', # Utility for filter
         'bom_dynamic_structured', # for filter type category

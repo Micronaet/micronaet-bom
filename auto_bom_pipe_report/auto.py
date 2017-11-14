@@ -95,7 +95,8 @@ class MrpProduction(orm.Model):
             _logger.error('Error generation TX report [%s]' % (
                 sys.exc_info(),))
             return False            
-        now = datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+        now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        now = now.replace('-', '_').replace(':', '.')
         attachments = [('Tubi_%s.odt' % now, result)]
                 
         # ---------------------------------------------------------------------

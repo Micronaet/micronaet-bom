@@ -313,7 +313,8 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             # Merge cell:
             WS.merge_range(row, 0, row, 10, '')
-            WS.merge_range(row, 11, row, 15, '')
+            WS.merge_range(row, 11, row, 13, '')
+            WS.merge_range(row, 13, row, 15, '')
 
             if sal[11] < 0:
                 format_text = get_xls_format('bg_red')
@@ -339,6 +340,9 @@ class MrpProduction(orm.Model):
                 (category, format_text),
                 ('', format_text),
                 ('', format_text),
+                ('acq. %s' % purchase, format_text),
+                ('', format_text),
+                
                 ]        
             write_xls_mrp_line(WS, row, line0)
             row += 1
@@ -354,10 +358,7 @@ class MrpProduction(orm.Model):
             
             # Create row data:
             line1 = [
-                ('%s [acq. %s]' % (
-                    o.default_code, 
-                    purchase,
-                    ), format_header),
+                ('%s' % o.default_code, format_header),
                 ('', format_header),
                 ('Set.', format_header),
                 ('Ott.', format_header),
@@ -623,7 +624,8 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         # Report in ODT mode:
         # ---------------------------------------------------------------------
-        now = datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+        now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        now = now.replace('-', '_').replace(':', '.')
         if mode == 'odt':                
             report_name = 'stock_status_explode_report'
     

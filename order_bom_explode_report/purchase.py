@@ -50,11 +50,9 @@ class StockMove(orm.Model):
         res = {}
         domain = []
         
-        #year = datetime.now().year
         line_ids = self.search(cr, uid, [
-            #('order_id.date_order', '>=', '%s-01-01' % (year - 2)),
-            ('state', '=', 'completed'),
-            ('picking_id.origin', '=ilike', 'OF%'),
+            ('state', '=', 'done'),
+            ('origin', '=ilike', 'OF%'), #picking_id.origin
             ], context=context)
         for line in sorted(
                 self.browse(cr, uid, line_ids, context=context), 
@@ -64,5 +62,6 @@ class StockMove(orm.Model):
             if not product or product.id in res:
                 continue
             res[product.id] = line.picking_id.date
+        _logger.info('Total purchase product: %s' % len(line_ids))    
         return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

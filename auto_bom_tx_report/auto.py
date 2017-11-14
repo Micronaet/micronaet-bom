@@ -587,8 +587,22 @@ class MrpProduction(orm.Model):
         for line in res:
             row = write_xls_block_line(WS, row, line)
         
-        # TODO write unused lines:
-            
+        # Write unused lines:    
+        _logger.warning('Write unused lines in Excel') 
+        product_pool = self.pool.get('product.product')
+        WS = WB.add_worksheet(_('Non usati'))
+        WS.set_column('A:A', 10)
+        WS.set_column('B:B', 10)
+        row = 0        
+        for product in product_pool.browse(
+                cr, uid, all_component_ids, context=context):
+            row += 1    
+            write_xls_mrp_line(WS, row, [
+                product.default_code or '', 
+                product.name,
+                # TODO product.mx_net_mrp_qty,
+                ])
+
         WB.close()
         _logger.info('End creation file %s' % filename)
         return filename

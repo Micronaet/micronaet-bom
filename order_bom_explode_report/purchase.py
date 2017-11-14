@@ -62,10 +62,10 @@ class StockMove(orm.Model):
             product = line.product_id
             if not product or product.id in res:
                 continue
-            res[product.id] = '[acq. %s q. %s %s]' % (
+            res[product.id] = '[acq. %s %s %s]' % (
                 (line.picking_id.date or '')[:10],
-                line.product_uom_qty,
                 line.product_uom.name,
+                line.product_uom_qty,
                 )
         _logger.info('Total purchase product: %s' % len(line_ids))    
         return res

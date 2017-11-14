@@ -313,8 +313,7 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             # Merge cell:
             WS.merge_range(row, 0, row, 10, '')
-            WS.merge_range(row, 11, row, 13, '')
-            WS.merge_range(row, 13, row, 15, '')
+            WS.merge_range(row, 11, row, 15, '')
 
             if sal[11] < 0:
                 format_text = get_xls_format('bg_red')
@@ -322,10 +321,11 @@ class MrpProduction(orm.Model):
                 format_text = get_xls_format('bg_green')
             
             line0 = [
-                ('%s - %s (forn. abit.: %s)' % (
+                ('%s - %s (forn. abit.: %s) [acq. %s]' % (
                     o.name,
                     o.colour,
                     o.first_supplier_id.name if o.first_supplier_id else '',
+                    purchase,                    
                     ), format_text),
                 ('', format_text),
                 ('', format_text),
@@ -340,9 +340,6 @@ class MrpProduction(orm.Model):
                 (category, format_text),
                 ('', format_text),
                 ('', format_text),
-                ('acq. %s' % purchase, format_text),
-                ('', format_text),
-                
                 ]        
             write_xls_mrp_line(WS, row, line0)
             row += 1

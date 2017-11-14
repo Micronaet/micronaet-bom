@@ -597,13 +597,14 @@ class MrpProduction(orm.Model):
         WS.set_column('D:E', 15)
         
         # Header
+        format_text = get_xls_format('text')
         row = 0                
         write_xls_mrp_line(WS, row, [
-            'Categoria inv.',
-            'Codice', 
-            'Nome',            
-            'Netto',
-            'Lordo',
+            ('Categoria inv.', format_text),
+            ('Codice', format_text), 
+            ('Nome', format_text),
+            ('Netto', format_text),
+            ('Lordo', format_text),
             ])
 
         # Line:
@@ -613,11 +614,11 @@ class MrpProduction(orm.Model):
                 ):
             row += 1    
             write_xls_mrp_line(WS, row, [
-                product.inventory_category_id.name,                
-                product.default_code or '', 
-                product.name,
-                product.mx_net_mrp_qty,
-                product.mx_lord_mrp_qty,
+                (product.inventory_category_id.name, format_text),
+                (product.default_code or '', format_text),
+                (product.name, format_text),
+                (product.mx_net_mrp_qty, format_text),
+                (product.mx_lord_mrp_qty, format_text),
                 ])
 
         WB.close()

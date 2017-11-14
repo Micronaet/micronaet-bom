@@ -186,7 +186,6 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         #                                Procedure:
         # ---------------------------------------------------------------------
-
         self.order_month = {} # Parent distribution for month
                 
         if data is None:
@@ -366,6 +365,8 @@ class Parser(report_sxw.rml_parse):
                     halfwork = hw.product_id
                     if halfwork.relative_type != 'half':
                         continue
+
+                    # XXX Add only halfworked here    
                     if halfwork not in hws: # halfwork browse obj
                         hws[halfwork] = [
                             0.0, # 0. Needed                            

@@ -81,15 +81,13 @@ class SaleOrderLine(orm.Model):
             sol_ids = self.search(cr, uid, domain, context=context)
             _logger.info('Row produced: %s' % len(sol_ids))
             
-            product_ids = []
             for item in self.browse(cr, uid, sol_ids, context=context):
-                if item.product_id and item.product_id.id in all_ids:
-                    product_ids.append(item.product_id.id)
-
-            _logger.info('Product updated: %s' % len(product_ids))
-            return product_pool.write(cr, uid, product_ids, {
-                'mrp_status': value,
-                }, context=context)
+                if item.product_id:
+                    return product_pool.write(cr, uid, item.product_id.id, {
+                        'mrp_status': value,
+                        }, context=context)
+            _logger.info('Update also product')
+            return True
 
         # ---------------------------------------------------------------------
         # Prameters:            
@@ -132,7 +130,6 @@ class SaleOrderLine(orm.Model):
             ('mrp_id.date_planned', '<', month_24),
             ('product_id.mrp_status', '=', False),            
             ], 'obsolete', all_ids, context=context)
-        import pdb; pdb.set_trace()
 
         # ---------------------------------------------------------------------
         #                   Mark bom line status:
@@ -159,11 +156,11 @@ class SaleOrderLine(orm.Model):
                 # -------------------------------------------------------------
                 # Mark all primary component:    
                 # -------------------------------------------------------------
-                for second in first.bom_ids:
+                for second in item.half_bom_ids:
                     cmpt = second.product_id
                     if cmpt.id not in update_db[product.mrp_status]:
                         update_db[product.mrp_status].append(cmpt.id)
-                        
+
         # ---------------------------------------------------------------------
         # Update operations:
         # ---------------------------------------------------------------------

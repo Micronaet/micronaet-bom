@@ -45,9 +45,9 @@ class MrpProduction(orm.Model):
     """
         
     _inherit = 'mrp.production'
-    
+
     def send_component_mrp_report_scheduler(
-            self, cr, uid, context=None):
+            self, cr, uid, mode='xlsx', context=None):
         ''' Generate PDF with data and send mail
         '''
         _logger.info('Send report COMPONENT')
@@ -77,28 +77,37 @@ class MrpProduction(orm.Model):
             #'first_supplier_id': False, 
             }
 
-        # -----------------------------------------------------------------
+        # ---------------------------------------------------------------------
         # Call report:            
-        # -----------------------------------------------------------------
-        # Procedure for problem in setup language in ODT report
-        mrp_ids = self.search(cr, uid, [], context=context)
-        if mrp_ids:
-            mrp_id = mrp_ids[0]
-        else:
-            mrp_id = False
-                
-        try:
-            result, extension = openerp.report.render_report(
-                cr, uid, [mrp_id], 'stock_status_explode_report', 
-                datas, context)
-        except:
-            _logger.error('Error generation component report [%s]' % (
-                sys.exc_info(),))
-            return False            
+        # ---------------------------------------------------------------------
+        mrp_pool = self.pool.get('mrp.production')     
         now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         now = now.replace('-', '_').replace(':', '.')
+        if mode == 'xlsx':
+            filename = mrp_pool.extract_mrp_production_report_xlsx(
+                cr, uid, data=datas, context=context)
+            _logger.info('Extracted file in %s' % filename)
+
+            # Create attachment block for send after:  
+            result = open(filename, 'rb').read() #xlsx raw
+        else: # odt
+            # Procedure for problem in setup language in ODT report
+            mrp_ids = self.search(cr, uid, [], context=context)
+            if mrp_ids:
+                mrp_id = mrp_ids[0]
+            else:
+                mrp_id = False
+                    
+            try:
+                result, extension = openerp.report.render_report(
+                    cr, uid, [mrp_id], 'stock_status_explode_report', 
+                    datas, context)
+            except:
+                _logger.error('Error generation component report [%s]' % (
+                    sys.exc_info(),))
+                return False            
         attachments = [('Componenti_%s.odt' % now, result)]
-                
+                    
         # ---------------------------------------------------------------------
         # Send report:
         # ---------------------------------------------------------------------
@@ -107,7 +116,10 @@ class MrpProduction(orm.Model):
         model_pool = self.pool.get('ir.model.data')
         thread_pool = self.pool.get('mail.thread')
         group_id = model_pool.get_object_reference(
-            cr, uid, 'auto_bom_component_report', 'group_component_report_admin')[1]    
+            cr, uid, 
+            'auto_bom_component_report', 
+            'group_component_report_admin',
+            )[1]
         partner_ids = []
         for user in group_pool.browse(
                 cr, uid, group_id, context=context).users:

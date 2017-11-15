@@ -162,7 +162,7 @@ class SaleOrderLine(orm.Model):
         updated_ids = [] # for check (because there's an order)
         for product in sorted(product_pool.browse(cr, uid, product_ids, 
                 context=context), key=lambda x: sort_function(x.mrp_status)):
-            if product.id in update_ids:
+            if product.id in updated_ids:
                 continue # jump if yet updated (for order priorirty)
 
             # -----------------------------------------------------------------    

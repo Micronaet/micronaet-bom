@@ -139,44 +139,50 @@ class SaleOrderLine(orm.Model):
     def schedule_setup_obsolete_component_in_bom(self, cr, uid, context=None):
         ''' Setup obsolete component
         '''
+        def sort_function(x):
+            if x == 'obsolete': 
+                return 3
+            elif x == 'old':
+                return 2
+            else: # used
+                return 1    
+                
         product_pool = self.pool.get('product.product')
 
         # 1. Update product MRP status:
         # XXX self._update_mrp_status(cr, uid, context=context)
         
         # 2. Mark bom line status:
-        # Search all product produced all database:
+        update_db = {'old': [], 'updated': [], 'used': []}
         product_ids = product_pool.search(cr, uid, [
             ('mrp_status', '!=', False),
             ], context=context)
-
-        update_db = {}
-        i = 0
         _logger.info('Start explode %s product BOM' % len(product_ids))
         import pdb; pdb.set_trace()
-        for product in product_pool.browse(
-                cr, uid, product_ids, context=context):
-            i += 1
-            if i % 100 == 0:
-                _logger.info('Product read: %s' % i)
-            if product.mrp_status:
-                update_db[product.mrp_status] = []
-            
+        updated_ids = [] # for check (because there's an order)
+        for product in sorted(product_pool.browse(cr, uid, product_ids, 
+                context=context), key=lambda x: sort_function(x.mrp_status)):
+            if product.id in update_ids:
+                continue # jump if yet updated (for order priorirty)
+
             # -----------------------------------------------------------------    
             # Mark all primary component:    
             # -----------------------------------------------------------------    
+            updating_ids = update_db[product.mrp_status]
             for first in product.dynamic_bom_line_ids:
                 item = first.product_id
-                if item.id not in update_db[product.mrp_status]:
-                    update_db[product.mrp_status].append(item.id)
+                if item.id not in updating_ids:
+                    updating_ids.append(item.id)
+                    updated_ids.append(item.id)
 
                 # -------------------------------------------------------------
                 # Mark all primary component:    
                 # -------------------------------------------------------------
                 for second in item.half_bom_ids:
                     cmpt = second.product_id
-                    if cmpt.id not in update_db[product.mrp_status]:
-                        update_db[product.mrp_status].append(cmpt.id)
+                    if cmpt.id not in updating_ids:
+                        updating_ids.append(cmpt.id)
+                        updated_ids.append(cmpt.id)
 
         # ---------------------------------------------------------------------
         # Update operations:

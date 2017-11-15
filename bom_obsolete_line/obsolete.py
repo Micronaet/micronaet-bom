@@ -81,20 +81,19 @@ class SaleOrderLine(orm.Model):
             sol_ids = self.search(cr, uid, domain, context=context)
             _logger.info('Row produced: %s' % len(sol_ids))
             
-            i = 0
+            product_ids = []
+            import pdb; pdb.set_trace()
             for item in self.browse(cr, uid, sol_ids, context=context):
-                try:
-                    if item.product_id:
-                        i += 1
-                        if i % 100 == 0:
-                            _logger.info('Row updated: %s' % i)
+                if item.product_id:
+                    product_ids.append(item.product_id.id)
 
-                        product_pool.write(cr, uid, item.product_id.id, {
-                            'mrp_status': value,
-                            }, context=context)
-                except:
-                    _logger.error('Item error update: %s' % (item, ))
-
+            for item_id in product_ids:
+                product_pool.write(cr, uid, item_id, {
+                    'mrp_status': value,
+                    }, context=context)                        
+                #product_pool.write(cr, uid, product_ids, {
+                #    'mrp_status': value,
+                #    }, context=context)                        
             _logger.info('Update also product')
             return True
 
@@ -114,10 +113,10 @@ class SaleOrderLine(orm.Model):
         product_pool = self.pool.get('product.product')
         all_ids = product_pool.search(cr, uid, [], context=context)
         _logger.info('Reset product status: %s' % len(all_ids))
-        product_pool.write(cr, uid, all_ids, {
-            'mrp_status': False,
-            'bom_line_status': False,
-            }, context=context)
+        #product_pool.write(cr, uid, all_ids, {
+        #    'mrp_status': False,
+        #    'bom_line_status': False,
+        #    }, context=context)
 
         # B. used (0 - 12)
         update_product(self, cr, uid, [

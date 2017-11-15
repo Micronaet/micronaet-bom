@@ -30,8 +30,9 @@
     'license': 'AGPL-3',
     'depends': [
         'base',
-        'mrp',
+        'product',
         'sale',
+        'mrp',
         'bom_dynamic_structured',
         ],
     'init_xml': [],

@@ -57,8 +57,9 @@ class ProductProduct(orm.Model):
         }
 
     _defaults = {
-        'mrp_status': lambda *x: False,
-        'bom_line_status': lambda *x: False,
+        # For new product (first schedule correct old elements)
+        'mrp_status': lambda *x: 'used', 
+        'bom_line_status': lambda *x: 'used',
         }
 
 class SaleOrderLine(orm.Model):

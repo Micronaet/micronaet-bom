@@ -66,8 +66,9 @@ class SaleOrderLine(orm.Model):
     """    
     _inherit = 'sale.order.line'
     
-    def schedule_setup_obsolete_component_in_bom(self, cr, uid, context=None):
-        ''' Setup obsolete component
+    # Utility:
+    def _update_mrp_status(self, cr, uid, context=None):
+        ''' Update only product mrp status
         '''
         # ---------------------------------------------------------------------
         # Utility:
@@ -81,19 +82,12 @@ class SaleOrderLine(orm.Model):
             sol_ids = self.search(cr, uid, domain, context=context)
             _logger.info('Row produced: %s' % len(sol_ids))
             
-            product_ids = []
-            import pdb; pdb.set_trace()
             for item in self.browse(cr, uid, sol_ids, context=context):
                 if item.product_id:
-                    product_ids.append(item.product_id.id)
+                    product_pool.write(cr, uid, item.product_id.id, {
+                        'mrp_status': value,
+                        }, context=context)                        
 
-            for item_id in product_ids:
-                product_pool.write(cr, uid, item_id, {
-                    'mrp_status': value,
-                    }, context=context)                        
-                #product_pool.write(cr, uid, product_ids, {
-                #    'mrp_status': value,
-                #    }, context=context)                        
             _logger.info('Update also product')
             return True
 
@@ -113,10 +107,10 @@ class SaleOrderLine(orm.Model):
         product_pool = self.pool.get('product.product')
         all_ids = product_pool.search(cr, uid, [], context=context)
         _logger.info('Reset product status: %s' % len(all_ids))
-        #product_pool.write(cr, uid, all_ids, {
-        #    'mrp_status': False,
-        #    'bom_line_status': False,
-        #    }, context=context)
+        product_pool.write(cr, uid, all_ids, {
+            'mrp_status': False,
+            'bom_line_status': False,
+            }, context=context)
 
         # B. used (0 - 12)
         update_product(self, cr, uid, [
@@ -139,16 +133,27 @@ class SaleOrderLine(orm.Model):
             ('product_id.mrp_status', '=', False),            
             ], 'obsolete', context=context)
 
-        # ---------------------------------------------------------------------
-        #                   Mark bom line status:
-        # ---------------------------------------------------------------------
+        return True
+    
+    # Scheduled procedure:    
+    def schedule_setup_obsolete_component_in_bom(self, cr, uid, context=None):
+        ''' Setup obsolete component
+        '''
+        product_pool = self.pool.get('product.product')
+
+        # 1. Update product MRP status:
+        # XXX self._update_mrp_status(cr, uid, context=context)
+        
+        # 2. Mark bom line status:
         # Search all product produced all database:
         product_ids = product_pool.search(cr, uid, [
             ('mrp_status', '!=', False),
             ], context=context)
 
         update_db = {}
-        i = 0    
+        i = 0
+        _logger.info('Start explode %s product BOM' % len(product_ids))
+        import pdb; pdb.set_trace()
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
             i += 1
@@ -176,6 +181,7 @@ class SaleOrderLine(orm.Model):
         # ---------------------------------------------------------------------
         # Update operations:
         # ---------------------------------------------------------------------
+        import pdb; pdb.set_trace()
         for status, item_ids in update_db.iteritems():
              product_pool.write(cr, uid, item_ids, {
                  'bom_line_status': status,

@@ -72,7 +72,7 @@ class SaleOrderLine(orm.Model):
         # ---------------------------------------------------------------------
         # Utility:
         # ---------------------------------------------------------------------
-        def update_product(self, cr, uid, domain, value, all_ids, context=None):
+        def update_product(self, cr, uid, domain, value, context=None):
             ''' Update product function
             '''
             _logger.info('Set product: %s' % value)
@@ -81,11 +81,20 @@ class SaleOrderLine(orm.Model):
             sol_ids = self.search(cr, uid, domain, context=context)
             _logger.info('Row produced: %s' % len(sol_ids))
             
+            i = 0
             for item in self.browse(cr, uid, sol_ids, context=context):
-                if item.product_id:
-                    return product_pool.write(cr, uid, item.product_id.id, {
-                        'mrp_status': value,
-                        }, context=context)
+                try:
+                    if item.product_id:
+                        i += 1
+                        if i % 100 == 0:
+                            _logger.info('Row updated: %s' % i)
+
+                        product_pool.write(cr, uid, item.product_id.id, {
+                            'mrp_status': value,
+                            }, context=context)
+                except:
+                    _logger.error('Item error update: %s' % (item, ))
+
             _logger.info('Update also product')
             return True
 
@@ -114,7 +123,7 @@ class SaleOrderLine(orm.Model):
         update_product(self, cr, uid, [
             ('mrp_id.state', '!=', 'cancel'),
             ('mrp_id.date_planned', '>=', month_12),
-            ], 'used', all_ids, context=context)
+            ], 'used', context=context)
 
         # C. old (12 - 24)
         update_product(self, cr, uid, [
@@ -122,14 +131,14 @@ class SaleOrderLine(orm.Model):
             ('mrp_id.date_planned', '<', month_12),
             ('mrp_id.date_planned', '>=', month_24),
             ('product_id.mrp_status', '=', False),            
-            ], 'old', all_ids, context=context)
+            ], 'old', context=context)
 
         # C. obsolete (24 - ..)
         update_product(self, cr, uid, [
             ('mrp_id.state', '!=', 'cancel'),
             ('mrp_id.date_planned', '<', month_24),
             ('product_id.mrp_status', '=', False),            
-            ], 'obsolete', all_ids, context=context)
+            ], 'obsolete', context=context)
 
         # ---------------------------------------------------------------------
         #                   Mark bom line status:
@@ -139,9 +148,13 @@ class SaleOrderLine(orm.Model):
             ('mrp_status', '!=', False),
             ], context=context)
 
-        update_db = {}                
+        update_db = {}
+        i = 0    
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
+            i += 1
+            if i % 100 == 0:
+                _logger.info('Product read: %s' % i)
             if product.mrp_status:
                 update_db[product.mrp_status] = []
             

@@ -1,7 +1,65 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+        <!--product.prodcut-->
+        <record model="ir.ui.view" id="view_product_mrp_status_tree">
+            <field name="name">product.product.tree</field>
+            <field name="model">product.product</field>
+            <field name="arch" type="xml">
+                <tree string="Product variant" colors="red:mrp_status==False;brown:bom_line_status==False;black:mrp_status!=False;blue:bom_line_status!=False">
+	                <field name="default_code" />
+	                <field name="name" />
+	                <field name="lst_price" />
+	                <field name="price" />
+	                <field name="uom_id" />
+	                <field name="ean13" />
+                    <field name="mrp_status" />
+                    <field name="bom_line_status" />
+	                <field name="state" invisible="1" />
+	                <field name="product_tmpl_id" invisible="1" />
+                </tree>
+            </field>
+        </record>        
+        <record model="ir.ui.view" id="view_product_mrp_search">
+            <field name="name">product.product.bom.status.search</field>
+            <field name="model">product.product</field>
+            <field name="priority" eval="50" />
+            <field name="arch" type="xml">
+                <search string="Product search" version="7.0">        
+                    <field name="name" />
+                    <field name="default_code" />
+                    <field name="mrp_status" />
+                    <field name="bom_line_status" />
 
+                    <filter name="mrp_status_off" string="Without MRP status" domain="[('mrp_status','=',False)]"/>
+                    <filter name="mrp_status_on" string="With MRP status" domain="[('mrp_status','!=',False)]"/>
+
+                    <filter name="mrp_bom_line_off" string="Without BOM line status" domain="[('bom_line_status','=',False)]"/>
+                    <filter name="mrp_bom_line_on" string="With BOM line status" domain="[('bom_line_status','!=',False)]"/>
+                    
+                    <group expand="0" string="Group By...">
+                        <filter name="group_mrp_status" string="MRP status" context="{'group_by': 'mrp_status'}"/>
+                        <filter name="group_bom_line_status" string="BOM line status" context="{'group_by': 'bom_line_status'}"/>
+                    </group>                
+                </search>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_product_mrp_form">
+            <field name="name">Product BOM used</field>
+            <field name="res_model">product.product</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_product_mrp_status_tree"/>
+            <field name="search_view_id" ref="view_product_mrp_search"/>            
+            <field name="context">{}</field>
+            <field name="domain">[]</field>
+        </record>
+        <menuitem 
+            parent="mrp.menu_mrp_bom_form_action" 
+            id="menu_view_product_mrp_status" 
+            action="action_product_mrp_form"
+            sequence="90"
+            />        
     </data>
 </openerp>
 

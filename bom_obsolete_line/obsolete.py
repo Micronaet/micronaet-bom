@@ -40,7 +40,7 @@ _logger = logging.getLogger(__name__)
 
 bom_status = [
     ('used', 'Used (< 12)'),
-    ('old', 'Old (12 > 24)',
+    ('old', 'Old (12 > 24)'),
     ('obsolete', 'Obsolete (> 24)'),
     ]
 
@@ -72,17 +72,21 @@ class SaleOrderLine(orm.Model):
         # ---------------------------------------------------------------------
         # Utility:
         # ---------------------------------------------------------------------
-        def update_product(self, cr, uid, domain, value, context=None):
+        def update_product(self, cr, uid, domain, value, all_ids, context=None):
             ''' Update product function
             '''
             _logger.info('Set product: %s' % value)
             product_pool = self.pool.get('product.product')
             
             sol_ids = self.search(cr, uid, domain, context=context)
-            _logger.info('Row produced: %s' % len(sol_ids)
-            product_ids = [item.product_id.id for item in self.browse(
-                cr, uid, sol_ids, context=context)]
-            _logger.info('Product updated: %s' % len(product_ids)  
+            _logger.info('Row produced: %s' % len(sol_ids))
+            
+            product_ids = []
+            for item in self.browse(cr, uid, sol_ids, context=context):
+                if item.product_id and item.product_id.id in all_ids:
+                    product_ids.append(item.product_id.id)
+
+            _logger.info('Product updated: %s' % len(product_ids))
             return product_pool.write(cr, uid, product_ids, {
                 'mrp_status': value,
                 }, context=context)
@@ -101,40 +105,43 @@ class SaleOrderLine(orm.Model):
         # ---------------------------------------------------------------------
         # A. Reset product
         product_pool = self.pool.get('product.product')
-        _logger.info('Reset product status')        
-        product_ids = product_pool.search(cr, uid, [], context=context)
-        product_pool.write(cr, uid, product_ids, {
+        all_ids = product_pool.search(cr, uid, [], context=context)
+        _logger.info('Reset product status: %s' % len(all_ids))
+        product_pool.write(cr, uid, all_ids, {
             'mrp_status': False,
             'bom_line_status': False,
             }, context=context)
 
         # B. used (0 - 12)
         update_product(self, cr, uid, [
-            ('mrp_production_id.state', '!=', 'cancel'),
-            ('mrp_production_id.date_planned', '<', month_12),
-            ], 'used', context=context)
+            ('mrp_id.state', '!=', 'cancel'),
+            ('mrp_id.date_planned', '>=', month_12),
+            ], 'used', all_ids, context=context)
 
         # C. old (12 - 24)
         update_product(self, cr, uid, [
-            ('mrp_production_id.state', '!=', 'cancel'),
-            ('mrp_production_id.date_planned', '>=', month_12),
-            ('mrp_production_id.date_planned', '<', month_24),
+            ('mrp_id.state', '!=', 'cancel'),
+            ('mrp_id.date_planned', '<', month_12),
+            ('mrp_id.date_planned', '>=', month_24),
             ('product_id.mrp_status', '=', False),            
-            ], 'old', context=context)
+            ], 'old', all_ids, context=context)
 
         # C. obsolete (24 - ..)
         update_product(self, cr, uid, [
-            ('mrp_production_id.state', '!=', 'cancel'),
-            ('mrp_production_id.date_planned', '>=', month_24),
+            ('mrp_id.state', '!=', 'cancel'),
+            ('mrp_id.date_planned', '<', month_24),
             ('product_id.mrp_status', '=', False),            
-            ], 'obsolete', context=context)
+            ], 'obsolete', all_ids, context=context)
+        import pdb; pdb.set_trace()
 
         # ---------------------------------------------------------------------
         #                   Mark bom line status:
         # ---------------------------------------------------------------------
+        # Search all product produced all database:
         product_ids = product_pool.search(cr, uid, [
             ('mrp_status', '!=', False),
             ], context=context)
+
         update_db = {}                
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):

@@ -91,6 +91,7 @@ class MrpProduction(orm.Model):
             # Create attachment block for send after:  
             result = open(filename, 'rb').read() #xlsx raw
         else: # odt
+            mode = 'odt' # for extension
             # Procedure for problem in setup language in ODT report
             mrp_ids = self.search(cr, uid, [], context=context)
             if mrp_ids:
@@ -106,7 +107,7 @@ class MrpProduction(orm.Model):
                 _logger.error('Error generation component report [%s]' % (
                     sys.exc_info(),))
                 return False            
-        attachments = [('Componenti_%s.odt' % now, result)]
+        attachments = [('Componenti_%s.%s' % (now, mode), result)]
                     
         # ---------------------------------------------------------------------
         # Send report:

@@ -6,7 +6,7 @@
             <field name="name">product.product.tree</field>
             <field name="model">product.product</field>
             <field name="arch" type="xml">
-                <tree string="Product variant" colors="red:mrp_status==False;brown:bom_line_status==False;black:mrp_status!=False;blue:bom_line_status!=False">
+                <tree string="Product variant" colors="red:mrp_status==False and bom_line_status==False;black:mrp_status!=False;blue:bom_line_status!=False">
 	                <field name="default_code" />
 	                <field name="name" />
 	                <field name="lst_price" />

@@ -1,0 +1,115 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* bom_obsolete_line
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-11-16 07:48+0000\n"
+"PO-Revision-Date: 2017-11-16 08:50+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: it\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#. module: bom_obsolete_line
+#: view:product.product:bom_obsolete_line.view_product_mrp_search
+msgid "BOM line status"
+msgstr "Stato linee DB"
+
+#. module: bom_obsolete_line
+#: field:product.product,bom_line_status:0
+msgid "BOM line status (component)"
+msgstr "Stato linee DB (componenti)"
+
+#. module: bom_obsolete_line
+#: field:mrp.bom.line,bom_line_status:0
+msgid "Bom line status"
+msgstr "Stato linee DB"
+
+#. module: bom_obsolete_line
+#: view:product.product:bom_obsolete_line.view_product_mrp_search
+msgid "Group By..."
+msgstr "Raggruppa per..."
+
+#. module: bom_obsolete_line
+#: field:product.product,mrp_status:0
+msgid "MRP Status (product)"
+msgstr "Stato produzione (prodotti)"
+
+#. module: bom_obsolete_line
+#: view:product.product:bom_obsolete_line.view_product_mrp_search
+msgid "MRP status"
+msgstr "Stato produzione"
+
+#. module: bom_obsolete_line
+#: selection:mrp.bom.line,bom_line_status:0
+#: selection:product.product,bom_line_status:0
+#: selection:product.product,mrp_status:0
+msgid "Obsolete (> 24)"
+msgstr "Obsoleto (> 24)"
+
+#. module: bom_obsolete_line
+#: selection:mrp.bom.line,bom_line_status:0
+#: selection:product.product,bom_line_status:0
+#: selection:product.product,mrp_status:0
+msgid "Old (12 > 24)"
+msgstr "Vecchio (12 > 24)"
+
+#. module: bom_obsolete_line
+#: model:ir.model,name:bom_obsolete_line.model_product_product
+msgid "Product"
+msgstr "Prodotto"
+
+#. module: bom_obsolete_line
+#: model:ir.actions.act_window,name:bom_obsolete_line.action_product_mrp_form
+#: model:ir.ui.menu,name:bom_obsolete_line.menu_view_product_mrp_status
+msgid "Product BOM used"
+msgstr "Prodotti usati in DB"
+
+#. module: bom_obsolete_line
+#: view:product.product:bom_obsolete_line.view_product_mrp_search
+msgid "Product search"
+msgstr "Ricerca prodotto"
+
+#. module: bom_obsolete_line
+#: view:product.product:bom_obsolete_line.view_product_mrp_status_tree
+msgid "Product variant"
+msgstr "Varianti di prodotto"
+
+#. module: bom_obsolete_line
+#: model:ir.model,name:bom_obsolete_line.model_sale_order_line
+msgid "Sales Order Line"
+msgstr "Linea d'ordine di vendita"
+
+#. module: bom_obsolete_line
+#: selection:mrp.bom.line,bom_line_status:0
+#: selection:product.product,bom_line_status:0
+#: selection:product.product,mrp_status:0
+msgid "Used (< 12)"
+msgstr "Usati (< 12)"
+
+#. module: bom_obsolete_line
+#: view:product.product:bom_obsolete_line.view_product_mrp_search
+msgid "With BOM line status"
+msgstr "Con stato linee DB"
+
+#. module: bom_obsolete_line
+#: view:product.product:bom_obsolete_line.view_product_mrp_search
+msgid "With MRP status"
+msgstr "Con stato produzione"
+
+#. module: bom_obsolete_line
+#: view:product.product:bom_obsolete_line.view_product_mrp_search
+msgid "Without BOM line status"
+msgstr "Senza stato linee DB"
+
+#. module: bom_obsolete_line
+#: view:product.product:bom_obsolete_line.view_product_mrp_search
+msgid "Without MRP status"
+msgstr "Senza stato produzione"

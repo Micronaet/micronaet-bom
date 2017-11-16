@@ -58,7 +58,7 @@ class ProductProduct(orm.Model):
 
     _defaults = {
         # For new product (first schedule correct old elements)
-        'mrp_status': lambda *x: 'used', 
+        'mrp_status': lambda *x: 'used',
         'bom_line_status': lambda *x: 'used',
         }
 
@@ -159,7 +159,7 @@ class SaleOrderLine(orm.Model):
             ('mrp_status', '!=', False),
             ], context=context)
         _logger.info('Start explode %s product BOM' % len(product_ids))
-        import pdb; pdb.set_trace()
+
         updated_ids = [] # for check (because there's an order)
         for product in sorted(product_pool.browse(cr, uid, product_ids, 
                 context=context), key=lambda x: sort_function(x.mrp_status)):

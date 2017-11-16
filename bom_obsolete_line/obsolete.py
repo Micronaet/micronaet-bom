@@ -151,7 +151,7 @@ class SaleOrderLine(orm.Model):
         product_pool = self.pool.get('product.product')
 
         # 1. Update product MRP status:
-        # XXX self._update_mrp_status(cr, uid, context=context)
+        self._update_mrp_status(cr, uid, context=context)
         
         # 2. Mark bom line status:
         update_db = {'old': [], 'updated': [], 'used': []}
@@ -188,7 +188,6 @@ class SaleOrderLine(orm.Model):
         # ---------------------------------------------------------------------
         # Update operations:
         # ---------------------------------------------------------------------
-        import pdb; pdb.set_trace()
         for status, item_ids in update_db.iteritems():
              product_pool.write(cr, uid, item_ids, {
                  'bom_line_status': status,

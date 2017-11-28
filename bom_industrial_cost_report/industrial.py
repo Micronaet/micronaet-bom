@@ -167,19 +167,20 @@ class ProductProduct(orm.Model):
         '''
         res = {}
         cost_pool = self.pool.get('mrp.bom.industrial.cost')
+        line_pool = self.pool.get('mrp.bom.industrial.cost.line')
         cost_ids = cost_pool.search(cr, uid, [], context=context)
         cost_db = {}
         for cost in cost_pool.browse(
                 cr, uid, cost_ids, context=context):
             cost_db[cost.id] = cost.name            
-        #import pdb; pdb.set_trace()
+
         for product in self.browse(cr, uid, ids, context=context):
             default_code = product.default_code
             if not default_code:
                 continue
 
             query = '''
-                SELECT cost_id, cost
+                SELECT id
                 FROM mrp_bom_industrial_cost_line 
                 WHERE '%s' ilike name
                 ORDER BY length(name) desc;
@@ -187,10 +188,15 @@ class ProductProduct(orm.Model):
             cr.execute(query)
 
             # Update category element priority order len mask
-            for item in cr.fetchall():
-                cost_name = cost_db.get(item[0], '???')
-                if cost_name not in res: # only the first 
-                    res[cost_name] = item[1]            
+            # XXX 28/10/2017 Changed for report use:
+            item_ids = [item[0] for item in cr.fetchall()]
+            for item in line_pool.browse(cr, uid, item_ids, context=context):
+                if item.cost_id not in res:
+                    res[item.cost_id] = item
+                            
+                #cost_name = cost_db.get(item[0], '???')
+                #if cost_name not in res: # only the first 
+                #    res[cost_name] = item[1]
         return res
 
     # -------------------------------------------------------------------------

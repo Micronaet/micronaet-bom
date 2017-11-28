@@ -323,9 +323,10 @@ class ProductProduct(orm.Model):
             cr, uid, [product.id], context=context)
         
         # Append totals:    
-        for cost, value in cost_industrial.iteritems():
+        for cost, item in cost_industrial.iteritems():
             #date, price = get_last_price(self, product)
-            res.append(('T', cost, value))    
+            value = 0.0 # TODO item.
+            res.append(('T', cost.name or '???', value))
             self.min += value
             self.max += value
         return res

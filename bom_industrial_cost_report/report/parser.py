@@ -242,6 +242,23 @@ class ProductProduct(orm.Model):
         # ---------------------------------------------------------------------
         # Utility:
         # ---------------------------------------------------------------------
+        def get_last_price(self, product):
+            ''' Load list in all seller pricelist return min and max value
+            '''
+            max_data = False
+            price = 0.0
+            for seller in product.seller_ids:
+                 for pricelist in seller.pricelist_ids:
+                     if not pricelist.is_active:
+                         continue
+                         
+                     date_quotation = pricelist.date_quotation or False
+                     if date_quotation > max_data:
+                         price = pricelist.price
+                         max_data = date_quotation
+                         
+            return max_data, price
+            
         def load_subelements_price(self, res, mode, item, product, hw=False):
             ''' Load list in all seller pricelist return min and max value
             '''
@@ -249,11 +266,12 @@ class ProductProduct(orm.Model):
             max_value = 0.0
             
             record = [mode, item, []]
+                
             # TODO manage as pipe?
             for seller in product.seller_ids:
                  for pricelist in seller.pricelist_ids:
                      if not pricelist.is_active:
-                         continue
+                         continue                         
                      total = pricelist.price * item.product_qty
                      record[2].append((
                          seller.name.name,
@@ -272,7 +290,7 @@ class ProductProduct(orm.Model):
             self.max += max_value
             res.append(record)
             return
-
+                
         # ---------------------------------------------------------------------
         # Load component list (and subcomponent for HW):
         # ---------------------------------------------------------------------
@@ -300,9 +318,13 @@ class ProductProduct(orm.Model):
         res.append(('H', False, False))    
 
         # Add lavoration cost:
+        import pdb; pdb.set_trace()
         cost_industrial = self.get_cost_industrial_for_product(
             cr, uid, [product.id], context=context)
+        
+        # Append totals:    
         for cost, value in cost_industrial.iteritems():
+            #date, price = get_last_price(self, product)
             res.append(('T', cost, value))    
             self.min += value
             self.max += value

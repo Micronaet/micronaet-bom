@@ -172,7 +172,7 @@ class ProductProduct(orm.Model):
         for cost in cost_pool.browse(
                 cr, uid, cost_ids, context=context):
             cost_db[cost.id] = cost.name            
-        
+        import pdb; pdb.set_trace()
         for product in self.browse(cr, uid, ids, context=context):
             default_code = product.default_code
             if not default_code:

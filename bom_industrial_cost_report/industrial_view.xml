@@ -9,18 +9,24 @@
                  <tree string="Cost filter" editable="bottom">
                      <field name="cost_id" invisible="context.get('is_embedded', False)"/>
                      <field name="name" />
-                     <field name="cost" />
+                     <field name="product_id" />
+                     <field name="qty" />
+                     <field name="uom_id" />
+                     <!--<field name="cost" />-->                     
                  </tree>
              </field>
          </record>         
          <record model="ir.ui.view" id="view_mrp_bom_industrial_cost_line_form">
-             <field name="name">mrp.bom.industrial.cost.line.tree</field>
+             <field name="name">mrp.bom.industrial.cost.line.form</field>
              <field name="model">mrp.bom.industrial.cost.line</field>
              <field name="arch" type="xml">
                  <form string="Cost filter">
                      <field name="cost_id" />
                      <field name="name" />
-                     <field name="cost" />
+                     <field name="product_id" />
+                     <field name="qty" />
+                     <field name="uom_id" />
+                     <!--<field name="cost" />-->                     
                  </form>
              </field>
          </record>
@@ -31,7 +37,7 @@
                  <search string="Cost line" version="7.0">        
                      <field name="name" />
                      <field name="cost_id" />
-                     <filter name="cost_0" string="No cost" domain="[('cost','=',0)]"/>
+                     <!--<filter name="cost_0" string="No cost" domain="[('cost','=',0)]"/>-->
                      <group expand="0" string="Group By...">
                          <filter name="group_cost" string="Cost" context="{'group_by': 'cost_id'}"/>
                      </group>                
@@ -67,9 +73,10 @@
                  <form string="Industrial cost">
                      <group colspan="4" col="4">
                          <field name="name" />
-                         <field name="default_cost" />
+                         <field name="unit_cost" />
+                         <!--<field name="default_cost" />-->
                          <separator string="Detail:" colspan="2"/>
-                         <button name="load_detail_from_BOM" string="Load BOM selected" type="object" colspan="1" icon="gtk-refresh"/>
+                         <!--<button name="load_detail_from_BOM" string="Load BOM selected" type="object" colspan="1" icon="gtk-refresh"/>-->
                          <button name="open_load_detail_list" string="Detail list" type="object" colspan="1" icon="gtk-goto-last"/>
                          <field name="line_ids" colspan="4" col="4" nolabel="1" context="{'is_embedded': True}"/>
                      </group>    
@@ -129,8 +136,8 @@
              <field name="view_type">form</field>
              <field name="view_mode">tree,form</field>
              <field name="view_id" ref="view_product_bom_selection_tree"/>
-             <field name="search_view_id" ref="view_product_bom_selection_search"/>             
-             <field name="context">{}</field>
+             <field name="search_view_id" ref="view_product_bom_selection_search"/>
+             <field name="context">{'search_default_bom_selection_on': True,}</field>
              <field name="domain">[]</field>
          </record>
          <menuitem 

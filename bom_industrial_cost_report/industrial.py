@@ -109,9 +109,12 @@ class MrpBomIndustrialCost(orm.Model):
         
     _columns = {
         'name': fields.char('Name', size=64, required=True),
-        'default_cost': fields.float('Default cost', digits=(16, 3),
+        'unit_cost': fields.float('Costo Unitario', digits=(16, 3),
             help='Default cost used when append imported BOM'),        
         'note': fields.text('Note'),
+        # TODO REMOVE:
+        'default_cost': fields.float('Default cost', digits=(16, 3),
+            help='Default cost used when append imported BOM'),        
         }
 
 class MrpBomIndustrialCostLine(orm.Model):
@@ -125,10 +128,17 @@ class MrpBomIndustrialCostLine(orm.Model):
     _columns = {
         'name': fields.char('Mask', size=64, required=True, 
             help='Mask for code, use % for all, _ for replace one char'),
-        'cost': fields.float('Cost', digits=(16, 3), required=True),
+        'product_id': fields.many2one('product.product', 'Prodotto'),
+        'uom_id': fields.related(
+            'product_id', 'uom_id', 
+            type='many2one', relation='product.uom', 
+            string='UM', readonly=True),
+        # TODO last buy and last price    
+        'qty': fields.float('Q.', digits=(16, 3), required=True),
         'cost_id': fields.many2one(
-            'mrp.bom.industrial.cost', 'Cost', 
-            required=False),            
+            'mrp.bom.industrial.cost', 'Cost'),            
+        # TODO REMOVE:
+        'cost': fields.float('Cost', digits=(16, 3), required=True),
         }
 
 class MrpBomIndustrialCost(orm.Model):

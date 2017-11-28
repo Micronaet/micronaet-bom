@@ -138,7 +138,7 @@ class MrpBomIndustrialCostLine(orm.Model):
         'cost_id': fields.many2one(
             'mrp.bom.industrial.cost', 'Cost'),            
         # TODO REMOVE:
-        'cost': fields.float('Cost', digits=(16, 3), required=True),
+        'cost': fields.float('Cost', digits=(16, 3)),
         }
 
 class MrpBomIndustrialCost(orm.Model):
@@ -172,7 +172,7 @@ class ProductProduct(orm.Model):
         for cost in cost_pool.browse(
                 cr, uid, cost_ids, context=context):
             cost_db[cost.id] = cost.name            
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         for product in self.browse(cr, uid, ids, context=context):
             default_code = product.default_code
             if not default_code:

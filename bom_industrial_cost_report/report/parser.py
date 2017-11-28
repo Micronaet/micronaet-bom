@@ -318,7 +318,7 @@ class ProductProduct(orm.Model):
         res.append(('H', False, False))    
 
         # Add lavoration cost:
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         cost_industrial = self.get_cost_industrial_for_product(
             cr, uid, [product.id], context=context)
         

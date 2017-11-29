@@ -242,23 +242,6 @@ class ProductProduct(orm.Model):
         # ---------------------------------------------------------------------
         # Utility:
         # ---------------------------------------------------------------------
-        def get_last_price(self, product):
-            ''' Load list in all seller pricelist return min and max value
-            '''
-            max_data = False
-            price = 0.0
-            for seller in product.seller_ids:
-                 for pricelist in seller.pricelist_ids:
-                     if not pricelist.is_active:
-                         continue
-                         
-                     date_quotation = pricelist.date_quotation or False
-                     if date_quotation > max_data:
-                         price = pricelist.price
-                         max_data = date_quotation
-                         
-            return max_data, price
-            
         def load_subelements_price(self, res, mode, item, product, hw=False):
             ''' Load list in all seller pricelist return min and max value
             '''
@@ -317,15 +300,15 @@ class ProductProduct(orm.Model):
         # Add header:
         res.append(('H', False, False))    
 
-        # Add lavoration cost:
-        #import pdb; pdb.set_trace()
-        cost_industrial = self.get_cost_industrial_for_product(
-            cr, uid, [product.id], context=context)
-        
         # Append totals:    
-        for cost, item in cost_industrial.iteritems():
-            #date, price = get_last_price(self, product)
-            value = 0.0 # TODO item.
+        for cost, item in self.get_cost_industrial_for_product(
+                cr, uid, [product.id], context=context).iteritems():
+            # TODO get date, price = from function fields
+            if item.product_id: # use item price
+                value = 0.0# TODO item.qty * cost.unit_price 
+            else:
+                value = item.qty * cost.unit_cost 
+                    
             res.append(('T', cost.name or '???', value))
             self.min += value
             self.max += value

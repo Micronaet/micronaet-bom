@@ -52,8 +52,6 @@ class MrpBomIndustrialCost(orm.Model):
     def open_load_detail_list(self, cr, uid, ids, context=None):
         ''' Open list in tree view
         '''
-        #model_pool = self.pool.get('ir.model.data')
-        #view_id = model_pool.get_object_reference('module_name', 'view_name')[1]
         line_pool = self.pool.get('mrp.bom.industrial.cost.line')
         line_ids = line_pool.search(cr, uid, [
             ('cost_id', '=', ids[0]),
@@ -125,6 +123,31 @@ class MrpBomIndustrialCostLine(orm.Model):
     _description = 'Industrial cost line'
     _order = 'name'
     
+    def _get_last_cost_info(self, cr, uid, ids, fields, args, context=None):
+        ''' Fields function for calculate 
+        '''
+        res = {}
+        for line in self.browse(cr, uid, ids, context=context):            
+            product = line.product_id
+            res[line.id] = {}
+            res[line.id]['last_cost'] = 0.0
+            res[line.id]['last_date'] = False
+            if not product:
+                continue
+
+            # Loop on sellers and pricelist:
+            for seller in product.seller_ids:
+                 for pricelist in seller.pricelist_ids: # XXX multi q. probl?
+                     if not pricelist.is_active:
+                         continue
+                         
+                     date_quotation = pricelist.date_quotation or False
+                     if not res[line.id]['last_cost'] or \
+                            date_quotation > res[line.id]['last_date']:
+                         res[line.id]['last_cost'] = pricelist.price
+                         res[line.id]['last_date'] = date_quotation
+        return res
+        
     _columns = {
         'name': fields.char('Mask', size=64, required=True, 
             help='Mask for code, use % for all, _ for replace one char'),
@@ -133,12 +156,19 @@ class MrpBomIndustrialCostLine(orm.Model):
             'product_id', 'uom_id', 
             type='many2one', relation='product.uom', 
             string='UM', readonly=True),
-        # TODO last buy and last price    
-        'qty': fields.float('Q.', digits=(16, 3), required=True),
         'cost_id': fields.many2one(
             'mrp.bom.industrial.cost', 'Cost'),            
-        # TODO REMOVE:
-        'cost': fields.float('Cost', digits=(16, 3)),
+        'qty': fields.float('Q.', digits=(16, 3), required=True),
+        
+        # Get product cost info:
+        'last_cost': fields.function(
+            _get_last_cost_info, method=True, 
+            type='float', string='Costo ultimo', 
+            store=False, multi=True, readonly=True), 
+        'last_date': fields.function(
+            _get_last_cost_info, method=True, 
+            type='float', string='Costo ultimo', 
+            store=False, multi=True, readonly=True),
         }
 
 class MrpBomIndustrialCost(orm.Model):
@@ -165,39 +195,30 @@ class ProductProduct(orm.Model):
         ''' Return all list of industrial cost for product passed
             ids: product ids XXX now is one!
         '''
-        res = {}
-        cost_pool = self.pool.get('mrp.bom.industrial.cost')
+        # Pool used:
         line_pool = self.pool.get('mrp.bom.industrial.cost.line')
-        cost_ids = cost_pool.search(cr, uid, [], context=context)
-        cost_db = {}
-        for cost in cost_pool.browse(
-                cr, uid, cost_ids, context=context):
-            cost_db[cost.id] = cost.name            
+        
+        product = self.browse(cr, uid, ids, context=context)[0]
+        default_code = product.default_code
+        if not default_code:
+            return {}
 
-        for product in self.browse(cr, uid, ids, context=context):
-            default_code = product.default_code
-            if not default_code:
+        # Update category element priority order len mask
+        query = '''
+            SELECT id FROM mrp_bom_industrial_cost_line 
+            WHERE '%s' ilike name ORDER BY length(name) desc;
+            ''' % default_code
+        cr.execute(query)
+
+        # XXX 28/10/2017 Changed for report use:
+        res = {}
+        item_ids = [item[0] for item in cr.fetchall()]
+        for item in line_pool.browse(
+                cr, uid, item_ids, context=context):
+            if item.cost_id in res:
                 continue
-
-            query = '''
-                SELECT id
-                FROM mrp_bom_industrial_cost_line 
-                WHERE '%s' ilike name
-                ORDER BY length(name) desc;
-                ''' % default_code
-            cr.execute(query)
-
-            # Update category element priority order len mask
-            # XXX 28/10/2017 Changed for report use:
-            item_ids = [item[0] for item in cr.fetchall()]
-            for item in line_pool.browse(cr, uid, item_ids, context=context):
-                if item.cost_id not in res:
-                    res[item.cost_id] = item
-                            
-                #cost_name = cost_db.get(item[0], '???')
-                #if cost_name not in res: # only the first 
-                #    res[cost_name] = item[1]
-        return res
+            res[item.cost_id] = item    
+        return res        
 
     # -------------------------------------------------------------------------
     # Button for select

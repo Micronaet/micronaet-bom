@@ -242,6 +242,8 @@ class ProductProduct(orm.Model):
         'from_industrial': fields.float(
             'From industrial cost', digits=(16, 3)),
         'to_industrial': fields.float(
-            'To industrial cost', digits=(16, 3)),            
+            'To industrial cost', digits=(16, 3)),
+        'industrial_missed': fields.boolean('Manca', 
+            help='Manca prezzo di alcuni componenti'),
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

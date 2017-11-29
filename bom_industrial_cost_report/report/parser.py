@@ -235,14 +235,13 @@ class ProductProduct(orm.Model):
             active_ids = self.search(cr, uid, [
                 ('bom_selection', '=', True),
                 ], context=context)
-        objects = self.browse(
-            cr, uid, active_ids, context=context)
+        objects = self.browse(cr, uid, active_ids, context=context)
            
         return objects #sorted(objects, key=lambda o: o.default_code)
 
     def _report_industrial_get_details(self, cr, uid, product, context=None):
         ''' Create detail row
-        '''
+        '''        
         # ---------------------------------------------------------------------
         # Utility:
         # ---------------------------------------------------------------------
@@ -276,8 +275,13 @@ class ProductProduct(orm.Model):
             self.min += min_value
             self.max += max_value
             res.append(record)
-            return
-                
+            return record[2] # error test for check price present
+
+        # Pool used:           
+        product_pool = self.pool.get('product.product')        
+        if context is None:
+            context = {}
+            
         # ---------------------------------------------------------------------
         # Load component list (and subcomponent for HW):
         # ---------------------------------------------------------------------
@@ -285,18 +289,24 @@ class ProductProduct(orm.Model):
         # Min / Max totals:
         self.min = 0.0
         self.max = 0.0
+        error = False # for write in product
         for item in product.dynamic_bom_line_ids:
             component = item.product_id
             half_bom_ids = component.half_bom_ids # if half component
             if half_bom_ids: # HW component
                 for cmpt in half_bom_ids:
-                    load_subelements_price(
+                    test = load_subelements_price(
                         self, res, 'S', cmpt, cmpt.product_id, 
                         item.product_id.default_code,
                         )
+                    if not test:
+                        error = True
+
             else: # not HW component
-                load_subelements_price(
+                test = load_subelements_price(
                     self, res, 'C', item, item.product_id)
+                if not test:
+                    error = True
 
         # ---------------------------------------------------------------------
         # Extra data end report:
@@ -315,6 +325,14 @@ class ProductProduct(orm.Model):
             res.append(('T', item or '???', value))
             self.min += value
             self.max += value
+        
+        # Write status in row:    
+        if context.get('update_record', True): # XXX always true for now:
+            product_pool.write(cr, uid, product.id, {
+                'from_industrial': self.min,
+                'to_industrial': self.max,
+                'industrial_missed': error,
+                }, context=context)
         return res
 
     def _report_industrial_get_totals(self, mode):

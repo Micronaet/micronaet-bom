@@ -120,11 +120,11 @@
              <field name="model">product.product</field>
              <field name="priority" eval="50" />
              <field name="arch" type="xml">
-                 <tree string="BOM selection" editable="bottom" colors="red:bom_selection==True and industrial_missed==False">
+                 <tree string="BOM selection" editable="bottom" colors="red:bom_selection==True and industrial_missed==True">
                      <field name="industrial_missed" invisible="1"/>
                      <field name="bom_selection" invisible="1"/>
-                     <field name="name" />
                      <field name="default_code" />
+                     <field name="name" />
                      <button name="open_current_dynamic_bom" string="Manage dynamic lines" type="object" icon="gtk-justify-fill"/>
                      <field name="from_industrial" />
                      <field name="to_industrial" />

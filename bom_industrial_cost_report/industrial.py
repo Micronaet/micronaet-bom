@@ -167,7 +167,7 @@ class MrpBomIndustrialCostLine(orm.Model):
             store=False, multi=True, readonly=True), 
         'last_date': fields.function(
             _get_last_cost_info, method=True, 
-            type='float', string='Costo ultimo', 
+            type='char', string='Data ultimo', 
             store=False, multi=True, readonly=True),
         }
 

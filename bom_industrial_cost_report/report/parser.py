@@ -133,19 +133,23 @@ class ProductProduct(orm.Model):
         cost_db = {}
         
         cost_pool = self.pool.get('mrp.bom.industrial.cost')
-        cost_ids = cost_pool.search(cr, uid, [], context=context)
+        cost_ids = cost_pool.search(cr, uid, [], order='name', context=context)
         i = 0
         for cost in cost_pool.browse(cr, uid, cost_ids, context=context):
             cost_db[cost.name] = i # position in Excel file
             i += 1
+  
+        WS.set_column('A:A', 10)
+        WS.set_column('B:B', 35)
+        WS.set_column('C:AX', 10)
         
         header = [
-            _('Code'), 
-            _('Description'), 
+            _('Codice'), 
+            _('Descrizione'), 
             _('Min'), 
             _('Max'), 
-            _('Price not present')]
-        header.extend(cost_db.keys())
+            _('Prezzo non presente')]
+        header.extend(sorted(cost_db, key=lambda x: cost_db[x]))
         xls_write_row(WS, 0, header, format_title)
         
         # ---------------------------------------------------------------------
@@ -165,7 +169,7 @@ class ProductProduct(orm.Model):
                         not_details = True
                 elif mode == 'T':
                     # Industrial cost
-                    industrial_cost[cost_db[item]] = details                    
+                    industrial_cost[cost_db[item.cost_id.name]] = details                    
                 else:
                     pass # Heder row
 
@@ -303,13 +307,12 @@ class ProductProduct(orm.Model):
         # Append totals:    
         for cost, item in self.get_cost_industrial_for_product(
                 cr, uid, [product.id], context=context).iteritems():
-            # TODO get date, price = from function fields
+            # 2 case: with product or use unit_cost    
             if item.product_id: # use item price
-                value = 0.0# TODO item.qty * cost.unit_price 
+                value = item.qty * item.last_cost
             else:
-                value = item.qty * cost.unit_cost 
-                    
-            res.append(('T', cost.name or '???', value))
+                value = item.qty * cost.unit_cost                     
+            res.append(('T', item or '???', value))
             self.min += value
             self.max += value
         return res

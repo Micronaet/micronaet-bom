@@ -281,7 +281,10 @@ class ProductProduct(orm.Model):
         product_pool = self.pool.get('product.product')        
         if context is None:
             context = {}
-            
+        type_i18n = {
+            'industrial': 'COSTI INDUSTRIALI',
+            'work': 'MANODOPERA',
+            }    
         # ---------------------------------------------------------------------
         # Load component list (and subcomponent for HW):
         # ---------------------------------------------------------------------
@@ -311,12 +314,20 @@ class ProductProduct(orm.Model):
         # ---------------------------------------------------------------------
         # Extra data end report:
         # ---------------------------------------------------------------------
-        # Add header:
-        res.append(('H', False, False))    
-
-        # Append totals:    
-        for cost, item in self.get_cost_industrial_for_product(
-                cr, uid, [product.id], context=context).iteritems():
+        # Append totals:
+        last_type = False
+        supplement_cost = sorted(
+            self.get_cost_industrial_for_product(
+                cr, uid, [product.id], context=context).iteritems(),
+            key=lambda x: (x[0].type, x[0].name),
+            )
+                    
+        for cost, item in supplement_cost:
+            if last_type != cost.type:
+                last_type = cost.type
+                # Add header (change every category break level):
+                res.append(('H', type_i18n.get(last_type, '?'), False))    
+                
             # 2 case: with product or use unit_cost    
             if item.product_id: # use item price
                 value = item.qty * item.last_cost

@@ -109,11 +109,19 @@ class MrpBomIndustrialCost(orm.Model):
         'name': fields.char('Name', size=64, required=True),
         'unit_cost': fields.float('Costo Unitario', digits=(16, 3),
             help='Default cost used when append imported BOM'),        
+        'type': fields.selection([
+            ('work', 'Manodopera'),
+            ('industrial', 'Costi industriali'),
+            ], 'Tipo'),
         'note': fields.text('Note'),
         # TODO REMOVE:
         'default_cost': fields.float('Default cost', digits=(16, 3),
             help='Default cost used when append imported BOM'),        
         }
+    
+    _defaults = {
+        'type': lambda *x: 'industrial',
+        }    
 
 class MrpBomIndustrialCostLine(orm.Model):
     """ Model name: Cost line
@@ -218,7 +226,7 @@ class ProductProduct(orm.Model):
             if item.cost_id in res:
                 continue
             res[item.cost_id] = item    
-        return res        
+        return res
 
     # -------------------------------------------------------------------------
     # Button for select

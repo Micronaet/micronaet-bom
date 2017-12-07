@@ -112,7 +112,7 @@ class MrpBomIndustrialCost(orm.Model):
         'type': fields.selection([
             ('work', 'Manodopera'),
             ('industrial', 'Costi industriali'),
-            ], 'Tipo'),
+            ], 'Tipo', required=True),
         'note': fields.text('Note'),
         # TODO REMOVE:
         'default_cost': fields.float('Default cost', digits=(16, 3),

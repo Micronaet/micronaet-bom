@@ -36,6 +36,10 @@ from openerp.osv import fields, osv, expression, orm
 
 _logger = logging.getLogger(__name__)
 
+type_i18n = {
+    'industrial': 'COSTI INDUSTRIALI',
+    'work': 'MANODOPERA',
+    }    
 
 class ProductProduct(orm.Model):
     """ Model name: ProductProduct add utility for report
@@ -245,6 +249,20 @@ class ProductProduct(orm.Model):
         # ---------------------------------------------------------------------
         # Utility:
         # ---------------------------------------------------------------------
+        def industrial_index_get_text(index):
+            ''' Convert all index value in string format
+            '''
+            index_total = sum(index.values())
+            res = ''
+            for key, value in index.iteritems():
+                res += '%s: %6.3f / %6.3f > %s%%\r\n' % (
+                    type_i18n.get(key, '?'), 
+                    value, index_total,
+                    ('%6.3f' % (100.0 * value / index_total, )) if \
+                        index_total else 'ERRORE!',
+                    )
+            return res
+            
         def load_subelements_price(self, res, mode, item, product, hw=False):
             ''' Load list in all seller pricelist return min and max value
             '''
@@ -281,10 +299,7 @@ class ProductProduct(orm.Model):
         product_pool = self.pool.get('product.product')        
         if context is None:
             context = {}
-        type_i18n = {
-            'industrial': 'COSTI INDUSTRIALI',
-            'work': 'MANODOPERA',
-            }    
+
         # ---------------------------------------------------------------------
         # Load component list (and subcomponent for HW):
         # ---------------------------------------------------------------------
@@ -322,11 +337,15 @@ class ProductProduct(orm.Model):
             key=lambda x: (x[0].type, x[0].name),
             )
                     
+        index = {
+            _('Componenti'): self.max, # used max:
+            }            
         for cost, item in supplement_cost:
             if last_type != cost.type:
                 last_type = cost.type
                 # Add header (change every category break level):
-                res.append(('H', type_i18n.get(last_type, '?'), False))    
+                res.append(('H', type_i18n.get(last_type, '?'), False))
+                index[cost.type] = 0.0
                 
             # 2 case: with product or use unit_cost    
             if item.product_id: # use item price
@@ -336,13 +355,16 @@ class ProductProduct(orm.Model):
             res.append(('T', item or '???', value))
             self.min += value
             self.max += value
+            index[cost.type] += value # for index calc
         
         # Write status in row:    
+        self.index = industrial_index_get_text(index)
         if context.get('update_record', True): # XXX always true for now:
             product_pool.write(cr, uid, product.id, {
                 'from_industrial': self.min,
                 'to_industrial': self.max,
                 'industrial_missed': error,
+                'industrial_index': self.index,
                 }, context=context)
         return res
 
@@ -351,7 +373,9 @@ class ProductProduct(orm.Model):
         '''    
         if mode == 'min':
             return self.min
-        else:
+        elif mode == 'index':
+            return self.index,    
+        else: # mode == 'max':
             return self.max
         
 class Parser(report_sxw.rml_parse):

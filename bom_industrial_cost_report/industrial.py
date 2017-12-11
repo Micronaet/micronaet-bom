@@ -253,5 +253,6 @@ class ProductProduct(orm.Model):
             'To industrial cost', digits=(16, 3)),
         'industrial_missed': fields.boolean('Manca', 
             help='Manca prezzo di alcuni componenti'),
+        'industrial_index': fields.text('Indici'),
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

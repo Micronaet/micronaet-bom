@@ -130,6 +130,8 @@
                      <button name="open_current_dynamic_bom" string="Manage dynamic lines" type="object" icon="gtk-justify-fill"/>
                      <field name="from_industrial" />
                      <field name="to_industrial" />
+                     <field name="industrial_sale_a" />
+                     <field name="industrial_sale_b" />
                      <field name="state" invisible="1" />
                      <button name="bom_selection_on" string="Set BOM on" type="object" icon="star-off" attrs="{'invisible': [('bom_selection','=',True)]}"/>
                      <button name="bom_selection_off" string="Set BOM off" type="object" icon="star-on" attrs="{'invisible': [('bom_selection','=',False)]}"/> 
@@ -149,6 +151,48 @@
              <field name="context">{'search_default_bom_selection_on': True,}</field>
              <field name="domain">[]</field>
          </record>
+         
+         <!--res.company-->
+         <record model="ir.ui.view" id="view_res_company_parameter_tree">
+             <field name="name">res.company.tree</field>
+             <field name="model">res.company</field>
+             <field name="priority" eval="40" />
+             <field name="arch" type="xml">
+                 <tree string="Parametri" editable="bottom">        
+                     <field name="name" readonly="1"/>
+                     <field name="industrial_margin_a" />
+                     <field name="industrial_margin_b" />
+                 </tree>
+             </field>
+         </record>
+         <record model="ir.actions.act_window" id="action_company_parameter_form">
+             <field name="name">Parametri stampa</field>
+             <field name="res_model">res.company</field>
+             <field name="view_type">form</field>
+             <field name="view_mode">tree</field>
+             <field name="view_id" ref="view_res_company_parameter_tree"/>
+             <field name="context">{}</field>
+             <field name="domain">[]</field>
+         </record>
+         <!--<record model="ir.ui.view" id="view_res_company_parameter_form">
+             <field name="name">res.company.form</field>
+             <field name="model">res.company</field>
+             <field name="priority" eval="40" />
+             <field name="arch" type="xml">
+                 <form string="Parametri" version="7.0">        
+                     <sheet>
+                         <group col="4" colspan="4">
+                             <field name="name" />
+                             <newline/>
+                             
+                             <field name="industrial_margin_a" />
+                             <field name="industrial_margin_b" />
+                         </group>
+                     </sheet>        
+                 </form>
+             </field>
+         </record>-->
+
          <menuitem 
              parent="mrp.menu_mrp_bom" 
              id="menu_product_bom_selection_root" 
@@ -167,13 +211,20 @@
                  parent="menu_product_bom_selection_root" 
                  id="menu_mrp_bom_industrial_cost" 
                  action="action_mrp_bom_industrial_cost"
-                 sequence="90"
+                 sequence="20"
                  />
              <menuitem 
                  parent="menu_product_bom_selection_root" 
                  id="menu_mrp_bom_industrial_cost_line" 
                  action="action_mrp_bom_industrial_cost_line"
-                 sequence="99"
+                 sequence="30"
+                 />
+
+             <menuitem 
+                 parent="menu_product_bom_selection_root" 
+                 id="menu_mrp_bom_industrial_cost_parameter"
+                 action="action_company_parameter_form"
+                 sequence="90"
                  />
                  
     </data>

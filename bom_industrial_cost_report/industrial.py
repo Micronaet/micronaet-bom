@@ -44,8 +44,8 @@ class ResCompany(orm.Model):
     _inherit = 'res.company'
     
     _columns = {
-        'industrial_margin_a': fields.float('Margine A', digits=(16, 4)),
-        'industrial_margin_b': fields.float('Margine B', digits=(16, 4)),
+        'industrial_margin_a': fields.float('Margine A%', digits=(16, 4)),
+        'industrial_margin_b': fields.float('Margine B%', digits=(16, 4)),
         }
 
 class MrpBomIndustrialCost(orm.Model):
@@ -254,6 +254,19 @@ class ProductProduct(orm.Model):
         return self.write(cr, uid, ids, {
             'bom_selection': False,            
             }, context=context)                
+
+    def _get_industrial_sale_ab(self, cr, uid, ids, fields, args, context=None):
+        ''' Fields function for calculate 
+        ''' 
+        res = {}
+        for product in self.browse(cr, uid, ids, context=context):
+            cost = product.to_industrial
+            res[product.id] = {}
+            res[product.id]['industrial_sale_a'] = \
+                cost * product.company_id.industrial_margin_a / 100.0
+            res[product.id]['industrial_sale_b'] = \
+                cost * product.company_id.industrial_margin_b / 100.0
+        return res
             
     _columns = {
         'bom_selection': fields.boolean('BOM Selection'),
@@ -264,5 +277,16 @@ class ProductProduct(orm.Model):
         'industrial_missed': fields.boolean('Manca', 
             help='Manca prezzo di alcuni componenti'),
         'industrial_index': fields.text('Indici'),
+        
+        # Calculated:
+        'industrial_sale_a': fields.function(
+            _get_industrial_sale_ab, method=True, 
+            type='float', string='Vend. A%', multi=True,
+            store=False), 
+        'industrial_sale_b': fields.function(
+            _get_industrial_sale_ab, method=True, 
+            type='float', string='Vend. B%', multi=True,
+            store=False), 
+                        
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

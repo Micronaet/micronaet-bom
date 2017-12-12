@@ -286,7 +286,14 @@ class MrpProduction(orm.Model):
         inventory_pos = get_position_season(get_date()) # for inventory mangm.1
         for product in product_proxy: # XXX Product ordered for now
             for item in product.dynamic_bom_line_ids: # XXX All Halfworked:
-                
+            
+                # Note: 12/12/2017 Remove placehoder elements:
+                if item.product_id.bom_placeholder or \
+                        item.product_id.bom_alternative:
+                    _logger.warning('Placeholder product jumped: %s' % \
+                        item.product_id.default_code)    
+                    continue
+                    
                 # XXX NOTE: Filter category always in hw not component!
                 if with_type_ids and \
                         item.category_id.type_id.id not in with_type_ids:

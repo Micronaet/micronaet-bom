@@ -38,6 +38,16 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+class ResCompany(orm.Model):
+    """ Model name: ResCompany
+    """    
+    _inherit = 'res.company'
+    
+    _columns = {
+        'industrial_margin_a': fields.float('Margine A', digits=(16, 4)),
+        'industrial_margin_b': fields.float('Margine B', digits=(16, 4)),
+        }
+
 class MrpBomIndustrialCost(orm.Model):
     """ Model name: Industrial cost
     """

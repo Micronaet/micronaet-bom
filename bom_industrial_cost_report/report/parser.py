@@ -356,7 +356,13 @@ class ProductProduct(orm.Model):
             self.min += value
             self.max += value
             index[cost.type] += value # for index calc
-        
+
+        # Save margin parameters:        
+        self.margin_a = \
+            self.max * product.company_id.industrial_margin_a / 100.0 
+        self.margin_b = \
+            self.max * product.company_id.industrial_margin_b / 100.0 
+            
         # Write status in row:    
         self.index = industrial_index_get_text(index)
         if context.get('update_record', True): # XXX always true for now:
@@ -375,6 +381,10 @@ class ProductProduct(orm.Model):
             return self.min
         elif mode == 'index':
             return self.index,    
+        elif mode == 'margin_a':
+            return self.margin_a,    
+        elif mode == 'margin_b':
+            return self.margin_b,    
         else: # mode == 'max':
             return self.max
         

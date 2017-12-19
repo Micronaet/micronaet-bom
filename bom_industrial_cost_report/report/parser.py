@@ -166,8 +166,9 @@ class ProductProduct(orm.Model):
             not_details = False
 
             industrial_cost = [0.0 for col in range(0, len(cost_db))]
-            for mode, item, details in self._report_industrial_get_details(
-                    cr, uid, product, context=context):
+            for mode, item, details, time_qty in \
+                    self._report_industrial_get_details(
+                        cr, uid, product, context=context):
                 if mode in ('C', 'S'):
                     if not details: # Check if not details 
                         not_details = True
@@ -349,19 +350,13 @@ class ProductProduct(orm.Model):
                 
             # 2 case: with product or use unit_cost    
             if item.product_id: # use item price
-                value = item.qty * item.last_cost
-                mask = '%s%s'
-                qty = ''
+                value = item.qty * item.last_cost                
+                time_qty = False
             else:
                 value = item.qty * cost.unit_cost                     
-                mask = '%s (T. %s)'
-                qty = item.qty
-
-            res.append((
-                'T', 
-                mask % (item or '???', item.qty), 
-                value,
-                ))
+                time_qty = item.qty
+                
+            res.append(('T', item or '???', value, time_qty))
             self.min += value
             self.max += value
             index[cost.type] += value # for index calc

@@ -270,7 +270,10 @@ class ProductProduct(orm.Model):
             min_value = 0.0
             max_value = 0.0
             
-            record = [mode, item, []]
+            record = [
+                mode, item, [], 
+                False, # not used here
+                ]
                 
             # TODO manage as pipe?
             for seller in product.seller_ids:

@@ -145,7 +145,7 @@ class ProductProduct(orm.Model):
   
         WS.set_column('A:A', 10)
         WS.set_column('B:B', 35)
-        WS.set_column('C:AX', 10)
+        WS.set_column('C:AX', 12)
         
         header = [
             _('Codice'), 
@@ -173,7 +173,7 @@ class ProductProduct(orm.Model):
                         not_details = True
                 elif mode == 'T':
                     # Industrial cost
-                    industrial_cost[cost_db[item.cost_id.name]] = details                    
+                    industrial_cost[cost_db[item.cost_id.name]] = details                   
                 else:
                     pass # Heder row
 
@@ -350,9 +350,18 @@ class ProductProduct(orm.Model):
             # 2 case: with product or use unit_cost    
             if item.product_id: # use item price
                 value = item.qty * item.last_cost
+                mask = '%s%s'
+                qty = ''
             else:
                 value = item.qty * cost.unit_cost                     
-            res.append(('T', item or '???', value))
+                mask = '%s (T. %s)'
+                qty = item.qty
+
+            res.append((
+                'T', 
+                mask % (item or '???', item.qty), 
+                value,
+                ))
             self.min += value
             self.max += value
             index[cost.type] += value # for index calc

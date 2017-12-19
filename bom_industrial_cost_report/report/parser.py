@@ -348,7 +348,9 @@ class ProductProduct(orm.Model):
             if last_type != cost.type:
                 last_type = cost.type
                 # Add header (change every category break level):
-                res.append(('H', type_i18n.get(last_type, '?'), False))
+                res.append(('H', type_i18n.get(last_type, '?'), False, 
+                    False, # no used
+                    ))
                 index[cost.type] = 0.0
                 
             # 2 case: with product or use unit_cost    

@@ -174,7 +174,11 @@ class ProductProduct(orm.Model):
                         not_details = True
                 elif mode == 'T':
                     # Industrial cost
-                    industrial_cost[cost_db[item.cost_id.name]] = details                   
+                    if time_qty:                        
+                        industrial_cost[cost_db[item.cost_id.name]] = \
+                            '%s (T. %s)' % (details, time_qty)
+                    else:        
+                        industrial_cost[cost_db[item.cost_id.name]] = details
                 else:
                     pass # Heder row
 

@@ -52,7 +52,7 @@ class ResCompany(orm.Model):
         '''
         sale_pool = self.pool.get('sale.order')
         order_ids = sale_pool.search(cr, uid, [
-            ('state', 'not in', ('cancel', 'send', 'draft')),
+            ('state', 'not in', ('cancel', 'sent', 'draft')),
             ('pricelist_order', '=', False),
             ('mx_closed', '=', False), # Only open orders (not all MRP after)
             # Also forecasted order

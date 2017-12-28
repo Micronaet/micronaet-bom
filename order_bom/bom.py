@@ -74,7 +74,7 @@ class SaleOrder(orm.Model):
         
         # Search open order:
         line_ids = line_pool.search(cr, uid, [
-            ('order_id.state', 'not in', ('cancel', 'send', 'draft')),
+            ('order_id.state', 'not in', ('cancel', 'sent', 'draft')),
             ('order_id.pricelist_order', '=', False),
             ('product_id.exclude_parcels', '=', False), # remove no parcels product
             

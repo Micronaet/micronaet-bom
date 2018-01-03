@@ -597,6 +597,6 @@ class Parser(report_sxw.rml_parse):
             list_browse = [item for item in product_pool.browse(
                 cr, uid, self.pipe_ids, context=context) if 
                     abs(item.mx_net_mrp_qty) > min_val]
-                    
-        return sorted(list_browse, key=lambda x: x.default_code)        
+
+        return sorted(list_browse, key=lambda x: x.default_code)   
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

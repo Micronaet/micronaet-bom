@@ -377,11 +377,15 @@ class MrpProduction(orm.Model):
         year = datetime.now().year
         if month >= 9:
             period_from = '%s-09-01' % year
-            mm_from = '%s-09-01' % year # From 01/09 > ALL (so 31/12)
+            # XXX 03/01/2018 use all period instead of restart 1/1
+            # XXX because period accounting is [01/09-31/08]
+            #mm_from = '%s-09-01' % year # From 01/09 > ALL (so 31/12)
             period_to = '%s-08-31' % (year + 1)
         else:
             period_from = '%s-09-01' % (year - 1) # for OC and OF
-            mm_from = '%s-01-01' % year # From 1/1 
+            # XXX 03/01/2018 use all period instead of restart 1/1
+            # XXX because period accounting is [01/09-31/08]
+            #mm_from = '%s-01-01' % year # From 1/1 
             period_to = '%s-08-31' % year
 
         write_xls_line('extra', (
@@ -466,7 +470,8 @@ class MrpProduction(orm.Model):
                     # USE order data:
                     # Change for jump year 04/01/2017 (for year change 1/1)
                     #if date > period_to or date < period_from: # extra range
-                    if (date < mm_from) or (date > period_to): # extra range
+                    # XXX no more mm_from use with period: [01/09-31/08]
+                    if (date < period_from) or (date > period_to): # extrarange
                         write_xls_line('move', (
                             block, 'NOT USED', pick.name, pick.origin,
                             date, pos, '', # product_code                                
@@ -503,8 +508,9 @@ class MrpProduction(orm.Model):
             ('partner_id', 'not in', exclude_partner_ids), # current company
             
             # Only in period # TODO remove if check extra data
-            # 04/01/2017 Changed for clean vefore 1/1
-            ('date', '>=', mm_from), # XXX 01/09 or 1/1 
+            # XXX OLD: 04/01/2017 Changed for clean before 1/1
+            # XXX no more use with period: [01/09-31/08]
+            ('date', '>=', period_from), # XXX 01/09
             ('date', '<=', period_to), 
             ])
             
@@ -644,7 +650,7 @@ class MrpProduction(orm.Model):
                 # USE order data:
                 # Note: Remain period_from instead of mm_from exclude extra 
                 # period order always 1/9
-                if date > period_to or date < period_from: # extra range
+                if date < period_from or date > period_to: # extra range
                     write_xls_line('move', (
                         block, 'NOT USED', order.name, '', date, pos,
                         product_code, '', # MP
@@ -744,8 +750,9 @@ class MrpProduction(orm.Model):
             ('state', '!=', 'cancel'), # TODO correct? for unload element?
             
             # Period filter:
-            # 04/01/2017 MRP from 1/9 or 1/1 depend on change year
-            ('date_planned', '>=', mm_from), # 1/9 or 1/1
+            # XXX OLD: 04/01/2017 MRP from 1/9 or 1/1 depend on change year
+            # XXX no more use with period: [01/09-31/08]
+            ('date_planned', '>=', period_from), # 1/9 or 1/1
             ('date_planned', '<=', period_to),
             
             # No customer exclude filter

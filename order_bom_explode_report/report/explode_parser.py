@@ -113,7 +113,8 @@ class MrpProduction(orm.Model):
                 product, # product or halfworked
                 category,
                 {}, # (HW that contain fabric) > fabric mode report
-                [0.0], # Total for my of fabrics (fabric report)
+                # XXX No more used, not deleted for extra position:
+                [0.0], # Total for mt fabrics (fabric report)
                 purchase.get(product.id, ''),
                 ]
             return
@@ -155,27 +156,31 @@ class MrpProduction(orm.Model):
 
         def update_hw_data_line(data, product, remain, mt):
             ''' Update data line for remain hw line
+                data: xls line list
+                product: browse of current product
+                remain: OC remain to deliver / produce
+                mt: q. from BOM
             '''
             hw_fabric = data[9]
-            total = data[10] # list of one element
-            if product.default_code in hw_fabric:
-                hw_fabric[product.default_code][1] += remain
-                #hw_fabric[product.default_code][2] += comp_remain                                    
-                #total[0] += comp_remain
-            else:
-                stock = product.mx_net_qty # XXX mx_net_mrp_qty?
-                # Use only OC available stock quantity
-                if remain >= stock: # Use all stock
-                    stock_mt = stock * mt
-                else: # use all OC (extra stock not useable)
-                    stock_mt = remain * mt
-                    
+            # # No more used (calculated during report):
+            #total = data[10] # list of one element (save total mt usable)
+            if product.default_code not in hw_fabric:
+                # Create empty record with fixed data:
                 hw_fabric[product.default_code] = [
-                    stock, # 0. Stock HW
-                    remain, # 1. OC remain HW
-                    stock_mt, # 2. Stock Component 
+                    product.mx_net_qty, # 0. Stock HW XXX use mx_net_mrp_qty?
+                    0.0, # 1. OC remain HW
+                    0.0, # 2. Stock Component (mt  of fabric)
+                    #mt, # 3. Mt. from BOM
                     ]
-                total[0] += stock_mt
+            current = hw_fabric[product.default_code] # readability            
+            current[1] += remain # OC total        
+            # XXX better once when end totalise remain
+            # Test: OC >= Stock:
+            if current[1] >= current[0]: # Use all stock (OC >= stock)
+                current[2] = current[0] * mt
+            else: # use all OC (extra stock not useable)
+                current[2] = current[1] * mt
+                #total[0] += stock_mt
             return True
                         
         # ---------------------------------------------------------------------

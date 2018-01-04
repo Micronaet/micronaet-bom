@@ -515,15 +515,20 @@ class MrpProduction(orm.Model):
 
                     # Total:
                     # HW in Mt. of fabric that can be used:
-                    (int(hw_total[0]), get_xls_format('number_blue')),
+                    [0, get_xls_format('number_blue')], # initial setup
                     # To be ordered - used = Total order                    
-                    (int(hw_total[0] - sal[11]), get_xls_format('bg_green')),
+                    [0, get_xls_format('bg_green')], # initial setup
                     ]
+                hw_total_mt = 0.0
                 for hw_code, hw_status in hw.iteritems():
+                    hw_total_mt += hw_status[2] # usabled
+
+                    # OC covered with stock (color the HW text):
                     if hw_status[1] <= hw_status[0]: # black
                         line6[0].append(get_xls_format('text')) 
                     else: # red
                         line6[0].append(get_xls_format('text_red'))
+                    
                     line6[0].append('%s OC:%s' % (
                         hw_code,
                         int(hw_status[1]),
@@ -533,10 +538,13 @@ class MrpProduction(orm.Model):
                     line6[0].append(get_xls_format('text_green'))
                     line6[0].append(' M.:%s' % int(hw_status[0]))
                     line6[0].append(get_xls_format('text_black'))
+                    #line6[0].append('(%s)>>>' % hw_status[3])
                     line6[0].append('>>>')
                     line6[0].append(get_xls_format('text_blue'))
                     line6[0].append('%s ' % int(hw_status[2]))
                     #line6[0].append(get_xls_format('text_wrap'))
+                line6[13][0] = int(hw_total_mt)# Update total mt. calc here
+                line6[14][0] = int(sal[11] + hw_total_mt)# Update total order
                     
                 line6[0].append(get_xls_format('text_grey'))
                 write_xls_mrp_line(WS, row, line6)

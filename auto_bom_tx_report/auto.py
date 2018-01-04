@@ -508,18 +508,10 @@ class MrpProduction(orm.Model):
                 # Create row data:
                 line6 = [
                     [], # rich text format
-                    ('', format_text),
-                    ('', format_text),
-                    ('', format_text),
-                    ('', format_text),
-                    ('', format_text),
-                    ('', format_text),
-                    ('', format_text),
-                    ('', format_text),
-                    ('', format_text),
-                    ('', format_text),
-                    ('', format_text),
-                    ('', format_text),
+                    ('', format_text), ('', format_text), ('', format_text),
+                    ('', format_text), ('', format_text), ('', format_text),
+                    ('', format_text), ('', format_text), ('', format_text),
+                    ('', format_text), ('', format_text), ('', format_text),
                     (int(hw_total[0]), get_xls_format('number_blue')),
                     ]                        
                 for hw_code, hw_status in hw.iteritems():

@@ -164,7 +164,12 @@ class MrpProduction(orm.Model):
                 #total[0] += comp_remain
             else:
                 stock = product.mx_net_qty # XXX mx_net_mrp_qty?
-                stock_mt = stock * mt
+                # Use only OC available stock quantity
+                if remain >= stock: # Use all stock
+                    stock_mt = stock * mt
+                else: # use all OC (extra stock not useable)
+                    stock_mt = remain * mt
+                    
                 hw_fabric[product.default_code] = [
                     stock, # 0. Stock HW
                     remain, # 1. OC remain HW
@@ -854,7 +859,6 @@ class MrpProduction(orm.Model):
         all_component_ids = self._get_all_product_in_bom(
             cr, uid, context=context)
         # TODO remove unwanted category:
-        #
             
         for key in sorted(y_axis, key=order_mode):
             # -----------------------------------------------------------------    

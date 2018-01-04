@@ -512,8 +512,13 @@ class MrpProduction(orm.Model):
                     ('', format_text), ('', format_text), ('', format_text),
                     ('', format_text), ('', format_text), ('', format_text),
                     ('', format_text), ('', format_text), ('', format_text),
+
+                    # Total:
+                    # HW in Mt. of fabric that can be used:
                     (int(hw_total[0]), get_xls_format('number_blue')),
-                    ]                        
+                    # To be ordered - used = Total order                    
+                    (int(hw_total[0] - sal[11]), get_xls_format('bg_green')),
+                    ]
                 for hw_code, hw_status in hw.iteritems():
                     if hw_status[1] <= hw_status[0]: # black
                         line6[0].append(get_xls_format('text')) 

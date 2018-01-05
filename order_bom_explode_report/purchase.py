@@ -54,7 +54,6 @@ class StockMove(orm.Model):
             ('state', '=', 'done'),
             ('origin', '=ilike', 'OF%'), #picking_id.origin
             ], context=context)
-
         for line in sorted(
                 self.browse(cr, uid, line_ids, context=context), 
                 key=lambda x: x.picking_id.date, 
@@ -62,10 +61,11 @@ class StockMove(orm.Model):
             product = line.product_id
             if not product or product.id in res:
                 continue
-            res[product.id] = '[acq. %s %s %s]' % (
+            res[product.id] = '[acq. %s %s %s: EUR %s]' % (
                 (line.picking_id.date or '')[:10],
                 line.product_uom.name,
                 line.product_uom_qty,
+                line.price_unit,                
                 )
         _logger.info('Total purchase product: %s' % len(line_ids))    
         return res

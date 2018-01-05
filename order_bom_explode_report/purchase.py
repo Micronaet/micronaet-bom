@@ -61,7 +61,7 @@ class StockMove(orm.Model):
             product = line.product_id
             if not product or product.id in res:
                 continue
-            res[product.id] = '[acq. %s %s %s: EUR %s]' % (
+            res[product.id] = '[acq. %s %s %s: costo un. %s]' % (
                 (line.picking_id.date or '')[:10],
                 line.product_uom.name,
                 line.product_uom_qty,

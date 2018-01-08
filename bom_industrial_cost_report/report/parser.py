@@ -601,10 +601,9 @@ class Parser(report_sxw.rml_parse):
                         uom_name = cmpt.product_id.uom_id.name
                         fabric_text = ''
                         if is_fabric:
-                            mq_total = cmpt_q * is_fabric
                             fabric_text = '(MQ: %8.5f EUR/MQ: %8.5f)' % (
-                                mq_total,
-                                max_value / mq_total,
+                                cmpt_q * is_fabric,
+                                max_value / is_fabric,
                                 )
                             
                         # Pipe element:    

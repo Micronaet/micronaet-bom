@@ -111,6 +111,8 @@
                      <field name="name" />
                      <filter name="bom_selection_on" string="Selected" domain="[('bom_selection','=',True)]"/>
                      <filter name="bom_selection_off" string="Not selected" domain="[('bom_selection','=',False)]"/>
+                     <filter name="bom_industrial_no_price_on" string="DB prezzo zero" domain="[('bom_industrial_no_price','=',True)]"/>
+                     <filter name="bom_industrial_no_price_off" string="BOM prezzo indicato" domain="[('bom_industrial_no_price','=',False)]"/>
                      <group expand="0" string="Group By...">
                          <filter name="group_bom_selection" string="BOM" context="{'group_by': 'bom_selection'}"/>
                      </group>                
@@ -123,6 +125,7 @@
              <field name="priority" eval="50" />
              <field name="arch" type="xml">
                  <tree string="BOM selection" editable="bottom" colors="red:bom_selection==True and industrial_missed==True">
+                     <field name="bom_industrial_no_price" invisible="1"/>
                      <field name="industrial_missed" invisible="1"/>
                      <field name="bom_selection" invisible="1"/>
                      <field name="default_code" />
@@ -149,6 +152,30 @@
              <field name="view_id" ref="view_product_bom_selection_tree"/>
              <field name="search_view_id" ref="view_product_bom_selection_search"/>
              <field name="context">{'search_default_bom_selection_on': True,}</field>
+             <field name="domain">[]</field>
+         </record>
+
+         <record model="ir.ui.view" id="view_product_bom_no_price_tree">
+             <field name="name">product.product.no.price.tree</field>
+             <field name="model">product.product</field>
+             <field name="priority" eval="50" />
+             <field name="arch" type="xml">
+                 <tree string="BOM selection" editable="bottom" colors="blue:bom_industrial_no_price==True">
+                     <field name="bom_industrial_no_price" />
+                     <field name="default_code" />
+                     <field name="name" />
+                     <field name="state" invisible="1" />
+                 </tree>
+             </field>
+         </record>
+         <record model="ir.actions.act_window" id="action_product_bom_no_price_tree">
+             <field name="name">DB prodotti no prezzo</field>
+             <field name="res_model">product.product</field>
+             <field name="view_type">form</field>
+             <field name="view_mode">tree,form</field>
+             <field name="view_id" ref="view_product_bom_no_price_tree"/>
+             <field name="search_view_id" ref="view_product_bom_selection_search"/>
+             <field name="context">{'search_default_bom_industrial_no_price_on': True,}</field>
              <field name="domain">[]</field>
          </record>
          
@@ -222,6 +249,13 @@
                  sequence="30"
                  />
 
+             <menuitem 
+                 parent="menu_product_bom_selection_root" 
+                 id="menu_product_bom_no_price"
+                 action="action_product_bom_no_price_tree"
+                 sequence="80"
+                 />
+                 
              <menuitem 
                  parent="menu_product_bom_selection_root" 
                  id="menu_mrp_bom_industrial_cost_parameter"

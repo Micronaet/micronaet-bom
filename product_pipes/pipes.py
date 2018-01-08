@@ -138,6 +138,7 @@ class ProductProduct(orm.Model):
         for product in self.browse(cr, uid, ids, context=context):            
             data = {}            
             if auto_weight:
+                _logger.warning('Auto calculation weight mode')
                 thick = product.pipe_thick
                 
                 # Area:
@@ -159,6 +160,7 @@ class ProductProduct(orm.Model):
                 weight = volume * product.pipe_material_id.weight_specific
                 data['weight'] = weight
             else:
+                _logger.warning('No auto calculation weight mode')
                 weight = product.weight    
 
             # Price: 

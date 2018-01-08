@@ -106,7 +106,7 @@
                             <field name="pipe_thick" />
                             <field name="pipe_length" />
                             <field name="pipe_resistence" />
-                            <field name="weight" string="Weight Kg. (calc.)" />
+                            <field name="weight" string="Weight Kg." />
                             
                             <separator string="Price" colspan="4"/>
                             <field name="standard_price" />

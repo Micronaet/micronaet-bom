@@ -176,7 +176,21 @@ def is_fabric_product(product):
         if is_fabric:
             return float(h) / 100.0 # meter
     return False         
-        
+
+def get_price_detail(price_ids):
+    ''' With detail
+    '''
+    res = ''
+    # If not detail:
+    return res # XXX no detail mode
+    for seller, price, date_quotation in price_ids:
+        res += 'Forn.: %s %s EUR (%s) \n' % (
+            seller.name, # Supplier browse
+            price, # Unit price
+            date_quotation,
+            )
+    return res        
+
 class ProductProduct(orm.Model):
     """ Model name: ProductProduct add utility for report
     """
@@ -577,7 +591,8 @@ class Parser(report_sxw.rml_parse):
                         #last_date = False # TODO last price?
                         cmpt_q = item.product_qty * cmpt.product_qty # XXX                        
                         min_value, max_value, price_ids = get_pricelist(
-                            cmpt.product_id, date_ref)
+                            cmpt.product_id, date_ref)                        
+                        price_detail = get_price_detail(price_ids)
 
                         is_fabric = is_fabric_product(cmpt.product_id)
                         if is_fabric:
@@ -603,7 +618,7 @@ class Parser(report_sxw.rml_parse):
                             uom_name, # UOM
                             max_value, # unit price (max not the last!)
                             max_value * cmpt_q, # subtotal (last = unit x q)
-                            price_ids, # list of all prices (XXX not used)
+                            price_detail, # list of price (used for detail)
                             component, # HW product
                             cmpt.product_id, # Product for extra data
                             red_price, # no price
@@ -621,6 +636,7 @@ class Parser(report_sxw.rml_parse):
                     cmpt_q = item.product_qty
                     min_value, max_value, price_ids = get_pricelist(
                         item.product_id, date_ref)
+                    price_detail = get_price_detail(price_ids)
 
                     red_price = \
                         not component.bom_industrial_no_price and not max_value
@@ -635,7 +651,7 @@ class Parser(report_sxw.rml_parse):
                         component.uom_id.name, # UOM
                         max_value, # unit price (max not the last!)
                         max_value * item.product_qty, # subtotal
-                        price_ids, 
+                        price_detail, # list of price (used for detail), 
                         False, # HW product (not here)
                         component, # Product for extra data
                         red_price, # Prod with no price

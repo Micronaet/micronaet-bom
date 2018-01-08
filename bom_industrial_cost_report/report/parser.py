@@ -587,8 +587,11 @@ class Parser(report_sxw.rml_parse):
                                      
                         # TODO manage as pipe?
                         red_price = \
-                            cmtp.product_id.bom_industrial_no_price and \
+                            cmpt.product_id.bom_industrial_no_price and \
                                 not max_value
+                        if cmpt.product_id.bom_industrial_no_price:
+                            max_value = 0.0 # no price in BOM
+                            
                         record = [
                             '%s - %s' % (
                                 cmpt.product_id.default_code or '',
@@ -619,6 +622,8 @@ class Parser(report_sxw.rml_parse):
 
                     red_price = \
                         not component.bom_industrial_no_price and not max_value
+                    if component.bom_industrial_no_price:
+                        max_value = 0.0
                     data[3].append([
                         '%s - %s' % (
                             component.default_code or '',

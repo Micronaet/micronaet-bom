@@ -127,36 +127,44 @@ class ProductProduct(orm.Model):
             
     def calculate_pipe_price_from_dimension(self, cr, uid, ids, context=None):
         ''' Calculate volume depend on dimension of pipe and weight / volume
+            remove auto weight, use context parameter
         '''
+        # Auto weight parameter:
+        if context is None:
+            context = {}
+        auto_weight = context.get('auto_weight', False)
+            
         # Used from button but also for scheduled operation
         for product in self.browse(cr, uid, ids, context=context):            
-            thick = product.pipe_thick
-            
-            # Area:
-            ray1 = product.pipe_diameter / 2
-            if product.pipe_diameter2:
-                ray2 = product.pipe_diameter2 / 2
-            else:    
-                ray2 = ray1
+            data = {}            
+            if auto_weight:
+                thick = product.pipe_thick
                 
-            plain_area = ray1 * ray2 * math.pi
-            empty_area = (ray1 - thick) * (ray2 - thick) * math.pi
-            
-            # Volume:    
-            plain_volume = plain_area * product.pipe_length
-            empty_volume = empty_area * product.pipe_length
-            volume = (plain_volume - empty_volume) / 1000000 # m3
-            
-            # Weight:
-            weight = volume * product.pipe_material_id.weight_specific
-            
+                # Area:
+                ray1 = product.pipe_diameter / 2
+                if product.pipe_diameter2:
+                    ray2 = product.pipe_diameter2 / 2
+                else:    
+                    ray2 = ray1
+                    
+                plain_area = ray1 * ray2 * math.pi
+                empty_area = (ray1 - thick) * (ray2 - thick) * math.pi
+                
+                # Volume:    
+                plain_volume = plain_area * product.pipe_length
+                empty_volume = empty_area * product.pipe_length
+                volume = (plain_volume - empty_volume) / 1000000 # m3
+                
+                # Weight:
+                weight = volume * product.pipe_material_id.weight_specific
+                data['weight'] = weight
+            else:
+                weight = product.weight    
+
             # Price: 
-            standard_price = weight * product.pipe_material_id.last_price
-            
-            self.write(cr, uid, product.id, {
-                'standard_price': standard_price,
-                'weight': weight,
-                }, context=context)
+            data['standard_price'] = \
+                weight * product.pipe_material_id.last_price
+            self.write(cr, uid, product.id, data, context=context)
         
     _columns = {
         'is_pipe': fields.boolean('Is Pipe'),

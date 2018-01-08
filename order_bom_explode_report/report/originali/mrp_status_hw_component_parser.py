@@ -303,6 +303,7 @@ class Parser(report_sxw.rml_parse):
                     stock_net = product.mx_net_qty
                     # Check negative stock for highlight:
                     if stock_net < 0:
+                        import pdb; pdb.set_trace()
                         parent_todo[parent][3] += 1
                     
                     parent_todo[parent][1] += stock_net # Net in stock (once)

@@ -33,6 +33,11 @@ from openerp.report.report_sxw import rml_parse
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from openerp.osv import fields, osv, expression, orm
+from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
+    DEFAULT_SERVER_DATETIME_FORMAT, 
+    DATETIME_FORMATS_MAP, 
+    float_compare)
+
 
 _logger = logging.getLogger(__name__)
 
@@ -40,6 +45,99 @@ type_i18n = {
     'industrial': 'COSTI INDUSTRIALI',
     'work': 'MANODOPERA',
     }    
+
+# -----------------------------------------------------------------------------
+#                      UTILITY (TODO move in a module or class?):
+# -----------------------------------------------------------------------------
+def industrial_index_get_text(index):
+    ''' Convert all index value in string format
+    '''
+    index_total = sum(index.values())
+    res = ''
+    for key, value in index.iteritems():
+        res += '%s: %6.3f / %6.3f > %s%%\r\n' % (
+            type_i18n.get(key, '?'), 
+            value, index_total,
+            ('%6.3f' % (100.0 * value / index_total, )) if \
+                index_total else 'ERRORE!',
+            )
+    return res
+    
+def load_subelements_price(self, res, mode, item, product, hw=False):
+    ''' Load list in all seller pricelist return min and max value
+    '''
+    min_value = 0.0
+    max_value = 0.0
+    
+    record = [
+        mode, item, [], 
+        False, # not used here
+        ]
+        
+    # TODO manage as pipe?
+    for seller in product.seller_ids:
+         for pricelist in seller.pricelist_ids:
+             if not pricelist.is_active:
+                 continue                         
+             total = pricelist.price * item.product_qty
+             record[2].append((
+                 seller.name.name,
+                 '%10.5f' % pricelist.price,
+                 pricelist.date_quotation or '???',
+                 '%10.5f' % total,
+                 hw,
+                 ))
+             if not min_value or total < min_value:
+                 min_value = total
+             if total > max_value:
+                 max_value = total
+                 
+    # Update min and max value:             
+    self.min += min_value
+    self.max += max_value
+    res.append(record)
+    return record[2] # error test for check price present
+
+def get_pricelist(product, cmpt_q, date_ref):
+    ''' Return:
+        min, max, all pricelist for this product
+        active price, reference >= passed
+    '''
+    res = [
+        False, # Min
+        0.0, # Max
+        [], # Price list
+        ]
+        
+    for seller in product.seller_ids:
+         for pricelist in seller.pricelist_ids:
+             # no inactive price XXX remove this filter?
+             if not pricelist.is_active: # no inactive
+                 continue            
+                       
+             # Take only period date:
+             if pricelist.date_quotation and \
+                    pricelist.date_quotation <= date_ref:
+                 continue
+             
+             date_quotation = pricelist.date_quotation
+             price = pricelist.price
+             total = cmpt_q * price
+                                              
+             # XXX Used:    ???
+             res[2].append((
+                 seller.name, # Supplier browse
+                 price, # Unit price
+                 date_quotation or '???', # Date
+                 total, # Subtotal
+                 ))
+             
+             # Save min or max price:    
+             if not res[0] or total < res[0]:
+                 res[0] = total
+             if total > res[1]:
+                 res[1] = total
+    return res             
 
 class ProductProduct(orm.Model):
     """ Model name: ProductProduct add utility for report
@@ -226,7 +324,9 @@ class ProductProduct(orm.Model):
     # -------------------------------------------------------------------------
     def _report_industrial_get_objects(self, cr, uid, data=None, context=None):
         ''' Return single report or list of selected bom 
-        '''        # Readability:
+            Used in report and in XLSX extract files
+        '''        
+        # Readability:
         if data is None:
             data = {}
 
@@ -246,63 +346,12 @@ class ProductProduct(orm.Model):
                 ], context=context)
         objects = self.browse(cr, uid, active_ids, context=context)
            
-        return objects #sorted(objects, key=lambda o: o.default_code)
+        #return objects #sorted(objects, key=lambda o: o.default_code)
+        return sorted(objects, key=lambda o: o.default_code)
 
     def _report_industrial_get_details(self, cr, uid, product, context=None):
         ''' Create detail row
         '''        
-        # ---------------------------------------------------------------------
-        # Utility:
-        # ---------------------------------------------------------------------
-        def industrial_index_get_text(index):
-            ''' Convert all index value in string format
-            '''
-            index_total = sum(index.values())
-            res = ''
-            for key, value in index.iteritems():
-                res += '%s: %6.3f / %6.3f > %s%%\r\n' % (
-                    type_i18n.get(key, '?'), 
-                    value, index_total,
-                    ('%6.3f' % (100.0 * value / index_total, )) if \
-                        index_total else 'ERRORE!',
-                    )
-            return res
-            
-        def load_subelements_price(self, res, mode, item, product, hw=False):
-            ''' Load list in all seller pricelist return min and max value
-            '''
-            min_value = 0.0
-            max_value = 0.0
-            
-            record = [
-                mode, item, [], 
-                False, # not used here
-                ]
-                
-            # TODO manage as pipe?
-            for seller in product.seller_ids:
-                 for pricelist in seller.pricelist_ids:
-                     if not pricelist.is_active:
-                         continue                         
-                     total = pricelist.price * item.product_qty
-                     record[2].append((
-                         seller.name.name,
-                         '%10.5f' % pricelist.price,
-                         pricelist.date_quotation or '???',
-                         '%10.5f' % total,
-                         hw,
-                         ))
-                     if not min_value or total < min_value:
-                         min_value = total
-                     if total > max_value:
-                         max_value = total
-                         
-            # Update min and max value:             
-            self.min += min_value
-            self.max += max_value
-            res.append(record)
-            return record[2] # error test for check price present
-
         # Pool used:           
         product_pool = self.pool.get('product.product')        
         if context is None:
@@ -340,7 +389,7 @@ class ProductProduct(orm.Model):
         # Append totals:
         last_type = False
         supplement_cost = sorted(
-            self.get_cost_industrial_for_product(
+            product_pool.get_cost_industrial_for_product(
                 cr, uid, [product.id], context=context).iteritems(),
             key=lambda x: (x[0].type, x[0].name),
             )
@@ -412,14 +461,139 @@ class Parser(report_sxw.rml_parse):
         
     def get_objects(self, data=None):
         ''' Return single report or list of selected bom 
-        '''        # Readability:
+        '''        
+        # Readability:
         cr = self.cr
         uid = self.uid
         context = {}
         product_pool = self.pool.get('product.product')
         
-        return product_pool._report_industrial_get_objects(
+        # Default reference for take price is 500 days before:
+        days = 500 # valid price
+        date_ref = (datetime.now() - timedelta(days=500)).strftime(
+            DEFAULT_SERVER_DATE_FORMAT)
+        
+        res = []
+        selected_product = product_pool._report_industrial_get_objects(
             cr, uid, data=data, context=context)
+        if selected_product:    
+            margin_a = \
+                selected_product[0].company_id.industrial_margin_a / 100.0 
+            margin_b = \
+                selected_product[0].company_id.industrial_margin_b / 100.0 
+                
+        for product in selected_product:
+                
+            data = [
+                0.0, # 0. Min
+                0.0, # 1. Max
+                False, # 2. Error
+                [], # 3. Component data
+                [], # 4. Extra cost (1) industrial
+                [], # 5. Extra cost (2) work
+                {}, # 6. Index (total for calculate index)
+                {}, # 7. Total (margin element)
+                product, # 8. Product browse
+                ]
+
+            # -----------------------------------------------------------------
+            # Load component list (and subcomponent for HW):
+            # -----------------------------------------------------------------
+            for item in product.dynamic_bom_line_ids:
+                component = item.product_id
+                half_bom_ids = component.half_bom_ids # if half component
+                if half_bom_ids: 
+                    # HW component (level 2)                    
+                    for cmpt in half_bom_ids:
+                        #last_date = False # TODO last price?
+                        cmpt_q = item.product_qty * cmpt.product_qty # XXX                        
+                        min_value, max_value, price_ids = get_pricelist(
+                            product, cmpt_q, date_ref)
+                                     
+                        # TODO manage as pipe?
+                        record = [
+                            '%s - %s >> %s' % (
+                                cmpt.product_id.default_code or '',
+                                cmpt.product_id.name or '',
+                                component.default_code or '', # HW 
+                                ),
+                            cmpt_q, # q. total
+                            cmpt.product_id.uom_id.name, # UOM
+                            max_value, # unit price (max not the last!)
+                            max_value * cmpt_q, # subtotal (last = unit x q)
+                            price_ids, # list of all prices (XXX not used)
+                            ]
+
+                        if not max_value: 
+                            error = True # This product now is in error!
+                                     
+                        # Update min and max value:             
+                        data[0] += min_value
+                        data[1] += max_value
+                        data[3].append(record) # Populate product database
+                else: 
+                    # Raw material (level 1)
+                    min_value, max_value, price_ids = get_pricelist(
+                        product, cmpt_q, date_ref)
+                    data[3].append([
+                        '%s - %s' % (
+                            component.default_code or '',
+                            component.name or '',
+                            ),
+                        item.product_qty, # q. total
+                        component.uom_id.name, # UOM
+                        max_value, # unit price (max not the last!)
+                        item.product_qty * max_value, # subtotal
+                        price_ids, # list of all prices
+                        ]) # Populate product database
+
+            # Sort collected data:
+            data[3].sort() # First element is name
+            
+            # -----------------------------------------------------------------
+            # Extra data end report:
+            # -----------------------------------------------------------------
+            data[5] = { # Index
+                _('Componenti'): self.max, # used max:
+                }            
+            for cost, item in product_pool.get_cost_industrial_for_product(
+                    cr, uid, [product.id], context=context).iteritems():
+                # Index total:    
+                if cost.type not in data[6]: 
+                    data[6][cost.type] = 0.0
+                    
+                # 2 case: with product or use unit_cost    
+                if item.product_id: # use item price
+                    value = item.qty * item.last_cost                
+                    time_qty = False
+                else:
+                    value = item.qty * cost.unit_cost                     
+                    time_qty = item.qty
+                
+                if cost.type == 'industrial':
+                    data[4].append((item or '???', value, time_qty))
+                else: #'work'    
+                    data[5].append((item or '???', value, time_qty))
+                
+                data[0] += value # min
+                data[1] += value # max
+                data[6][cost.type] += value # Index total
+
+            # Save margin parameters:        
+            data[7]['margin_a'] = data[1] * industrial_margin_a / 100.0 
+            data[7]['margin_b'] = data[1] * industrial_margin_b / 100.0 
+                
+            # Write status in row:    
+            data[7]['index'] = industrial_index_get_text(data[6])
+            if context.get('update_record', True): # XXX always true for now:
+                product_pool.write(cr, uid, product.id, {
+                    'from_industrial': data[0],
+                    'to_industrial': data[1],
+                    'industrial_missed': data[2],
+                    'industrial_index': data[7]['index'],
+                    }, context=context)            
+            res.append(data)
+        return res
 
     def get_details(self, product):
         ''' Create detail row

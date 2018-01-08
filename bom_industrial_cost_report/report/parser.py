@@ -57,7 +57,7 @@ def industrial_index_get_text(index):
     for key, value in index.iteritems():
         if key not in type_i18n: 
             continue # jump key not used
-        res += '%s: %6.3f / %6.3f > %s%%\r\n' % (
+        res += '%s: %6.3f su %6.3f = %s%%\r\n' % (
             type_i18n[key], 
             value, index_total,
             ('%6.3f' % (100.0 * value / index_total, )) if \
@@ -521,20 +521,21 @@ class Parser(report_sxw.rml_parse):
         
         res = []
         product_pool = self.pool.get('product.product')
-        product_uom = self.pool.get('product.uom')
+        
         # search mq uom:
-        uom_ids = product_uom.search(cr, uid, [
-            '|',
-            ('name', 'ilike', 'M2'),
-            ('account_ref', 'ilike', 'MQ'),            
-            ], context=context)
-        if uom_ids:
-            mq_id = product_uom.browse(cr, uid, uom_ids, context=context)[0]
-        else:
-            raise osv.except_osv(
-                _('Errore UM'), 
-                _('Non trovo UM: MQ'),
-                )
+        #product_uom = self.pool.get('product.uom')
+        #uom_ids = product_uom.search(cr, uid, [
+        #    '|',
+        #    ('name', 'ilike', 'M2'),
+        #    ('account_ref', 'ilike', 'MQ'),            
+        #    ], context=context)
+        #if uom_ids:
+        #    mq_id = product_uom.browse(cr, uid, uom_ids, context=context)[0]
+        #else:
+        #    raise osv.except_osv(
+        #        _('Errore UM'), 
+        #        _('Non trovo UM: MQ'),
+        #        )
         
         selected_product = product_pool._report_industrial_get_objects(
             cr, uid, data=datas, context=context)
@@ -573,6 +574,7 @@ class Parser(report_sxw.rml_parse):
                 {}, # 7. Total (margin element)
                 product, # 8. Product browse
                 '', # 9. Parameter of report
+                '', # 10. Total text
                 ]
 
             # -----------------------------------------------------------------
@@ -594,13 +596,23 @@ class Parser(report_sxw.rml_parse):
                             cmpt.product_id, date_ref)                        
                         price_detail = get_price_detail(price_ids)
 
+                        # Fabric element:
                         is_fabric = is_fabric_product(cmpt.product_id)
+                        uom_name = cmpt.product_id.uom_id.name
+                        fabric_text = ''
                         if is_fabric:
-                            uom_name = mq_id.name
-                            report_q = cmpt_q * is_fabric
-                        else:
-                            uom_name = cmpt.product_id.uom_id.name
-                            report_q = cmpt_q
+                            mq_total = cmpt_q * is_fabric
+                            fabric_text = '(MQ: %8.5f EUR/MQ: %8.5f)' % (
+                                mq_total,
+                                max_value / mq_total,
+                                )
+                            
+                        # Pipe element:    
+                        if cmpt.product_id.is_pipe:
+                            # Calc with weight and price kg not cost manag.:
+                            max_value = \
+                                cmpt.product_id.pipe_material_id.last_price * \
+                                cmpt.product_id.weight
                                      
                         # TODO manage as pipe?
                         red_price = \
@@ -614,7 +626,7 @@ class Parser(report_sxw.rml_parse):
                                 cmpt.product_id.default_code or '',
                                 cmpt.product_id.name or '',
                                 ),
-                            report_q, # q. total
+                            cmpt_q, # q. total
                             uom_name, # UOM
                             max_value, # unit price (max not the last!)
                             max_value * cmpt_q, # subtotal (last = unit x q)
@@ -622,6 +634,7 @@ class Parser(report_sxw.rml_parse):
                             component, # HW product
                             cmpt.product_id, # Product for extra data
                             red_price, # no price
+                            fabric_text, # fabric text for price
                             ]
 
                         if red_price:
@@ -655,6 +668,7 @@ class Parser(report_sxw.rml_parse):
                         False, # HW product (not here)
                         component, # Product for extra data
                         red_price, # Prod with no price
+                        '', # fabric text for price
                         ]) # Populate product database
                         
                     if red_price:
@@ -663,12 +677,16 @@ class Parser(report_sxw.rml_parse):
                     data[0] += min_value * cmpt_q
                     data[1] += max_value * cmpt_q
 
-            # Sort collected data:
-            data[3].sort() # First element is name
-            
-            # Add extra 
+            # Add extra (save in total the max)
             data[0] += data[0] * margin_extra / 100.0
-            data[1] += data[1] * margin_extra / 100.0
+            margin_extra_value = data[1] * margin_extra / 100.0
+            # Update total text:
+            data[10] += '%10.5f +%10.5f'  % (
+                data[1],
+                margin_extra_value,                
+                )
+            
+            data[1] += margin_extra_value
             
             # -----------------------------------------------------------------
             # Extra data end report:
@@ -690,18 +708,26 @@ class Parser(report_sxw.rml_parse):
                     value = item.qty * cost.unit_cost                     
                     time_qty = item.qty
                 
+                cost_item = (item or '???', value, time_qty)
                 if cost.type == 'industrial':
-                    data[4].append((item or '???', value, time_qty))
-                else: #'work'    
-                    data[5].append((item or '???', value, time_qty))
+                    data[4].append(cost_item)
+                elif cost.type == 'work':
+                    data[5].append(cost_item)
+                else:
+                    raise osv.except_osv(
+                        _('Tipo errato'), 
+                        _('Tipo di costo non presente'),
+                        )
                 
                 data[0] += value # min
                 data[1] += value # max
                 data[6][cost.type] += value # Index total
 
             # Save margin parameters:        
-            data[7]['margin_a'] = data[1] * margin_a / 100.0 
-            data[7]['margin_b'] = data[1] * margin_b / 100.0 
+
+            data[7]['margin_a'] = data[1] * margin_a / 100.0
+            data[7]['margin_b'] = data[1] * margin_b / 100.0
+            
                 
             # Write status in row:    
             data[7]['index'] = industrial_index_get_text(data[6])
@@ -711,7 +737,17 @@ class Parser(report_sxw.rml_parse):
                     'to_industrial': data[1],
                     'industrial_missed': data[2],
                     'industrial_index': data[7]['index'],
-                    }, context=context)            
+                    }, context=context)  
+                       
+            # Total text:      
+            # Mat + Extra + Cost1 + Cost2
+            for t in type_i18n:
+                if t in data[6]:
+                    data[10] += ' +%8.5f' % data[6][t]
+
+            # Sort data:
+            data[4].sort(key=lambda x: x[0].cost_id.name) # Table 1
+            data[5].sort(key=lambda x: x[0].cost_id.name) # Table 2
             res.append(data)
         
         # Update parameters:    

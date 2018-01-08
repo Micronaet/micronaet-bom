@@ -162,6 +162,8 @@
                      <field name="name" readonly="1"/>
                      <field name="industrial_margin_a" />
                      <field name="industrial_margin_b" />
+                     <field name="industrial_days" />
+                     <field name="industrial_margin_extra" />
                  </tree>
              </field>
          </record>

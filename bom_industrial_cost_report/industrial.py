@@ -46,7 +46,16 @@ class ResCompany(orm.Model):
     _columns = {
         'industrial_margin_a': fields.float('Margine A%', digits=(16, 4)),
         'industrial_margin_b': fields.float('Margine B%', digits=(16, 4)),
+        'industrial_days': fields.integer('Giorni prezzo', 
+            help='Giorni prima di oggi in cui prendere il prezzo inserito'),
+        'industrial_margin_extra': fields.float('Margine extra%', 
+            digits=(16, 4)),
         }
+        
+    _defaults = {
+        'industrial_days': lambda *x: 500,
+        'industrial_margin_extra': lambda *x: 0.1,
+        }    
 
 class MrpBomIndustrialCost(orm.Model):
     """ Model name: Industrial cost
@@ -270,6 +279,10 @@ class ProductProduct(orm.Model):
             
     _columns = {
         'bom_selection': fields.boolean('BOM Selection'),
+        'bom_industrial_no_price': fields.boolean('BOM no price OK', 
+            help='Se il prodotto fa parte di DB viene indicato senza prezzo',
+            ),
+        
         'from_industrial': fields.float(
             'From industrial cost', digits=(16, 3)),
         'to_industrial': fields.float(
@@ -287,6 +300,5 @@ class ProductProduct(orm.Model):
             _get_industrial_sale_ab, method=True, 
             type='float', string='Vend. B%', multi=True,
             store=False), 
-                        
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

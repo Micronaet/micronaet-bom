@@ -109,34 +109,42 @@ def get_pricelist(product, cmpt_q, date_ref):
         [], # Price list
         ]
         
+    only_one = False
+    i = 0
     for seller in product.seller_ids:
-         for pricelist in seller.pricelist_ids:
-             # no inactive price XXX remove this filter?
-             if not pricelist.is_active: # no inactive
-                 continue            
-                       
-             # Take only period date:
-             if pricelist.date_quotation and \
-                    pricelist.date_quotation <= date_ref:
-                 continue
+        for pricelist in seller.pricelist_ids:
+            # no inactive price XXX remove this filter?
+            if not pricelist.is_active: # no inactive
+                continue            
+            i += 1 # total price active          
              
-             date_quotation = pricelist.date_quotation
-             price = pricelist.price
-             total = cmpt_q * price
+            # Take only period date:
+            price = pricelist.price
+            only_one = price
+            date_quotation = pricelist.date_quotation
+            total = cmpt_q * price
                                               
-             # XXX Used:    ???
-             res[2].append((
-                 seller.name, # Supplier browse
-                 price, # Unit price
-                 date_quotation or '???', # Date
-                 total, # Subtotal
-                 ))
-             
-             # Save min or max price:    
-             if not res[0] or total < res[0]:
-                 res[0] = total
-             if total > res[1]:
-                 res[1] = total
+            # XXX Used:    ???
+            res[2].append((
+                seller.name, # Supplier browse
+                price, # Unit price
+                date_quotation or '???', # Date
+                total, # Subtotal
+                ))
+
+            # Keep here for analyse only one price:             
+            if pricelist.date_quotation and \
+                   pricelist.date_quotation <= date_ref:
+                continue
+
+            # Save min or max price:    
+            if not res[0] or total < res[0]:
+                res[0] = total
+            if total > res[1]:
+                res[1] = total
+    if only_one and i == 1:
+        res[0] = only_one
+        res[1] = only_one
     return res             
 
 class ProductProduct(orm.Model):
@@ -459,31 +467,32 @@ class Parser(report_sxw.rml_parse):
             'get_totals': self.get_totals,
         })
         
-    def get_objects(self, data=None):
+    def get_objects(self, datas=None):
         ''' Return single report or list of selected bom 
         '''        
         # Readability:
         cr = self.cr
         uid = self.uid
         context = {}
-        product_pool = self.pool.get('product.product')
-        
-        # Default reference for take price is 500 days before:
-        days = 500 # valid price
-        date_ref = (datetime.now() - timedelta(days=500)).strftime(
-            DEFAULT_SERVER_DATE_FORMAT)
         
         res = []
+        product_pool = self.pool.get('product.product')
         selected_product = product_pool._report_industrial_get_objects(
-            cr, uid, data=data, context=context)
+            cr, uid, data=datas, context=context)
         if selected_product:    
             margin_a = \
                 selected_product[0].company_id.industrial_margin_a / 100.0 
             margin_b = \
                 selected_product[0].company_id.industrial_margin_b / 100.0 
+            # TODO manage extra:    
+            margin_extra = \
+                selected_product[0].company_id.industrial_margin_extra / 100.0 
+
+            days = selected_product[0].company_id.industrial_days or 500
+            date_ref = (datetime.now() - timedelta(days=days)).strftime(
+                DEFAULT_SERVER_DATE_FORMAT)
                 
-        for product in selected_product:
-                
+        for product in selected_product:                        
             data = [
                 0.0, # 0. Min
                 0.0, # 1. Max
@@ -499,8 +508,10 @@ class Parser(report_sxw.rml_parse):
             # -----------------------------------------------------------------
             # Load component list (and subcomponent for HW):
             # -----------------------------------------------------------------
-            for item in product.dynamic_bom_line_ids:
+            for item in product.dynamic_bom_line_ids:                
                 component = item.product_id
+                if component.bom_placeholder or component.bom_alternative:
+                    continue # jump component
                 half_bom_ids = component.half_bom_ids # if half component
                 if half_bom_ids: 
                     # HW component (level 2)                    
@@ -508,7 +519,7 @@ class Parser(report_sxw.rml_parse):
                         #last_date = False # TODO last price?
                         cmpt_q = item.product_qty * cmpt.product_qty # XXX                        
                         min_value, max_value, price_ids = get_pricelist(
-                            product, cmpt_q, date_ref)
+                            cmpt.product_id, cmpt_q, date_ref)
                                      
                         # TODO manage as pipe?
                         record = [
@@ -525,7 +536,7 @@ class Parser(report_sxw.rml_parse):
                             ]
 
                         if not max_value: 
-                            error = True # This product now is in error!
+                            data[2] = True # This product now is in error!
                                      
                         # Update min and max value:             
                         data[0] += min_value
@@ -533,14 +544,15 @@ class Parser(report_sxw.rml_parse):
                         data[3].append(record) # Populate product database
                 else: 
                     # Raw material (level 1)
+                    cmpt_q = item.product_qty
                     min_value, max_value, price_ids = get_pricelist(
-                        product, cmpt_q, date_ref)
+                        item.product_id, cmpt_q, date_ref)
                     data[3].append([
                         '%s - %s' % (
                             component.default_code or '',
                             component.name or '',
                             ),
-                        item.product_qty, # q. total
+                        cmpt_q, # q. total
                         component.uom_id.name, # UOM
                         max_value, # unit price (max not the last!)
                         item.product_qty * max_value, # subtotal
@@ -553,8 +565,8 @@ class Parser(report_sxw.rml_parse):
             # -----------------------------------------------------------------
             # Extra data end report:
             # -----------------------------------------------------------------
-            data[5] = { # Index
-                _('Componenti'): self.max, # used max:
+            data[6] = { # Index
+                _('Componenti'): data[1], # used max:
                 }            
             for cost, item in product_pool.get_cost_industrial_for_product(
                     cr, uid, [product.id], context=context).iteritems():
@@ -580,8 +592,8 @@ class Parser(report_sxw.rml_parse):
                 data[6][cost.type] += value # Index total
 
             # Save margin parameters:        
-            data[7]['margin_a'] = data[1] * industrial_margin_a / 100.0 
-            data[7]['margin_b'] = data[1] * industrial_margin_b / 100.0 
+            data[7]['margin_a'] = data[1] * margin_a / 100.0 
+            data[7]['margin_b'] = data[1] * margin_b / 100.0 
                 
             # Write status in row:    
             data[7]['index'] = industrial_index_get_text(data[6])

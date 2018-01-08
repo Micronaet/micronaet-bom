@@ -558,7 +558,7 @@ class Parser(report_sxw.rml_parse):
                 {}, # 6. Index (total for calculate index)
                 {}, # 7. Total (margin element)
                 product, # 8. Product browse
-                '', # 9. Paremter of report
+                '', # 9. Parameter of report
                 ]
 
             # -----------------------------------------------------------------
@@ -567,7 +567,9 @@ class Parser(report_sxw.rml_parse):
             for item in product.dynamic_bom_line_ids:                
                 component = item.product_id
                 if component.bom_placeholder or component.bom_alternative:
+                    _logger.warning('Jump placeholder elements')
                     continue # jump component
+                    
                 half_bom_ids = component.half_bom_ids # if half component
                 if half_bom_ids: 
                     # HW component (level 2)                    

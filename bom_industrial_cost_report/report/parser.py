@@ -398,9 +398,9 @@ class ProductProduct(orm.Model):
                 ], context=context)
         objects = self.browse(cr, uid, active_ids, context=context)
            
-        #return objects #sorted(objects, key=lambda o: o.default_code)
         return sorted(objects, key=lambda o: o.default_code)
 
+    # XXX To remove:
     def _report_industrial_get_details(self, cr, uid, product, context=None):
         ''' Create detail row
         '''        
@@ -488,27 +488,27 @@ class ProductProduct(orm.Model):
                 }, context=context)
         return res
 
-    def _report_industrial_get_totals(self, mode):
-        ''' Total value (min or max)
-        '''    
-        if mode == 'min':
-            return self.min
-        elif mode == 'index':
-            return self.index,    
-        elif mode == 'margin_a':
-            return self.margin_a,    
-        elif mode == 'margin_b':
-            return self.margin_b,    
-        else: # mode == 'max':
-            return self.max
+#    def _report_industrial_get_totals(self, mode):
+#        ''' Total value (min or max)
+#        '''    
+#        if mode == 'min':
+#            return self.min
+#        elif mode == 'index':
+#            return self.index,    
+#        elif mode == 'margin_a':
+#            return self.margin_a,    
+#        elif mode == 'margin_b':
+#            return self.margin_b,    
+#        else: # mode == 'max':
+#            return self.max
         
 class Parser(report_sxw.rml_parse):
     def __init__(self, cr, uid, name, context):
         super(Parser, self).__init__(cr, uid, name, context)
         self.localcontext.update({
             'get_objects': self.get_objects,
-            'get_details': self.get_details,
-            'get_totals': self.get_totals,
+            #'get_details': self.get_details,
+            #'get_totals': self.get_totals,
         })
         
     def get_objects(self, datas=None):
@@ -753,20 +753,20 @@ class Parser(report_sxw.rml_parse):
         res[0][9] = parameter
         return res
 
-    def get_details(self, product):
-        ''' Create detail row
-        '''
-        cr = self.cr
-        uid = self.uid
-        context = {}
+    #def get_details(self, product):
+    #    ''' Create detail row
+    #    '''
+    #    cr = self.cr
+    #    uid = self.uid
+    #    context = {}
 
-        # Pool used:    
-        product_pool = self.pool.get('product.product')
-        return product_pool._report_industrial_get_details(
-            cr, uid, product, context=context)
+    #    # Pool used:    
+    #    product_pool = self.pool.get('product.product')
+    #    return product_pool._report_industrial_get_details(
+    #        cr, uid, product, context=context)
         
-    def get_totals(self, mode):
-        ''' Total value (min or max)
-        '''    
-        product_pool = self.pool.get('product.product')
-        return product_pool._report_industrial_get_totals(mode)
+    #def get_totals(self, mode):
+    #    ''' Total value (min or max)
+    #    '''    
+    #    product_pool = self.pool.get('product.product')
+    #    return product_pool._report_industrial_get_totals(mode)

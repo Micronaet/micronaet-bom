@@ -722,8 +722,7 @@ class Parser(report_sxw.rml_parse):
                 data[1] += value # max
                 data[6][cost.type] += value # Index total
 
-            # Save margin parameters:        
-
+            # Save margin parameters:
             data[7]['margin_a'] = data[1] * margin_a / 100.0
             data[7]['margin_b'] = data[1] * margin_b / 100.0
             
@@ -752,21 +751,3 @@ class Parser(report_sxw.rml_parse):
         # Update parameters:    
         res[0][9] = parameter
         return res
-
-    #def get_details(self, product):
-    #    ''' Create detail row
-    #    '''
-    #    cr = self.cr
-    #    uid = self.uid
-    #    context = {}
-
-    #    # Pool used:    
-    #    product_pool = self.pool.get('product.product')
-    #    return product_pool._report_industrial_get_details(
-    #        cr, uid, product, context=context)
-        
-    #def get_totals(self, mode):
-    #    ''' Total value (min or max)
-    #    '''    
-    #    product_pool = self.pool.get('product.product')
-    #    return product_pool._report_industrial_get_totals(mode)

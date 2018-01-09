@@ -274,6 +274,11 @@ class PurchaseOrderXLSX(orm.Model):
                 # Manage product error:
                 if not product_ids: 
                     _logger.error('No product with code: %s' % default_code)
+                    # FATAL ERROR (maybe file not in correct format so raise:
+                    raise osv.except_osv(
+                        _('Errore importazione'), 
+                        _('Non trovato il codice prodotto: %s' % default_code),
+                        )
                     error += 'Riga: %s > No prodotto: %s\n' % (
                         row, default_code)
                     continue

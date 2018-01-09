@@ -401,92 +401,92 @@ class ProductProduct(orm.Model):
         return sorted(objects, key=lambda o: o.default_code)
 
     # XXX To remove:
-    def _report_industrial_get_details(self, cr, uid, product, context=None):
-        ''' Create detail row
-        '''        
-        # Pool used:           
-        product_pool = self.pool.get('product.product')        
-        if context is None:
-            context = {}
+    #def _report_industrial_get_details(self, cr, uid, product, context=None):
+    #    ''' Create detail row
+    #    '''        
+    #    # Pool used:           
+    #    product_pool = self.pool.get('product.product')        
+    #    if context is None:
+    #        context = {}
 
-        # ---------------------------------------------------------------------
-        # Load component list (and subcomponent for HW):
-        # ---------------------------------------------------------------------
-        res = []
-        # Min / Max totals:
-        self.min = 0.0
-        self.max = 0.0
-        error = False # for write in product
-        for item in product.dynamic_bom_line_ids:
-            component = item.product_id
-            half_bom_ids = component.half_bom_ids # if half component
-            if half_bom_ids: # HW component
-                for cmpt in half_bom_ids:
-                    test = load_subelements_price(
-                        self, res, 'S', cmpt, cmpt.product_id, 
-                        item.product_id.default_code,
-                        )
-                    if not test:
-                        error = True
+    #    # ---------------------------------------------------------------------
+    #    # Load component list (and subcomponent for HW):
+    #    # ---------------------------------------------------------------------
+    #    res = []
+    #    # Min / Max totals:
+    #    self.min = 0.0
+    #    self.max = 0.0
+    #    error = False # for write in product
+    #    for item in product.dynamic_bom_line_ids:
+    #        component = item.product_id
+    #        half_bom_ids = component.half_bom_ids # if half component
+    #        if half_bom_ids: # HW component
+    #            for cmpt in half_bom_ids:
+    #                test = load_subelements_price(
+    #                    self, res, 'S', cmpt, cmpt.product_id, 
+    #                    item.product_id.default_code,
+    #                    )
+    #                if not test:
+    #                    error = True
 
-            else: # not HW component
-                test = load_subelements_price(
-                    self, res, 'C', item, item.product_id)
-                if not test:
-                    error = True
+    #        else: # not HW component
+    #            test = load_subelements_price(
+    #                self, res, 'C', item, item.product_id)
+    #            if not test:
+    #                error = True
 
-        # ---------------------------------------------------------------------
-        # Extra data end report:
-        # ---------------------------------------------------------------------
-        # Append totals:
-        last_type = False
-        supplement_cost = sorted(
-            product_pool.get_cost_industrial_for_product(
-                cr, uid, [product.id], context=context).iteritems(),
-            key=lambda x: (x[0].type, x[0].name),
-            )
+    #    # ---------------------------------------------------------------------
+    #    # Extra data end report:
+    #    # ---------------------------------------------------------------------
+    #    # Append totals:
+    #    last_type = False
+    #    supplement_cost = sorted(
+    #        product_pool.get_cost_industrial_for_product(
+    #            cr, uid, [product.id], context=context).iteritems(),
+    #        key=lambda x: (x[0].type, x[0].name),
+    #        )
                     
-        index = {
-            _('component'): self.max, # used max:
-            }            
-        for cost, item in supplement_cost:
-            if last_type != cost.type:
-                last_type = cost.type
-                # Add header (change every category break level):
-                res.append(('H', type_i18n.get(last_type, '?'), False, 
-                    False, # no used
-                    ))
-                index[cost.type] = 0.0
+    #    index = {
+    #        _('component'): self.max, # used max:
+    #        }            
+    #    for cost, item in supplement_cost:
+    #        if last_type != cost.type:
+    #            last_type = cost.type
+    #            # Add header (change every category break level):
+    #            res.append(('H', type_i18n.get(last_type, '?'), False, 
+    #                False, # no used
+    #                ))
+    #            index[cost.type] = 0.0
                 
-            # 2 case: with product or use unit_cost    
-            if item.product_id: # use item price
-                value = item.qty * item.last_cost                
-                time_qty = False
-            else:
-                value = item.qty * cost.unit_cost                     
-                time_qty = item.qty
+    #        # 2 case: with product or use unit_cost    
+    #        if item.product_id: # use item price
+    #            value = item.qty * item.last_cost                
+    #            time_qty = False
+    #        else:
+    #            value = item.qty * cost.unit_cost                     
+    #            time_qty = item.qty
                 
-            res.append(('T', item or '???', value, time_qty))
-            self.min += value
-            self.max += value
-            index[cost.type] += value # for index calc
+    #        res.append(('T', item or '???', value, time_qty))
+    #        self.min += value
+    #        self.max += value
+    #        index[cost.type] += value # for index calc
 
-        # Save margin parameters:        
-        self.margin_a = \
-            self.max * product.company_id.industrial_margin_a / 100.0 
-        self.margin_b = \
-            self.max * product.company_id.industrial_margin_b / 100.0 
+    #    # Save margin parameters:        
+    #    self.margin_a = \
+    #        self.max * product.company_id.industrial_margin_a / 100.0 
+    #    self.margin_b = \
+    #        self.max * product.company_id.industrial_margin_b / 100.0 
             
-        # Write status in row:    
-        self.index = industrial_index_get_text(index)
-        if context.get('update_record', True): # XXX always true for now:
-            product_pool.write(cr, uid, product.id, {
-                'from_industrial': self.min,
-                'to_industrial': self.max,
-                'industrial_missed': error,
-                'industrial_index': self.index,
-                }, context=context)
-        return res
+    #    # Write status in row:    
+    #    self.index = industrial_index_get_text(index)
+    #    if context.get('update_record', True): # XXX always true for now:
+    #        product_pool.write(cr, uid, product.id, {
+    #            'from_industrial': self.min,
+    #            'to_industrial': self.max,
+    #            'industrial_missed': error,
+    #            'industrial_index': self.index,
+    #            }, context=context)
+    #    return res
 
 #    def _report_industrial_get_totals(self, mode):
 #        ''' Total value (min or max)

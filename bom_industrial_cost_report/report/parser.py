@@ -522,21 +522,6 @@ class Parser(report_sxw.rml_parse):
         res = []
         product_pool = self.pool.get('product.product')
         
-        # search mq uom:
-        #product_uom = self.pool.get('product.uom')
-        #uom_ids = product_uom.search(cr, uid, [
-        #    '|',
-        #    ('name', 'ilike', 'M2'),
-        #    ('account_ref', 'ilike', 'MQ'),            
-        #    ], context=context)
-        #if uom_ids:
-        #    mq_id = product_uom.browse(cr, uid, uom_ids, context=context)[0]
-        #else:
-        #    raise osv.except_osv(
-        #        _('Errore UM'), 
-        #        _('Non trovo UM: MQ'),
-        #        )
-        
         selected_product = product_pool._report_industrial_get_objects(
             cr, uid, data=datas, context=context)
         if selected_product:    

@@ -554,11 +554,11 @@ class Parser(report_sxw.rml_parse):
         
             parameter = _('Parametri: Margine A: %s%% - Margine B: %s%% - '
                 'Margine extra: %s%% Giorni date rif. prezzi -%s') % (
-                margin_a,
-                margin_b,
-                margin_extra,
-                days,
-                )
+                    margin_a,
+                    margin_b,
+                    margin_extra,
+                    days,
+                    )
         else:        
             return res
                 

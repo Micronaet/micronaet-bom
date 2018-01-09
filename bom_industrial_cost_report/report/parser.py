@@ -65,41 +65,6 @@ def industrial_index_get_text(index):
             )
     return res
     
-#def load_subelements_price(self, res, mode, item, product, hw=False):
-#    ''' Load list in all seller pricelist return min and max value
-#    '''
-#    min_value = 0.0
-#    max_value = 0.0
-#    
-#    record = [
-#        mode, item, [], 
-#        False, # not used here
-#        ]
-#        
-#    # TODO manage as pipe?
-#    for seller in product.seller_ids:
-#         for pricelist in seller.pricelist_ids:
-#             if not pricelist.is_active:
-#                 continue                         
-#             total = pricelist.price * item.product_qty
-#             record[2].append((
-#                 seller.name.name,
-#                 '%10.5f' % pricelist.price,
-#                 pricelist.date_quotation or '???',
-#                 '%10.5f' % total,
-#                 hw,
-#                 ))
-#             if not min_value or total < min_value:
-#                 min_value = total
-#             if total > max_value:
-#                 max_value = total
-#                 
-#    # Update min and max value:             
-#    self.min += min_value
-#    self.max += max_value
-#    res.append(record)
-#    return record[2] # error test for check price present
-
 def get_pricelist(product, date_ref):
     ''' Return:
         min price, max price, all pricelist for this product
@@ -227,9 +192,11 @@ class ProductProduct(orm.Model):
             }
 
     def open_xls_report(self, cr, uid, ids, context=None):
-        ''' Return xls report
+        ''' Return xls report extracted from get_object method
         '''
+        # ---------------------------------------------------------------------
         # Utility:
+        # ---------------------------------------------------------------------
         def xls_write_row(WS, row, row_data, format_cell):
             ''' Print line in XLS file            
             '''
@@ -284,8 +251,7 @@ class ProductProduct(orm.Model):
         # ---------------------------------------------------------------------
         # Get database of industrial cost:
         # ---------------------------------------------------------------------
-        cost_db = {}
-        
+        cost_db = {}        
         cost_pool = self.pool.get('mrp.bom.industrial.cost')
         cost_ids = cost_pool.search(cr, uid, [], order='name', context=context)
         i = 0
@@ -293,6 +259,9 @@ class ProductProduct(orm.Model):
             cost_db[cost.name] = i # position in Excel file
             i += 1
   
+        # ---------------------------------------------------------------------
+        # Setup excel layout and columns:
+        # ---------------------------------------------------------------------
         WS.set_column('A:A', 10)
         WS.set_column('B:B', 35)
         WS.set_column('C:AX', 10)
@@ -309,46 +278,40 @@ class ProductProduct(orm.Model):
         # ---------------------------------------------------------------------
         # Get product cost information
         # ---------------------------------------------------------------------
+        # Extract data from ODT master function:
         row = 0
-        for product in self._report_industrial_get_objects(
-                cr, uid, data=datas, context=context):
-            row += 1
-            not_details = False
-
-            industrial_cost = [0.0 for col in range(0, len(cost_db))]
-            for mode, item, details, time_qty in \
-                    self._report_industrial_get_details(
-                        cr, uid, product, context=context):
-                if mode in ('C', 'S'):
-                    if not details: # Check if not details 
-                        not_details = True
-                elif mode == 'T':
-                    # Industrial cost
-                    if time_qty:                        
+        for (r_min, r_max, r_error, r_components, r_extra1, r_extra2, r_index, 
+            r_total, product, r_parameter, r_total_text) in \
+                self.report_get_objects_bom_industrial_cost(
+                    cr, uid, datas=datas, context=context):
+            row += 1       
+                 
+            # Detault data:
+            row_data = [
+                product.default_code, 
+                product.name, 
+                r_min, 
+                r_max,
+                'X' if r_error else '',
+                ]
+            
+            # Extra column for costs:
+            industrial_cost = [0.0 for col in range(0, len(cost_db))]            
+            
+            # Loop on 2 cost table (industrial cost):
+            for table in (r_extra1, r_extra2): 
+                for item, details, time_qty in table:
+                    if time_qty:                    
                         industrial_cost[cost_db[item.cost_id.name]] = \
                             '%s (T. %s)' % (details, time_qty)
                     else:        
                         industrial_cost[cost_db[item.cost_id.name]] = details
-                else:
-                    pass # Heder row
 
-            cost_min = self._report_industrial_get_totals('min')
-            cost_max = self._report_industrial_get_totals('max')
-            
             # -----------------------------------------------------------------
             # Print XLS row data:
             # -----------------------------------------------------------------
-            row_data = [
-                product.default_code, 
-                product.name, 
-                cost_min, 
-                cost_max,
-                'X' if not_details else ''
-                ]
-
             row_data.extend(industrial_cost)
             xls_write_row(WS, row, row_data, format_text)
-            
         _logger.info('End export BOM cost on %s' % xls_filename)
         WB.close()
 
@@ -400,94 +363,7 @@ class ProductProduct(orm.Model):
            
         return sorted(objects, key=lambda o: o.default_code)
 
-    # XXX To remove:
-    #def _report_industrial_get_details(self, cr, uid, product, context=None):
-    #    ''' Create detail row
-    #    '''        
-    #    # Pool used:           
-    #    product_pool = self.pool.get('product.product')        
-    #    if context is None:
-    #        context = {}
-
-    #    # ---------------------------------------------------------------------
-    #    # Load component list (and subcomponent for HW):
-    #    # ---------------------------------------------------------------------
-    #    res = []
-    #    # Min / Max totals:
-    #    self.min = 0.0
-    #    self.max = 0.0
-    #    error = False # for write in product
-    #    for item in product.dynamic_bom_line_ids:
-    #        component = item.product_id
-    #        half_bom_ids = component.half_bom_ids # if half component
-    #        if half_bom_ids: # HW component
-    #            for cmpt in half_bom_ids:
-    #                test = load_subelements_price(
-    #                    self, res, 'S', cmpt, cmpt.product_id, 
-    #                    item.product_id.default_code,
-    #                    )
-    #                if not test:
-    #                    error = True
-
-    #        else: # not HW component
-    #            test = load_subelements_price(
-    #                self, res, 'C', item, item.product_id)
-    #            if not test:
-    #                error = True
-
-    #    # ---------------------------------------------------------------------
-    #    # Extra data end report:
-    #    # ---------------------------------------------------------------------
-    #    # Append totals:
-    #    last_type = False
-    #    supplement_cost = sorted(
-    #        product_pool.get_cost_industrial_for_product(
-    #            cr, uid, [product.id], context=context).iteritems(),
-    #        key=lambda x: (x[0].type, x[0].name),
-    #        )
-                    
-    #    index = {
-    #        _('component'): self.max, # used max:
-    #        }            
-    #    for cost, item in supplement_cost:
-    #        if last_type != cost.type:
-    #            last_type = cost.type
-    #            # Add header (change every category break level):
-    #            res.append(('H', type_i18n.get(last_type, '?'), False, 
-    #                False, # no used
-    #                ))
-    #            index[cost.type] = 0.0
-                
-    #        # 2 case: with product or use unit_cost    
-    #        if item.product_id: # use item price
-    #            value = item.qty * item.last_cost                
-    #            time_qty = False
-    #        else:
-    #            value = item.qty * cost.unit_cost                     
-    #            time_qty = item.qty
-                
-    #        res.append(('T', item or '???', value, time_qty))
-    #        self.min += value
-    #        self.max += value
-    #        index[cost.type] += value # for index calc
-
-    #    # Save margin parameters:        
-    #    self.margin_a = \
-    #        self.max * product.company_id.industrial_margin_a / 100.0 
-    #    self.margin_b = \
-    #        self.max * product.company_id.industrial_margin_b / 100.0 
-            
-    #    # Write status in row:    
-    #    self.index = industrial_index_get_text(index)
-    #    if context.get('update_record', True): # XXX always true for now:
-    #        product_pool.write(cr, uid, product.id, {
-    #            'from_industrial': self.min,
-    #            'to_industrial': self.max,
-    #            'industrial_missed': error,
-    #            'industrial_index': self.index,
-    #            }, context=context)
-    #    return res
-    def report_get_objects_bom_industrial_cost(self, cr, uid, ids, datas=None, 
+    def report_get_objects_bom_industrial_cost(self, cr, uid, datas=None, 
             context=None):
         ''' Report action for generate database used (both ODT and XLSX export)
         '''
@@ -726,6 +602,5 @@ class Parser(report_sxw.rml_parse):
         product_pool = self.pool.get('product.product')
         
         return product_pool.report_get_objects_bom_industrial_cost(
-            cr, uid, ids, datas=datas, context=context)
-            
+            cr, uid, datas=datas, context=context)
 

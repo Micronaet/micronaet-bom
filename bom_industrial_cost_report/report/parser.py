@@ -511,10 +511,11 @@ class ProductProduct(orm.Model):
             # Add extra (save in total the max)
             data[0] += data[0] * margin_extra / 100.0
             margin_extra_value = data[1] * margin_extra / 100.0
+            
             # Update total text:
             data[10] += '%10.5f +%10.5f'  % (
                 data[1],
-                margin_extra_value,                
+                margin_extra_value,
                 )
             
             data[1] += margin_extra_value
@@ -541,9 +542,9 @@ class ProductProduct(orm.Model):
                 
                 cost_item = (item or '???', value, time_qty)
                 if cost.type == 'industrial':
-                    data[4].append(cost_item)
-                elif cost.type == 'work':
                     data[5].append(cost_item)
+                elif cost.type == 'work':
+                    data[4].append(cost_item)
                 else:
                     raise osv.except_osv(
                         _('Tipo errato'), 

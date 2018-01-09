@@ -71,7 +71,7 @@ def get_pricelist(product, date_ref):
         active price, reference >= passed
     '''
     res = [
-        False, # Min
+        0.0, # Min (not False)
         0.0, # Max
         [], # Price list
         ]
@@ -104,7 +104,7 @@ def get_pricelist(product, date_ref):
                 continue
 
             # Save min or max price:    
-            if not res[0] or price < res[0]:
+            if not res[0] or price < res[0]: # 0 price will be replaced
                 res[0] = price
             if price > res[1]:
                 res[1] = price
@@ -440,7 +440,7 @@ class ProductProduct(orm.Model):
                         # Pipe element:    
                         if cmpt.product_id.is_pipe:
                             # Calc with weight and price kg not cost manag.:
-                            max_value = \
+                            min_value = max_value = \
                                 cmpt.product_id.pipe_material_id.last_price * \
                                 cmpt.product_id.weight
                                      
@@ -449,7 +449,7 @@ class ProductProduct(orm.Model):
                             cmpt.product_id.bom_industrial_no_price and \
                                 not max_value
                         if cmpt.product_id.bom_industrial_no_price:
-                            max_value = 0.0 # no price in BOM
+                            min_value = max_value = 0.0 # no price in BOM
                             
                         record = [
                             '%s - %s' % (
@@ -473,6 +473,7 @@ class ProductProduct(orm.Model):
                         # Update min and max value:             
                         data[0] += min_value * cmpt_q
                         data[1] += max_value * cmpt_q
+                        
                         data[3].append(record) # Populate product database
                 else: 
                     # Raw material (level 1)                    
@@ -484,7 +485,7 @@ class ProductProduct(orm.Model):
                     red_price = \
                         not component.bom_industrial_no_price and not max_value
                     if component.bom_industrial_no_price:
-                        max_value = 0.0
+                        min_value = max_value = 0.0
                     data[3].append([
                         '%s - %s' % (
                             component.default_code or '',

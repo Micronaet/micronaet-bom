@@ -65,40 +65,40 @@ def industrial_index_get_text(index):
             )
     return res
     
-def load_subelements_price(self, res, mode, item, product, hw=False):
-    ''' Load list in all seller pricelist return min and max value
-    '''
-    min_value = 0.0
-    max_value = 0.0
-    
-    record = [
-        mode, item, [], 
-        False, # not used here
-        ]
-        
-    # TODO manage as pipe?
-    for seller in product.seller_ids:
-         for pricelist in seller.pricelist_ids:
-             if not pricelist.is_active:
-                 continue                         
-             total = pricelist.price * item.product_qty
-             record[2].append((
-                 seller.name.name,
-                 '%10.5f' % pricelist.price,
-                 pricelist.date_quotation or '???',
-                 '%10.5f' % total,
-                 hw,
-                 ))
-             if not min_value or total < min_value:
-                 min_value = total
-             if total > max_value:
-                 max_value = total
-                 
-    # Update min and max value:             
-    self.min += min_value
-    self.max += max_value
-    res.append(record)
-    return record[2] # error test for check price present
+#def load_subelements_price(self, res, mode, item, product, hw=False):
+#    ''' Load list in all seller pricelist return min and max value
+#    '''
+#    min_value = 0.0
+#    max_value = 0.0
+#    
+#    record = [
+#        mode, item, [], 
+#        False, # not used here
+#        ]
+#        
+#    # TODO manage as pipe?
+#    for seller in product.seller_ids:
+#         for pricelist in seller.pricelist_ids:
+#             if not pricelist.is_active:
+#                 continue                         
+#             total = pricelist.price * item.product_qty
+#             record[2].append((
+#                 seller.name.name,
+#                 '%10.5f' % pricelist.price,
+#                 pricelist.date_quotation or '???',
+#                 '%10.5f' % total,
+#                 hw,
+#                 ))
+#             if not min_value or total < min_value:
+#                 min_value = total
+#             if total > max_value:
+#                 max_value = total
+#                 
+#    # Update min and max value:             
+#    self.min += min_value
+#    self.max += max_value
+#    res.append(record)
+#    return record[2] # error test for check price present
 
 def get_pricelist(product, date_ref):
     ''' Return:

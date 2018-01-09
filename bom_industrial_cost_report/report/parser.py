@@ -487,42 +487,12 @@ class ProductProduct(orm.Model):
     #            'industrial_index': self.index,
     #            }, context=context)
     #    return res
-
-#    def _report_industrial_get_totals(self, mode):
-#        ''' Total value (min or max)
-#        '''    
-#        if mode == 'min':
-#            return self.min
-#        elif mode == 'index':
-#            return self.index,    
-#        elif mode == 'margin_a':
-#            return self.margin_a,    
-#        elif mode == 'margin_b':
-#            return self.margin_b,    
-#        else: # mode == 'max':
-#            return self.max
-        
-class Parser(report_sxw.rml_parse):
-    def __init__(self, cr, uid, name, context):
-        super(Parser, self).__init__(cr, uid, name, context)
-        self.localcontext.update({
-            'get_objects': self.get_objects,
-            #'get_details': self.get_details,
-            #'get_totals': self.get_totals,
-        })
-        
-    def get_objects(self, datas=None):
-        ''' Return single report or list of selected bom 
-        '''        
-        # Readability:
-        cr = self.cr
-        uid = self.uid
-        context = {}
-        
+    def report_get_objects_bom_industrial_cost(self, cr, uid, ids, datas=None, 
+            context=None):
+        ''' Report action for generate database used (both ODT and XLSX export)
+        '''
         res = []
-        product_pool = self.pool.get('product.product')
-        
-        selected_product = product_pool._report_industrial_get_objects(
+        selected_product = self._report_industrial_get_objects(
             cr, uid, data=datas, context=context)
         if selected_product:    
             margin_a = \
@@ -678,7 +648,7 @@ class Parser(report_sxw.rml_parse):
             data[6] = { # Index
                 _('component'): data[1], # used max:
                 }            
-            for cost, item in product_pool.get_cost_industrial_for_product(
+            for cost, item in self.get_cost_industrial_for_product(
                     cr, uid, [product.id], context=context).iteritems():
                 # Index total:    
                 if cost.type not in data[6]: 
@@ -715,7 +685,7 @@ class Parser(report_sxw.rml_parse):
             # Write status in row:    
             data[7]['index'] = industrial_index_get_text(data[6])
             if context.get('update_record', True): # XXX always true for now:
-                product_pool.write(cr, uid, product.id, {
+                self.write(cr, uid, product.id, {
                     'from_industrial': data[0],
                     'to_industrial': data[1],
                     'industrial_missed': data[2],
@@ -735,4 +705,27 @@ class Parser(report_sxw.rml_parse):
         
         # Update parameters:    
         res[0][9] = parameter
-        return res
+        return res        
+
+class Parser(report_sxw.rml_parse):
+    def __init__(self, cr, uid, name, context):
+        super(Parser, self).__init__(cr, uid, name, context)
+        self.localcontext.update({
+            'get_objects': self.get_objects,
+            #'get_details': self.get_details,
+            #'get_totals': self.get_totals,
+        })
+        
+    def get_objects(self, datas=None):
+        ''' Return single report or list of selected bom 
+        '''        
+        # Readability:
+        cr = self.cr
+        uid = self.uid
+        context = {}
+        product_pool = self.pool.get('product.product')
+        
+        return product_pool.report_get_objects_bom_industrial_cost(
+            cr, uid, ids, datas=datas, context=context)
+            
+

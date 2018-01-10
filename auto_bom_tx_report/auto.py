@@ -607,7 +607,7 @@ class MrpProduction(orm.Model):
         row = 0
         write_xls_mrp_line(WS, row, [(
             'Elenco componenti non presenti nella stampa appartenenti a: '
-            'DB Dinamiche, padre e semilavorato (se filtro fornitore attivo'
+            'DB Dinamiche, padre e semilavorato (se filtro fornitore attivo '
             'viene applicato anche qui)', format_text),
             ])
         row = 1

@@ -8,7 +8,7 @@
             <field name="inherit_id" ref="order_bom_explode_report.component_status_report_wizard_view"/>
             <field name="arch" type="xml">                
                 <button name="action_open_report" position="after">
-                    <button name="action_open_report_xlsx" string="XLSX" type="object" icon="gtk-print" class="oe_highlight" attrs="{'invisible': [('mode','in',('todo', 'mrp'))]}"/>
+                    <button name="action_open_report_xlsx" string="Stampa TX in XLSX" type="object" icon="gtk-print" class="oe_highlight" attrs="{'invisible': [('mode','!=','component'),('mrp_mode','!=','fabric')]}"/>
                 </button>
             </field>
        </record>

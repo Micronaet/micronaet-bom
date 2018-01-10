@@ -599,12 +599,18 @@ class MrpProduction(orm.Model):
         WS = WB.add_worksheet(_('Non usati'))
         WS.set_column('A:A', 30)
         WS.set_column('B:B', 15)
-        WS.set_column('C:C', 30)
-        WS.set_column('D:E', 15)
+        WS.set_column('C:D', 30)
+        WS.set_column('E:F', 15)
         
         # Header
         format_text = get_xls_format('text')
-        row = 0                
+        row = 0
+        write_xls_mrp_line(WS, row, [(
+            'Elenco componenti non presenti nella stampa appartenenti a: '
+            'DB Dinamiche, padre e semilavorato (se filtro fornitore attivo'
+            'viene applicato anche qui)', format_text),
+            ])
+        row = 1
         write_xls_mrp_line(WS, row, [
             ('Categoria inv.', format_text),
             ('Codice', format_text), 

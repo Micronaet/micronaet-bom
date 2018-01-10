@@ -168,7 +168,7 @@ class CcomponentStatusReportWizard(orm.TransientModel):
         'negative_start': fields.boolean('Negative start', 
             help='Total check month for negative start'),
         'first_supplier_id': fields.many2one(
-            'res.partner', 'First supplier'),
+            'res.partner', 'Fornitore ultimo acquisto'),
         'type_id': fields.many2one(
             'mrp.bom.structure.category.type', 'Component category type'),
         'with_type_ids': fields.many2many(

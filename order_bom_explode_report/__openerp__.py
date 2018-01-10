@@ -43,6 +43,7 @@
         'production_accounting_external',
         'production_forecast_order', # for forecast check
         'no_parcels_count', # exclude no parcels product        
+        'product_last_supplier', # last purchase supplier data (for filter)
         ],
     'init_xml': [],
     'demo': [],

@@ -609,6 +609,7 @@ class MrpProduction(orm.Model):
             ('Categoria inv.', format_text),
             ('Codice', format_text), 
             ('Nome', format_text),
+            ('Ultimo forn.', format_text),
             ('Netto', format_text),
             ('Lordo', format_text),
             ])
@@ -623,6 +624,7 @@ class MrpProduction(orm.Model):
                 (product.inventory_category_id.name, format_text),
                 (product.default_code or '', format_text),
                 (product.name, format_text),
+                (product.recent_supplier_id.name or '', format_text),
                 (product.mx_net_mrp_qty, format_text),
                 (product.mx_lord_mrp_qty, format_text),
                 ])

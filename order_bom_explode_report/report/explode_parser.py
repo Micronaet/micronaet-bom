@@ -46,13 +46,19 @@ class MrpProduction(orm.Model):
     _inherit = 'mrp.production'
     
     # Utility:
-    def _get_all_product_in_bom(self, cr, uid, context=None):
+    def _get_all_product_in_bom(self, cr, uid, data=None, context=None):
         ''' Search product in bom line with particular category:
         '''
-        line_pool = self.pool.get('mrp.bom.line')
-        line_ids = line_pool.search(cr, uid, [
+        domain = [
             ('bom_id.bom_category', 'in', ('dynamic', 'half', 'parent')),
-            ], context=context)
+            ]
+        if data is not None:
+            first_supplier_id = data.get('first_supplier_id')
+            if first_supplier_id:
+                domain.append(('recent_supplier_id', '=', first_supplier_id))
+            
+        line_pool = self.pool.get('mrp.bom.line')
+        line_ids = line_pool.search(cr, uid, domain, context=context)
         res = []
         for item in line_pool.browse(cr, uid, line_ids, context=context):
             if item.product_id.id not in res:
@@ -869,7 +875,7 @@ class MrpProduction(orm.Model):
         write_xls_line('extra', ('Remove lines:', ))
         
         all_component_ids = self._get_all_product_in_bom(
-            cr, uid, context=context)
+            cr, uid, data=data, context=context)
         # TODO remove unwanted category:
             
         for key in sorted(y_axis, key=order_mode):

@@ -320,19 +320,21 @@ class MrpProduction(orm.Model):
                 # in halfwork use only hw component:    
                 half_bom_ids = item.product_id.half_bom_ids    
                 if mode == 'halfwork' and half_bom_ids: # hw with component
-                    if first_supplier_id and \
-                            first_supplier_id != \
-                                item.product_id.first_supplier_id.id:
-                        continue # Jump not supplier present    
+                    # 10/01/2018 change first with recent
+                    if first_supplier_id and first_supplier_id != \
+                                item.product_id.recent_supplier_id.id:
+                        continue # Jump not supplier present   
+                         
                     category = item.category_id.type_id.name if \
                         item.category_id and item.category_id.type_id else \
                             _('No category')
                     add_x_item(y_axis, item, category, purchase_db)                                        
                 elif mode == 'component' and not half_bom_ids: # cmpt in BOM
-                    #if first_supplier_id and \
-                    #        first_supplier_id != \
-                    #            item.product_id.first_supplier_id.id:
-                    #    continue # Jump not supplier present    
+                    # 10/01/2018 restore supplier filter on recent_supplier_id
+                    if first_supplier_id and first_supplier_id != \
+                                item.product_id.recent_supplier_id.id:
+                        continue # Jump not supplier present    
+                        
                     if mp_mode == 'fabric' and item.product_id.id not in \
                             fabric_ids: # jump not fabric
                         continue
@@ -345,6 +347,11 @@ class MrpProduction(orm.Model):
                     # TODO log halfcomponent with empty list
                     # relative_type = 'half'
                     for component in half_bom_ids:
+                        # 10/01/2018 supplier filter on recent_supplier_id
+                        if first_supplier_id and first_supplier_id != \
+                                    item.product_id.recent_supplier_id.id:
+                            continue # Jump not supplier present    
+
                         if mp_mode == 'fabric' and component.product_id.id \
                                 not in fabric_ids:
                             continue

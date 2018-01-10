@@ -2,6 +2,8 @@
 <openerp>
     <data>
        <!-- component.status.report.wizard -->
+       <!--
+       XXX 10/01/2018 Removed not used? (there's a similar button in TX!
        <record id="component_status_report_wizard_xlsx_view" model="ir.ui.view">
             <field name="name">Print component status XLSX</field>
             <field name="model">component.status.report.wizard</field>
@@ -11,7 +13,7 @@
                     <button name="action_open_report_xlsx" string="XLSX" type="object" icon="gtk-print" class="oe_highlight" attrs="{'invisible': [('mode','in',('todo', 'mrp'))]}"/>
                 </button>
             </field>
-       </record>
+       </record>-->
     </data>
 </openerp>
 

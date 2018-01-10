@@ -2,14 +2,14 @@
 <openerp>
     <data>
        <!-- component.status.report.wizard -->
-       <record id="component_status_report_wizard_xlsx_view" model="ir.ui.view">
-            <field name="name">Print component status XLSX</field>
+       <record id="component_status_report_cmpt_wizard_xlsx_view" model="ir.ui.view">
+            <field name="name">Print component button XLSX</field>
             <field name="model">component.status.report.wizard</field>
             <field name="inherit_id" ref="order_bom_explode_report.component_status_report_wizard_view"/>
             <field name="arch" type="xml">                
                 <button name="action_open_report" position="after">
-                    <button name="action_open_report_xlsx" string="Tessuti in XLSX" type="object" icon="gtk-print" 
-                        class="oe_highlight" attrs="{'invisible': ['|',('mode','!=','component'),('mp_mode','!=','fabric')]}"/>
+                    <button name="action_open_cmpt_report_xlsx" string="Componenti in XLSX" type="object" icon="gtk-print" 
+                        class="oe_highlight" attrs="{'invisible': ['|',('mode','!=','component'),('mp_mode','=','fabric')]}"/>
                 </button>
             </field>
        </record>

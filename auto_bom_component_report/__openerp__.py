@@ -36,6 +36,7 @@
     'demo': [],
     'data': [
         'security/xml_groups.xml',
+        'wizard_xls.xml',
 
         'scheduler.xml',
         ],

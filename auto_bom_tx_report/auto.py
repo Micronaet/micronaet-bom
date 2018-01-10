@@ -108,6 +108,7 @@ class MrpProduction(orm.Model):
     
     _inherit = 'mrp.production'
     
+    # TODO MOVE IN MODULE? used also from component auto report
     def extract_mrp_production_report_xlsx(
             self, cr, uid, data=None, context=None):
         ''' Extract data from report and put in excel mode
@@ -324,7 +325,7 @@ class MrpProduction(orm.Model):
                 ('%s - %s (forn. abit.: %s) %s' % (
                     o.name,
                     o.colour,
-                    o.first_supplier_id.name if o.first_supplier_id else '',
+                    o.recent_supplier_id.name or o.first_supplier_id else '',
                     purchase,                    
                     ), format_text),
                 ('', format_text),

@@ -39,6 +39,70 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+class ComponentStatusReportWizard(orm.TransientModel):
+    ''' Wizard for print status
+    '''
+    _inherit = 'component.status.report.wizard'
+
+    # --------------------
+    # Wizard button event:
+    # --------------------
+    # TODO check!!!!!!!!!!!!!!!!!!!
+    def action_open_cmpt_report_xlsx(self, cr, uid, ids, context=None):
+        ''' Event for button done
+        '''
+        if context is None: 
+            context = {
+                'lang': 'it_IT',
+                }
+        mrp_pool = self.pool.get('mrp.production')     
+        attachment_pool = self.pool.get('ir.attachment')
+        
+        wiz_browse = self.browse(cr, uid, ids, context=context)[0]        
+        datas = {
+            'mode': wiz_browse.mode, #'mode': 'component', 
+            'mp_mode': wiz_browse.mp_mode, # 'mp_mode': 'fabric', 
+            'days': wiz_browse.days,
+            'first_supplier_id': wiz_browse.first_supplier_id.id or False,
+            #'negative_start': wiz_browse.negative_start,
+            'type_id': False, # TODO remove ex. wiz_browse.type_id.id or
+            'with_type_ids': 
+                [item.id for item in wiz_browse.with_type_ids],
+            'without_type_ids': 
+                [item.id for item in wiz_browse.without_type_ids],
+            'with_deadline': wiz_browse.with_deadline,    
+            'only_negative': wiz_browse.only_negative,
+            'exclude_inventory_category': 
+                wiz_browse.exclude_inventory_category,
+            # Report setup:
+            #'model': 'mrp.production',
+            #'active_id': False,
+            #'active_ids': [],
+            #'context': context,
+            }
+
+        filename = mrp_pool.extract_mrp_production_report_xlsx(
+            cr, uid, data=datas, context=context)
+        _logger.info('Extracted file in %s' % filename)
+
+        b64 = open(filename, 'rb').read().encode('base64')
+        attachment_id = attachment_pool.create(cr, uid, {
+            'name': 'Stato componenti',
+            'datas_fname': 
+                'stato_componenti_materiali_%s.xlsx' % wiz_browse.mode,
+            'type': 'binary',
+            'datas': b64,
+            'partner_id': 1,
+            'res_model': 'res.partner',
+            'res_id': 1,
+            }, context=context)
+
+        return {
+            'type' : 'ir.actions.act_url',
+            'url': '/web/binary/saveas?model=ir.attachment&field=datas&'
+                'filename_field=datas_fname&id=%s' % attachment_id,
+            'target': 'self',
+            }
 
 class MrpProduction(orm.Model):
     """ Model name: MrpProduction
@@ -46,6 +110,7 @@ class MrpProduction(orm.Model):
         
     _inherit = 'mrp.production'
 
+    
     def send_component_mrp_report_scheduler(
             self, cr, uid, mode='xlsx', context=None):
         ''' Generate PDF with data and send mail

@@ -49,13 +49,16 @@ class MrpProduction(orm.Model):
     def _get_all_product_in_bom(self, cr, uid, data=None, context=None):
         ''' Search product in bom line with particular category:
         '''
+        # TODO Write a parameter for print only in scheduled launch
         domain = [
             ('bom_id.bom_category', 'in', ('dynamic', 'half', 'parent')),
             ]
         if data is not None:
             first_supplier_id = data.get('first_supplier_id')
             if first_supplier_id:
-                domain.append(('recent_supplier_id', '=', first_supplier_id))
+                domain.append(
+                    ('product_id.recent_supplier_id', '=', first_supplier_id),
+                    )
             
         line_pool = self.pool.get('mrp.bom.line')
         line_ids = line_pool.search(cr, uid, domain, context=context)

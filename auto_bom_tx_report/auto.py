@@ -325,7 +325,7 @@ class MrpProduction(orm.Model):
                 ('%s - %s (forn. abit.: %s) %s' % (
                     o.name,
                     o.colour,
-                    o.recent_supplier_id.name or o.first_supplier_id else '',
+                    o.recent_supplier_id.name or o.first_supplier_id or '',
                     purchase,                    
                     ), format_text),
                 ('', format_text),

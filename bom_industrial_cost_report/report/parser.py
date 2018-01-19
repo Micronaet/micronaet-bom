@@ -406,6 +406,7 @@ class ProductProduct(orm.Model):
                 product, # 8. Product browse
                 '', # 9. Parameter of report
                 '', # 10. Total text
+                [0.0, 0.0], # 11. Pipe weight total (q, total)
                 ]
 
             # -----------------------------------------------------------------
@@ -440,9 +441,16 @@ class ProductProduct(orm.Model):
                         # Pipe element:    
                         if cmpt.product_id.is_pipe:
                             # Calc with weight and price kg not cost manag.:
+                            pipe_price = \
+                                cmpt.product_id.pipe_material_id.last_price
                             min_value = max_value = \
-                                cmpt.product_id.pipe_material_id.last_price * \
+                                pipe_price * cmpt.product_id.weight
+
+                            # Total pipe weight:    
+                            q_pipe = item.product_qty * cmpt.product_qty *\
                                 cmpt.product_id.weight
+                            data[11][0] += q_pipe
+                            data[11][1] += q_pipe * pipe_price
                                      
                         # TODO manage as pipe?
                         red_price = \

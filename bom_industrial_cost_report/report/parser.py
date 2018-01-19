@@ -577,6 +577,7 @@ class ProductProduct(orm.Model):
                     data[10] += ' +%8.5f' % data[6][t]
 
             # Sort data:
+            data[3].sort() # Component
             data[4].sort(key=lambda x: x[0].cost_id.name) # Table 1
             data[5].sort(key=lambda x: x[0].cost_id.name) # Table 2
             res.append(data)

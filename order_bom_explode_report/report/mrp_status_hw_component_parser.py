@@ -421,6 +421,8 @@ class Parser(report_sxw.rml_parse):
         check_used = []
         for halfwork, record in hws.iteritems():
             needed = record[0] - record[1] # proposed net (- stock)
+            if needed < 0: # if negative HW, no Pipe requests
+                needed = 0
             for parent_cmpt, qty in record[2].iteritems():
                 db_hw = parent_cmpt[1]
                 for element in db_hw.half_bom_ids:

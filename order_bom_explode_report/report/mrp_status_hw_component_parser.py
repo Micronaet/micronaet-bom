@@ -510,6 +510,8 @@ class Parser(report_sxw.rml_parse):
                     continue
                 
                 proposed_hw = hw_data[0] - hw_data[1]
+                if proposed_hw < 0:
+                    proposed_hw = 0
                 data_B = [
                     hw_data[2].get((parent, halfwork), '?'), # total
                     halfwork.default_code, # hw code

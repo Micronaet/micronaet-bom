@@ -454,7 +454,7 @@ class ProductProduct(orm.Model):
                                      
                         # TODO manage as pipe?
                         red_price = \
-                            cmpt.product_id.bom_industrial_no_price and \
+                            not cmpt.product_id.bom_industrial_no_price and \
                                 not max_value
                         if cmpt.product_id.bom_industrial_no_price:
                             min_value = max_value = 0.0 # no price in BOM

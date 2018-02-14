@@ -68,7 +68,7 @@ class SaleOrderCheckOcWizard(orm.TransientModel):
         ws = excel_pool.create_worksheet(ws_name)        
         row = 0
         excel_pool.column_width(ws_name, [
-            20, 10
+            20, 10,
             10, 10, 10,
             10, 20, 
             10, 20, 

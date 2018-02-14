@@ -68,7 +68,7 @@ class SaleOrderCheckOcWizard(orm.TransientModel):
         ws = excel_pool.create_worksheet(ws_name)        
         row = 0
         excel_pool.column_width(ws_name, [
-            20, 
+            20, 10
             10, 10, 10,
             10, 20, 
             10, 20, 
@@ -76,7 +76,7 @@ class SaleOrderCheckOcWizard(orm.TransientModel):
             20, 10, 10, 
             20])
         excel_pool.write_xls_line(ws_name, row, [
-            'OC', 
+            'OC', 'Scadenza',
             'OC', 'B', 'Cons.',
             'Rim.', 'Prodotto', 
             'Q.', 'Semilavorato', 
@@ -133,7 +133,7 @@ class SaleOrderCheckOcWizard(orm.TransientModel):
                         continue # only T code
                     row += 1
                     excel_pool.write_xls_line(ws_name, row, [
-                        sol.order_id.name, 
+                        sol.order_id.name, sol.date_deadline,
                         oc, b, d,
                         remain, product.default_code, 
                         bom1.product_qty, bom1.product_id.default_code,

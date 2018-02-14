@@ -133,7 +133,7 @@ class SaleOrderCheckOcWizard(orm.TransientModel):
                         continue # only T code
                     row += 1
                     excel_pool.write_xls_line(ws_name, row, [
-                        sol.order_id.name, sol.date_deadline,
+                        sol.order_id.name, sol.date_deadline[:7],
                         oc, b, d,
                         remain, product.default_code, 
                         bom1.product_qty, bom1.product_id.default_code,

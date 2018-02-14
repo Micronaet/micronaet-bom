@@ -93,7 +93,7 @@ class SaleOrderCheckOcWizard(orm.TransientModel):
             ('mx_closed', '=', False),            
             ], context=context)
         
-        for sol in sol_pool.browse(cr, uid, sol_ids[:50], context=context):    
+        for sol in sol_pool.browse(cr, uid, sol_ids, context=context):    
             product = sol.product_id
             
             # -----------------------------------------------------------------

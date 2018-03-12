@@ -119,8 +119,9 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         ''' Event for button done
         '''
         # ---------------------------------------------------------------------
-        # Utility:
+        #                             UTILITY: 
         # ---------------------------------------------------------------------
+        # Excel:
         def xls_write_row(WS, row, line, title=False):
             ''' Write row in a file
             '''
@@ -177,6 +178,25 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 for col in range(0, len(data)):
                     WS.write(row, col + 1, data[col])
             return    
+        
+        # ---------------------------------------------------------------------
+        # BOM
+        def load_bom_template(self, cr, uid, context=None):
+            ''' Load template bom return code[:6] with element
+            '''    
+            res = {}
+            product_pool = self.pool.get('product.product')
+            product_ids = product_pool.search(cr, uid, [
+                ('bom_selected', '=', True),
+                ], context=context)
+            for product in product_pool.browse(
+                    cr, uid, product_ids, context=context):
+                res[product.default_code[:6].strip()] = (
+                    product.dynamic_bom_line_ids, # BOM
+                    product_pool.get_cost_industrial_for_product( # Industrial
+                        cr, uid, [product.id], context=context),
+                    )
+            return res
             
         def clean_float(value):
             ''' Clean float value
@@ -280,6 +300,11 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         product_pool = self.pool.get('product.product')
         costs = product_pool.get_purchase_cost_value(
             cr, uid, context=context)
+        
+        # ---------------------------------------------------------------------
+        # Template bom:
+        # ---------------------------------------------------------------------
+        template_bom = load_bom_template(self, cr, uid, context=context)    
 
         # ---------------------------------------------------------------------            
         # XLS output file:
@@ -423,15 +448,23 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         materials = {}
         jumped = {} # Material not managed
+        no_bom6 = {}
         for default_code, unload_list in inventory_product.iteritems():
             _logger.info('Extract material for code: %s' % default_code)
             
             # ------------------------------
             # Product data information used:
             # ------------------------------
-            # Normal product:
-            dynamic_ids = products[default_code].dynamic_bom_line_ids
-            
+            # Normal product (check in BOM template):
+            code6 = default_code[:6].strip() 
+            if code6 in template_bom:
+                (dynamic_ids, industrial_ids) = templage_bom[code6]
+                # TODO manage industrial
+                
+                #dynamic_ids = products[default_code].dynamic_bom_line_ids
+            elif default_code not in no_bom6: # Log no bom product
+                no_bom6.append(default_code)
+                
             # Halfworked product:
             half_line_ids = products[default_code].half_bom_ids # bom_ids            
             # relative_type = half
@@ -442,9 +475,10 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     #_logger.info('Jumped 0: %s' % default_code)
                     continue
                                     
-            # -------------------------------------------------------------
+            # -----------------------------------------------------------------
             # I. Prime material:
-            # -------------------------------------------------------------
+            # -----------------------------------------------------------------
+            # Invoice direct sale for material
             if not dynamic_ids and not half_line_ids:
                 # Not used:
                 if not_in_inventory_selection(
@@ -464,10 +498,12 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         products[default_code], col, product_qty, materials, 
                         costs)
                 continue
+            # -----------------------------------------------------------------    
 
-            # -------------------------------------------------------------
-            # II. Halfwork explose:                
-            # -------------------------------------------------------------
+            # -----------------------------------------------------------------
+            # II. Halfwork explose:
+            # -----------------------------------------------------------------
+            # Halfwork explosed with material present
             for line in half_line_ids:
                 component = line.product_id
                 component_code = component.default_code
@@ -492,18 +528,22 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         costs
                         )
                 continue
+            # -----------------------------------------------------------------    
 
-            # -------------------------------------------------------------
+            # -----------------------------------------------------------------
             # III. Product explose:
-            # -------------------------------------------------------------
+            # -----------------------------------------------------------------
+            # Explode product, first level 
             for line in dynamic_ids: # has bom
                 # TODO change product_qty
                 component = line.product_id
                 component_code = component.default_code
 
-                # ---------------------------------------------------------
+                # -------------------------------------------------------------
                 # a. HW in product explose:
-                # ---------------------------------------------------------
+                # -------------------------------------------------------------
+                # Explode material in halfworked level:
+                # TODO save also halfwork material
                 if component.half_bom_ids:
                     for hw_line in component.half_bom_ids:
                         hw_product = hw_line.product_id
@@ -533,12 +573,11 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 # ---------------------------------------------------------
                 # b. Prime material in product explose:
                 # ---------------------------------------------------------
-                # Not used:
+                # Take material in first level                
                 if not_in_inventory_selection(component, jumped, costs):
-                    continue # jump not used
-
-                # Add to inventory:
-                if component_code not in materials:
+                    continue # Not used jumped
+                                    
+                if component_code not in materials: # Add to inventory:
                     setup_materials(component, materials, costs)
                 setup_materials_q(
                     component, col, 
@@ -547,7 +586,6 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     costs,
                     )
 
-
         xls_sheet_write(
             WB, '5. Materiali utilizzati', materials, material_product)
         xls_sheet_write_table(
@@ -555,6 +593,11 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 'Codice materiale', 'Nome', 'Costo', 'Ricavo', 'Fornitore', 
                 'Prezzo',
                 ))
+        #xls_sheet_write_table(
+        #    WB, '7. Prodotti senza DB template', no_bom6, (
+        #        'Codice materiale', 'Nome', 'Costo', 'Ricavo', 'Fornitore', 
+        #        'Prezzo',
+        #        ))
                         
     _columns = {
         'year': fields.integer('Year', required=True),

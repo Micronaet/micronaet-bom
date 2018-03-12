@@ -33,6 +33,7 @@
         'product',
         'sale',
         'account',
+        'bom_industrial_cost_report', # for BOM template
         ],
     'init_xml': [],
     'demo': [],

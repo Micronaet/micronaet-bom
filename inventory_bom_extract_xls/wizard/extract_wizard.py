@@ -187,7 +187,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             res = {}
             product_pool = self.pool.get('product.product')
             product_ids = product_pool.search(cr, uid, [
-                ('bom_selected', '=', True),
+                ('bom_selection', '=', True),
                 ], context=context)
             for product in product_pool.browse(
                     cr, uid, product_ids, context=context):

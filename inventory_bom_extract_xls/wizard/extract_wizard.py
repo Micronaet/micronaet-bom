@@ -448,7 +448,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         materials = {}
         jumped = {} # Material not managed
-        no_bom6 = {}
+        no_bom6 = []
         for default_code, unload_list in inventory_product.iteritems():
             _logger.info('Extract material for code: %s' % default_code)
             
@@ -594,7 +594,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 'Prezzo',
                 ))
         # TODO write page:
-        print no_bom6    
+        print sorted(no_bom6)
         #xls_sheet_write_table(
         #    WB, '7. Prodotti senza DB template', no_bom6, (
         #        'Codice materiale', 'Nome', 'Costo', 'Ricavo', 'Fornitore', 

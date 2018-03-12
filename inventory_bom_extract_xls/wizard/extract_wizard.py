@@ -458,6 +458,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             # Normal product (check in BOM template):
             code6 = default_code[:6].strip()
             industrial_ids = {}
+            dynamic_ids = []
             if code6 in template_bom:
                 (dynamic_ids, industrial_ids) = template_bom[code6]
                 # TODO manage industrial                

@@ -593,6 +593,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 'Codice materiale', 'Nome', 'Costo', 'Ricavo', 'Fornitore', 
                 'Prezzo',
                 ))
+        # TODO write page:
+        print no_bom6    
         #xls_sheet_write_table(
         #    WB, '7. Prodotti senza DB template', no_bom6, (
         #        'Codice materiale', 'Nome', 'Costo', 'Ricavo', 'Fornitore', 

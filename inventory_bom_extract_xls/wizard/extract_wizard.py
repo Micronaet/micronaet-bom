@@ -84,6 +84,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
     # --------------------
     def action_extract_reload(self, cr, uid, ids, context=None):
         ''' Reload cost / revenut before launch normal procedure        
+            1. First get data from ODOO product and update fields
+            2. After override values from file CSV present
         '''    
         product_pool = self.pool.get('product.product')
         csv_file = '/home/administrator/photo/xls/stock/costrevenue.csv'

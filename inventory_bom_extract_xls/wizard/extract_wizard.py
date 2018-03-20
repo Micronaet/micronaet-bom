@@ -75,8 +75,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     'inv_cost_account': cost,
                     'inv_first_supplier': supplier,
                     }, context=context)
-        else:
-            _logger.error('Product code not found: %s' % default_code)               
+            else:
+                _logger.error('Product code not found: %s' % default_code)               
         return True
         
     # --------------------

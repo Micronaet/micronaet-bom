@@ -181,6 +181,7 @@ class ProductProduct(orm.Model):
     def open_multi_report(self, cr, uid, ids, context=None):
         ''' Return multi report
         '''
+        datas = {}
         datas['wizard'] = True # started from wizard
         datas['active_ids'] = False
         return {

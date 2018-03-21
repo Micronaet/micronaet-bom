@@ -11,8 +11,7 @@
                      <field name="name" />
                      <field name="filename" />
                      <field name="create_date" />
-                     <field name="create_uid" />
-                     
+                     <field name="create_uid" />                     
                  </tree>
              </field>
          </record>
@@ -25,7 +24,10 @@
                          <button name="button_history_now" string="Storicizza" type="object" />
                      </header>
                      <sheet>    
-                         <group colspan="4" col="4" attrs="{'invisible': [('name','=',False)]}">
+                         <group colspan="4" col="4" attrs="{'invisible': [('name', '!=', False)]}">
+                             <field name="note" colspan="4" nolabel="1" widget="html" />
+                         </group>    
+                         <group colspan="4" col="4" attrs="{'invisible': [('name', '=', False)]}">
                              <field name="name" readonly="1" />
                              <field name="filename" readonly="1" />
                              <field name="create_date" readonly="1" />

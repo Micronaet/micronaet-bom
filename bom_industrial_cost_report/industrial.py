@@ -220,13 +220,74 @@ class MrpBomIndustrialHistory(orm.Model):
     def button_history_now(self, cr, uid, ids, context=None):
         ''' History button
         '''
-        name = 'Storico %s' % datetime.now()
-        filename = '%s.pdf' % datetime.now().strftime(
-            DEFAULT_SERVER_DATETIME_FORMAT) 
+        _logger.info('Run report backgroud')
+        
+        # Parameters:
+        path = '~/.local/share/Odoo/history/%s' % cr.dbname# XXX
+        path = os.path.expanduser(path)
+        os.system('mkdir -p %s' % path) # Create if not present
+        
+        # Context:
+        if context is None:
+            context = {
+                'lang': 'it_IT',
+                }
+
+        # Datas for report
+        datas = {
+            # Report setup:
+            'model': 'product.product',
+            'active_id': False,
+            'active_ids': [], # no active_ids means all template BOM!
+            'context': context,
+
+            # Datas setup:
+            'update_record': True,
+            'wizard': True,
+            }
+
+        # -----------------------------------------------------------------
+        # Call report:            
+        # -----------------------------------------------------------------
+        # Procedure for problem in setup language in ODT report
+        #product_pool = self.pool.get('product.product')
+        #product_ids = product_pool.search(cr, uid, [], context=context)
+        #if product_ids:
+        #    product_id = product_ids[0]
+        #else:
+        #    product_id = False
+                
+        try:
+            result, extension = openerp.report.render_report(
+                cr, uid, [], 'industrial_cost_bom_report', 
+                datas, context)
+        except:
+            _logger.error('Error generation history BOM report [%s]' % (
+                sys.exc_info(),))
+            return False
+            
+        # ---------------------------------------------------------------------
+        # Filename generation:
+        # ---------------------------------------------------------------------
+        # Parameter:        
+        now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        now = now.replace('-', '_').replace(':', '.')
+        filename = 'Storico_db_%s.pdf' % now
         filename = filename.replace(':', '.').replace('/', '_')
-        # TODO create report passing history datas switchs
+        fullname = os.path.join(path, filename)
+        
+        # Save report in history folder 
+        # result
+        f_out = open(fullname, 'wb+')
+        f_out.write(result)
+        f_out.close()
+        _logger.warning('Create files: %s' % fullname)
+        
+        # ---------------------------------------------------------------------
+        # Save history record data:
+        # ---------------------------------------------------------------------
         self.write(cr, uid, ids, {
-            'name': name,
+            'name': 'Storico %s' % now,
             'filename': filename,
             }, context=context)
         return True
@@ -236,6 +297,27 @@ class MrpBomIndustrialHistory(orm.Model):
         'filename': fields.char('Filename.', size=80),
         'create_uid': fields.many2one('res.users', 'Utente', readonly=True),    
         'create_date': fields.date('Data', readonly=True),
+        'note': fields.text('Note', readonly=True),
+        }
+        
+    _defaults = {
+        'note': lambda *x: u'''
+            <p><b>Storicizzazione prezzi</b></p>
+            <p>Premere il bottone per storicizzare i prezzi sulle 
+               attuali distinte base, verrà generato il report totale e,
+               in funzione dei costi registrati al momento, stalvati
+               nella scheda prodotto il costo di partenza con i vari 
+               margini impostati ad oggi.</p>
+            <p>Tale processo sovrascrive gli attuali prezzi quindi
+               lanciarlo solo se sicuri dell'operazione. Una volta
+               Storicizzato controllare che non siano presenti 
+               distinte con i valori in rosso (prezzi mancanti), in
+               tal caso è necessario identificare il problema e 
+               rigenerare un altro storico.               
+               </p>   
+            <p>Attenzione la generazione del report storico può durare
+               qualche minuto...</p>   
+            ''',
         }
 
 class ProductProduct(orm.Model):

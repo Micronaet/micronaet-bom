@@ -450,7 +450,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         materials = {}
         jumped = {} # Material not managed
-        no_bom6 = []
+        no_bom6 = {}
         for default_code, unload_list in inventory_product.iteritems():
             _logger.info('Extract material for code: %s' % default_code)
             
@@ -462,11 +462,16 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             code6 = default_code[:6].strip()
             industrial_ids = {}
             dynamic_ids = []
+            # TODO choose another template instead
+            
             if code6 in template_bom:
                 (dynamic_ids, industrial_ids) = template_bom[code6]
-                # TODO manage industrial                
-            elif default_code not in no_bom6: # Log no bom product
-                no_bom6.append(default_code)
+                # TODO manage industrial
+            else:
+                if code6 not in no_bom6:
+                    no_bom6[code6] = []
+                if default_code not in no_bom6[code6]: # Log no bom product
+                    no_bom6[code6].append(default_code)
                 
             # Halfworked product:
             half_line_ids = product.half_bom_ids # bom_ids            
@@ -591,13 +596,16 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 'Codice materiale', 'Nome', 'Costo', 'Ricavo', 'Fornitore', 
                 'Prezzo',
                 ))
-        # TODO write page:
-        print sorted(no_bom6)
-        #xls_sheet_write_table(
-        #    WB, '7. Prodotti senza DB template', no_bom6, (
-        #        'Codice materiale', 'Nome', 'Costo', 'Ricavo', 'Fornitore', 
-        #        'Prezzo',
-        #        ))
+                
+        # Write extra page for BOM not found from product template:
+        WS = WB.add_worksheet('7. Prodotti senza modello DB')
+        row = 0
+        WS.write(row, 0, 'Codice padre (template)')
+        WS.write(row, 1, 'Elenco prodotti')
+        for code6 in sorted(no_bom6):
+            row += 1
+            WS.write(row, 0, code6)
+            WS.write(row, 1, ', '.join(no_bom6[code6]))
                         
     _columns = {
         'year': fields.integer('Year', required=True),

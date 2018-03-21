@@ -1,6 +1,60 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+         
+         <!--mrp.bom.industrial.history-->
+         <record model="ir.ui.view" id="view_mrp_bom_industrial_history_tree">
+             <field name="name">mrp.bom.industrial.history.tree</field>
+             <field name="model">mrp.bom.industrial.history</field>
+             <field name="arch" type="xml">
+                 <tree string="Storico">        
+                     <field name="name" />
+                     <field name="filename" />
+                     <field name="create_date" />
+                     <field name="create_user" />
+                     
+                 </tree>
+             </field>
+         </record>
+         <record model="ir.ui.view" id="view_mrp_bom_industrial_history_form">
+             <field name="name">mrp.bom.industrial.history.form</field>
+             <field name="model">mrp.bom.industrial.history</field>
+             <field name="arch" type="xml">
+                 <form string="Storico">        
+                     <header>
+                         <button name="button_history_now" string="Storicizza" type="object" />
+                     </header>
+                     <sheet>    
+                         <group colspan="4" col="4" attrs="{'invisible': [('name','=',False)]}">
+                             <field name="name" readonly="1" />
+                             <field name="filename" readonly="1" />
+                             <field name="create_date" readonly="1" />
+                             <field name="create_user" readonly="1" />
+                         </group>    
+                     </sheet>                     
+                 </form>
+             </field>
+         </record>         
+         <record model="ir.actions.act_window" id="action_mrp_bom_industrial_history">
+             <field name="name">Storico DB</field>
+             <field name="res_model">mrp.bom.industrial.history</field>
+             <field name="view_type">form</field>
+             <field name="view_mode">tree,form</field>
+             <field name="view_id" ref="view_mrp_bom_industrial_history_tree"/>
+             <field name="context">{}</field>
+             <field name="domain">[]</field>
+         </record>
+         <record model="ir.actions.act_window" id="action_mrp_bom_industrial_history_new">
+             <field name="name">Storicizza</field>
+             <field name="res_model">mrp.bom.industrial.history</field>
+             <field name="view_type">form</field>
+             <field name="view_mode">form,tree</field>
+             <field name="view_id" ref="view_mrp_bom_industrial_history_form"/>
+             <field name="context">{}</field>
+             <field name="domain">[]</field>
+         </record>
+         
+
          <!--mrp.bom.industrial.cost.line-->
          <record model="ir.ui.view" id="view_mrp_bom_industrial_cost_line_tree">
              <field name="name">mrp.bom.industrial.cost.line.tree</field>
@@ -262,6 +316,29 @@
                  action="action_company_parameter_form"
                  sequence="90"
                  />
+             <menuitem 
+                 parent="menu_product_bom_selection_root" 
+                 id="menu_mrp_bom_industrial_history_root"
+                 sequence="99"
+                 />
+                 <menuitem 
+                     parent="menu_mrp_bom_industrial_history_root" 
+                     id="menu_mrp_bom_industrial_history_new"
+                     action="action_mrp_bom_industrial_history_new"
+                     sequence="10"
+                     />
+                 <menuitem 
+                     parent="menu_mrp_bom_industrial_history_root" 
+                     id="menu_mrp_bom_industrial_history"
+                     action="action_mrp_bom_industrial_history"
+                     sequence="20"
+                     />
+                 
+             <menuitem 
+                 parent="parent_menu" 
+                 id="menu_action_openerp_model_tree" 
+                 action="action_openerp_model_tree"/>
+                 
                  
     </data>
 </openerp>

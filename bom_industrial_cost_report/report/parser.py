@@ -367,6 +367,14 @@ class ProductProduct(orm.Model):
             context=None):
         ''' Report action for generate database used (both ODT and XLSX export)
         '''
+        if datas is None:
+            datas = {}
+        update_record = datas.get('update_record', False)
+        if update_record:
+            _logger.warning('Product price will be updated from report!')
+        else:    
+            _logger.warning('No product price updated!')
+
         res = []
         selected_product = self._report_industrial_get_objects(
             cr, uid, data=datas, context=context)
@@ -570,7 +578,7 @@ class ProductProduct(orm.Model):
                 
             # Write status in row:    
             data[7]['index'] = industrial_index_get_text(data[6])
-            if context.get('update_record', True): # XXX always true for now:
+            if update_record:
                 self.write(cr, uid, product.id, {
                     'from_industrial': data[0],
                     'to_industrial': data[1],
@@ -592,7 +600,7 @@ class ProductProduct(orm.Model):
         
         # Update parameters:    
         res[0][9] = parameter
-        return res        
+        return res
 
 class Parser(report_sxw.rml_parse):
     def __init__(self, cr, uid, name, context):

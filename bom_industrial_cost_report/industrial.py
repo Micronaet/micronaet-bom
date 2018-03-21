@@ -209,6 +209,35 @@ class MrpBomIndustrialCost(orm.Model):
             'mrp.bom.industrial.cost.line', 'cost_id', 'Line'),
         }
 
+class MrpBomIndustrialHistory(orm.Model):
+    """ Model name: Mrp Bom IndustrialHistory
+    """    
+    _name = 'mrp.bom.industrial.history'
+    _description = 'BOM Industrial history'
+    _rec_name = 'name'
+    _order = 'name'
+    
+    def button_history_now(self, cr, uid, ids, context=None):
+        ''' History button
+        '''
+        name = 'Storico %s' % datetime.now()
+        filename = '%s.pdf' % datetime.now().strftime(
+            DEFAULT_SERVER_DATETIME_FORMAT) 
+        filename = filename.replace(':', '.').replace('/', '_')
+        # TODO create report passing history datas switchs
+        self.write(cr, uid, ids, {
+            'name': name,
+            'filename': filename,
+            }, context=context):
+        return True
+    
+    _columns = {
+        'name': fields.char('Rif.', size=64),
+        'filename': fields.char('Filename.', size=80),
+        'create_uid': fields.many2one('res.users', 'Utente', readonly=True),    
+        'create_date': fields.date('Data', readonly=True),
+        }
+
 class ProductProduct(orm.Model):
     """ Model name: ProductProduct
     """

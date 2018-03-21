@@ -272,7 +272,7 @@ class MrpBomIndustrialHistory(orm.Model):
         # Parameter:        
         now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         now = now.replace('-', '_').replace(':', '.')
-        filename = 'Storico_db_%s.pdf' % now
+        filename = 'Storico_db_%s.%s' % (now, extension)
         filename = filename.replace(':', '.').replace('/', '_')
         fullname = os.path.join(path, filename)
         

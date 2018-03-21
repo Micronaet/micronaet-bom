@@ -228,7 +228,7 @@ class MrpBomIndustrialHistory(orm.Model):
         self.write(cr, uid, ids, {
             'name': name,
             'filename': filename,
-            }, context=context):
+            }, context=context)
         return True
     
     _columns = {

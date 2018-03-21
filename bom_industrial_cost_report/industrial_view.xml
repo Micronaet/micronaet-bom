@@ -11,7 +11,7 @@
                      <field name="name" />
                      <field name="filename" />
                      <field name="create_date" />
-                     <field name="create_user" />
+                     <field name="create_uid" />
                      
                  </tree>
              </field>
@@ -29,7 +29,7 @@
                              <field name="name" readonly="1" />
                              <field name="filename" readonly="1" />
                              <field name="create_date" readonly="1" />
-                             <field name="create_user" readonly="1" />
+                             <field name="create_uid" readonly="1" />
                          </group>    
                      </sheet>                     
                  </form>
@@ -320,6 +320,7 @@
                  parent="menu_product_bom_selection_root" 
                  id="menu_mrp_bom_industrial_history_root"
                  sequence="99"
+                 name="Storico"
                  />
                  <menuitem 
                      parent="menu_mrp_bom_industrial_history_root" 
@@ -333,12 +334,6 @@
                      action="action_mrp_bom_industrial_history"
                      sequence="20"
                      />
-                 
-             <menuitem 
-                 parent="parent_menu" 
-                 id="menu_action_openerp_model_tree" 
-                 action="action_openerp_model_tree"/>
-                 
                  
     </data>
 </openerp>

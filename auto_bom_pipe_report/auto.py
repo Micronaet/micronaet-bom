@@ -99,9 +99,9 @@ class MrpProduction(orm.Model):
         now = now.replace('-', '_').replace(':', '.')
         
         # XXX temp (REMOVE):
-        #f_tubi = open('/home/thebrush/tubi.odt', 'wb')
-        #f_tubi.write(result)
-        #f_tubi.close()
+        f_tubi = open('/home/thebrush/tubi.odt', 'wb')
+        f_tubi.write(result)
+        f_tubi.close()
         
         attachments = [('Tubi_%s.odt' % now, result)]
                 

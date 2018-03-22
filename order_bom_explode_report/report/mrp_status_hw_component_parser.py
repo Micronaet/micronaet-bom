@@ -251,7 +251,6 @@ class Parser(report_sxw.rml_parse):
         
         hws = {} # Halfworked database for collect HW informations
         cmpts = {} # Component database for collect needed pipe
-        real_cmpts = {} # Real component (also with negative hw data)
 
         order_ids = company_pool.mrp_domain_sale_order_line(
             cr, uid, context=context)
@@ -439,19 +438,15 @@ class Parser(report_sxw.rml_parse):
                             
                     # Total for pipes
                     if element.product_id in cmpts:
-                        cmpts[element.product_id] += \
+                        cmpts[element.product_id][0] += \
                             needed * element.product_qty
-                    else:    
-                        cmpts[element.product_id] = \
-                            needed * element.product_qty
-                            
-                    # Total for pipes also with negative halfworked:
-                    if element.product_id in real_cmpts:
-                        real_cmpts[element.product_id] += \
+                        cmpts[element.product_id][1] += \
                             real_needed * element.product_qty
                     else:    
-                        real_cmpts[element.product_id] = \
-                            real_needed * element.product_qty
+                        cmpts[element.product_id] = [
+                            needed * element.product_qty,
+                            real_needed * element.product_qty,
+                            ]
                     
         # ---------------------------------------------------------------------
         # Prepare report:
@@ -571,11 +566,10 @@ class Parser(report_sxw.rml_parse):
                             cp.default_code or ''))
                     
                     # Clean pipes without negative hw
-                    proposed_cmpt = cmpts.get(cp, 0.0) 
-                    proposed = int(round((proposed_cmpt - cmpt_net - cmpt_of)))
-                    
-                    # Real with also negative hw.
-                    real_proposed_cmpt = real_cmpts.get(cp, 0.0) 
+                    proposed_cmpt, real_proposed_cmpt = \
+                        cmpts.get(cp, (0.0, 0.0))
+                    proposed = int(round((
+                        proposed_cmpt - cmpt_net - cmpt_of)))
                     real_proposed = int(round((
                         real_proposed_cmpt - cmpt_net - cmpt_of)))
                     

@@ -251,6 +251,7 @@ class Parser(report_sxw.rml_parse):
         
         hws = {} # Halfworked database for collect HW informations
         cmpts = {} # Component database for collect needed pipe
+        real_cmpts = {} # Real component (also with negative hw data)
 
         order_ids = company_pool.mrp_domain_sale_order_line(
             cr, uid, context=context)
@@ -421,9 +422,12 @@ class Parser(report_sxw.rml_parse):
         # TODO generate here component database for pipes (from hws):
         check_used = []
         for halfwork, record in hws.iteritems():
-            needed = record[0] - record[1] # proposed net (- stock)
-            if needed < 0: # if negative HW, no Pipe requests
+            real_needed = record[0] - record[1] # proposed net (- stock)
+            if real_needed < 0: # if negative HW, no Pipe requests
                 needed = 0
+            else:
+                needed = real_needed
+    
             for parent_cmpt, qty in record[2].iteritems():
                 db_hw = parent_cmpt[1]
                 for element in db_hw.half_bom_ids:
@@ -433,12 +437,21 @@ class Parser(report_sxw.rml_parse):
                     else:
                         check_used.append(check)
                             
+                    # Total for pipes
                     if element.product_id in cmpts:
                         cmpts[element.product_id] += \
                             needed * element.product_qty
                     else:    
                         cmpts[element.product_id] = \
                             needed * element.product_qty
+                            
+                    # Total for pipes also with negative halfworked:
+                    if element.product_id in real_cmpts:
+                        real_cmpts[element.product_id] += \
+                            real_needed * element.product_qty
+                    else:    
+                        real_cmpts[element.product_id] = \
+                            real_needed * element.product_qty
                     
         # ---------------------------------------------------------------------
         # Prepare report:
@@ -448,7 +461,7 @@ class Parser(report_sxw.rml_parse):
         # Empty record
         empty_A = ['' for n in range(0, 7)] # parent 7
         empty_B = ['' for n in range(0, 6)] # halfwork 6
-        empty_C = ['' for n in range(0, 9)] # component 8
+        empty_C = ['' for n in range(0, 10)] # component 9
         
         # TODO remove use cmpt_present instead:
         hw_present = [] # for highlight only first total in report (for orders)
@@ -557,8 +570,14 @@ class Parser(report_sxw.rml_parse):
                         _logger.error('Component not present: %s' % (
                             cp.default_code or ''))
                     
+                    # Clean pipes without negative hw
                     proposed_cmpt = cmpts.get(cp, 0.0) 
-                    proposed = proposed_cmpt - cmpt_net - cmpt_of
+                    proposed = int(round((proposed_cmpt - cmpt_net - cmpt_of)))
+                    
+                    # Real with also negative hw.
+                    real_proposed_cmpt = real_cmpts.get(cp, 0.0) 
+                    real_proposed = int(round((
+                        real_proposed_cmpt - cmpt_net - cmpt_of)))
                     
                     # Add data block directly:
                     res.append(data_AB + [
@@ -567,10 +586,11 @@ class Parser(report_sxw.rml_parse):
                         int(round(proposed_cmpt)),
                         int(round(cmpt_net)),
                         int(round(cmpt_of)),
-                        int(round(proposed)) if proposed > 0.0 else '',
-                        int(round(proposed)) if proposed <= 0.0 else '',
-                        yet_write,
+                        proposed if proposed > 0.0 else '', # 18
+                        proposed if proposed <= 0.0 else '', # 19
+                        yet_write, # 20
                         cp.mx_of_date or '',
+                        real_proposed if real_proposed != proposed else '',
                         ])
                             
                 if hw_first: # no cmpt data (not in loop)

@@ -97,6 +97,12 @@ class MrpProduction(orm.Model):
             return False            
         now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         now = now.replace('-', '_').replace(':', '.')
+        
+        # XXX temp (REMOVE):
+        #f_tubi = open('/home/thebrush/tubi.odt', 'wb')
+        #f_tubi.write(result)
+        #f_tubi.close()
+        
         attachments = [('Tubi_%s.odt' % now, result)]
                 
         # ---------------------------------------------------------------------

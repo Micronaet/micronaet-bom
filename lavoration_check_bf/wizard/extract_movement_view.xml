@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+       <!-- stock.move.extract.cut.wizard -->
+       <record id="stock_move_extract_cut_wizard_view" model="ir.ui.view">
+            <field name="name">Extract cut movement</field>
+            <field name="model">stock.move.extract.cut.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Wizard for extract movement" version="7.0">
+                   <header>
+                       <button string="Cancel" special="cancel" />
+                       <button name="action_done" string="Extract" type="object" icon="gtk-print" class="oe_highlight" />
+                   </header>                   
+                   <group colspan="4" col="4">
+                        <field name="from_date" />
+                        <field name="to_date" />
+                        <field name="product_id" />
+                        <field name="start_code" />
+                   </group>
+                </form>
+            </field>
+      </record>
+      <record model="ir.actions.act_window" id="action_stock_move_extract_cut_wizard_view">
+          <field name="name">Extract cut movement</field>
+          <field name="res_model">stock.move.extract.cut.wizard</field>
+          <field name="view_type">form</field>
+          <field name="view_mode">form</field>
+          <field name="target">new</field>
+          <field name="view_id" ref="stock_move_extract_cut_wizard_view"/>
+      </record>
+      <menuitem 
+          parent="lavoration_cl_sl.menu_stock_picking_cut_cl" 
+          id="menu_stock_move_extract_cut_wizard" 
+          action="action_stock_move_extract_cut_wizard_view"
+          sequence="20"
+          />            
+    </data>
+</openerp>

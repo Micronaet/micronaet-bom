@@ -61,9 +61,6 @@ class StockMoveExtractCutWizard(orm.TransientModel):
         excel_pool = self.pool.get('excel.writer')
         move_pool = self.pool.get('stock.move')
         
-        ws_name = 'Movimenti taglio'
-        excel_pool.create_worksheet(name=ws_name) 
-
         domain = [
             #('picking_id.state', '=', 'done'),
             ('picking_id.dep_mode', '=', 'cut'),
@@ -81,13 +78,14 @@ class StockMoveExtractCutWizard(orm.TransientModel):
                     wiz_browse.start_code))
         if wiz_browse.product_id:
             domain.append(
-                ('product_id', '<=', wiz_browse.product_id.id))
-                
+                ('product_id', '<=', wiz_browse.product_id.id))                
         move_ids = move_pool.search(cr, uid, domain, context=context)
         
         # ---------------------------------------------------------------------
-        # Start write Excel file:
-        # ---------------------------------------------------------------------        
+        # Movement page:
+        # ---------------------------------------------------------------------
+        ws_name = 'Movimenti taglio'
+        excel_pool.create_worksheet(name=ws_name) 
         # Layout:
         excel_pool.column_width(ws_name, [
             15, 20, 15, 30, 6,
@@ -104,6 +102,7 @@ class StockMoveExtractCutWizard(orm.TransientModel):
             ],)# default_format=False)
             
         # Move lines:    
+        total = {}
         for move in sorted(
                 move_pool.browse(cr, uid, move_ids, context=context),
                 key=lambda x: (
@@ -111,12 +110,44 @@ class StockMoveExtractCutWizard(orm.TransientModel):
                     x.product_id.default_code,
                     )):
             row += 1        
+            
+            # Total operation:
+            product = move.product_id
+            if product not in total:
+                total[product] = move.product_uom_qty
+            else:    
+                total[product] += move.product_uom_qty
+                
             excel_pool.write_xls_line(ws_name, row, [
                 move.picking_id.name,
                 move.picking_id.date,
                 move.product_id.default_code or '??',
                 move.product_id.name or '',
                 move.product_uom_qty,
+                ],)# default_format=False)
+        
+        # ---------------------------------------------------------------------
+        # Total product page:
+        # ---------------------------------------------------------------------
+        ws_name = 'Totali prodotto'
+        excel_pool.create_worksheet(name=ws_name)         
+        excel_pool.column_width(ws_name, [15, 30, 6])
+        
+        # Header
+        row = 0
+        excel_pool.write_xls_line(ws_name, row, [
+            'codice',
+            'nome',
+            'totale',
+            ],)# default_format=False)
+            
+        # Rows:    
+        for product in sorted(total, key=lambda x: x.default_code):            
+            row += 1        
+            excel_pool.write_xls_line(ws_name, row, [
+                product.default_code,
+                product.name,
+                total[product],
                 ],)# default_format=False)
                     
         return excel_pool.return_attachment(cr, uid, 'Movimenti di taglio', 

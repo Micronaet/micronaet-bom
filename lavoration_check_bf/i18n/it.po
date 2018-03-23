@@ -1,0 +1,84 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* lavoration_check_bf
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-03-23 07:33+0000\n"
+"PO-Revision-Date: 2018-03-23 08:35+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: it\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#. module: lavoration_check_bf
+#: view:stock.move.extract.cut.wizard:lavoration_check_bf.stock_move_extract_cut_wizard_view
+msgid "Cancel"
+msgstr "Annulla"
+
+#. module: lavoration_check_bf
+#: field:stock.move.extract.cut.wizard,create_uid:0
+msgid "Created by"
+msgstr "Creato da"
+
+#. module: lavoration_check_bf
+#: field:stock.move.extract.cut.wizard,create_date:0
+msgid "Created on"
+msgstr "Creato il"
+
+#. module: lavoration_check_bf
+#: view:stock.move.extract.cut.wizard:lavoration_check_bf.stock_move_extract_cut_wizard_view
+msgid "Extract"
+msgstr "Stampa Excel"
+
+#. module: lavoration_check_bf
+#: model:ir.actions.act_window,name:lavoration_check_bf.action_stock_move_extract_cut_wizard_view
+#: model:ir.ui.menu,name:lavoration_check_bf.menu_stock_move_extract_cut_wizard
+msgid "Extract cut movement"
+msgstr "Estrai movimento di taglio"
+
+#. module: lavoration_check_bf
+#: field:stock.move.extract.cut.wizard,from_date:0
+msgid "From"
+msgstr "Da"
+
+#. module: lavoration_check_bf
+#: field:stock.move.extract.cut.wizard,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: lavoration_check_bf
+#: field:stock.move.extract.cut.wizard,write_uid:0
+msgid "Last Updated by"
+msgstr "Aggiornato da"
+
+#. module: lavoration_check_bf
+#: field:stock.move.extract.cut.wizard,write_date:0
+msgid "Last Updated on"
+msgstr "Aggiornato il"
+
+#. module: lavoration_check_bf
+#: field:stock.move.extract.cut.wizard,product_id:0
+msgid "Product"
+msgstr "Prodotto"
+
+#. module: lavoration_check_bf
+#: field:stock.move.extract.cut.wizard,start_code:0
+msgid "Start with"
+msgstr "Comincia per"
+
+#. module: lavoration_check_bf
+#: field:stock.move.extract.cut.wizard,to_date:0
+msgid "To"
+msgstr "A"
+
+#. module: lavoration_check_bf
+#: view:stock.move.extract.cut.wizard:lavoration_check_bf.stock_move_extract_cut_wizard_view
+msgid "Wizard for extract movement"
+msgstr "Wizard estrai movimenti"

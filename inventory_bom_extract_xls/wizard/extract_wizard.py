@@ -280,6 +280,31 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             materials[default_code][col + 12] += qty * price
             return
             
+        def correct_default_code(default_code, product_mapping, bom_jump, 
+                bom_mapping, code_part):
+            ''' Clean or remap default_code
+            '''
+            if not default_code:
+                _logger.error('No default code')
+                return False
+                
+            # Swap product code:
+            if default_code in product_mapping:
+                default_code = product_mapping[default_code]
+                _logger.error('Code re-mapped to %s' % default_code)
+
+            parent_code = default_code[:code_part].strip()
+            
+            # Jump commercial product:
+            if parent_code in bom_jump:
+                _logger.error('Code jumped (commercial): %s' % default_code)
+                return False
+
+            if parent_code in bom_mapping:
+                parent_code = bom_mapping[parent_code]
+                _logger.error('Parent code remapped to %s' % parent_code)                
+            return default_code, parent_code                    
+            
         if context is None: 
             context = {}    
 
@@ -396,23 +421,32 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         _logger.info('Read %s invoice line' % len(line_ids))        
         for line in line_pool.browse(
                 cr, uid, line_ids, context=context):
-            default_code = line.product_id.default_code
-            if not default_code:
-                _logger.error('No default code')
-                continue
+            #default_code = line.product_id.default_code
+            #if not default_code:
+            #    _logger.error('No default code')
+            #    continue
                 
             # Swap product code:    
-            if default_code in product_mapping:
-                default_code = product_mapping[default_code]
-                _logger.error('Code re-mapped to %s' % default_code)
+            #if default_code in product_mapping:
+            #    default_code = product_mapping[default_code]
+            #    _logger.error('Code re-mapped to %s' % default_code)
 
-            parent_code = default_code[:code_part].strip()
+            #parent_code = default_code[:code_part].strip()
             
             # Jump commercial product:
-            if parent_code in bom_jump:
-                _logger.error('Code jumped (commercial): %s' % default_code)
+            #if parent_code in bom_jump:
+            #    _logger.error('Code jumped (commercial): %s' % default_code)
+            #    continue
+            
+            # Remapping operations:
+            default_code = line.product_id.default_code            
+            res = correct_default_code(
+                default_code, product_mapping, bom_jump, bom_mapping, 
+                code_part)
+            if not res: # Error for code or parent:
                 continue
-
+            default_code, parent_code = res
+            
             if parent_code in bom_mapping:
                 parent_code = bom_mapping[parent_code]
                 _logger.error('Parent code remapped to %s' % parent_code)
@@ -480,8 +514,13 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # C. Assign product unload depend on inventory database
         # ---------------------------------------------------------------------
-        for default_code, unload_list in inventory_product.iteritems():
-            parent_code = default_code[:code_part].strip()
+        for default_code, unload_list in inventory_product.iteritems():   
+             
+            # Remap default_code and parent_code:
+            default_code, parent_code = correct_default_code(
+                default_code, product_mapping, bom_jump, bom_mapping, 
+                code_part)
+            #parent_code = default_code[:code_part].strip()
             # loop on month:
             for col in range(0, 12):
                 product_qty = inventory_product[default_code][col]
@@ -507,6 +546,11 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         no_bom6 = {}
         for default_code, unload_list in inventory_product.iteritems():
             _logger.info('Extract material for code: %s' % default_code)
+            
+            # Remap code:
+            default_code, parent_code = correct_default_code(
+                default_code, product_mapping, bom_jump, bom_mapping, 
+                code_part)
             
             # ------------------------------
             # Product data information used:

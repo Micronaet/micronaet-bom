@@ -290,7 +290,46 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         xls_file = '/home/administrator/photo/xls/stock/inventory_%s.xlsx'
         xls_infile = '/home/administrator/photo/xls/stock/use_inv_%s.xlsx'
         start_row = 2 # first data row (start from 0)
-                
+        
+        # BOM Mask for commercial product:
+        bom_jump = (
+            '430', 
+            '440',
+            '450',
+            '460',
+            '470',
+            '750',            
+            )
+        
+        # BOM to be used instead of original (not present)        
+        bom_mapping = {
+            '023TXR': '023TX',
+            '025TXR': '025TX',
+            '029': '029TX',
+            '029TXR': '029TX',
+            '084': '081',
+            '123FR': '123PE',
+            '127DB': '127S',
+            '129TXR': '129TX',
+            '223FR': '223TX',
+            '223TXR': '223TX',
+            '230': '230L',
+            '650': '650TX',
+            '651': '651TX',            
+            '900': '900TX',
+            '900FRN': '900TX',
+            '905': '905S',
+            '930': '930L',
+            }
+
+        # Product with wrong code, mapped in correct one's            
+        product_mapping = {
+            '129D ANBIBE': '129D  ANBIBE',
+            '360   ANCE': '360HP ANCE',
+            '375   BS': '375HP BS',
+            '810  BIAR': '810   BIAR',
+            }
+
         # Read parameter from wizard:
         wiz_browse = self.browse(cr, uid, ids, context=context)[0]
         year = wiz_browse.year
@@ -361,8 +400,23 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             if not default_code:
                 _logger.error('No default code')
                 continue
-            parent_code = default_code[:code_part].strip()
                 
+            # Swap product code:    
+            if default_code in product_mapping:
+                default_code = product_mapping[default_code]
+                _logger.error('Code re-mapped to %s' % default_code)
+
+            parent_code = default_code[:code_part].strip()
+            
+            # Jump commercial product:
+            if parent_code in bom_jump:
+                _logger.error('Code jumped (commercial): %s' % default_code)
+                continue
+
+            if parent_code in bom_mapping:
+                parent_code = bom_mapping[parent_code]
+                _logger.error('Parent code remapped to %s' % parent_code)
+                                
             quantity = line.quantity
             date_invoice = line.invoice_id.date_invoice
             

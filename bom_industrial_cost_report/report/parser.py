@@ -133,13 +133,18 @@ def is_fabric_product(product):
     
     # Has TEX001 format:
     for (from_c, to_c) in [(3, 6), (6, 9)]:
-        h = product.default_code[from_c:to_c] 
+        h = product.default_code[from_c:to_c]
         is_fabric = True
         for c in h:
             if not c.isdigit():
                 is_fabric = False
+                
         if is_fabric:
-            return float(h) / 100.0 # meter
+            try:
+                return float(h) / 100.0 # meter
+            except:
+                _logger.error('Error convert %s to float' % h)
+                return 0.0    
     return False         
 
 def get_price_detail(price_ids):

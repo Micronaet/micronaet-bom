@@ -114,7 +114,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         self.import_csv_inventory_cost_revenue(
             cr, uid, csv_file, context=context)
 
-        # Call XLSX produce function:    
+        # Call XLSX produce functiocn:    
         return self.action_extract(cr, uid, ids, context=context)
         
     def action_extract(self, cr, uid, ids, context=None):

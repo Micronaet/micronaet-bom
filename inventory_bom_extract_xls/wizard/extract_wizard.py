@@ -280,10 +280,11 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             materials[default_code][col + 12] += qty * price
             return
             
-        def correct_default_code(default_code, bom_jump, 
-                bom_mapping, code_part):
+        def correct_default_code(product, bom_jump, bom_mapping, 
+                bom_template_product, code_part):
             ''' Clean or remap default_code
             '''
+            default_code = product.default_code
             if not default_code:
                 _logger.warning('No default code')
                 return False
@@ -302,8 +303,9 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
 
             if parent_code in bom_mapping:
                 parent_code = bom_mapping[parent_code]
+                product = bom_template_product[parent_code.strip()] # browse
                 _logger.warning('Parent code remapped to %s' % parent_code)                
-            return default_code, parent_code                    
+            return default_code, parent_code, product
             
         if context is None: 
             context = {}    
@@ -347,6 +349,17 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             '930': '930L',
             }
 
+        # Product browse for bom template (replace it during remapping operat.
+        bom_template_product = {}
+        product_pool = self.pool.get('product.product')
+        product_ids = product_pool.search(cr, uid, [
+            ('bom_selection', '=', True),
+            ], context=context)
+        for product in product_pool.browse(
+                cr, uid, product_ids, context=context):
+            bom_template_product[
+                product.default_code[:code_part].strip()] = product
+            
         # Product with wrong code, mapped in correct one's            
         #product_mapping = {
         #    #'129D ANBIBE': '129D  ANBIBE',
@@ -363,7 +376,6 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # Load cost from order:
         # ---------------------------------------------------------------------
         _logger.info('Check cost for product')
-        product_pool = self.pool.get('product.product')
         costs = product_pool.get_purchase_cost_value(
             cr, uid, context=context)
         
@@ -424,11 +436,11 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
 
             # Remapping operations:
             res = correct_default_code(
-                line.product_id.default_code, bom_jump, 
-                bom_mapping, code_part)
+                line.product_id, bom_jump, 
+                bom_mapping, bom_template_product, code_part)
             if not res: # Error for code or parent:
                 continue
-            default_code, parent_code = res
+            default_code, parent_code, product = res
             
             quantity = line.quantity
             date_invoice = line.invoice_id.date_invoice
@@ -437,7 +449,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 inventory_product[default_code] = [
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ]
-                products[default_code] = line.product_id     
+                products[default_code] = product #line.product_id     
             if parent_code not in inventory:
                 inventory[parent_code] = [
                     0, # Start inv.
@@ -496,9 +508,9 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         for default_code, unload_list in inventory_product.iteritems():   
              
             # Remap default_code and parent_code:
-            default_code, parent_code = correct_default_code(
-                default_code, bom_jump, bom_mapping, 
-                code_part)
+            default_code, parent_code. product = correct_default_code(
+                products[default_code], bom_jump, bom_mapping, 
+                bom_template_product, code_part)
 
             # loop on month:
             for col in range(0, 12):
@@ -527,15 +539,15 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             _logger.info('Extract material for code: %s' % default_code)
             
             # Remap code:
-            default_code, parent_code = correct_default_code(
-                default_code, bom_jump, bom_mapping, 
-                code_part)
+            default_code, parent_code, product = correct_default_code(
+                products[default_code], bom_jump, bom_mapping, 
+                bom_template_product, code_part)
             
             # ------------------------------
             # Product data information used:
             # ------------------------------
             # Normal product (check in BOM template):
-            product = products[default_code] # Browse obj
+            #product = products[default_code] # Browse obj
             code6 = default_code[:6].strip()
             industrial_ids = {}
             dynamic_ids = []

@@ -289,11 +289,6 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 _logger.warning('No default code')
                 return False
                 
-            # Swap product code:
-            #if default_code in product_mapping:
-            #    default_code = product_mapping[default_code]
-            #    _logger.warning('Code re-mapped to %s' % default_code)
-
             parent_code = default_code[:code_part].strip()
             
             # Jump commercial product:
@@ -303,7 +298,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
 
             if parent_code in bom_mapping:
                 parent_code = bom_mapping[parent_code]
-                product = bom_template_product[parent_code.strip()] # browse
+                product = bom_template_product[parent_code] # browse
                 _logger.warning('Parent code remapped to %s' % parent_code)                
             return default_code, parent_code, product
             
@@ -449,7 +444,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 inventory_product[default_code] = [
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ]
-                products[default_code] = product #line.product_id     
+                products[default_code] = product
             if parent_code not in inventory:
                 inventory[parent_code] = [
                     0, # Start inv.
@@ -508,7 +503,9 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         for default_code, unload_list in inventory_product.iteritems():   
              
             # Remap default_code and parent_code:
-            default_code, parent_code. product = correct_default_code(
+            if default_code == '230TX NCVN':
+                import pdb; pdb.set_trace()
+            default_code, parent_code, product = correct_default_code(
                 products[default_code], bom_jump, bom_mapping, 
                 bom_template_product, code_part)
 
@@ -547,7 +544,6 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             # Product data information used:
             # ------------------------------
             # Normal product (check in BOM template):
-            #product = products[default_code] # Browse obj
             code6 = default_code[:6].strip()
             industrial_ids = {}
             dynamic_ids = []

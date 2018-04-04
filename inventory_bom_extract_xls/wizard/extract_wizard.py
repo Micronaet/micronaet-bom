@@ -280,29 +280,29 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             materials[default_code][col + 12] += qty * price
             return
             
-        def correct_default_code(default_code, product_mapping, bom_jump, 
+        def correct_default_code(default_code, bom_jump, 
                 bom_mapping, code_part):
             ''' Clean or remap default_code
             '''
             if not default_code:
-                _logger.error('No default code')
+                _logger.warning('No default code')
                 return False
                 
             # Swap product code:
-            if default_code in product_mapping:
-                default_code = product_mapping[default_code]
-                _logger.error('Code re-mapped to %s' % default_code)
+            #if default_code in product_mapping:
+            #    default_code = product_mapping[default_code]
+            #    _logger.warning('Code re-mapped to %s' % default_code)
 
             parent_code = default_code[:code_part].strip()
             
             # Jump commercial product:
             if parent_code in bom_jump:
-                _logger.error('Code jumped (commercial): %s' % default_code)
+                _logger.warning('Code jumped (commercial): %s' % default_code)
                 return False
 
             if parent_code in bom_mapping:
                 parent_code = bom_mapping[parent_code]
-                _logger.error('Parent code remapped to %s' % parent_code)                
+                _logger.warning('Parent code remapped to %s' % parent_code)                
             return default_code, parent_code                    
             
         if context is None: 
@@ -348,12 +348,12 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             }
 
         # Product with wrong code, mapped in correct one's            
-        product_mapping = {
-            '129D ANBIBE': '129D  ANBIBE',
-            '360   ANCE': '360HP ANCE',
-            '375   BS': '375HP BS',
-            '810  BIAR': '810   BIAR',
-            }
+        #product_mapping = {
+        #    #'129D ANBIBE': '129D  ANBIBE',
+        #    '360   ANCE': '360HP ANCE',
+        #    #'375   BS': '375HP BS',
+        #    #'810  BIAR': '810   BIAR',
+        #    }
 
         # Read parameter from wizard:
         wiz_browse = self.browse(cr, uid, ids, context=context)[0]
@@ -423,18 +423,13 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 cr, uid, line_ids, context=context):
 
             # Remapping operations:
-            default_code = line.product_id.default_code            
             res = correct_default_code(
-                default_code, product_mapping, bom_jump, bom_mapping, 
-                code_part)
+                line.product_id.default_code, bom_jump, 
+                bom_mapping, code_part)
             if not res: # Error for code or parent:
                 continue
             default_code, parent_code = res
             
-            if parent_code in bom_mapping:
-                parent_code = bom_mapping[parent_code]
-                _logger.error('Parent code remapped to %s' % parent_code)
-                                
             quantity = line.quantity
             date_invoice = line.invoice_id.date_invoice
             
@@ -502,7 +497,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
              
             # Remap default_code and parent_code:
             default_code, parent_code = correct_default_code(
-                default_code, product_mapping, bom_jump, bom_mapping, 
+                default_code, bom_jump, bom_mapping, 
                 code_part)
 
             # loop on month:
@@ -533,7 +528,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             
             # Remap code:
             default_code, parent_code = correct_default_code(
-                default_code, product_mapping, bom_jump, bom_mapping, 
+                default_code, bom_jump, bom_mapping, 
                 code_part)
             
             # ------------------------------

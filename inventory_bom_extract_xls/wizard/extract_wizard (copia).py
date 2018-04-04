@@ -280,6 +280,28 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             materials[default_code][col + 12] += qty * price
             return
             
+        def correct_default_code(product, bom_jump, bom_mapping, 
+                bom_template_product, code_part):
+            ''' Clean or remap default_code
+            '''
+            default_code = product.default_code
+            if not default_code:
+                _logger.warning('No default code')
+                return False
+                
+            parent_code = default_code[:code_part].strip()
+            
+            # Jump commercial product:
+            if parent_code in bom_jump:
+                _logger.warning('Code jumped (commercial): %s' % default_code)
+                return False
+
+            if parent_code in bom_mapping:
+                parent_code = bom_mapping[parent_code]
+                product = bom_template_product[parent_code] # browse
+                _logger.warning('Parent code remapped to %s' % parent_code)                
+            return default_code, parent_code, product
+            
         if context is None: 
             context = {}    
 
@@ -291,6 +313,56 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         xls_infile = '/home/administrator/photo/xls/stock/use_inv_%s.xlsx'
         start_row = 2 # first data row (start from 0)
         
+        # BOM Mask for commercial product:
+        bom_jump = (
+            '430', 
+            '440',
+            '450',
+            '460',
+            '470',
+            '750',            
+            )
+        
+        # BOM to be used instead of original (not present)        
+        bom_mapping = {
+            '023TXR': '023TX',
+            '025TXR': '025TX',
+            '029': '029TX',
+            '029TXR': '029TX',
+            '084': '081',
+            '123FR': '123PE',
+            '127DB': '127S',
+            '129TXR': '129TX',
+            '223FR': '223TX',
+            '223TXR': '223TX',
+            '230': '230L',
+            '650': '650TX',
+            '651': '651TX',            
+            '900': '900TX',
+            '900FRN': '900TX',
+            '905': '905S',
+            '930': '930L',
+            }
+
+        # Product browse for bom template (replace it during remapping operat.
+        bom_template_product = {}
+        product_pool = self.pool.get('product.product')
+        product_ids = product_pool.search(cr, uid, [
+            ('bom_selection', '=', True),
+            ], context=context)
+        for product in product_pool.browse(
+                cr, uid, product_ids, context=context):
+            bom_template_product[
+                product.default_code[:code_part].strip()] = product
+            
+        # Product with wrong code, mapped in correct one's            
+        #product_mapping = {
+        #    #'129D ANBIBE': '129D  ANBIBE',
+        #    '360   ANCE': '360HP ANCE',
+        #    #'375   BS': '375HP BS',
+        #    #'810  BIAR': '810   BIAR',
+        #    }
+
         # Read parameter from wizard:
         wiz_browse = self.browse(cr, uid, ids, context=context)[0]
         year = wiz_browse.year
@@ -299,7 +371,6 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # Load cost from order:
         # ---------------------------------------------------------------------
         _logger.info('Check cost for product')
-        product_pool = self.pool.get('product.product')
         costs = product_pool.get_purchase_cost_value(
             cr, uid, context=context)
         
@@ -357,12 +428,19 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         _logger.info('Read %s invoice line' % len(line_ids))        
         for line in line_pool.browse(
                 cr, uid, line_ids, context=context):
-            default_code = line.product_id.default_code
-            if not default_code:
-                _logger.error('No default code')
-                continue                
-            parent_code = default_code[:code_part].strip()
-                                
+
+            # Remapping operations:
+            if line.product_id.default_code == '651TX   BIBE':
+                import pdb; pdb.set_trace()
+            res = correct_default_code(
+                line.product_id, bom_jump, 
+                bom_mapping, bom_template_product, code_part)
+            if not res: # Error for code or parent:
+                continue
+            default_code, parent_code, product = res
+            if default_code == '651TX   BIBE':
+                import pdb; pdb.set_trace()
+            
             quantity = line.quantity
             date_invoice = line.invoice_id.date_invoice
             
@@ -370,7 +448,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 inventory_product[default_code] = [
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ]
-                products[default_code] = line.product_id     
+                products[default_code] = product
             if parent_code not in inventory:
                 inventory[parent_code] = [
                     0, # Start inv.
@@ -426,8 +504,18 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # C. Assign product unload depend on inventory database
         # ---------------------------------------------------------------------
-        for default_code, unload_list in inventory_product.iteritems():
-            parent_code = default_code[:code_part].strip()
+        for default_code, unload_list in inventory_product.iteritems():   
+             
+            # Remap default_code and parent_code:
+            if default_code == '651TX   BIBE':
+                old = default_code
+                import pdb; pdb.set_trace()
+            default_code, parent_code, product = correct_default_code(
+                products[default_code], bom_jump, bom_mapping, 
+                bom_template_product, code_part)
+            if default_code == '651TX   BIBE':
+                import pdb; pdb.set_trace()
+
             # loop on month:
             for col in range(0, 12):
                 product_qty = inventory_product[default_code][col]
@@ -454,11 +542,15 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         for default_code, unload_list in inventory_product.iteritems():
             _logger.info('Extract material for code: %s' % default_code)
             
+            # Remap code:
+            default_code, parent_code, product = correct_default_code(
+                products[default_code], bom_jump, bom_mapping, 
+                bom_template_product, code_part)
+            
             # ------------------------------
             # Product data information used:
             # ------------------------------
             # Normal product (check in BOM template):
-            product = products[default_code] # Browse obj
             code6 = default_code[:6].strip()
             industrial_ids = {}
             dynamic_ids = []

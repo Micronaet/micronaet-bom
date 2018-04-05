@@ -317,11 +317,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         _logger.info('Check cost for product')
         product_pool = self.pool.get('product.product')
-        costs = product_pool.get_purchase_cost_value(
-            cr, uid, context=context)
-        print costs
-        import pdb; pdb.set_trace()    
-        
+        costs = product_pool.get_purchase_cost_value(cr, uid, context=context)
+
         # ---------------------------------------------------------------------
         # Template bom:
         # ---------------------------------------------------------------------

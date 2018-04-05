@@ -271,18 +271,25 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 #return product.standard_price
                 return product.inv_cost_value or product.standard_price 
 
-        def setup_materials(product, materials, costs):
+        def setup_materials(product, materials, costs, mm_total):
             ''' Utility for append product in material list (initial setup)
             '''
             price = get_cost(product, costs)
-            if product.default_code not in materials:
-                materials[product.default_code] = [
+            default_code = product.default_code
+            if default_code not in materials:
+                materials[default_code] = [
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     product.inv_revenue_account,
                     product.inv_cost_account,
                     product.inv_first_supplier,
-                    price, 
+                    price,
+
+                    # Totals:                    
+                    mm_total.get(default_code, 0.0), # IN
+                    0.0, # OUT
+                    mm_total.get(default_code, 0.0), # 31/12
+                    '' if default_code in mm_total else 'NO MM', # Test
                     ]            
             return
             
@@ -294,8 +301,12 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             default_code = product.default_code
             # Add q:
             materials[default_code][col] += qty
+            
             # Add total TODO change cost value:
             materials[default_code][col + 12] += qty * price
+
+            materials[default_code][29] -= qty # OUT
+            materials[default_code][30] -= qty # 31/12
             return
             
         if context is None: 
@@ -341,7 +352,6 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         _logger.info('Load MM file: %s' % mm_infile)
         mm_total = {}
         i = 0
-        import pdb; pdb.set_trace()
         for line in open(mm_infile, 'r'):
             i += 1
             if i == 1:
@@ -389,6 +399,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             'Gen.', 'Feb.', 'Mar.', 'Apr.', 'Mag.', 'Giu.', 'Lug.', 
             'Ago.', 'Set.', 'Ott.', 'Nov.', 'Dic.',
             'Costo', 'Ricavo', 'Fornitore', 'Costo',
+            'IN', 'OUT', 'INV 31/12', 'MM test',
             ]
 
         # ---------------------------------------------------------------------
@@ -539,7 +550,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     continue # jump not used (update the list)!
                     
                 # Add in inventory:
-                setup_materials(product, materials, costs)
+                setup_materials(product, materials, costs, mm_total)
                 
                 # Loop on all period:
                 for col in range (0, 12):
@@ -564,7 +575,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     continue
 
                 # Add to inventory:
-                setup_materials(component, materials, costs)
+                setup_materials(component, materials, costs, mm_total)
                 
                 # Loop on all period:
                 for col in range (0, 12):
@@ -606,7 +617,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                             continue # jump not used!
                         
                         # Add to inventory:
-                        setup_materials(hw_product, materials, costs)
+                        setup_materials(hw_product, materials, costs, mm_total)
 
                         for col in range (0, 12):
                             product_qty = unload_list[col]
@@ -635,7 +646,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         continue
                         
                     if component_code not in materials: # Add to inventory:
-                        setup_materials(component, materials, costs)
+                        setup_materials(component, materials, costs, mm_total)
                     setup_materials_q(
                         component, col, 
                         product_qty * line.product_qty, 

@@ -220,7 +220,6 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 res = float(value)
                 return res
             except:
-                #_logger.warning('Float value not present: %s' % value)
                 return 0.0
         
         def not_in_inventory_selection(product, jumped, costs):
@@ -261,9 +260,13 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             '''
             # TODO write a better method
             default_code = product.default_code
-            if default_code and default_code in costs:
+            if default_code and default_code in costs and costs[default_code]:
+                if default_code == 'ANG22':
+                    print default_code, costs[default_code]
                 return costs[default_code]
             else:     
+                if default_code == 'ANG22':
+                    print default_code, product.inv_cost_value or product.standard_price 
                 #return product.standard_price
                 return product.inv_cost_value or product.standard_price 
 
@@ -316,6 +319,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         product_pool = self.pool.get('product.product')
         costs = product_pool.get_purchase_cost_value(
             cr, uid, context=context)
+        print costs
+        import pdb; pdb.set_trace()    
         
         # ---------------------------------------------------------------------
         # Template bom:

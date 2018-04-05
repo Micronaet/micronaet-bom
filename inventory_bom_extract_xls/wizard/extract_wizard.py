@@ -235,7 +235,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 '37.00108', # Copriteste e pinze c/acquisti
                 )
             supplier_selection = (
-                '20.01330', # La Industrial Algodonera
+                31401, #'20.01330', # La Industrial Algodonera
                 )
 
             # cost, revenue, supplier all different:

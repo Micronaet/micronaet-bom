@@ -307,6 +307,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         code_part = 6
         xls_file = '/home/administrator/photo/xls/stock/inventory_%s.xlsx'
         xls_infile = '/home/administrator/photo/xls/stock/use_inv_%s.xlsx'
+        mm_infile = '/home/administrator/photo/xls/stock/mori_fin_%s.csv'
+        
         start_row = 2 # first data row (start from 0)
         
         # Read parameter from wizard:
@@ -331,6 +333,41 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # Insert year in filename:
         xls_file = xls_file % year
         xls_infile = xls_infile % year
+        mm_infile = mm_infile % year
+
+        # ---------------------------------------------------------------------            
+        # Load MM input (BF, INV, FF):
+        # ---------------------------------------------------------------------            
+        _logger.info('Load MM file: %s' % mm_infile)
+        mm_total = {}
+        i = 0
+        import pdb; pdb.set_trace()
+        for line in open(mm_infile, 'r'):
+            i += 1
+            if i == 1:
+                continue # jump first line
+            line = line.strip()
+            row = line.split(';')
+                        
+            mode = row[0].strip()
+            #date = row[6]
+            default_code = row[9].strip()
+            #um = row[11]
+            qty = float(row[26].replace(',', '.'))
+            
+            if mode in ('IN', 'BF'):
+                sign = +1
+            elif mode in ('RF', ):
+                sign = -1
+            else:
+                sign = +1
+                _logger.error('Move not found: %s' % mode)
+                     
+            if default_code in mm_total: 
+                mm_total[default_code] += sign * qty
+            else:
+                mm_total[default_code] = sign * qty
+            
 
         # Open XLS file:
         _logger.info('Create extract %s file' % xls_file)

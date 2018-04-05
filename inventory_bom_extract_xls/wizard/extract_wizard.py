@@ -108,6 +108,19 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     product.property_account_expense.account_ref \
                         if product.property_account_expense else False,
                 }                    
+            
+            # Get also cost:
+            cost = 0.0
+            data = False
+            for supplier in product.seller_ids:
+                for price in supplier.pricelist_ids:
+                    if not price.is_active:
+                        continue
+                    if date == False or price.date_quotation > date:
+                        date = price.date_quotation
+                        cost = price.price
+            if cost:
+                data['inv_cost_value'] = cost
             product_pool.write(cr, uid, product.id, data, context=context)
             
         # Update with file:
@@ -251,7 +264,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             if default_code and default_code in costs:
                 return costs[default_code]
             else:     
-                return product.standard_price
+                #return product.standard_price
+                return product.inv_cost_value or product.standard_price 
 
         def setup_materials(product, materials, costs):
             ''' Utility for append product in material list (initial setup)

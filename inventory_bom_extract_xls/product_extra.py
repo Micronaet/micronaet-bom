@@ -108,6 +108,7 @@ class ProductProduct(orm.Model):
     _columns = {
         'inv_cost_account': fields.char('Inv. cost account', size=8),
         'inv_revenue_account': fields.char('Inv. cost account', size=8),
-        'inv_first_supplier': fields.char('Inv. First supplier', size=8),        
+        'inv_first_supplier': fields.char('Inv. First supplier', size=8),
+        'inv_cost_value': fields.float('Inv. cost', digits=(16, 6)),     
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -111,7 +111,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             
             # Get also cost:
             cost = 0.0
-            data = False
+            date = False
             for supplier in product.seller_ids:
                 for price in supplier.pricelist_ids:
                     if not price.is_active:

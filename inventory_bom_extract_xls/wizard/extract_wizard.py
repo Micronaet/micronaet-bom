@@ -299,6 +299,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             price = get_cost(product, costs)
             
             default_code = product.default_code
+                 
             # Add q:
             materials[default_code][col] += qty
             
@@ -377,7 +378,6 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 mm_total[default_code] += sign * qty
             else:
                 mm_total[default_code] = sign * qty
-            
 
         # Open XLS file:
         _logger.info('Create extract %s file' % xls_file)
@@ -430,7 +430,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                                 
             quantity = line.quantity
             date_invoice = line.invoice_id.date_invoice
-            
+                        
             if default_code not in inventory_product:
                 inventory_product[default_code] = [
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -654,18 +654,24 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         costs,
                         )
 
+        # ---------------------------------------------------------------------                
+        # Used materials
+        # ---------------------------------------------------------------------                
         xls_sheet_write(
             WB, '5. Materiali utilizzati', materials, material_product)
+            
+        # ---------------------------------------------------------------------                
+        # Unused materials:
+        # ---------------------------------------------------------------------                
         xls_sheet_write_table(
             WB, '6. Materiali saltati', jumped, (
                 'Codice materiale', 'Nome', 'Costo', 'Ricavo', 'Fornitore', 
                 'Prezzo',
                 ))
-        xls_sheet_write(        
-        #xls_sheet_write_table(
-            WB, '7. Mexal', mm_total, ('Codice materiale', 'Esistenza'))
-                
+
+        # ---------------------------------------------------------------------                
         # Write extra page for BOM not found from product template:
+        # ---------------------------------------------------------------------                
         WS = WB.add_worksheet('7. Prodotti senza modello DB')
         row = 0
         WS.write(row, 0, 'Codice padre (template)')
@@ -674,6 +680,18 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             row += 1
             WS.write(row, 0, code6)
             WS.write(row, 1, ', '.join(no_bom6[code6]))
+
+        # ---------------------------------------------------------------------                
+        # Write extra page for Account total movemnet 2016
+        # ---------------------------------------------------------------------                
+        WS = WB.add_worksheet('8. Movimenti Mexal')
+        row = 0
+        WS.write(row, 0, 'Codice prodotto')
+        WS.write(row, 1, 'Totale movimenti')
+        for code in sorted(mm_total):
+            row += 1
+            WS.write(row, 0, code)
+            WS.write(row, 1, mm_total[code])
                         
     _columns = {
         'year': fields.integer('Year', required=True),

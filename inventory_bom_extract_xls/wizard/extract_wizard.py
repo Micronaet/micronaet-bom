@@ -312,9 +312,9 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         if context is None: 
             context = {}    
 
-        # ---------------------------------------------------------------------            
+        # ---------------------------------------------------------------------
         # Parameters:        
-        # ---------------------------------------------------------------------            
+        # ---------------------------------------------------------------------
         code_part = 6
         xls_file = '/home/administrator/photo/xls/stock/inventory_%s.xlsx'
         xls_infile = '/home/administrator/photo/xls/stock/use_inv_%s.xlsx'
@@ -661,6 +661,9 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 'Codice materiale', 'Nome', 'Costo', 'Ricavo', 'Fornitore', 
                 'Prezzo',
                 ))
+        xls_sheet_write(        
+        #xls_sheet_write_table(
+            WB, '7. Mexal', mm_total, ('Codice materiale', 'Esistenza'))
                 
         # Write extra page for BOM not found from product template:
         WS = WB.add_worksheet('7. Prodotti senza modello DB')

@@ -286,7 +286,7 @@ class ProductProduct(orm.Model):
         # Extract data from ODT master function:
         row = 0
         for (r_min, r_max, r_error, r_components, r_extra1, r_extra2, r_index, 
-            r_total, product, r_parameter, r_total_text) in \
+            r_total, product, r_parameter, r_total_text, pipe_data) in \
                 self.report_get_objects_bom_industrial_cost(
                     cr, uid, datas=datas, context=context):
             row += 1       

@@ -271,7 +271,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 #return product.standard_price
                 return product.inv_cost_value or product.standard_price 
 
-        def setup_materials(product, materials, costs, mm_total):
+        def setup_materials(product, materials, costs, mm_total, 
+                mm_code_unused):
             ''' Utility for append product in material list (initial setup)
             '''
             price = get_cost(product, costs)
@@ -290,7 +291,11 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     0.0, # OUT
                     mm_total.get(default_code, 0.0), # 31/12
                     '' if default_code in mm_total else 'NO MM', # Test
-                    ]            
+                    ]
+                    
+            # Remove used code:        
+            if default_code in mm_code_unused:
+                mm_code_unused.remove(default_code)
             return
             
         def setup_materials_q(product, col, qty, materials, costs):
@@ -352,6 +357,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------            
         _logger.info('Load MM file: %s' % mm_infile)
         mm_total = {}
+        
         i = 0
         for line in open(mm_infile, 'r'):
             i += 1
@@ -379,6 +385,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             else:
                 mm_total[default_code] = sign * qty
 
+        mm_code_unused = mm_total.keys()
+        
         # Open XLS file:
         _logger.info('Create extract %s file' % xls_file)
         WB = xlsxwriter.Workbook(xls_file)
@@ -550,7 +558,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     continue # jump not used (update the list)!
                     
                 # Add in inventory:
-                setup_materials(product, materials, costs, mm_total)
+                setup_materials(product, materials, costs, mm_total, 
+                    mm_code_unused)
                 
                 # Loop on all period:
                 for col in range (0, 12):
@@ -575,7 +584,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     continue
 
                 # Add to inventory:
-                setup_materials(component, materials, costs, mm_total)
+                setup_materials(component, materials, costs, mm_total, 
+                    mm_code_unused)
                 
                 # Loop on all period:
                 for col in range (0, 12):
@@ -617,7 +627,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                             continue # jump not used!
                         
                         # Add to inventory:
-                        setup_materials(hw_product, materials, costs, mm_total)
+                        setup_materials(hw_product, materials, costs, mm_total, 
+                            mm_code_unused)
 
                         for col in range (0, 12):
                             product_qty = unload_list[col]
@@ -646,7 +657,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                         continue
                         
                     if component_code not in materials: # Add to inventory:
-                        setup_materials(component, materials, costs, mm_total)
+                        setup_materials(component, materials, costs, mm_total, 
+                            mm_code_unused)
                     setup_materials_q(
                         component, col, 
                         product_qty * line.product_qty, 
@@ -682,7 +694,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             WS.write(row, 1, ', '.join(no_bom6[code6]))
 
         # ---------------------------------------------------------------------                
-        # Write extra page for Account total movemnet 2016
+        # Write extra page for Account total movement 2016
         # ---------------------------------------------------------------------                
         WS = WB.add_worksheet('8. Movimenti Mexal')
         row = 0
@@ -692,6 +704,16 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             row += 1
             WS.write(row, 0, code)
             WS.write(row, 1, mm_total[code])
+
+        # ---------------------------------------------------------------------                
+        # Write extra page for Account total movement 2016
+        # ---------------------------------------------------------------------                
+        WS = WB.add_worksheet('9. Prodotti non utilizzati')
+        row = 0
+        WS.write(row, 0, 'Codice prodotto')
+        for code in sorted(mm_code_unused):
+            row += 1
+            WS.write(row, 0, code)
                         
     _columns = {
         'year': fields.integer('Year', required=True),

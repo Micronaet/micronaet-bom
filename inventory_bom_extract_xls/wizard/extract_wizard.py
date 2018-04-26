@@ -215,12 +215,12 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     
             for product in product_pool.browse(
                     cr, uid, product_ids, context=context):
-                res[product.default_code[:6].strip()] = (
-                    # BOM:
+                res[product.default_code[:6].strip()] = (                    
                     dynamic_bom, 
-                    # Industrial
+                    # Industrial:
                     product_pool.get_cost_industrial_for_product(                         
                         cr, uid, [product.id], context=context),
+                        )
             return res
             
         def clean_float(value):

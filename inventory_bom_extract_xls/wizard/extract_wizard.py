@@ -196,8 +196,10 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         
         # ---------------------------------------------------------------------
         # BOM
-        def load_bom_template(self, cr, uid, context=None):
+        def load_bom_template(self, cr, uid, use_dynamic=False, context=None):
             ''' Load template bom return code[:6] with element
+                use_dynamic: get also dynamic bom from template, instead
+                   will use product dynamic bom
             '''    
             res = {}
             product_pool = self.pool.get('product.product')
@@ -206,11 +208,18 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 ], context=context)
             for product in product_pool.browse(
                     cr, uid, product_ids, context=context):
-                res[product.default_code[:6].strip()] = (
-                    product.dynamic_bom_line_ids, # BOM
-                    product_pool.get_cost_industrial_for_product( # Industrial
-                        cr, uid, [product.id], context=context),
-                    )
+                if use_dynamic:    
+                    res[product.default_code[:6].strip()] = (
+                        product.dynamic_bom_line_ids, # BOM
+                        product_pool.get_cost_industrial_for_product( 
+                            # Industrial
+                            cr, uid, [product.id], context=context),
+                    res[product.default_code[:6].strip()] = (
+                        (),#product.dynamic_bom_line_ids, # BOM
+                        product_pool.get_cost_industrial_for_product( 
+                            # Industrial
+                            cr, uid, [product.id], context=context),
+                        )
             return res
             
         def clean_float(value):
@@ -334,6 +343,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Parameters:        
         # ---------------------------------------------------------------------
+        use_dynamic = False # 
         code_part = 6
         xls_file = '/home/administrator/photo/xls/stock/inventory_%s.xlsx'
         xls_infile = '/home/administrator/photo/xls/stock/use_inv_%s.xlsx'
@@ -355,7 +365,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Template bom:
         # ---------------------------------------------------------------------
-        template_bom = load_bom_template(self, cr, uid, context=context)    
+        template_bom = load_bom_template(
+            self, cr, uid, use_dynamic, context=context)    
 
         # ---------------------------------------------------------------------            
         # XLS output file:
@@ -558,6 +569,10 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     no_bom6[code6] = []
                 if default_code not in no_bom6[code6]: # Log no bom product
                     no_bom6[code6].append(default_code)
+            
+            # Use BOM from product instead of template bom
+            if not use_dynamic:
+                dynamic_ids = product.dynamic_bom_line_ids
                 
             # Halfworked product:
             half_line_ids = product.half_bom_ids # bom_ids            

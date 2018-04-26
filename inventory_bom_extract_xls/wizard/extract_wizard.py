@@ -206,20 +206,21 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             product_ids = product_pool.search(cr, uid, [
                 ('bom_selection', '=', True),
                 ], context=context)
+            
+            # Dynamic BOM:    
+            if use_dynamic:
+                dynamic_bom = product.dynamic_bom_line_ids
+            else:
+                dynamic_bom = ()
+                    
             for product in product_pool.browse(
                     cr, uid, product_ids, context=context):
-                if use_dynamic:    
-                    res[product.default_code[:6].strip()] = (
-                        product.dynamic_bom_line_ids, # BOM
-                        product_pool.get_cost_industrial_for_product( 
-                            # Industrial
-                            cr, uid, [product.id], context=context),
-                    res[product.default_code[:6].strip()] = (
-                        (),#product.dynamic_bom_line_ids, # BOM
-                        product_pool.get_cost_industrial_for_product( 
-                            # Industrial
-                            cr, uid, [product.id], context=context),
-                        )
+                res[product.default_code[:6].strip()] = (
+                    # BOM:
+                    dynamic_bom, 
+                    # Industrial
+                    product_pool.get_cost_industrial_for_product(                         
+                        cr, uid, [product.id], context=context),
             return res
             
         def clean_float(value):
@@ -343,7 +344,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Parameters:        
         # ---------------------------------------------------------------------
-        use_dynamic = False # 
+        use_dynamic = False # Force tempate bom use
         code_part = 6
         xls_file = '/home/administrator/photo/xls/stock/inventory_%s.xlsx'
         xls_infile = '/home/administrator/photo/xls/stock/use_inv_%s.xlsx'

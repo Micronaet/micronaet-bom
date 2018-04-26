@@ -59,6 +59,12 @@ class MrpProduction(orm.Model):
                 domain.append(
                     ('product_id.recent_supplier_id', '=', first_supplier_id),
                     )
+                # TODO use also manual supplier?    
+                #domain.extend([
+                #    '|',
+                #    ('product_id.recent_supplier_id', '=', first_supplier_id),
+                #    ('product_id.first_supplier_id', '=', first_supplier_id),
+                #    ])
             
         line_pool = self.pool.get('mrp.bom.line')
         line_ids = line_pool.search(cr, uid, domain, context=context)

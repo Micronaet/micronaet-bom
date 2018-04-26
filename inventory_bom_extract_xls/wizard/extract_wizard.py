@@ -277,6 +277,17 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             '''
             price = get_cost(product, costs)
             default_code = product.default_code
+            extract_number = '0'
+            
+            # Extra data for calc:
+            if default_code[:2].upper() in (
+                    'TE', 'TJ', 'TS', 'TX'):
+                extract_number = default_code[3:6]
+                if not extract_number.isdigit():
+                    extract_number = default_code[6:9]
+                    if not extract_number.isdigit():
+                        extract_number = '0'
+                
             if default_code not in materials:
                 materials[default_code] = [
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -291,6 +302,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     0.0, # OUT
                     mm_total.get(default_code, 0.0), # 31/12
                     '' if default_code in mm_total else 'NO MM', # Test
+                    product.weight if product.is_pipe else 0.0,# pipe weight
+                    int(extract_number),# extract number (for fabric)
                     ]
                     
             # Remove used code:        
@@ -407,7 +420,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             'Gen.', 'Feb.', 'Mar.', 'Apr.', 'Mag.', 'Giu.', 'Lug.', 
             'Ago.', 'Set.', 'Ott.', 'Nov.', 'Dic.',
             'Costo', 'Ricavo', 'Fornitore', 'Costo',
-            'IN', 'OUT', 'INV 31/12', 'MM test',
+            'IN', 'OUT', 'INV 31/12', 'MM test', 'Volume', 'Altezza Tess.',
             ]
 
         # ---------------------------------------------------------------------
@@ -708,12 +721,16 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------                
         # Write extra page for Account total movement 2016
         # ---------------------------------------------------------------------                
-        WS = WB.add_worksheet('9. Prodotti non utilizzati')
+        WS = WB.add_worksheet('9. Prodotti non utilizzati ')
         row = 0
+        WS.write(row, 0, 'Prodotti presenti in mexal non utilizzati')
+        row += 1
         WS.write(row, 0, 'Codice prodotto')
+        WS.write(row, 1, 'Movimentato')
         for code in sorted(mm_code_unused):
             row += 1
             WS.write(row, 0, code)
+            WS.write(row, 1, mm_total.get(code, '?'))
                         
     _columns = {
         'year': fields.integer('Year', required=True),

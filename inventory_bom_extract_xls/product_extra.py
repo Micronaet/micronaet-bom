@@ -96,7 +96,7 @@ class ProductProduct(orm.Model):
                     log_f.write('%s|%s|%s\n' % (
                         default_code, pl.price, pl.date_quotation))
                     break
-                            
+
             # -----------------------------------------------------------------
             # Use anagraphic if not present
             # -----------------------------------------------------------------

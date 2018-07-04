@@ -329,6 +329,20 @@ class ProductProduct(orm.Model):
     # -------------------------------------------------------------------------    
     # Utility function:
     # -------------------------------------------------------------------------    
+    def get_cost_industrial_for_product_xmlrpc(self, cr, uid, ids, 
+            context=None):
+        ''' Procedure for return via XMLRLC call
+        '''
+        res = {}
+        cost_db = self.get_cost_industrial_for_product(
+                cr, uid, ids, context=context)
+        for cost, line in cost_db.iteritems():            
+            res[cost.name] = (
+                line.qty, 
+                line.cost_id.name,
+                )
+        return res
+        
     def get_cost_industrial_for_product(self, cr, uid, ids, context=None):
         ''' Return all list of industrial cost for product passed
             ids: product ids XXX now is one!

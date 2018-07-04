@@ -341,8 +341,8 @@ class ProductProduct(orm.Model):
                 line.qty, 
                 line.cost_id.name,
                 line.product_id.default_code or '',
-                line.product_id.last_cost,
-                line.product_id.last_date,
+                line.last_cost,
+                line.last_date,
                 )
         return res
         

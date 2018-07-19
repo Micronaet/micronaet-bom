@@ -88,6 +88,54 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             2. After override values from file CSV present
         '''    
         product_pool = self.pool.get('product.product')
+        #csv_file = '/home/administrator/photo/xls/stock/costrevenue.csv'
+        #_logger.info('Import cost and revenue in product: %s' % csv_file)
+        
+        # Before load original:
+        product_ids = product_pool.search(cr, uid, [], context=context)
+        for product in product_pool.browse(cr, uid, product_ids, 
+                context=context):
+                
+            # Store in new fields for fast search during report:    
+            data = {
+                #'inv_first_supplier': 
+                #    product.first_supplier_id.id \
+                #        if product.first_supplier_id else False,        
+                'inv_revenue_account': 
+                    product.property_account_income.account_ref \
+                        if product.property_account_income else False,
+                'inv_cost_account': 
+                    product.property_account_expense.account_ref \
+                        if product.property_account_expense else False,
+                }                    
+            
+            # Get also cost:
+            #cost = 0.0
+            #date = False
+            #for supplier in product.seller_ids:
+            #    for price in supplier.pricelist_ids:
+            #        if not price.is_active:
+            #            continue
+            #        if date == False or price.date_quotation > date:
+            #            date = price.date_quotation
+            #            cost = price.price
+            #if cost:
+            #    data['inv_cost_value'] = cost
+            product_pool.write(cr, uid, product.id, data, context=context)
+            
+        # Update with file:
+        #self.import_csv_inventory_cost_revenue(
+        #    cr, uid, csv_file, context=context)
+
+        # Call XLSX produce functiocn:    
+        return True#self.action_extract(cr, uid, ids, context=context)
+
+    def action_extract_reload_all(self, cr, uid, ids, context=None):
+        ''' Reload cost / revenut before launch normal procedure        
+            1. First get data from ODOO product and update fields
+            2. After override values from file CSV present
+        '''    
+        product_pool = self.pool.get('product.product')
         csv_file = '/home/administrator/photo/xls/stock/costrevenue.csv'
         _logger.info('Import cost and revenue in product: %s' % csv_file)
         
@@ -243,7 +291,10 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 '37.00105', # Cartoni c/acquisti
                 '37.00106', # Cellophan c/acquisti
                 '37.00108', # Copriteste e pinze c/acquisti
+                
+                '37.00115', # Piani tavoli e basi c/acquisti XXX after 2017
                 )
+
             supplier_selection = (
                 31401,   #'20.01330', # La Industrial Algodonera
                 '31401', #'20.01330', # La Industrial Algodonera

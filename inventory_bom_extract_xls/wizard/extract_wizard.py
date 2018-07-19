@@ -88,15 +88,20 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             2. After override values from file CSV present
         '''    
         product_pool = self.pool.get('product.product')
-        #csv_file = '/home/administrator/photo/xls/stock/costrevenue.csv'
-        #_logger.info('Import cost and revenue in product: %s' % csv_file)
         
         # Before load original:
         product_ids = product_pool.search(cr, uid, [], context=context)
+        i_tot = len(product_ids)
+        _logger.info('Update %s product...' % i_tot)
+        i = 0
         for product in product_pool.browse(cr, uid, product_ids, 
                 context=context):
                 
             # Store in new fields for fast search during report:    
+            i += 1
+            if i % 100 == 0:
+                _logger.info('%s / %s product updated' % (i, i_tot))
+                
             data = {
                 #'inv_first_supplier': 
                 #    product.first_supplier_id.id \
@@ -107,8 +112,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 'inv_cost_account': 
                     product.property_account_expense.account_ref \
                         if product.property_account_expense else False,
-                }                    
-            
+                }
+
             # Get also cost:
             #cost = 0.0
             #date = False

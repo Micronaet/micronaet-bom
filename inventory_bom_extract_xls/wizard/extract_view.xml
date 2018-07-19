@@ -33,6 +33,5 @@
           parent="account.menu_finance_periodical_processing" 
           id="menu_product_inventory_extract_xls_wizard" 
           action="action_product_inventory_extract_xls_wizard"/>
-          
     </data>
 </openerp>

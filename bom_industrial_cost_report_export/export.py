@@ -47,6 +47,14 @@ class ProductProduct(orm.Model):
     """    
     _inherit = 'product.product'
 
+    def get_medea_data(value):
+        medea_cost = { #packaging:
+            '005': 1.37,
+            '014': 3.23,
+            '021': 5.14,
+            }
+        return medea_cost.get(value, '')
+
     def report_get_objects_bom_industrial_cost(self, cr, uid, datas=None, 
             context=None):
         ''' Integration report

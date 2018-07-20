@@ -47,7 +47,7 @@ class ProductProduct(orm.Model):
     """    
     _inherit = 'product.product'
 
-    def get_medea_data(value):
+    def get_medea_data(self, value):
         medea_cost = { #packaging:
             '005': 1.37,
             '014': 3.23,

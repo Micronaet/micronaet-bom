@@ -86,7 +86,7 @@ class ProductProduct(orm.Model):
                 (name, q, um, price, total, list_detail, hw, element, 
                     red_price, fabric_text) = line
                 if hw:
-                    block1 = '%s%s' % (
+                    block1 = '%s %s %s' % (
                         name,
                         list_ids,
                         hw.default_code,                
@@ -94,7 +94,7 @@ class ProductProduct(orm.Model):
                 else:
                     block1 = name              
                     
-                f_bom.write('%s%s|%s|%s|%s|%s\n' % (
+                f_bom.write('%s|%s|%s|%s|%s\n' % (
                     block1,
                     q,
                     um,

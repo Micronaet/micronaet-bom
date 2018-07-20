@@ -53,6 +53,11 @@ class ProductProduct(orm.Model):
         '''
         import pdb; pdb.set_trace()
         _logger.info('Start extracting...')
+        #data =  {
+        #    'active_ids': False, # Load all template
+        #    'model': 'product.product', 
+        #    'wizard': True,
+            }
         res = super(
             ProductProduct, self).report_get_objects_bom_industrial_cost(
                 cr, uid, datas=datas, context=context)
@@ -61,14 +66,6 @@ class ProductProduct(orm.Model):
         # ---------------------------------------------------------------------
         # NEW VERSIONE:
         # ---------------------------------------------------------------------
-        data = {
-            'wizard': True,
-            'active_ids': False, # Load all template
-            }
-
-        res = product_pool.report_get_objects_bom_industrial_cost(
-            cr, uid, data=data)
-
         f_bom = open('/home/odoo/0.DB.bom_file.csv', 'w')
 
         header = 'Componente|Q.|UM|Prezzo|Totale\n'

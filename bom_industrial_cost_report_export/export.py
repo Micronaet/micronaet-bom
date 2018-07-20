@@ -58,7 +58,7 @@ class ProductProduct(orm.Model):
         #    'active_ids': False, # Load all template
         #    'model': 'product.product', 
         #    'wizard': True,
-            }
+        #   }
         res = super(
             ProductProduct, self).report_get_objects_bom_industrial_cost(
                 cr, uid, datas=datas, context=context)

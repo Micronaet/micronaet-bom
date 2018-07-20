@@ -51,6 +51,7 @@ class ProductProduct(orm.Model):
             context=None):
         ''' Integration report
         '''
+        import pdb; pdb.set_trace()
         _logger.info('Start extracting...')
         res = super(
             ProductProduct, self).report_get_objects_bom_industrial_cost(

@@ -85,7 +85,7 @@ class ProductProduct(orm.Model):
             for line in components:
                 (name, q, um, price, total, list_detail, hw, element, 
                     red_price, fabric_text) = line
-                if test == 'hw':
+                if hw:
                     block1 = '%s%s' % (
                         name,
                         list_ids,

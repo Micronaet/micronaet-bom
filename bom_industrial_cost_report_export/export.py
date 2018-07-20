@@ -51,7 +51,6 @@ class ProductProduct(orm.Model):
             context=None):
         ''' Integration report
         '''
-        import pdb; pdb.set_trace()
         _logger.info('Start extracting...')
         # TODO reactivate
         #data =  {
@@ -70,6 +69,7 @@ class ProductProduct(orm.Model):
         f_bom = open('/home/odoo/0.DB.bom_file.csv', 'w')
 
         header = 'Componente|Q.|UM|Prezzo|Totale\n'
+        import pdb; pdb.set_trace()
         for item in res:
             (min, max, error, components, extra1, extra2, index, total, 
                 product, parameter, total_text, pipe_total_weight) = item
@@ -86,9 +86,9 @@ class ProductProduct(orm.Model):
                 (name, q, um, price, total, list_detail, hw, element, 
                     red_price, fabric_text) = line
                 if hw:
-                    block1 = '%s %s %s' % (
+                    block1 = '%s %s' % (
                         name,
-                        list_ids,
+                        #list_ids,
                         hw.default_code,                
                         )  
                 else:

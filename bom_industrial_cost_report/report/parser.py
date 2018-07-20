@@ -565,7 +565,6 @@ class ProductProduct(orm.Model):
                     time_qty = item.qty
 
                 if item.cost_id.name == 'Manodopera MEDEA':
-                    import pdb; pdb.set_trace()
                     value = self.get_medea_data(item.name.lstrip('%'))
                 cost_item = (item or '???', value, time_qty)
                 if cost.type == 'industrial':

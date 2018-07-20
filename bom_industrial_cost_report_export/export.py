@@ -126,7 +126,10 @@ class ProductProduct(orm.Model):
             'G420': 3.02, 
             'G421': 3.76,
             }
-        return medea_cost.get(value, '')
+        res = medea_cost.get(value, 0.0)
+        if not res:
+            _logger.error('Empty code: %s' % value)
+        return res
 
     def report_get_objects_bom_industrial_cost(self, cr, uid, datas=None, 
             context=None):

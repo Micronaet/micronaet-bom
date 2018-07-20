@@ -170,7 +170,7 @@ class ProductProduct(orm.Model):
     # -------------------------------------------------------------------------
     # Button event:
     # -------------------------------------------------------------------------
-    def get_medea_data(value):
+    def get_medea_data(self, value):
         return ''
 
     def open_single_report(self, cr, uid, ids, context=None):

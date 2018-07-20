@@ -55,7 +55,7 @@ class ProductProduct(orm.Model):
         _logger.info('Start extracting...')
         res = super(
             ProductProduct, self).report_get_objects_bom_industrial_cost(
-                cr, uid, datas=context, context=context)
+                cr, uid, datas=datas, context=context)
         _logger.info('Start reporting...')
         
         # ---------------------------------------------------------------------

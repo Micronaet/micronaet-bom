@@ -53,6 +53,7 @@ class ProductProduct(orm.Model):
         '''
         import pdb; pdb.set_trace()
         _logger.info('Start extracting...')
+        # TODO reactivate
         #data =  {
         #    'active_ids': False, # Load all template
         #    'model': 'product.product', 

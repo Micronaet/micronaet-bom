@@ -66,14 +66,14 @@ class ProductProduct(orm.Model):
         # ---------------------------------------------------------------------
         # NEW VERSIONE:
         # ---------------------------------------------------------------------
-        f_bom = open('/home/odoo/0.DB.bom_file.csv', 'w')
+        f_bom = open('/home/odoo/0.bom_report.csv', 'w')
 
-        header = 'Componente|Q.|UM|Prezzo|Totale\n'
+        header = u'Componente|Q.|UM|Prezzo|Totale\n'
         import pdb; pdb.set_trace()
         for item in res:
             (min, max, error, components, extra1, extra2, index, total, 
                 product, parameter, total_text, pipe_total_weight) = item
-            f_bom.write('%s|%s' % (
+            f_bom.write(u'%s|%s' % (
                 product.default_code, 
                 product.name,
                 ))
@@ -86,7 +86,7 @@ class ProductProduct(orm.Model):
                 (name, q, um, price, total, list_detail, hw, element, 
                     red_price, fabric_text) = line
                 if hw:
-                    block1 = '%s %s' % (
+                    block1 = u'%s %s' % (
                         name,
                         #list_ids,
                         hw.default_code,                
@@ -94,7 +94,7 @@ class ProductProduct(orm.Model):
                 else:
                     block1 = name              
                     
-                f_bom.write('%s|%s|%s|%s|%s\n' % (
+                f_bom.write(u'%s|%s|%s|%s|%s\n' % (
                     block1,
                     q,
                     um,
@@ -105,7 +105,7 @@ class ProductProduct(orm.Model):
             # -----------------------------------------------------------------
             # Work
             # -----------------------------------------------------------------
-            f_bom.write('Manodopera||Prodotto|Totale')
+            f_bom.write(u'Manodopera||Prodotto|Totale')
             for item, details, time_qty in extra1:
                 f_bom.write('%s (unit. %s)||%s|%s\n' % (
                     item.cost_id.name,
@@ -117,7 +117,7 @@ class ProductProduct(orm.Model):
             # -----------------------------------------------------------------
             # Industrial
             # -----------------------------------------------------------------
-            f_bom.write('Costi industriali||Prodotto|Totale')
+            f_bom.write(u'Costi industriali||Prodotto|Totale')
             for item, details, time_qty in extra2:
                 f_bom.write('%s (unit. %s)||%s|%s\n' % (
                     item.cost_id.name,
@@ -129,13 +129,15 @@ class ProductProduct(orm.Model):
             # -----------------------------------------------------------------
             # Total:
             # -----------------------------------------------------------------
-            f_bom.write('Subtotali|%s|Costo|%s-%s\n' % (
+            f_bom.write(u'Subtotali|%s|Costo|%s-%s\n' % (
                 total_text, min, max
                 ))
             #f_bom.write('Indici|%s|Vendita|%s-%s\n' % (
             #    total['index'],
             #    total['margin']
             #    ))
+            
+        f_bom.close()
         return res
             
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -126,7 +126,9 @@ class ProductProduct(orm.Model):
             'G420': 3.02, 
             'G421': 3.76,
             }
-        res = medea_cost.get(value, 0.0)
+            
+        medea_code = value.lstrip('%')    
+        res = medea_cost.get(medea_code, 0.0)
         if not res:
             _logger.error('Empty code: %s' % value)
         return res

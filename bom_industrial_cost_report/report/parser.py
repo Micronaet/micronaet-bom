@@ -565,8 +565,7 @@ class ProductProduct(orm.Model):
                     time_qty = item.qty
 
                 if item.cost_id.name == 'Manodopera MEDEA':
-                    medea_code = item.name.lstrip('%')
-                    value = self.get_medea_data(medea_code)
+                    value = self.get_medea_data(item.name)
                 cost_item = (item or '???', value, time_qty)
                 if cost.type == 'industrial':
                     data[5].append(cost_item)

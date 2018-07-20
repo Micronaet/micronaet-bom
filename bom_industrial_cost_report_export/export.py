@@ -62,6 +62,8 @@ class ProductProduct(orm.Model):
             ProductProduct, self).report_get_objects_bom_industrial_cost(
                 cr, uid, datas=datas, context=context)
         _logger.info('Start reporting...')
+        # removed
+        return res
         
         # ---------------------------------------------------------------------
         # NEW VERSIONE:
@@ -69,7 +71,6 @@ class ProductProduct(orm.Model):
         f_bom = open('/home/odoo/0.bom_report.csv', 'w')
 
         header = u'Componente|Q.|UM|Prezzo|Totale\n'
-        import pdb; pdb.set_trace()
         for item in res:
             (min, max, error, components, extra1, extra2, index, total, 
                 product, parameter, total_text, pipe_total_weight) = item

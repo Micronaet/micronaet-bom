@@ -560,7 +560,7 @@ class ProductProduct(orm.Model):
                 else:
                     value = item.qty * cost.unit_cost                     
                     time_qty = item.qty
-                
+                import pdb; pdb.set_trace()
                 cost_item = (item or '???', value, time_qty)
                 if cost.type == 'industrial':
                     data[5].append(cost_item)

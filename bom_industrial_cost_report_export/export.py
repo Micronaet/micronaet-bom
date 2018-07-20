@@ -126,7 +126,7 @@ class ProductProduct(orm.Model):
             'G420': 3.02, 
             'G421': 3.76,
             }
-            
+        import pdb; pdb.set_trace()
         medea_code = value.lstrip('%')    
         res = medea_cost.get(medea_code, 0.0)
         if not res:

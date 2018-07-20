@@ -105,7 +105,7 @@ class ProductProduct(orm.Model):
             # -----------------------------------------------------------------
             # Work
             # -----------------------------------------------------------------
-            f_bom.write(u'Manodopera||Prodotto|Totale')
+            f_bom.write(u'Manodopera|Prodotto|Totale\n')
             for item, details, time_qty in extra1:
                 f_bom.write('%s (unit. %s)||%s|%s\n' % (
                     item.cost_id.name,
@@ -117,7 +117,7 @@ class ProductProduct(orm.Model):
             # -----------------------------------------------------------------
             # Industrial
             # -----------------------------------------------------------------
-            f_bom.write(u'Costi industriali||Prodotto|Totale')
+            f_bom.write(u'Costi industriali|Prodotto|Totale\n')
             for item, details, time_qty in extra2:
                 f_bom.write('%s (unit. %s)||%s|%s\n' % (
                     item.cost_id.name,

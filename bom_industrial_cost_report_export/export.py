@@ -130,7 +130,7 @@ class ProductProduct(orm.Model):
             # Total:
             # -----------------------------------------------------------------
             f_bom.write('Subtotali|%s|Costo|%s-%s\n' % (
-                total_test, min, max
+                total_text, min, max
                 ))
             #f_bom.write('Indici|%s|Vendita|%s-%s\n' % (
             #    total['index'],

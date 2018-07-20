@@ -73,7 +73,7 @@ class ProductProduct(orm.Model):
         for item in res:
             (min, max, error, components, extra1, extra2, index, total, 
                 product, parameter, total_text, pipe_total_weight) = item
-            f_bom('%s|%s' % (
+            f_bom.write('%s|%s' % (
                 product.default_code, 
                 product.name,
                 ))

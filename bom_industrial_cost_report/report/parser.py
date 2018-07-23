@@ -154,10 +154,10 @@ def get_price_detail(price_ids):
     # If not detail:
     return res # XXX no detail mode
     for seller, price, date_quotation in price_ids:
-        res += 'Forn.: %s %s EUR (%s) \n' % (
-            seller.name, # Supplier browse
+        res += '%s EUR (%s) %s \n' % (
             price, # Unit price
             date_quotation,
+            seller.name, # Supplier browse
             )
     return res        
 

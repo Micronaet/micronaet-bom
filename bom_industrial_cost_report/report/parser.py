@@ -70,6 +70,7 @@ def get_pricelist(product, date_ref):
         min price, max price, all pricelist for this product
         active price, reference >= passed
     '''
+    with_history = True # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     res = [
         0.0, # Min (not False)
         0.0, # Max
@@ -80,8 +81,10 @@ def get_pricelist(product, date_ref):
     for seller in product.seller_ids:
         for pricelist in seller.pricelist_ids:
             # no inactive price XXX remove this filter?
-            if not pricelist.is_active: # no inactive
-                continue   
+            # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            #if not pricelist.is_active: # no inactive
+            #    continue   
+            # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
              
             # Take only period date:
             price = pricelist.price
@@ -97,6 +100,16 @@ def get_pricelist(product, date_ref):
                 price, # Unit price
                 date_quotation, # Date
                 ))
+
+            # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            if with_history:
+                for history in pricelist.history_ids:
+                    res[2].append((
+                        seller.name, # Supplier browse
+                        history.price, # Unit price
+                        history.date_quotation, # Date
+                        ))                
+            # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
             # Keep here for analyse only one price:             
             if pricelist.date_quotation and \

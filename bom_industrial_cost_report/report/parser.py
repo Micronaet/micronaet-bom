@@ -493,6 +493,7 @@ class ProductProduct(orm.Model):
                         if cmpt.product_id.bom_industrial_no_price:
                             min_value = max_value = 0.0 # no price in BOM
                             
+                        import pdb; pdb.set_trace()    
                         record = [
                             '%s - %s' % (
                                 cmpt.product_id.default_code or '',
@@ -544,6 +545,7 @@ class ProductProduct(orm.Model):
                         component, # Product for extra data
                         red_price, # Prod with no price
                         '', # fabric text for price
+                        get_price_2016(price_ids, max_value), # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                         ]) # Populate product database
                         
                     if red_price:

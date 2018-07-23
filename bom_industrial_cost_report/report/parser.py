@@ -161,6 +161,24 @@ def get_price_detail(price_ids):
             )
     return res        
 
+def get_price_2016(price_ids, current):
+    ''' With detail
+    '''
+    res = ''
+    last_date = False
+    last_price = 0
+    
+    # If not detail:
+    for seller, price, date_quotation in price_ids:
+        if not last_date and date_quotation <= '2017-01-01' and 
+                date_quotation > last_date and price != current:
+            res = 'Forn.: %s %s EUR (%s) \n' % (
+                seller.name, # Supplier browse
+                price, # Unit price
+                date_quotation,
+                )
+    return res        
+
 class ProductProduct(orm.Model):
     """ Model name: ProductProduct add utility for report
     """
@@ -490,7 +508,7 @@ class ProductProduct(orm.Model):
                             red_price, # no price
                             fabric_text, # fabric text for price
                             # TODO 2016 evaluation if different!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                            ''
+                            get_price_2016(price_ids, max_value),
                             ]
 
                         if red_price:

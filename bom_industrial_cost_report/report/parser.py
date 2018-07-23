@@ -170,7 +170,7 @@ def get_price_2016(price_ids, current):
     
     # If not detail:
     for seller, price, date_quotation in price_ids:
-        if not last_date and date_quotation <= '2017-01-01' and 
+        if not last_date and date_quotation <= '2017-01-01' and \
                 date_quotation > last_date and price != current:
             res = 'Forn.: %s %s EUR (%s) \n' % (
                 seller.name, # Supplier browse

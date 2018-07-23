@@ -489,6 +489,8 @@ class ProductProduct(orm.Model):
                             cmpt.product_id, # Product for extra data
                             red_price, # no price
                             fabric_text, # fabric text for price
+                            # TODO 2016 evaluation if different!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                            ''
                             ]
 
                         if red_price:

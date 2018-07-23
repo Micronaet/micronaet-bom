@@ -417,7 +417,7 @@ class ProductProduct(orm.Model):
                'TBFZ': 0.71,
                'TBZN': 0.71,               
                }
-            return price_db.get(product.default_code[:4], 0.0) * product.weight
+            return price_db.get(product.default_code[:4], 0.0)
 
         if datas is None:
             datas = {}

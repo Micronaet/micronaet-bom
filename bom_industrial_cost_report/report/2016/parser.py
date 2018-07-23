@@ -70,6 +70,7 @@ def get_pricelist(product, date_ref):
         min price, max price, all pricelist for this product
         active price, reference >= passed
     '''
+    with_history = True # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     res = [
         0.0, # Min (not False)
         0.0, # Max
@@ -80,8 +81,10 @@ def get_pricelist(product, date_ref):
     for seller in product.seller_ids:
         for pricelist in seller.pricelist_ids:
             # no inactive price XXX remove this filter?
-            if not pricelist.is_active: # no inactive
-                continue   
+            # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            #if not pricelist.is_active: # no inactive
+            #    continue   
+            # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
              
             # Take only period date:
             price = pricelist.price
@@ -97,6 +100,16 @@ def get_pricelist(product, date_ref):
                 price, # Unit price
                 date_quotation, # Date
                 ))
+
+            # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            if with_history:
+                for history in pricelist.history_ids:
+                    res[2].append((
+                        seller.name, # Supplier browse
+                        history.price, # Unit price
+                        history.date_quotation, # Date
+                        ))                
+            # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
             # Keep here for analyse only one price:             
             if pricelist.date_quotation and \
@@ -159,6 +172,24 @@ def get_price_detail(price_ids):
             date_quotation,
             seller.name, # Supplier browse
             )
+    return res        
+
+def get_price_2016(price_ids, current):
+    ''' With detail
+    '''
+    res = ''
+    last_date = False
+    last_price = 0
+    
+    # If not detail:
+    for seller, price, date_quotation in price_ids:
+        if not last_date and date_quotation <= '2017-01-01' and \
+                date_quotation > last_date and price != current:
+            res = '%s \n(%s) %s \n' % (
+                price, # Unit price
+                date_quotation,
+                seller.name, # Supplier browse
+                )
     return res        
 
 class ProductProduct(orm.Model):
@@ -375,6 +406,19 @@ class ProductProduct(orm.Model):
             context=None):
         ''' Report action for generate database used (both ODT and XLSX export)
         '''
+        # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        def get_metal_price(product):
+            ''' Get price for metal
+            '''
+            price_db = {
+               'TBAL': 3.55,
+               'TUAL': 3.55,
+               'TBFE': 0.71,
+               'TBFZ': 0.71,
+               'TBZN': 0.71,               
+               }
+            return price_db.get(product.default_code[:4], 0.0)
+
         if datas is None:
             datas = {}
         update_record = datas.get('update_record', False)
@@ -459,6 +503,9 @@ class ProductProduct(orm.Model):
                             # Calc with weight and price kg not cost manag.:
                             pipe_price = \
                                 cmpt.product_id.pipe_material_id.last_price
+                            # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+                            pipe_price = get_metal_price(cmpt.product_id)
+
                             min_value = max_value = \
                                 pipe_price * cmpt.product_id.weight
 
@@ -489,6 +536,8 @@ class ProductProduct(orm.Model):
                             cmpt.product_id, # Product for extra data
                             red_price, # no price
                             fabric_text, # fabric text for price
+                            # TODO 2016 evaluation if different!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                            get_price_2016(price_ids, max_value),
                             ]
 
                         if red_price:
@@ -524,6 +573,7 @@ class ProductProduct(orm.Model):
                         component, # Product for extra data
                         red_price, # Prod with no price
                         '', # fabric text for price
+                        get_price_2016(price_ids, max_value), # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                         ]) # Populate product database
                         
                     if red_price:

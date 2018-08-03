@@ -72,6 +72,8 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Parameters:        
         # ---------------------------------------------------------------------
+        WS_name = _('Distinte base')
+
         excel_pool = self.pool.get('excel.writer')
         line_pool = self.pool.get('invoice.line')
 
@@ -98,6 +100,48 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
                 continue # yet present
             
             product_db[product] = product.dynamic_bom_line_ids
+
+        # ---------------------------------------------------------------------
+        # Setup Excel file:
+        # ---------------------------------------------------------------------
+        # Create worksheet:
+        excel_pool.create_worksheet(WS_name)
+        
+        # Load format:
+        excel_pool.set_format()
+        format_title = excel_pool.get_format('title')
+        format_header = excel_pool.get_format('header')
+        format_text = excel_pool.get_format('text')
+        format_number = excel_pool.get_format('number')
+        format_number_red = excel_pool.get_format('number_red')
+        format_number_green = excel_pool.get_format('number_green')
+
+        excel_pool.column_width(WS_name, [20, 40, 10, 2, 80])
+        
+        # Title:
+        row = 0        
+        excel_pool.write_xls_line(WS_name, row, ['''
+            Elenco prodotti risultanti dalle vendite del periodo con 
+            valorizzazione del costo da distinta base [%s - %s]''' % (
+                excel_pool.format_date(from_date),
+                excel_pool.format_date(to_date),
+                ),
+            ], default_format=format_title)
+
+        row += 2
+        excel_pool.write_xls_line(WS_name, row, [
+            'Codice',
+            'Nome',
+            'Costo',
+            'Tipo',
+            'Dettaglio distinta',                        
+            ], default_format=format_header)
+        
+        
+        # Header:
+        header = [
+            'Codice', 'Descrizione', 'Costo', 'Esploso DB'
+            ]
 
         # ---------------------------------------------------------------------
         # Sort element and create files:
@@ -136,15 +180,10 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
                         cost1,
                         )
                     total += cost1
-                    
-                
-        # Open XLS file:
-        _logger.info('Create extract %s file' % xls_file)
-
-        # Header:
-        header = [
-            'Codice', 'Descrizione', 'Costo', 'Esploso DB'
-            ]
+        
+        return excel_pool.return_attachment(cr, uid, WS_name, 
+            name_of_file='DB_prodotti_venduti.xlsx', version='8.0', php=True, 
+            context=context)
 
     _columns = {
         'from_date': fields.integer('From date >=', required=True),

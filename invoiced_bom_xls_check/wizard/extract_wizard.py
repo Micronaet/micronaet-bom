@@ -138,11 +138,6 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
             ], default_format=format_header)
         
         
-        # Header:
-        header = [
-            'Codice', 'Descrizione', 'Costo', 'Esploso DB'
-            ]
-
         # ---------------------------------------------------------------------
         # Sort element and create files:
         # ---------------------------------------------------------------------        

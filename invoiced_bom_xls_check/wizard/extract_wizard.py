@@ -54,13 +54,21 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
         '''
         cost = 0.0
         date = False
-        for supplier in product.seller_ids:
-            for price in supplier.pricelist_ids:
-                if not price.is_active:
-                    continue
-                if date == False or price.date_quotation > date:
-                    date = price.date_quotation
-                    cost = price.price
+        
+        # Cases iron:
+        if product.is_pipe:
+            cost = product.weight * product.pipe_material_id.last_price
+            date = '/'
+        
+        # Normal case (cost check):
+        else:   
+            for supplier in product.seller_ids:
+                for price in supplier.pricelist_ids:
+                    if not price.is_active:
+                        continue
+                    if date == False or price.date_quotation > date:
+                        date = price.date_quotation
+                        cost = price.price
         return cost, date
         
     def action_extract(self, cr, uid, ids, context=None):
@@ -85,7 +93,6 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------            
         # Load list of product in invoice period
         # ---------------------------------------------------------------------
-        _logger.info('Load product list')
         line_ids = line_pool.search(cr, uid, [
             ('invoice_id.date_invoice', '>=', from_date),
             ('invoice_id.date_invoice', '<=', to_date),
@@ -93,18 +100,21 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
             ('invoice_id.state', 'not in', ('cancel', 'draft',)),
             ], context=context)
         
+        _logger.info('Load product list [Tot. lines: %s]' % len(line_ids))
         product_db = {}
         for line in line_pool.browse(cr, uid, line_ids, context=context):
             product = line.product_id
             if product in product_db:
                 continue # yet present
             
-            product_db[product] = product.dynamic_bom_line_ids
+            product_db[product] = sorted(
+                product.dynamic_bom_line_ids, 
+                key=lambda x: x.product_id.default_code,
+                )
 
         # ---------------------------------------------------------------------
         # Setup Excel file:
         # ---------------------------------------------------------------------
-        import pdb; pdb.set_trace()
         # Create worksheet:
         excel_pool.create_worksheet(WS_name)
         
@@ -113,14 +123,16 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
         format_title = excel_pool.get_format('title')
         format_header = excel_pool.get_format('header')
         format_text = excel_pool.get_format('text')
+        format_center = excel_pool.get_format('text_center')
         format_number = excel_pool.get_format('number')
         format_number_red = excel_pool.get_format('number_red')
         format_number_green = excel_pool.get_format('number_green')
 
-        excel_pool.column_width(WS_name, [20, 50, 10, 4, 180])
+        excel_pool.column_width(WS_name, [20, 50, 10, 4, 130])
         
         # Title:
         row = 0        
+        excel_pool.row_height(WS_name, row, 40)
         excel_pool.write_xls_line(WS_name, row, ['''
             Elenco prodotti risultanti dalle vendite del periodo con 
             valorizzazione del costo da distinta base [%s - %s]''' % (
@@ -155,36 +167,54 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
             name = product.name or ''
             bom = u''
             total = 0.0
-            for l1 in product_db[product]:
-                p1 = l1.product_id
-                hw_bom = p1.half_bom_ids
-                cost1 = 0.0 # TODO
-                # TODO used cost db
-                if hw_bom:
-                    bom += u'SEMILAVORATO: %s' % p1.default_code
+            if product_db[product]:
+                mode = 'PF'
+                for l1 in product_db[product]:
+                    p1 = l1.product_id
+                    hw_bom = p1.half_bom_ids
+                    if p1 not in cost_db:
+                        cost_db[p1], date1 = self.get_product_cost(p1)
+                    cost1 = cost_db[p1]
+                    
+                    # TODO used cost db
+                    if hw_bom:
+                        bom += u'SL %s:\n' % p1.default_code
 
-                    for l2 in hw_bom:
-                        p2 = l2.product_id
-                        cost2 = 0.0
-                        bom += u'[%s q. %s (€)]' % (
-                            p2.default_code,
-                            l2.product_qty,
-                            cost2,
+                        for l2 in hw_bom:
+                            p2 = l2.product_id
+                            if p2 not in cost_db:
+                                cost_db[p2], date2 = self.get_product_cost(p2)
+                            cost2 = cost_db[p2]
+                            subtotal = l2.product_qty * cost2
+                            bom += u'    %s >> %s x %s€ (Data: %s) = %s€\n' % (
+                                p2.default_code,
+                                l2.product_qty,
+                                cost2,
+                                date2,
+                                subtotal,
+                                )
+                            total += subtotal
+                    else:
+                        subtotal = l1.product_qty * cost1 
+                        bom += u'%s >> %s x %s€ (Data: %s) = %s€\n' % (
+                            p1.default_code,
+                            l1.product_qty,
+                            cost1,
+                            date1,
+                            subtotal,
                             )
-                        total += cost2
-                else:
-                    bom += u'[%s q. %s (€)]' % (
-                        p1.default_code,
-                        l1.product_qty,
-                        cost1,
-                        )
-                    total += cost1
+                        total += subtotal
+            else:
+                if product.half_bom_ids:
+                    mode = 'SL'  
+                else:    
+                    mode = 'MP' 
 
             excel_pool.write_xls_line(WS_name, row, [
                 product.default_code or '',
                 product.name or '',
                 (total, format_number),
-                '', # TODO MP, PROD, SL
+                (mode, format_center),
                 bom,                        
                 ], default_format=format_text)
             

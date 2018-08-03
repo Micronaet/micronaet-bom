@@ -152,6 +152,9 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
                 x.default_code, # Code sort
                 )):
                 
+            row += 1
+            
+            # Read fields:
             default_code = product.default_code
             name = product.name or ''
             bom = u''
@@ -180,7 +183,15 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
                         cost1,
                         )
                     total += cost1
-        
+
+            excel_pool.write_xls_line(WS_name, row, [
+                product.default_code or '',
+                product.name or '',
+                (total, format_number),
+                '', # TODO MP, PROD, SL
+                bom,                        
+                ], default_format=format_text)
+            
         return excel_pool.return_attachment(cr, uid, WS_name, 
             name_of_file='DB_prodotti_venduti.xlsx', version='8.0', php=True, 
             context=context)

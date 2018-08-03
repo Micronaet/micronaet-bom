@@ -75,7 +75,7 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
         WS_name = _('Distinte base')
 
         excel_pool = self.pool.get('excel.writer')
-        line_pool = self.pool.get('invoice.line')
+        line_pool = self.pool.get('account.invoice.line')
 
         # Read parameter from wizard:
         wiz_browse = self.browse(cr, uid, ids, context=context)[0]
@@ -90,7 +90,7 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
             ('invoice_id.date_invoice', '>=', from_date),
             ('invoice_id.date_invoice', '<=', to_date),
             
-            ('state', 'not in', ('cancel', 'draft',)),
+            ('invoice_id.state', 'not in', ('cancel', 'draft',)),
             ], context=context)
         
         product_db = {}
@@ -104,6 +104,7 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Setup Excel file:
         # ---------------------------------------------------------------------
+        import pdb; pdb.set_trace()
         # Create worksheet:
         excel_pool.create_worksheet(WS_name)
         
@@ -116,7 +117,7 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
         format_number_red = excel_pool.get_format('number_red')
         format_number_green = excel_pool.get_format('number_green')
 
-        excel_pool.column_width(WS_name, [20, 40, 10, 2, 80])
+        excel_pool.column_width(WS_name, [20, 50, 10, 4, 180])
         
         # Title:
         row = 0        
@@ -192,7 +193,7 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
             context=context)
 
     _columns = {
-        'from_date': fields.integer('From date >=', required=True),
-        'to_date': fields.integer('To date <', required=True),
+        'from_date': fields.date('From date >=', required=True),
+        'to_date': fields.date('To date <', required=True),
         }        
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

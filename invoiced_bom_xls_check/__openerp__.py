@@ -18,7 +18,7 @@
 ###############################################################################
 
 {
-    'name': 'Extract invoicer product BOM',
+    'name': 'Extract invoiced product BOM',
     'version': '0.1',
     'category': 'Check',
     'description': '''    

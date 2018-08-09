@@ -408,16 +408,49 @@ class ProductProduct(orm.Model):
         '''
         if datas is None:
             datas = {}
+        
+        # ---------------------------------------------------------------------
+        # Parameters in datas dictionary:    
+        # ---------------------------------------------------------------------
+        # Need update record price:
         update_record = datas.get('update_record', False)
         if update_record:
             _logger.warning('Product price will be updated from report!')
         else:    
             _logger.warning('No product price updated!')
+        
+        # Range date:
+        from_date = datas.get('from_date', False)
+        to_date = datas.get('to_date', False)
+        
+        # ---------------------------------------------------------------------
+        # Load history database if to_date range is setup:
+        # ---------------------------------------------------------------------
+        history_db = {}
+        if to_date:
+            _logger.warning(
+                'Max date mode so read also history: %s!' % to_date)
 
+            # Load history database not empty with range passed:
+            history_pool = self.pool.get('pricelist.partnerinfo.history')
+            history_ids = history_pool.search(cr, uid, [
+                ('date_quotation', '>=', from_date),
+                ('date_quotation', '<=', to_date),
+                ('price', '>', 0),                
+                ], context=context)
+            for history in sorted(history_pool.browse(
+                    cr, uid, history_ids, context=context), 
+                    key=lambda x: x.date_quotation, reverse=True):
+                history_db[history.product_id.default_code] = (
+                    history.pricelist_id.supplier_id.name, # Seller name
+                    history.price, # Price
+                    history.date_quotation, # Date
+                    )
+        
         res = []
         selected_product = self._report_industrial_get_objects(
             cr, uid, data=datas, context=context)
-        if selected_product:    
+        if selected_product:
             margin_a = \
                 selected_product[0].company_id.industrial_margin_a
             margin_b = \
@@ -426,19 +459,21 @@ class ProductProduct(orm.Model):
             margin_extra = \
                 selected_product[0].company_id.industrial_margin_extra
 
-            days = selected_product[0].company_id.industrial_days or 500
-            date_ref = (datetime.now() - timedelta(days=days)).strftime(
-                DEFAULT_SERVER_DATE_FORMAT)
+            # Min date limit:
+            if not from_date:
+                days = selected_product[0].company_id.industrial_days or 500
+                from_date = (datetime.now() - timedelta(days=days)).strftime(
+                    DEFAULT_SERVER_DATE_FORMAT)                    
         
             parameter = _('Parametri: Margine A: %s%% - Margine B: %s%% - '
-                'Margine extra: %s%% Giorni date rif. prezzi -%s') % (
+                'Margine extra: %s%% Giorni min rif. prezzi %s') % (
                     margin_a,
                     margin_b,
                     margin_extra,
-                    days,
+                    from_date,
                     )
         else:        
-            return res
+            return res # No selection return empty records
                 
         for product in selected_product:                    
             data = [
@@ -472,7 +507,7 @@ class ProductProduct(orm.Model):
                         #last_date = False # TODO last price?
                         cmpt_q = item.product_qty * cmpt.product_qty # XXX                        
                         min_value, max_value, price_ids = get_pricelist(
-                            cmpt.product_id, date_ref)                        
+                            cmpt.product_id, from_date, to_date, history_db)                        
                         price_detail = get_price_detail(price_ids)
 
                         # Fabric element:
@@ -534,7 +569,7 @@ class ProductProduct(orm.Model):
                     # Raw material (level 1)                    
                     cmpt_q = item.product_qty
                     min_value, max_value, price_ids = get_pricelist(
-                        item.product_id, date_ref)
+                        item.product_id, from_date, to_date, history_db)
                     price_detail = get_price_detail(price_ids)
 
                     red_price = \

@@ -62,6 +62,22 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         return {
             'type': 'ir.actions.act_window_close'
             }
+    def print_report(self, cr, uid, ids, context=None):
+        ''' Redirect to report passing parameters
+        ''' 
+        wiz_proxy = self.browse(cr, uid, ids)[0]
+            
+        datas = {
+            'wizard': True,
+            'from_date': wiz_proxy.from_date or False,
+            'to_date': wiz_proxy.to_date or False,       
+            }
+
+        return {
+            'type': 'ir.actions.report.xml',
+            'report_name': 'industrial_cost_bom_report',
+            'datas': datas,
+            }
 
     _columns = {
         'from_date': fields.date('From date', required=True),

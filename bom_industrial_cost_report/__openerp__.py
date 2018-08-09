@@ -34,7 +34,7 @@
         'mrp',
         'product',
         'bom_production_cost',
-        'bom_dynamic_structured', # for dynamic bom structure
+        'bom_dynamic_structured', # for dynamic bom structure       
         ],
     'init_xml': [],
     'demo': [],
@@ -44,6 +44,7 @@
         
         'industrial_view.xml',
         'report/report_bom.xml',
+        'wizard/open_report_view.xml',
         ],
     'active': False,
     'installable': True,

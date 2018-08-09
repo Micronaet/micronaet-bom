@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+       <!-- product.bom.report.limit.wizard -->
+       <record id="product_bom_report_limit_wizard_view" model="ir.ui.view">
+            <field name="name">BOM limited report</field>
+            <field name="model">product.bom.report.limit.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Wizard print BOM limited" version="7.0">
+                   <header>
+                       <button string="Cancel" special="cancel" />
+                       <button name="action_print" string="Print" type="object" icon="gtk-print" class="oe_highlight" />
+                   </header>                   
+                   <group colspan="4" col="4">
+                        <field name="from_date" />
+                        <field name="to_date" />
+                   </group>
+                </form>
+            </field>
+      </record>
+
+      <record model="ir.actions.act_window" id="action_product_bom_report_limit">
+          <field name="name">Print limited BOM</field>
+          <field name="res_model">product.bom.report.limit.wizard</field>
+          <field name="view_type">form</field>
+          <field name="view_mode">form</field>
+          <field name="target">new</field>
+          <field name="view_id" ref="product_bom_report_limit_wizard_view"/>
+      </record>      
+      
+      <menuitem 
+          parent="menu_product_bom_selection_root" 
+          id="menu_product_bom_report" 
+          sequence="70"
+          name="Report wizard"
+          />
+          <menuitem 
+              parent="menu_product_bom_report" 
+              id="menu_menu_product_bom_report_print_wizard" 
+              action="action_product_bom_report_limit"
+              sequence="10"
+              />
+      
+    </data>
+</openerp>

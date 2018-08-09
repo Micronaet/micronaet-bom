@@ -65,18 +65,40 @@ def industrial_index_get_text(index):
             )
     return res
     
-def get_pricelist(product, date_ref):
+def get_pricelist(product, min_date, max_date=False, history_db=False):
     ''' Return:
-        min price, max price, all pricelist for this product
-        active price, reference >= passed
+        min price, max price, all pricelist for this product active price, 
+        min_date: min quotation date (mandatory)
+        max_date: max date (for evaluation in old period), not mandatory
+        history_db: product last history price (maybe max date evaluation)
+            key: default_code, value: (seller name, price, date quotation)
     '''
-    res = [
-        0.0, # Min (not False)
-        0.0, # Max
-        [], # Price list
-        ]
-        
-    last_price = [False, False] # Price, Date
+    # -------------------------------------------------------------------------
+    # History database (price overrided but save in database):
+    # -------------------------------------------------------------------------
+    default_code = product.default_code
+    
+    # If there's an history value price use that for start value:        
+    if history_db and default_code in history_db:
+        record = history_code[default_code] 
+        last_price = [
+            record[1], # price
+            record[2], # date
+            ]            
+        res = [
+            record[1], # Min (not False)
+            record[1], # Max
+            [record], # Price list
+            ]
+            
+    else: # Empty data record:
+        last_price = [False, False] # Price, Date 
+        res = [
+            0.0, # Min (not False)
+            0.0, # Max
+            [], # Price list
+            ]
+                
     for seller in product.seller_ids:
         for pricelist in seller.pricelist_ids:
             # no inactive price XXX remove this filter?
@@ -86,22 +108,31 @@ def get_pricelist(product, date_ref):
             # Take only period date:
             price = pricelist.price
             date_quotation = pricelist.date_quotation
-            
-            if not last_price[1] or (
+    
+            # XXX If max range test here:
+            if max_date and date_quotation and date_quotation >= max_date:
+                continue # over maximum limit
+
+            # -----------------------------------------------------------------
+            # Max date for price (if no date or >):
+            # -----------------------------------------------------------------
+            if not last_price[1] or ( # no date or this is the last
                     date_quotation and date_quotation > last_price[1]):
                 last_price[0] = price
                 last_price[1] = date_quotation or False
+
+            # -----------------------------------------------------------------
+            # Range evaluation:        
+            # -----------------------------------------------------------------
+            # XXX Keep here for analyse only one price:             
+            if date_quotation and date_quotation <= min_date:
+                continue # over minimum limit
                                               
             res[2].append((
                 seller.name, # Supplier browse
                 price, # Unit price
                 date_quotation, # Date
                 ))
-
-            # Keep here for analyse only one price:             
-            if pricelist.date_quotation and \
-                   pricelist.date_quotation <= date_ref:
-                continue
 
             # Save min or max price:    
             if not res[0] or price < res[0]: # 0 price will be replaced
@@ -617,9 +648,7 @@ class Parser(report_sxw.rml_parse):
         super(Parser, self).__init__(cr, uid, name, context)
         self.localcontext.update({
             'get_objects': self.get_objects,
-            #'get_details': self.get_details,
-            #'get_totals': self.get_totals,
-        })
+            })
         
     def get_objects(self, datas=None):
         ''' Return single report or list of selected bom 

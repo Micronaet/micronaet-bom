@@ -80,7 +80,7 @@ def get_pricelist(product, min_date, max_date=False, history_db=False):
     
     # If there's an history value price use that for start value:        
     if history_db and default_code in history_db:
-        record = history_code[default_code] 
+        record = history_db[default_code] 
         last_price = [
             record[1], # price
             record[2], # date
@@ -434,18 +434,33 @@ class ProductProduct(orm.Model):
             # Load history database not empty with range passed:
             history_pool = self.pool.get('pricelist.partnerinfo.history')
             history_ids = history_pool.search(cr, uid, [
-                ('date_quotation', '>=', from_date),
-                ('date_quotation', '<=', to_date),
+                #('date_quotation', '>=', from_date),
+                #('date_quotation', '<=', to_date),
                 ('price', '>', 0),                
                 ], context=context)
+                
             for history in sorted(history_pool.browse(
                     cr, uid, history_ids, context=context), 
-                    key=lambda x: x.date_quotation, reverse=True):
-                history_db[history.product_id.default_code] = (
+                    key=lambda x: x.date_quotation or x.write_date, 
+                    reverse=True):
+                date_quotation = history.date_quotation or \
+                    history.write_date[:10]
+                if not date_quotation or \
+                        date_quotation < from_date  or \
+                        date_quotation > to_date:
+                    continue # Esternal date or not present
+                    
+                default_code = history.pricelist_id.product_id.default_code
+                if default_code in history_db:
+                    continue # old price
+
+                history_db[default_code] = (
                     history.pricelist_id.supplier_id.name, # Seller name
                     history.price, # Price
-                    history.date_quotation, # Date
+                    date_quotation, # Date
                     )
+        else:
+            _logger.warning('No max date limit!')
         
         res = []
         selected_product = self._report_industrial_get_objects(
@@ -460,10 +475,19 @@ class ProductProduct(orm.Model):
                 selected_product[0].company_id.industrial_margin_extra
 
             # Min date limit:
-            if not from_date:
+            if from_date:
+                _logger.warning(
+                    'Min date limit from wizard: %s!' % from_date)
+                
+            else:    
                 days = selected_product[0].company_id.industrial_days or 500
                 from_date = (datetime.now() - timedelta(days=days)).strftime(
                     DEFAULT_SERVER_DATE_FORMAT)                    
+                _logger.warning(
+                    'Min date limit from parameter [%s]: %s!' % (
+                        days,
+                        from_date,
+                        ))
         
             parameter = _('Parametri: Margine A: %s%% - Margine B: %s%% - '
                 'Margine extra: %s%% Giorni min rif. prezzi %s') % (

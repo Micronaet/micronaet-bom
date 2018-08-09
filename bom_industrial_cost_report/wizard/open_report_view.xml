@@ -39,7 +39,6 @@
               id="menu_menu_product_bom_report_print_wizard" 
               action="action_product_bom_report_limit"
               sequence="10"
-              />
-      
+              />      
     </data>
 </openerp>

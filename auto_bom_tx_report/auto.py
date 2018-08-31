@@ -39,6 +39,17 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+class ProductProduct(orm.Model):
+    """ Model name: MrpProduction
+    """
+    
+    _inherit = 'product.product'
+    
+    _columns = {
+        'old_tcar': fields.integer('Old Tscar'),
+        'old_tscar': fields.integer('Old Tscar'),
+        }
+
 class ComponentStatusReportWizard(orm.TransientModel):
     ''' Wizard for print status
     '''
@@ -407,8 +418,9 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             #                            ROW 3
             # -----------------------------------------------------------------
+            old_tscar = ' (%s)' % o.old_tscar if o.old_tscar else ''
             line3 = [
-                ('Tot. Scar.: %s' % tscar, format_text),
+                ('Tot. Scar.: %s%s' % (tscar, old_tscar), format_text),
                 ('OC', get_xls_format('text_center')),
                 (oc[0], format_number),
                 (oc[1], format_number),
@@ -431,8 +443,9 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             #                            ROW 4
             # -----------------------------------------------------------------
+            old_tcar = ' (%s)' % o.old_tcar if o.old_tcar else ''
             line4 = [
-                ('Tot. Car.: %s' % tcar, format_text),
+                ('Tot. Car.: %s%s' % (tcar, old_tcar), format_text),
                 ('OF', get_xls_format('text_center')),
                 (of[0], format_number),
                 (of[1], format_number),

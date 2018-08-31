@@ -499,8 +499,6 @@ class ProductProduct(orm.Model):
         else:        
             return res # No selection return empty records
                 
-        component_f = open('/home/thebrush/component.txt', 'w')
-        component_saved = []
         for product in selected_product:                    
             data = [
                 0.0, # 0. Min
@@ -527,9 +525,8 @@ class ProductProduct(orm.Model):
                     continue # jump component
                     
                 half_bom_ids = component.half_bom_ids # if half component
-                if half_bom_ids:                     
+                if half_bom_ids: 
                     # HW component (level 2)                    
-                    hw_total = 0.0
                     for cmpt in half_bom_ids:
                         #last_date = False # TODO last price?
                         cmpt_q = item.product_qty * cmpt.product_qty # XXX                        
@@ -560,7 +557,7 @@ class ProductProduct(orm.Model):
                                 cmpt.product_id.weight
                             data[11][0] += q_pipe
                             data[11][1] += q_pipe * pipe_price
-
+                                     
                         # TODO manage as pipe?
                         red_price = \
                             not cmpt.product_id.bom_industrial_no_price and \
@@ -590,14 +587,6 @@ class ProductProduct(orm.Model):
                         # Update min and max value:             
                         data[0] += min_value * cmpt_q
                         data[1] += max_value * cmpt_q
-                        
-                        if component.default_code not in component_saved:
-                            hw_total += max_value * cmpt_q
-                            component_f.write('%-30s|%25.5f\r\n' % (
-                                component.default_code,
-                                hw_total,
-                                ))
-                            component_saved.append(component.default_code)    
                         
                         data[3].append(record) # Populate product database
                 else: 

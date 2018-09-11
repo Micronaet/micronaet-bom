@@ -11,7 +11,7 @@
     // ------------------------------------------------------------------------
     $user = 'admin';
     $password = 'cgp.fmsp6';
-    $dbname = 'Fiam2017S';
+    $dbname = 'Fiam2018finale';
     $server = 'localhost';
     $port = '18069';
     $type_connection = 'http';

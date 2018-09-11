@@ -647,6 +647,7 @@ class MrpProductionStat(orm.Model):
         # ---------------------------------------------------------------------
         res = ''
         max_queue = 10
+
         for stats in self.browse(cr, uid, stats_ids, context=context)[0]: # XXX only first?
             res = '''
                 <table>

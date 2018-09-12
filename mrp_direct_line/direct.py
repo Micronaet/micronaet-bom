@@ -473,7 +473,7 @@ class MrpProductionStat(orm.Model):
                     material.product_qty, 
                     material.ready_qty,
                     ]
-        
+
         for product in sorted(row, key=lambda x: x.default_code):
             material, product_qty, ready_qty = row[product]
             res += '''
@@ -839,7 +839,6 @@ class MrpProductionStat(orm.Model):
                     second += 1
                     if second > max_queue:
                         break
-
                     material_ready, material_max = self.get_ready_status(
                         cr, uid, [line.id], context=context)
                         
@@ -885,11 +884,14 @@ class MrpProductionStat(orm.Model):
                 if not material.category_id.show_ready:
                     continue # jump category not in show ready status
                 
+                product_qty = material.product_qty * line.working_qty
+                if not product_qty:
+                    continue # no q. no line
                 material_pool.create(cr, uid, {  
                     'stats_id': ids[0],
                     'sol_id': line.id,
                     'product_id': product.id,
-                    'product_qty': material.product_qty * line.working_qty,
+                    'product_qty': product_qty,
                     'bom_qty': material.product_qty,
                     'ready_qty': 0.0,                                       
                     }, context=context)
@@ -1143,7 +1145,10 @@ class SaleOrderLine(orm.Model):
             res[sol.id]['material_ready'] = True
             res[sol.id]['material_max'] = sol.working_qty # this prod. to work
             
+            mrp_id = sol.mrp_id.id
             for material in sol.material_ids:
+                if material.stats_id.mrp_id.id != mrp_id:
+                    continue # production not linked to this MRP                
                 ready_qty = material.ready_qty
                 product_qty = material.product_qty
                 bom_qty = material.bom_qty
@@ -1155,6 +1160,8 @@ class SaleOrderLine(orm.Model):
                     # Max verification:
                     if material_max < res[sol.id]['material_max']:
                         res[sol.id]['material_max'] = material_max
+                    if not material_max:
+                        break # next sol (0 is the bottom value!)
         return res    
 
     _columns = {

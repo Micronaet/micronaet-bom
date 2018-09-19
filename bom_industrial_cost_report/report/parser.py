@@ -499,7 +499,7 @@ class ProductProduct(orm.Model):
         else:        
             return res # No selection return empty records
                 
-        component_f = open('/home/thebrush/component.txt', 'w')
+        component_f = open(os.path.expanduser('~/component.txt', 'w'))
         component_saved = []
         for product in selected_product:                    
             data = [

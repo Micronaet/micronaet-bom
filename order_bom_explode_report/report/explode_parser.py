@@ -236,7 +236,11 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         # XLS Log file: 
         # ---------------------------------------------------------------------
-        xls_log = '/home/administrator/photo/log/report_explode_%s.xlsx' % mode
+        now = '%s' % datetime.now()
+        xls_log = '/home/administrator/photo/log/report_explode_%s_%s.xlsx' % (
+            mode,
+            now.replace('/', '_'),
+            )
         _logger.warning('Log file: %s' % xls_log)        
         WB = xlsxwriter.Workbook(xls_log)
 

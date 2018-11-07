@@ -66,7 +66,7 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Generate format used:
         # ---------------------------------------------------------------------
-        # B. Check sheet:
+        # A. Check sheet:
         ws_name = 'Controllo segnaposto'
         excel_pool.create_worksheet(name=ws_name)
 
@@ -95,27 +95,6 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
             ('parent_bom_id', '=', bom.id),
             ], context=context)        
 
-        row = 0
-        excel_pool.write_xls_line(
-            ws_name, row, header, default_format=f_header)
-        
-        row += 1
-        for product in sorted(
-                product_pool.browse(
-                    cr, uid, product_ids, context=context), 
-                    key=lambda x: x.default_code):
-            
-            line = [
-                product.default_code or '',
-                product.name or '',
-                product.parent_bom_id.name or '',
-                ]
-            excel_pool.write_xls_line(
-                ws_name, row, line, default_format=f_text)
-            row += 1
-
-        
-        
         header_convert = {} # for col position
         col = 0 # Start column # 2
         for line in sorted(bom.bom_line_ids, key=lambda x: x.category_id.name):
@@ -153,10 +132,7 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
                 category_id = dynamic.category_id.id
                 col = header_convert[category_id]
                 
-                if alternative or placeholder:
-                    code = ' '
-                else:
-                    code = component.default_code or ''
+                code = component.default_code or ' '
 
                 if placeholder:
                     f_cell = f_text_red
@@ -166,10 +142,23 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
                     f_cell = f_text
 
                 line[col] = (code, f_cell)
-                
+
             excel_pool.write_xls_line(
                 ws_name, row, line, default_format=f_text)
             row += 1
+
+        # B. Sheet product without BOM parent:
+        ws_name = 'Senza DB padre'
+        header = [
+            'Codice prodotto', 
+            'Nome prodotto', 
+            'DB',
+            ]
+        width = [20, 45, 20]
+
+        excel_pool.create_worksheet(name=ws_name)
+        excel_pool.column_width(ws_name, width)
+        #excel_pool.row_height(ws_name, row_list, height=10)
 
         # ---------------------------------------------------------------------
         # Product with different bom:
@@ -179,22 +168,26 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
             ('default_code', '=ilike', 
                 '%s%%' % bom.product_tmpl_id.default_code),
             ], context=context)
+        _logger.warning('Product not associated: %s' % len(product_ids))    
 
-        # ---------------------------------------------------------------------
-        #                             Excel file:        
-        # ---------------------------------------------------------------------
-        # A. Sheet product without BOM parent:
-        ws_name = 'Senza DB padre'
-        header = [
-            'Codice prodotto', 
-            'Nome prodotto', 
-            'DB',
-            ]
-        width = [20, 45, 20]
+        row = 0
+        excel_pool.write_xls_line(
+            ws_name, row, header, default_format=f_header)
         
-        excel_pool.create_worksheet(name=ws_name)
-        excel_pool.column_width(ws_name, width)
-        #excel_pool.row_height(ws_name, row_list, height=10)
+        row += 1
+        for product in sorted(
+                product_pool.browse(
+                    cr, uid, product_ids, context=context), 
+                    key=lambda x: x.default_code):
+            
+            line = [
+                product.default_code or '',
+                product.name or '',
+                product.parent_bom_id.name or '',
+                ]
+            excel_pool.write_xls_line(
+                ws_name, row, line, default_format=f_text)
+            row += 1
 
         return excel_pool.return_attachment(cr, uid, 'Controllo DB')
 

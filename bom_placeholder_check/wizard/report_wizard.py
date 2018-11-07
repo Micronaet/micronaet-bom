@@ -64,31 +64,6 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
         excel_pool = self.pool.get('excel.writer')
 
         # ---------------------------------------------------------------------
-        # Product with different bom:
-        # ---------------------------------------------------------------------
-        product_ids = product_pool.search(cr, uid, [
-            ('parent_bom_id', '!=', wiz_browse.bom_id.id),
-            ('default_code', '=ilike', 
-                '%s%%' % bom.product_tmpl_id.default_code),
-            ], context=context)
-
-        # ---------------------------------------------------------------------
-        #                             Excel file:        
-        # ---------------------------------------------------------------------
-        # A. Sheet product without BOM parent:
-        ws_name = 'Senza DB padre'
-        header = [
-            'Codice prodotto', 
-            'Nome prodotto', 
-            'DB',
-            ]
-        width = [20, 45, 20]
-        
-        excel_pool.create_worksheet(name=ws_name)
-        excel_pool.column_width(ws_name, width)
-        #excel_pool.row_height(ws_name, row_list, height=10)
-
-        # ---------------------------------------------------------------------
         # Generate format used:
         # ---------------------------------------------------------------------
         excel_pool.set_format()
@@ -96,6 +71,8 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
         f_header = excel_pool.get_format(key='header')
         f_header90 = excel_pool.get_format(key='header90')
         f_text = excel_pool.get_format(key='text')
+        f_text_red = excel_pool.get_format(key='bg_red')
+        f_text_yellow = excel_pool.get_format(key='bg_yellow')
         f_number = excel_pool.get_format(key='number')
 
         row = 0
@@ -121,24 +98,27 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
         # B. Check sheet:
         ws_name = 'Controllo segnaposto'
         header = [
-            'Codice prodotto', 
-            'Nome prodotto', 
+            ('Codice prodotto', f_header), 
+            #('Nome prodotto', f_header), 
             ]
-        width = [20, 45]
+        width = [
+            20, 
+            #45,
+            ]
         
         header_convert = {} # for col position
-        col = 1 # Start column # 3
+        col = 0 # Start column # 2
         for line in sorted(bom.bom_line_ids, key=lambda x: x.category_id.name):
             col += 1
             category = line.category_id
             header_convert[category.id] = col
             header.append(category.name)
-            width.append(10)
+            width.append(4)
         
         excel_pool.create_worksheet(name=ws_name)
         excel_pool.column_width(ws_name, width)
-        excel_pool.row_height(ws_name, [0], height=35)
-        
+        excel_pool.row_height(ws_name, [0], height=120)
+
         # ---------------------------------------------------------------------
         # Product with bom selected
         # ---------------------------------------------------------------------
@@ -154,17 +134,67 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
             ws_name, row, header, default_format=f_header90)
 
         row += 1
+        empty_block = ['' for item in range(0, col)]
+        import pdb; pdb.set_trace()
         for product in sorted(
                 product_pool.browse(
                     cr, uid, product_ids, context=context), 
                     key=lambda x: x.default_code):
             line = [
                 product.default_code or '',
-                product.name or '',
+                #product.name or '',
                 ]
+            line.extend(empty_block)
+            for dynamic in product.dynamic_bom_line_ids:
+                component = dynamic.product_id
+                placeholder = component.bom_placeholder
+                alternative = component.bom_alternative
+                category_id = dynamic.category_id.id
+                col = header_convert[category_id]
+                
+                if alternative or placeholder:
+                    code = ''
+                else:
+                    code = component.default_code or ''
+
+                if placeholder:
+                    f_cell = f_text_red
+                elif alternative:    
+                    f_cell = f_text_yellow
+                else:    
+                    f_cell = f_text
+
+                line[col] = (code, f_cell)
+                
             excel_pool.write_xls_line(
                 ws_name, row, line, default_format=f_text)
             row += 1
+
+        # ---------------------------------------------------------------------
+        # Product with different bom:
+        # ---------------------------------------------------------------------
+        product_ids = product_pool.search(cr, uid, [
+            ('parent_bom_id', '!=', wiz_browse.bom_id.id),
+            ('default_code', '=ilike', 
+                '%s%%' % bom.product_tmpl_id.default_code),
+            ], context=context)
+
+        # ---------------------------------------------------------------------
+        #                             Excel file:        
+        # ---------------------------------------------------------------------
+        # A. Sheet product without BOM parent:
+        ws_name = 'Senza DB padre'
+        header = [
+            'Codice prodotto', 
+            'Nome prodotto', 
+            'DB',
+            ]
+        width = [20, 45, 20]
+        
+        excel_pool.create_worksheet(name=ws_name)
+        excel_pool.column_width(ws_name, width)
+        #excel_pool.row_height(ws_name, row_list, height=10)
+
         return excel_pool.return_attachment(cr, uid, 'Controllo DB')
 
     _columns = {

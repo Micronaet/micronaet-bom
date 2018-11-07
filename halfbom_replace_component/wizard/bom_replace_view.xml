@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+       <!-- mrp.bom.replace.hw.wizard -->
+       <record id="mrp_bom_replace_hw_wizard_view" model="ir.ui.view">
+            <field name="name">Check BOM problem wizard</field>
+            <field name="model">mrp.bom.replace.hw.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Wizard" version="7.0">
+                   <header>
+                       <button string="Cancel" special="cancel" />
+                       <button name="action_select" string="Select" type="object" />
+                       <button name="action_print" string="Update" type="object" icon="gtk-update" class="oe_highlight" attrs="{'invisible': [('update_id','=',False)]}"/>
+                   </header>                   
+                   <group colspan="4" col="4">
+                       <field name="select_id" />
+                       <field name="update_id" />
+                       <field name="qty" />
+                   </group>
+                </form>
+            </field>
+      </record>
+      <record model="ir.actions.act_window" id="action_mrp_bom_replace_hw_wizard_view">
+          <field name="name">Update product HW BOM</field>
+          <field name="res_model">mrp.bom.replace.hw.wizard</field>
+          <field name="view_type">form</field>
+          <field name="view_mode">form</field>
+          <field name="target">new</field>
+          <field name="view_id" ref="mrp_bom_replace_hw_wizard_view"/>          
+      </record>
+      <menuitem 
+          parent="mrp.menu_mrp_manufacturing" 
+          id="menu__mrp_bom_replace_hw_wizard_view" 
+          action="action_mrp_bom_replace_hw_wizard_view"
+          sequence="100"
+          />
+    </data>
+</openerp>

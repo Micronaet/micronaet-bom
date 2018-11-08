@@ -10,7 +10,7 @@
                    <header>
                        <button string="Cancel" special="cancel" />
                        <button name="action_select" string="Select" type="object" />
-                       <button name="action_print" string="Update" type="object" icon="gtk-update" class="oe_highlight" attrs="{'invisible': [('update_id','=',False)]}"/>
+                       <button name="action_update" string="Update" type="object" icon="gtk-update" class="oe_highlight" attrs="{'invisible': [('update_id','=',False)]}"/>
                    </header>                   
                    <group colspan="4" col="4">
                        <field name="select_id" />

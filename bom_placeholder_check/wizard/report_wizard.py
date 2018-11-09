@@ -116,6 +116,8 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
 
         row += 1
         empty_block = ['' for item in range(0, position)]
+        
+        error_col = position + 2 # also detault colum)
         for product in sorted(
                 product_pool.browse(
                     cr, uid, product_ids, context=context), 
@@ -125,6 +127,7 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
                 #product.name or '',
                 ]
             line.extend(empty_block)
+            line.append('Errori')
             for dynamic in product.dynamic_bom_line_ids:
                 component = dynamic.product_id
                 placeholder = component.bom_placeholder
@@ -132,15 +135,13 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
                 category_id = dynamic.category_id.id
                 
                 # Write category not present in extra columns:
-                if category_id not in header_convert:
-                    import pdb; pdb.set_trace()
-                    _logger.warning(
-                        'Category not present: %s' % dynamic.category_id.name)
-                    position += 1
-                    header_convert[category_id] = position
-                    line.append('')              
-                col = header_convert[category_id]
-                
+                if category_id in header_convert:
+                    col = header_convert[category_id]
+                else:
+                    line[-1] -= _('Categoria not presente %s') % \
+                        dynamic.category_id.name
+                    continue # Error code
+
                 code = component.default_code or ' '
 
                 if placeholder:

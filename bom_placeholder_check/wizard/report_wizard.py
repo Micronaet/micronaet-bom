@@ -107,7 +107,8 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
                     cr, uid, line_ids, context=context)])
             product_ids = list(product_set_ids)
             not_in_ids = set(all_ids) - product_set_ids
-            
+        else:
+            product_ids = all_ids    
 
         header_convert = {} # for col position
         position = 0 # Start column # 2

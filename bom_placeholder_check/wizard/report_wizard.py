@@ -115,7 +115,7 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
             ws_name, row, header, default_format=f_header90)
 
         row += 1
-        empty_block = ['' for item in range(0, col)]
+        empty_block = ['' for item in range(0, position)]
         for product in sorted(
                 product_pool.browse(
                     cr, uid, product_ids, context=context), 

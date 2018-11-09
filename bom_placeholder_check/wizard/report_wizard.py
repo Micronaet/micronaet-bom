@@ -101,7 +101,9 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
             header_convert[category.id] = position
             header.append(category.name)
             width.append(6)
-        header('MANCANTI')
+
+        header.append('MANCANTI')
+        position += 1
         
         excel_pool.column_width(ws_name, width)
         excel_pool.row_height(ws_name, [0], height=120)
@@ -126,7 +128,7 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
                 #product.name or '',
                 ]
             line.extend(empty_block)
-            line.append(u'')
+
             for dynamic in product.dynamic_bom_line_ids:
                 component = dynamic.product_id
                 placeholder = component.bom_placeholder

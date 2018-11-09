@@ -245,7 +245,6 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
                 line = [
                     product.default_code or '',
                     product.name or '',
-                    product.parent_bom_id.name or '',
                     ]
                 excel_pool.write_xls_line(
                     ws_name, row, line, default_format=f_text)

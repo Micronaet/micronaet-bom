@@ -219,19 +219,18 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Product old
         # ---------------------------------------------------------------------
-        # C. Obsolete product:
-        ws_name = 'Obsoleti'
-        header = [
-            'Codice prodotto', 
-            'Nome prodotto', 
-            ]
-        width = [20, 45]
-
-        excel_pool.create_worksheet(name=ws_name)
-        excel_pool.column_width(ws_name, width)
-
         if from_date and not_in_ids:
             _logger.warning('Product obsolete: %s' % len(not_in_ids))    
+            # C. Obsolete product:
+            ws_name = 'Obsoleti'
+            header = [
+                'Codice prodotto', 
+                'Nome prodotto', 
+                ]
+            width = [20, 45]
+
+            excel_pool.create_worksheet(name=ws_name)
+            excel_pool.column_width(ws_name, width)
 
             row = 0
             excel_pool.write_xls_line(

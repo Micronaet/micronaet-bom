@@ -96,11 +96,11 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
             ], context=context)        
 
         header_convert = {} # for col position
-        col = 0 # Start column # 2
+        position = 0 # Start column # 2
         for line in sorted(bom.bom_line_ids, key=lambda x: x.category_id.name):
-            col += 1
+            position += 1
             category = line.category_id
-            header_convert[category.id] = col
+            header_convert[category.id] = position
             header.append(category.name)
             width.append(6)
         
@@ -130,6 +130,11 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
                 placeholder = component.bom_placeholder
                 alternative = component.bom_alternative
                 category_id = dynamic.category_id.id
+                
+                # Write category not present in extra columns:
+                if category_id not in header_convert:
+                    position += 1
+                    header_convert[category_id] = position
                 col = header_convert[category_id]
                 
                 code = component.default_code or ' '

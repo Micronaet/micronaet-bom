@@ -81,11 +81,9 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
 
         header = [
             ('Codice prodotto', f_header), 
-            #('Nome prodotto', f_header), 
             ]
         width = [
             20, 
-            #45,
             ]
 
         # ---------------------------------------------------------------------
@@ -103,6 +101,7 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
             header_convert[category.id] = position
             header.append(category.name)
             width.append(6)
+        header('MANCANTI')
         
         excel_pool.column_width(ws_name, width)
         excel_pool.row_height(ws_name, [0], height=120)
@@ -127,7 +126,7 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
                 #product.name or '',
                 ]
             line.extend(empty_block)
-            line.append(u'Errori')
+            line.append(u'')
             for dynamic in product.dynamic_bom_line_ids:
                 component = dynamic.product_id
                 placeholder = component.bom_placeholder
@@ -138,7 +137,7 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
                 if category_id in header_convert:
                     col = header_convert[category_id]
                 else:
-                    line[-1] += _(u'Categoria not presente %s') % \
+                    line[-1] += _(u'[%s] ') % \
                         dynamic.category_id.name
                     continue # Error code
 

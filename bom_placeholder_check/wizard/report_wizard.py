@@ -138,7 +138,7 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
                 if category_id in header_convert:
                     col = header_convert[category_id]
                 else:
-                    line[-1] -= _('Categoria not presente %s') % \
+                    line[-1] -= _(u'Categoria not presente %s') % \
                         dynamic.category_id.name
                     continue # Error code
 

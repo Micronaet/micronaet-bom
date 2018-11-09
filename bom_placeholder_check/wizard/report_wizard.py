@@ -133,10 +133,12 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
                 
                 # Write category not present in extra columns:
                 if category_id not in header_convert:
+                    import pdb; pdb.set_trace()
+                    _logger.warning(
+                        'Category not present: %s' % dynamic.category_id.name)
                     position += 1
                     header_convert[category_id] = position
-                    line.append('')
-                    
+                    line.append('')              
                 col = header_convert[category_id]
                 
                 code = component.default_code or ' '

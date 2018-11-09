@@ -99,7 +99,7 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
             line_pool = self.pool.get('account.invoice.line')
             line_ids = line_pool.search(cr, uid, [
                 ('product_id', 'in', all_ids), # Selected product
-                ('account_id.date_invoice', '>=', from_date), # Period
+                ('invoice_id.date_invoice', '>=', from_date), # Period
                 ], context=context)
                 
             product_set_ids = set(

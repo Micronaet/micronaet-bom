@@ -90,7 +90,7 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Product with bom selected
         # ---------------------------------------------------------------------
-        product_ids = product_pool.search(cr, uid, [
+        all_ids = product_pool.search(cr, uid, [
             ('parent_bom_id', '=', bom.id),
             ], context=context)        
 
@@ -98,12 +98,16 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
             # Get list of invoiced product from that date:
             line_pool = self.pool.get('account.invoice.line')
             line_ids = line_pool.search(cr, uid, [
-                ('product_id', 'in', product_ids), # Selected product
+                ('product_id', 'in', all_ids), # Selected product
                 ('account_id.date_invoice', '>=', from_date), # Period
                 ], context=context)
-            product_ids = list(set(
+                
+            product_set_ids = set(
                 [item.product_id.id for item in line_pool.browse(
-                    cr, uid, line_ids, context=context)]))
+                    cr, uid, line_ids, context=context)])
+            product_ids = list(product_set_ids)
+            not_in_ids = set(all_ids) - product_set_ids
+            
 
         header_convert = {} # for col position
         position = 0 # Start column # 2
@@ -211,6 +215,42 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
                 ws_name, row, line, default_format=f_text)
             row += 1
 
+        # ---------------------------------------------------------------------
+        # Product old
+        # ---------------------------------------------------------------------
+        # C. Obsolete product:
+        ws_name = 'Obsoleti'
+        header = [
+            'Codice prodotto', 
+            'Nome prodotto', 
+            ]
+        width = [20, 45]
+
+        excel_pool.create_worksheet(name=ws_name)
+        excel_pool.column_width(ws_name, width)
+
+        if from_date and not_in_ids:
+            _logger.warning('Product obsolete: %s' % len(not_in_ids))    
+
+            row = 0
+            excel_pool.write_xls_line(
+                ws_name, row, header, default_format=f_header)
+            
+            row += 1
+            for product in sorted(
+                    product_pool.browse(
+                        cr, uid, not_in_ids, context=context), 
+                        key=lambda x: x.default_code):
+                
+                line = [
+                    product.default_code or '',
+                    product.name or '',
+                    product.parent_bom_id.name or '',
+                    ]
+                excel_pool.write_xls_line(
+                    ws_name, row, line, default_format=f_text)
+                row += 1
+                
         return excel_pool.return_attachment(cr, uid, 'Controllo DB')
 
     _columns = {

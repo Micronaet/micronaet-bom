@@ -58,6 +58,7 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
 
         wiz_browse = self.browse(cr, uid, ids, context=context)[0]
         bom = wiz_browse.bom_id
+        from_date = wiz_browse.from_date
 
         # Pool used:
         product_pool = self.pool.get('product.product')
@@ -92,6 +93,17 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
         product_ids = product_pool.search(cr, uid, [
             ('parent_bom_id', '=', bom.id),
             ], context=context)        
+
+        if from_date:
+            # Get list of invoiced product from that date:
+            line_pool = self.pool.get('account.invoice.line')
+            line_ids = line_pool.search(cr, uid, [
+                ('product_id', 'in', product_ids), # Selected product
+                ('account_id.date_invoice', '>=', from_date), # Period
+                ], context=context)
+            product_ids = list(set(
+                [item.product_id.id for item in line_pool.browse(
+                    cr, uid, line_ids, context=context)]))
 
         header_convert = {} # for col position
         position = 0 # Start column # 2

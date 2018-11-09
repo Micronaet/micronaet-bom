@@ -35,6 +35,7 @@
         'base',
         'excel_export',
         'mrp',
+        'account',
         'bom_dynamic_structured',
         ],
     'init_xml': [],

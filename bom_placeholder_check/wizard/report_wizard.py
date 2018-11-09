@@ -261,7 +261,7 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
             ),
         }
 
-    _default = {
+    _defaults = {
         'from_date': lambda *x: (
             datetime.now() - timedelta(days=365 * 3)).strftime(
                 DEFAULT_SERVER_DATE_FORMAT),

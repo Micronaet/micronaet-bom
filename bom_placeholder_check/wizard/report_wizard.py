@@ -135,6 +135,8 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
                 if category_id not in header_convert:
                     position += 1
                     header_convert[category_id] = position
+                    line.append('')
+                    
                 col = header_convert[category_id]
                 
                 code = component.default_code or ' '

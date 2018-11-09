@@ -127,7 +127,7 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
                 #product.name or '',
                 ]
             line.extend(empty_block)
-            line.append('Errori')
+            line.append(u'Errori')
             for dynamic in product.dynamic_bom_line_ids:
                 component = dynamic.product_id
                 placeholder = component.bom_placeholder
@@ -138,7 +138,7 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
                 if category_id in header_convert:
                     col = header_convert[category_id]
                 else:
-                    line[-1] -= _(u'Categoria not presente %s') % \
+                    line[-1] += _(u'Categoria not presente %s') % \
                         dynamic.category_id.name
                     continue # Error code
 

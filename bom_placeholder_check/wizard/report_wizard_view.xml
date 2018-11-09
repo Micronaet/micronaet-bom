@@ -13,6 +13,7 @@
                    </header>                   
                    <group colspan="4" col="4">
                         <field name="bom_id" domain="[('bom_category', '=', 'parent')]"/>
+                        <field name="from_date" />
                    </group>
                 </form>
             </field>

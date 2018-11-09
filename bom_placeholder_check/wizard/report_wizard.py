@@ -125,7 +125,6 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
                     key=lambda x: x.default_code):
             line = [
                 product.default_code or ' ',
-                #product.name or '',
                 ]
             line.extend(empty_block)
 
@@ -205,5 +204,14 @@ class MrpBomPlaceholderCheckWizard(orm.TransientModel):
     _columns = {
         'bom_id': fields.many2one(
             'mrp.bom', 'DB Padre', required=True),
+        'from_date': fields.date('Dalla data', 
+            help='Mostra solo i prodotti che hanno fatture dalla data',
+            ),
         }
+
+    _default = {
+        'from_date': lambda *x: (
+            datetime.now() - timedelta(days=365 * 3)).strftime(
+                DEFAULT_SERVER_DATE_FORMAT),
+        }    
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -114,7 +114,9 @@ f_header = Excel.get_format('header')
 
 f_text = Excel.get_format('text')
 f_number = Excel.get_format('number')
-#f_text = Excel.get_format('text')
+
+f_text_red = Excel.get_format('bg_red')
+f_number_red = Excel.get_format('bg_red_number')
 
 for page in pages:
     Excel.write_xls_line(page, pages[page], (
@@ -146,19 +148,25 @@ for product in sorted(res):
         industrial = ''
         subtotal_industrial = ''
 
+    if product[7]: # Error:
+        text = f_text_red
+        number = t_number_red
+    else
+        text = f_text
+        number = t_number
     Excel.write_xls_line(page, pages[page], (
         product[1],
         product[2],
         template_name,
         
-        (product[3], f_number),
-        (product[4], f_number),
-        (industrial, f_number),
+        (product[3], number),
+        (product[4], number),
+        (industrial, number),
         
         product[6],
         'X' if product[7] else '',
-        (product[8], f_number),
-        (subtotal_industrial, f_number),        
-        ), f_text)
+        (product[8], number),
+        (subtotal_industrial, number),        
+        ), text)
     pages[page] += 1
 del(Excel)

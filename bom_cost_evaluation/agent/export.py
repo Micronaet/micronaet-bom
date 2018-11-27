@@ -158,7 +158,7 @@ for product in sorted(res):
         number = t_number_red
     else:
         text = f_text
-        number = t_number
+        number = f_number
     Excel.write_xls_line(page, pages[page], (
         product[1], # Category
         product[2], # Code

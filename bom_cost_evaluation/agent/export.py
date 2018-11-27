@@ -69,6 +69,9 @@ for product in product_pool.browse(product_ids):
     qty = product.mx_start_qty
     res.append((
         product.bom_cost_mode,
+        product.inventory_category_id.name if product.inventory_category_id \
+            else '',
+        
         product.default_code,
         product.name,
         qty,
@@ -95,6 +98,7 @@ for page in pages:
     Excel.create_worksheet(page)
     Excel.column_width(page, (
         20,
+        30, 
         40, 
         20,
         
@@ -120,6 +124,7 @@ f_number_red = Excel.get_format('bg_red_number')
 
 for page in pages:
     Excel.write_xls_line(page, pages[page], (
+        u'Categoria',
         u'Codice',
         u'Name',
         u'Modello ind.',
@@ -138,34 +143,35 @@ for page in pages:
 
 for product in sorted(res):
     page = product[0]
-    template = product[5]
+    template = product[6]
     if template:
         template_name = template.default_code
         industrial = template.from_industrial
-        subtotal_industrial = product[3] * industrial
+        subtotal_industrial = product[4] * industrial
     else:
         template_name = ''
         industrial = ''
         subtotal_industrial = ''
 
-    if product[7]: # Error:
+    if product[8]: # Error:
         text = f_text_red
         number = t_number_red
-    else
+    else:
         text = f_text
         number = t_number
     Excel.write_xls_line(page, pages[page], (
-        product[1],
-        product[2],
-        template_name,
+        product[1], # Category
+        product[2], # Code
+        product[3], # Name
+        template_name, # Template
         
-        (product[3], number),
         (product[4], number),
+        (product[5], number),
         (industrial, number),
         
-        product[6],
-        'X' if product[7] else '',
-        (product[8], number),
+        product[7],
+        'X' if product[8] else '',
+        (product[9], number),
         (subtotal_industrial, number),        
         ), text)
     pages[page] += 1

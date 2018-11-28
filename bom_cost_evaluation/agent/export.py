@@ -32,7 +32,6 @@ ExcelWriter = excel_export.excelwriter.ExcelWriter
 # -----------------------------------------------------------------------------
 # From config file:
 cfg_file = os.path.expanduser('./openerp.cfg')
-xlsx_file = './inventario.xlsx'
 
 config = ConfigParser.ConfigParser()
 config.read([cfg_file])
@@ -54,12 +53,15 @@ odoo = erppeek.Client(
     )
 
 # Pool used:
-odoo.context = {'enable_bom_cost': True}
+odoo.context = {
+    'enable_bom_cost': True,
+    'lang': 'it_IT',
+    }
 
 product_pool = odoo.model('product.product')
 product_ids = product_pool.search([
     #('default_code', 'in', ('AN023', '005TX   AR')),
-    #('default_code', '=ilike', '005%'),
+    #('default_code', '=ilike', 'BO2%'),
     ('mx_start_qty', '>', 0),
     ])
 
@@ -74,6 +76,8 @@ for product in product_pool.browse(product_ids):
         
         product.default_code,
         product.name,
+        product.uom_id.name,
+        
         qty,
         cost,
         product.bom_template_id,
@@ -86,30 +90,37 @@ for product in product_pool.browse(product_ids):
 #                            Excel file:
 # -----------------------------------------------------------------------------
 # Create WB:
+workbooks = {
+    'final': ExcelWriter('prodotti_finito.xlsx', verbose=True),
+    'half': ExcelWriter('semilavorati.xlsx', verbose=True), 
+    'material': ExcelWriter('materie_prime.xlsx', verbose=True), 
+    }
+
 Excel = ExcelWriter(xlsx_file, verbose=True)
 pages = {
-    'material': 0, 
-    'half': 0, 
     'final': 0,
+    'half': 0, 
+    'material': 0, 
     }
 
 #Excel.create_worksheet(page)
 for page in pages:
     Excel.create_worksheet(page)
     Excel.column_width(page, (
-        20,
+        15,
+        15, 
         30, 
-        40, 
         20,
+        5,
         
-        10,
-        10,
-        10,
+        9,
+        9,
+        9,
         
         50,
         5,
-        10,
-        10,
+        12,
+        12,
         ))
         
 # Create format:
@@ -128,6 +139,7 @@ for page in pages:
         u'Codice',
         u'Name',
         u'Modello ind.',
+        u'UM',
         
         u'Q.',
         u'Costo',        
@@ -143,19 +155,19 @@ for page in pages:
 
 for product in sorted(res):
     page = product[0]
-    template = product[6]
+    template = product[7]
     if template:
         template_name = template.default_code
         industrial = template.from_industrial
-        subtotal_industrial = product[4] * industrial
+        subtotal_industrial = product[5] * industrial
     else:
         template_name = ''
         industrial = ''
         subtotal_industrial = ''
 
-    if product[8]: # Error:
+    if product[9]: # Error:
         text = f_text_red
-        number = t_number_red
+        number = f_number_red
     else:
         text = f_text
         number = f_number
@@ -164,14 +176,15 @@ for product in sorted(res):
         product[2], # Code
         product[3], # Name
         template_name, # Template
+        product[4], # UOM
         
-        (product[4], number),
         (product[5], number),
+        (product[6], number),
         (industrial, number),
         
-        product[7],
-        'X' if product[8] else '',
-        (product[9], number),
+        product[8],
+        'X' if product[9] else '',
+        (product[10], number),
         (subtotal_industrial, number),        
         ), text)
     pages[page] += 1

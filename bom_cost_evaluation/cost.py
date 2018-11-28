@@ -82,23 +82,36 @@ class ProductProduct(orm.Model):
         if product.id in store['material']:
             return store['material'][product.id]
 
-        res = {}
-        last_date = False
-        last_price = 0.0
-        for seller in product.seller_ids:
-            for price in seller.pricelist_ids:
-                if not last_date or last_date < price.date_quotation:
-                    last_price = price.price
-                    last_date = price.date_quotation
-        if last_price:
+        if product.is_pipe: # Metal:
+            weight = product.weight
+            material = product.pipe_material_id.last_price
+            unit = material * weight
             record = (
-                last_price,
-                u'%s [%s]' % (
-                        last_price, last_date), 
-                False,
+                unit, 
+                u'(%sKg x %s€/kg=%s)' % (
+                    weight, 
+                    material,
+                    unit,
+                    ), 
+                not unit,
                 )
-        else:
-            record = (0.0, '', True)
+        else: # Material
+            last_date = False
+            last_price = 0.0
+            for seller in product.seller_ids:
+                for price in seller.pricelist_ids:
+                    if not last_date or last_date < price.date_quotation:
+                        last_price = price.price
+                        last_date = price.date_quotation
+            if last_price:
+                record = (
+                    last_price,
+                    u'(%s€ [%s])' % (
+                        last_price, last_date or '/'), 
+                    False,
+                    )
+            else:
+                record = (0.0, '', True)
 
         store['material'][product.id] = record
         return record
@@ -134,7 +147,7 @@ class ProductProduct(orm.Model):
                 record = self._get_last_material_price(
                     cr, uid, cmpt, store, context=context)
                 unit = record[0]
-                calc += u'(%s EUR/unit.)' % unit
+                calc += record[1] #u'(%s EUR/unit.)' % unit
 
             if not unit:
                 # TODO Add missed element (no price):
@@ -258,8 +271,9 @@ class ProductProduct(orm.Model):
                         res[product.id]['bom_total_cost'], 
                         res[product.id]['bom_total_cost_text'],
                         res[product.id]['bom_total_cost_error'],
-                        ) = self._get_hw_price(cr, uid, product.id, hw_ids, 
-                        store, context=context)
+                        ) = self._get_hw_price(
+                            cr, uid, product.id, hw_ids, 
+                            store, context=context)
 
                 else:    
                     # ---------------------------------------------------------

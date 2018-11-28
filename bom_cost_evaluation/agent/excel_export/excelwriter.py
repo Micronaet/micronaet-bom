@@ -210,7 +210,7 @@ class ExcelWriter():
             # Text:
             text_font='Courier 10 pitch', text_size=9, text_fg='black',
             # Number:
-            number_format='#,##0.#0',
+            number_format='#,##0.###0',
             # Layout:
             border=1,
             ):

@@ -72,7 +72,7 @@ for product in product_pool.browse(product_ids):
     res.append((
         product.bom_cost_mode,
         product.inventory_category_id.name if product.inventory_category_id \
-            else '',
+            else 'NON CATALOGATO',
         
         product.default_code,
         product.name,
@@ -91,70 +91,86 @@ for product in product_pool.browse(product_ids):
 # -----------------------------------------------------------------------------
 # Create WB:
 workbooks = {
-    'final': ExcelWriter('prodotti_finito.xlsx', verbose=True),
-    'half': ExcelWriter('semilavorati.xlsx', verbose=True), 
-    'material': ExcelWriter('materie_prime.xlsx', verbose=True), 
+    'final': ExcelWriter('./prodotti_finito.xlsx', verbose=True),
+    'half': ExcelWriter('./semilavorati.xlsx', verbose=True), 
+    'material': ExcelWriter('./materie_prime.xlsx', verbose=True), 
     }
 
-Excel = ExcelWriter(xlsx_file, verbose=True)
-pages = {
-    'final': 0,
-    'half': 0, 
-    'material': 0, 
+excel_format = {
+    'final': {
+        'f_title': workbooks['final'].get_format('title'),
+        'f_header': workbooks['final'].get_format('header'),
+        'f_text': workbooks['final'].get_format('text'),
+        'f_number': workbooks['final'].get_format('number'),
+        'f_text_red': workbooks['final'].get_format('bg_red'),
+        'f_number_red': workbooks['final'].get_format('bg_red_number'),
+        },
+    'half': {
+        'f_title': workbooks['half'].get_format('title'),
+        'f_header': workbooks['half'].get_format('header'),
+        'f_text': workbooks['half'].get_format('text'),
+        'f_number': workbooks['half'].get_format('number'),
+        'f_text_red': workbooks['half'].get_format('bg_red'),
+        'f_number_red': workbooks['half'].get_format('bg_red_number'),
+        },
+    'material': {
+        'f_title': workbooks['material'].get_format('title'),
+        'f_header': workbooks['material'].get_format('header'),
+        'f_text': workbooks['material'].get_format('text'),
+        'f_number': workbooks['material'].get_format('number'),
+        'f_text_red': workbooks['material'].get_format('bg_red'),
+        'f_number_red': workbooks['material'].get_format('bg_red_number'),
+        },
+    }
+    
+# Counters:
+counters = {
+    'final': {},
+    'half': {}, 
+    'material': {},     
     }
 
-#Excel.create_worksheet(page)
-for page in pages:
-    Excel.create_worksheet(page)
-    Excel.column_width(page, (
-        15,
-        15, 
-        30, 
-        20,
-        5,
+# -----------------------------------------------------------------------------
+# Utility:
+# -----------------------------------------------------------------------------
+def get_page(wb_name, ws_name, counters, excel_format):
+    ''' Get WS page or create if not present 
+        Add also header
+        wb_name: Name of workbook (3 mode: final, half, material)
+        ws_name: Sheet description
+        counters: counter for 3 modes
+        excel_format: format for 3 modes
+    '''
+    if ws_name not in counters[wb_name]: # Create:
+        # Add worksheet:
+        workbooks[wb_name].create_worksheet(ws_name)
         
-        9,
-        9,
-        9,
-        
-        50,
-        5,
-        12,
-        12,
-        ))
-        
-# Create format:
-f_title = Excel.get_format('title')
-f_header = Excel.get_format('header')
-
-f_text = Excel.get_format('text')
-f_number = Excel.get_format('number')
-
-f_text_red = Excel.get_format('bg_red')
-f_number_red = Excel.get_format('bg_red_number')
-
-for page in pages:
-    Excel.write_xls_line(page, pages[page], (
-        u'Categoria',
-        u'Codice',
-        u'Name',
-        u'Modello ind.',
-        u'UM',
-        
-        u'Q.',
-        u'Costo',        
-        u'Costo modello',    
+        # Setup columns:
+        workbooks[wb_name].column_width(ws_name, (
+            15, 30, 20, 5,        
+            9, 9, 9,
+            50, 5, 12, 12,
+            ))
             
-        u'Dettaglio',
-        u'Errore',
-        u'Subtotale',
-        u'Subtotale modello',
-        ), f_header)
-    pages[page] += 1    
-
+        # Setup header title:
+        counters[wb_name][ws_name] = 0 # Current line        
+        workbooks[wb_name].write_xls_line(
+            ws_name, counters[wb_name][ws_name], (
+                u'Codice', u'Name', u'Modello ind.', u'UM',            
+                u'Q.', u'Costo', u'Costo modello',                
+                u'Dettaglio', u'Errore', u'Subtotale', u'Subtotale modello',
+                ), excel_format[wb_name]['f_header'])
+        counters[wb_name][ws_name] += 1 
+        
+    return (
+        workbooks[wb_name], # WS
+        counters[wb_name][ws_name], # Counter
+        )
 
 for product in sorted(res):
-    page = product[0]
+    wb_name = product[0]
+    ws_name = product[1]
+    
     template = product[7]
     if template:
         template_name = template.default_code
@@ -166,13 +182,15 @@ for product in sorted(res):
         subtotal_industrial = ''
 
     if product[9]: # Error:
-        text = f_text_red
-        number = f_number_red
+        text = excel_format[wb_name]['f_text_red']
+        number = excel_format[wb_name]['f_number_red']
     else:
-        text = f_text
-        number = f_number
-    Excel.write_xls_line(page, pages[page], (
-        product[1], # Category
+        text = excel_format[wb_name]['f_text']
+        number = excel_format[wb_name]['f_number']
+        
+    Excel, row = get_page(wb_name, ws_name, counters, excel_format)    
+    Excel.write_xls_line(ws_name, row, (
+        #product[1], # Category
         product[2], # Code
         product[3], # Name
         template_name, # Template
@@ -187,5 +205,8 @@ for product in sorted(res):
         (product[10], number),
         (subtotal_industrial, number),        
         ), text)
-    pages[page] += 1
-del(Excel)
+    counters[wb_name][ws_name] += 1    
+
+del(workbooks['final'])
+del(workbooks['half'])
+del(workbooks['material'])

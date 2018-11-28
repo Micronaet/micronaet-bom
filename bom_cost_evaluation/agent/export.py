@@ -282,7 +282,8 @@ for product in sorted(
             x.default_code)):
     row += 1
     Excel.write_xls_line(ws_name, row, (
-        product.product.inventory_category_id.name or 'NON ASSEGNATA', 
+        product.inventory_category_id.name if product.inventory_category_id \
+            else 'NON ASSEGNATA', 
         product.default_code or '',
         product.name,
         ))

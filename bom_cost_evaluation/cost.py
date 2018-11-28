@@ -88,7 +88,7 @@ class ProductProduct(orm.Model):
             unit = material * weight
             record = (
                 unit, 
-                u'(%sKg x %s€/kg=%s)' % (
+                u'(%sKg x %s€/kg)=%s' % (
                     weight, 
                     material,
                     unit,
@@ -106,7 +106,7 @@ class ProductProduct(orm.Model):
             if last_price:
                 record = (
                     last_price,
-                    u'(%s€ [%s])' % (
+                    u'%s€ [%s]' % (
                         last_price, last_date or '/'), 
                     False,
                     )
@@ -229,9 +229,9 @@ class ProductProduct(orm.Model):
                 # -------------------------------------------------------------
                 res[product.id]['bom_cost_mode'] = 'final'          
                 total = 0.0
-                res[product.id]['bom_template_id'] = \
-                    self._get_product_bom_template(
-                        cr, uid, parent_code, store, context=context)
+                template_id = self._get_product_bom_template(
+                    cr, uid, parent_code, store, context=context)
+                res[product.id]['bom_template_id'] = template_id
                 
                 for item in sorted(
                         dynamic_bom, key=lambda x: x.product_id.default_code):
@@ -247,7 +247,7 @@ class ProductProduct(orm.Model):
                                 cmpt_hw_ids, store, context=context)
                         subtotal = cmpt_unit * qty        
                         res[product.id]['bom_total_cost_text'] += \
-                            u'[HW:%s] N. %s x %s EUR=%s  ' % (
+                            u'[HW:%s] N. %s x %s€=%s  ' % (
                                 cmpt.default_code, qty, cmpt_unit, subtotal)
                     else: # Material 
                         (cmpt_unit, cmpt_detail, cmpt_error) = \
@@ -256,9 +256,14 @@ class ProductProduct(orm.Model):
                                 context=context)
                         subtotal = cmpt_unit * qty        
                         res[product.id]['bom_total_cost_text'] += \
-                            u'[MP:%s] N. %s x %s EUR=%s  ' % (
+                            u'[MP:%s] N. %s x %s€=%s  ' % (
                                 cmpt.default_code, qty, cmpt_unit, subtotal)
                     total += subtotal
+                    
+                    # Error management:
+                    if not subtotal or not template_id:
+                        res[product.id]['bom_total_cost_error'] = True
+
                 res[product.id]['bom_total_cost'] = total
             else:
                 # -------------------------------------------------------------
@@ -291,7 +296,7 @@ class ProductProduct(orm.Model):
     _columns = {
         'bom_total_cost': fields.function(
             _get_bom_total_cost, method=True, 
-            type='float', string='BOM Cost', 
+            type='float', digits=(16, 4), string='BOM Cost', 
             store=False, multi=True), 
         'bom_total_cost_text': fields.function(
             _get_bom_total_cost, method=True, 

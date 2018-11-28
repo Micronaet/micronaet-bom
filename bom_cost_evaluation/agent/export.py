@@ -60,19 +60,26 @@ odoo.context = {
 
 product_pool = odoo.model('product.product')
 product_ids = product_pool.search([
-    #('default_code', 'in', ('AN023', '005TX   AR')),
-    #('default_code', '=ilike', 'BO2%'),
+    #('default_code', '=ilike', '005TX%'),
+    ('inventory_category_id', '=', False),
     ('mx_start_qty', '>', 0),
+    ])
+
+not_product_ids = product_pool.search([
+    ('mx_start_qty', '=', 0),
     ])
 
 res = []
 for product in product_pool.browse(product_ids):
     cost = product.bom_total_cost
     qty = product.mx_start_qty
+    if product.inventory_category_id:
+        category = product.inventory_category_id.name
+    else:
+        category = 'NON CATALOGATO'     
     res.append((
         product.bom_cost_mode,
-        product.inventory_category_id.name if product.inventory_category_id \
-            else 'NON CATALOGATO',
+        category,
         
         product.default_code,
         product.name,
@@ -130,6 +137,12 @@ counters = {
     'material': {},     
     }
 
+totals = {
+    'final': {},
+    'half': {}, 
+    'material': {},     
+    }
+
 # -----------------------------------------------------------------------------
 # Utility:
 # -----------------------------------------------------------------------------
@@ -147,20 +160,23 @@ def get_page(wb_name, ws_name, counters, excel_format):
         
         # Setup columns:
         workbooks[wb_name].column_width(ws_name, (
+            #15, 
             15, 30, 20, 5,        
             9, 9, 9,
-            50, 5, 12, 12,
+            50, 5, 13, 13,
             ))
             
         # Setup header title:
-        counters[wb_name][ws_name] = 0 # Current line        
+        counters[wb_name][ws_name] = 2 # Current line        
         workbooks[wb_name].write_xls_line(
             ws_name, counters[wb_name][ws_name], (
+                #u'Catalogo', 
                 u'Codice', u'Name', u'Modello ind.', u'UM',            
                 u'Q.', u'Costo', u'Costo modello',                
                 u'Dettaglio', u'Errore', u'Subtotale', u'Subtotale modello',
                 ), excel_format[wb_name]['f_header'])
-        counters[wb_name][ws_name] += 1 
+        counters[wb_name][ws_name] += 1
+        totals[wb_name][ws_name] = [0.0, 0.0] # Total page (normal, template)
         
     return (
         workbooks[wb_name], # WS
@@ -172,6 +188,7 @@ for product in sorted(res):
     ws_name = product[1]
     
     template = product[7]
+    subtotal_bom = product[10]
     if template:
         template_name = template.default_code
         industrial = template.from_industrial
@@ -201,12 +218,76 @@ for product in sorted(res):
         (industrial, number),
         
         product[8],
-        'X' if product[9] else '',
-        (product[10], number),
+        'X' if product[9] else ' ',
+        (subtotal_bom, number),
         (subtotal_industrial, number),        
         ), text)
-    counters[wb_name][ws_name] += 1    
+    counters[wb_name][ws_name] += 1
+    totals[wb_name][ws_name][0] += subtotal_bom or 0.0
+    totals[wb_name][ws_name][1] += subtotal_industrial or 0.0
 
+# -----------------------------------------------------------------------------
+# Write total page:
+# -----------------------------------------------------------------------------
+ws_name = 'TOTALI'
+for wb_name in totals:
+    Excel = workbooks[wb_name]    
+    text = excel_format[wb_name]['f_text']
+    number = excel_format[wb_name]['f_number']
+
+    # Add total page:
+    row = 0
+    workbooks[wb_name].create_worksheet(ws_name)
+    workbooks[wb_name].column_width(ws_name, (40, 15, 15))
+    workbooks[wb_name].write_xls_line(
+        ws_name, row, (
+            u'Categoria', u'Totale DB', u'Totale industriale'), 
+            excel_format[wb_name]['f_header'])
+            
+    for category in totals[wb_name]:
+        row += 1
+        subtotal_bom = totals[wb_name][category][0]
+        subtotal_industrial = totals[wb_name][category][1]
+        # Write total in Total page:
+        Excel.write_xls_line(ws_name, row, (
+            category, 
+            (subtotal_bom, number),
+            (subtotal_industrial, number),
+            ), text)
+
+        # Write total in sheet:
+        workbooks[wb_name].write_xls_line(
+            category, 0, (
+                u'Totale categoria', '', '', '', '', '', '', '', '',
+                (subtotal_bom, number),
+                (subtotal_industrial, number),
+                ), text)
+
+# -----------------------------------------------------------------------------
+# Write not included:
+# -----------------------------------------------------------------------------
+ws_name = 'Non inclusi'
+Excel = ExcelWriter('./non_presenti.xlsx', verbose=True)
+
+# Add total page:
+row = 0
+Excel.create_worksheet(ws_name)
+Excel.column_width(ws_name, (30, 15, 40))
+Excel.write_xls_line(ws_name, row, (u'Categoria', u'Codice', u'Nome'))
+
+for product in sorted(
+        product_pool.browse(not_product_ids), 
+        key=lambda x: (
+            x.inventory_category_id.name if x.inventory_category_id else '', 
+            x.default_code)):
+    row += 1
+    Excel.write_xls_line(ws_name, row, (
+        product.product.inventory_category_id.name or 'NON ASSEGNATA', 
+        product.default_code or '',
+        product.name,
+        ))
+        
+del(Excel)
 del(workbooks['final'])
 del(workbooks['half'])
 del(workbooks['material'])

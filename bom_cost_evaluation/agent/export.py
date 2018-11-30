@@ -61,12 +61,12 @@ odoo.context = {
 product_pool = odoo.model('product.product')
 product_ids = product_pool.search([
     #('default_code', '=ilike', '005TX%'),
-    ('inventory_category_id', '=', False),
+    #('inventory_category_id', '=', False),
     ('mx_start_qty', '>', 0),
     ])
 
 not_product_ids = product_pool.search([
-    ('mx_start_qty', '=', 0),
+    ('mx_start_qty', '<=', 0),
     ])
 
 res = []
@@ -161,9 +161,9 @@ def get_page(wb_name, ws_name, counters, excel_format):
         # Setup columns:
         workbooks[wb_name].column_width(ws_name, (
             #15, 
-            15, 30, 20, 5,        
-            9, 9, 9,
-            50, 5, 13, 13,
+            15, 40, 20, 4,        
+            11, 11, 11,
+            50, 5, 15, 15,
             ))
             
         # Setup header title:

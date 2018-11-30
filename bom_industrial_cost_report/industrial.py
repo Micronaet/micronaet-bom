@@ -233,6 +233,18 @@ class MrpBomIndustrialHistory(orm.Model):
                 'lang': 'it_IT',
                 }
 
+        # Bom current:
+        import pdb; pdb.set_trace()
+        product_pool = self.pool.get('product.product')
+        product_ids = product_pool.search(cr, uid, [
+            ('bom_selection', '=', True)], context=context)
+
+        previous_list = [u'%s: %s€' % (p.default_code, p.from_industrial)\
+             for p in product_pool.browse(
+                cr, uid, product_ids, context=context)]
+        previous_text = '\n'.join(sorted(previous_list))
+        import pdb; pdb.set_trace()
+        
         # Datas for report
         datas = {
             # Report setup:
@@ -289,6 +301,7 @@ class MrpBomIndustrialHistory(orm.Model):
         self.write(cr, uid, ids, {
             'name': 'Storico %s' % now,
             'filename': filename,
+            'previous_text': previous_text,
             }, context=context)
         return True
     
@@ -297,6 +310,7 @@ class MrpBomIndustrialHistory(orm.Model):
         'filename': fields.char('Filename.', size=80),
         'create_uid': fields.many2one('res.users', 'Utente', readonly=True),    
         'create_date': fields.date('Data', readonly=True),
+        'previous': fields.text('Previous', readonly=True),
         'note': fields.text('Note', readonly=True),
         }
         

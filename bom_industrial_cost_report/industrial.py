@@ -242,7 +242,7 @@ class MrpBomIndustrialHistory(orm.Model):
         previous_list = [u'%s: %s€' % (p.default_code, p.from_industrial)\
              for p in product_pool.browse(
                 cr, uid, product_ids, context=context)]
-        previous_text = '\n'.join(sorted(previous_list))
+        previous_text = u'\n'.join(sorted(previous_list))
         
         # Datas for report
         datas = {
@@ -295,12 +295,23 @@ class MrpBomIndustrialHistory(orm.Model):
         _logger.warning('Create files: %s' % fullname)
         
         # ---------------------------------------------------------------------
+        # Bom after cost:
+        # ---------------------------------------------------------------------
+        product_ids = product_pool.search(cr, uid, [
+            ('bom_selection', '=', True)], context=context)
+        post_list = [u'%s: %s€' % (p.default_code, p.from_industrial)\
+             for p in product_pool.browse(
+                cr, uid, product_ids, context=context)]
+        post_text = u'\n'.join(sorted(post_list))
+
+        # ---------------------------------------------------------------------
         # Save history record data:
         # ---------------------------------------------------------------------
         self.write(cr, uid, ids, {
             'name': 'Storico %s' % now,
             'filename': filename,
             'previous_text': previous_text,
+            'post_text': post_text,
             }, context=context)
         return True
     
@@ -309,7 +320,8 @@ class MrpBomIndustrialHistory(orm.Model):
         'filename': fields.char('Filename.', size=80),
         'create_uid': fields.many2one('res.users', 'Utente', readonly=True),    
         'create_date': fields.date('Data', readonly=True),
-        'previous': fields.text('Previous', readonly=True),
+        'previous_text': fields.text('Precedente', readonly=True),
+        'post_text': fields.text('Successivo', readonly=True),
         'note': fields.text('Note', readonly=True),
         }
         

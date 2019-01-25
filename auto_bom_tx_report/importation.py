@@ -206,7 +206,7 @@ class PurchaseOrderXLSX(orm.Model):
             inventory_ids = inventory_pool.search(cr, uid, [], context=context)
             for item in inventory_pool.browse(cr, uid, inventory_ids, 
                     context=context):
-                inventory_db[item.name] = inventory.id
+                inventory_db[item.name] = item.id
             
         current_proxy = self.browse(cr, uid, ids, context=context)[0]
         

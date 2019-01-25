@@ -319,13 +319,16 @@ class MrpProduction(orm.Model):
             # Jump pipes:
             if category == 'Pipes':    
                 return row # same row
-                
+            
+            inventory_category = o.inventory_category_id.name or ''
+    
             # -----------------------------------------------------------------
             #                            ROW 0
             # -----------------------------------------------------------------
             # Merge cell:
             WS.merge_range(row, 0, row, 10, '')
-            WS.merge_range(row, 11, row, 15, '')
+            WS.merge_range(row, 11, row, 12, '') # Category product
+            WS.merge_range(row, 13, row, 16, '') # Inventory category
 
             if sal[11] < 0:
                 format_text = get_xls_format('bg_red')
@@ -350,6 +353,9 @@ class MrpProduction(orm.Model):
                 ('', format_text),
                 ('', format_text),
                 (category, format_text),
+                ('', format_text),
+                (inventory_category, format_text),
+                ('', format_text),
                 ('', format_text),
                 ('', format_text),
                 ]        
@@ -383,6 +389,7 @@ class MrpProduction(orm.Model):
                 ('Ago.', format_header),
                 ('LEADTIME', format_header),
                 ('LOTTO', format_header),
+                ('INV. CAT.', format_header),
                 ]
             write_xls_mrp_line(WS, row, line1)
             row += 1
@@ -411,6 +418,7 @@ class MrpProduction(orm.Model):
                 (mm[11], format_number),
                 ('', format_header),
                 ('', format_header),
+                ('', format_header),
                 ]
             write_xls_mrp_line(WS, row, line2)
             row += 1
@@ -434,6 +442,7 @@ class MrpProduction(orm.Model):
                 (oc[9], format_number),
                 (oc[10], format_number),
                 (oc[11], format_number),
+                ('', format_header),
                 ('', format_header),
                 ('', format_header),
                 ]
@@ -461,6 +470,7 @@ class MrpProduction(orm.Model):
                 (of[11], format_number),
                 ('', format_header),
                 ('', format_header),
+                ('', format_header),
                 ]
             write_xls_mrp_line(WS, row, line4)
             row += 1
@@ -484,6 +494,7 @@ class MrpProduction(orm.Model):
                 (sal[9], format_number),
                 (sal[10], format_number),
                 (sal[11], format_number),
+                ('', format_header),
                 ('', format_header),
                 ('', format_header),
                 ]
@@ -633,11 +644,14 @@ class MrpProduction(orm.Model):
             ('Lordo', format_text),
             ])
 
+        # Sorted method:
+        sorted_product = sorted(product_pool.browse(
+            cr, uid, all_component_ids, context=context), 
+            key=lambda x: (x.inventory_category_id.name, x.default_code),
+            )
+
         # Line:
-        for product in sorted(product_pool.browse(
-                cr, uid, all_component_ids, context=context), 
-                key=lambda x: (x.inventory_category_id.name, x.default_code),
-                ):
+        for product in sorted_product:
             row += 1    
             write_xls_mrp_line(WS, row, [
                 (product.inventory_category_id.name, format_text),

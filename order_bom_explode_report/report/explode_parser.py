@@ -131,6 +131,7 @@ class MrpProduction(orm.Model):
                 # XXX No more used, not deleted for extra position:
                 [0.0], # Total for mt fabrics (fabric report)
                 purchase.get(product.id, ''),
+                product.inventory_category_id.name or '',
                 ]
             return
             
@@ -302,12 +303,12 @@ class MrpProduction(orm.Model):
                     y_axis, fabric, category_fabric, 
                     purchase_db, mode='product',
                     )
-                
+
         # Get product BOM dyamic lines (from active order):
         product_data = sale_pool.get_component_in_product_order_open(
             cr, uid, context=context)
         product_proxy = product_data['product']
-    
+        
         # TODO manage all product for particular category? 
         # SO: filter product in category instead of ordered product    
 
@@ -315,6 +316,8 @@ class MrpProduction(orm.Model):
         inventory_pos = get_position_season(get_date()) # for inventory mangm.1
         for product in product_proxy: # XXX Product ordered for now
             for item in product.dynamic_bom_line_ids: # XXX All Halfworked:
+                # TODO Remove log:
+                
             
                 # Note: 12/12/2017 Remove placehoder elements:
                 if item.product_id.bom_placeholder or \
@@ -881,7 +884,7 @@ class MrpProduction(orm.Model):
         else:
             _logger.info('Set sort for all')
             order_mode = lambda code: (
-                y_axis[code][8], 
+                y_axis[code][12], 
                 code,
                 )
                 
@@ -890,7 +893,7 @@ class MrpProduction(orm.Model):
         all_component_ids = self._get_all_product_in_bom(
             cr, uid, data=data, context=context)
         # TODO remove unwanted category:
-            
+
         for key in sorted(y_axis, key=order_mode):
             # -----------------------------------------------------------------    
             # Normal report block:

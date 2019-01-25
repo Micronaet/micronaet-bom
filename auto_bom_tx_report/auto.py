@@ -517,6 +517,7 @@ class MrpProduction(orm.Model):
             # Extra data (leadtime and order lot):        
             lineOrd.append((o.leadtime or 0, format_number))
             lineOrd.append((o.purchase_lot_block or 0, format_number))
+            lineOrd.append(('', format_text))
                 
             write_xls_mrp_line(WS, row, lineOrd)
             row += 1

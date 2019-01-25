@@ -589,14 +589,30 @@ class MrpProduction(orm.Model):
         
         filename = '/tmp/extract_fabric_report.xlsx'        
         _logger.info('Start create file %s' % filename)
+        
+        # ---------------------------------------------------------------------
+        # Utility:
+        # ---------------------------------------------------------------------
+        def get_add_page(WB, name):
+            ''' Add WS with that name
+                if present return WS reference
+            '''
+            WS = WB.add_worksheet(name)
+            
+            # -----------------------------------------------------------------
+            # Format columns width:
+            # -----------------------------------------------------------------
+            WS.set_column('A:A', 19)
+            WS.set_column('B:B', 3)
+            WS.set_column('C:N', 8)
+            WS.set_column('O:P', 6)
+            return WS
+            
+        # ---------------------------------------------------------------------
+        # Create Excel file:    
+        # ---------------------------------------------------------------------
         WB = xlsxwriter.Workbook(filename)
-        WS = WB.add_worksheet(_('Fabric'))
-
-        # Format columns width:
-        WS.set_column('A:A', 19)
-        WS.set_column('B:B', 3)
-        WS.set_column('C:N', 8)
-        WS.set_column('O:P', 6)
+        WS_page = {}
         
         # Current month cell:
         convert_month = {
@@ -619,10 +635,18 @@ class MrpProduction(orm.Model):
             cr, uid, data=data, context=context)
         
         # Loop all record to write:
-        row = 0
         for line in res:
-            row = write_xls_block_line(WS, row, line)
-        
+            category_name = line[12] or 'Non presente'
+            if category_name not in WS_page:
+                WS_page[category_name] = [
+                    get_add_page(WB, category_name), # WS
+                    0, # row
+                    ]
+            WS, row = WS_page[category_name]
+            
+            # Save row returned:
+            WS_page[category_name][1] = write_xls_block_line(WS, row, line)
+            
         # Write unused lines:    
         _logger.warning('Write unused lines in Excel') 
         product_pool = self.pool.get('product.product')

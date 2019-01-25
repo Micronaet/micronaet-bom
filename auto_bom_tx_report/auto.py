@@ -541,7 +541,7 @@ class MrpProduction(orm.Model):
                     # HW in Mt. of fabric that can be used:
                     [0, get_xls_format('number_blue')], # initial setup
                     # To be ordered - used = Total order                    
-                    [0, get_xls_format('bg_green')], # initial setup
+                    [0, get_xls_format('bg_green')], # initial setup green!
                     ]
                 hw_total_mt = 0.0
                 for hw_code, hw_status in hw.iteritems():
@@ -568,7 +568,14 @@ class MrpProduction(orm.Model):
                     line6[0].append('%s ' % int(hw_status[2]))
                     #line6[0].append(get_xls_format('text_wrap'))
                 line6[13][0] = int(hw_total_mt)# Update total mt. calc here
-                line6[14][0] = int(sal[11] + hw_total_mt)# Update total order
+                
+                # -------------------------------------------------------------
+                # Total with color:
+                # -------------------------------------------------------------
+                order_total = int(sal[11] + hw_total_mt)
+                line6[14][0] = order_total # Total to be ordered
+                if order_total <= 0:
+                    line6[14][1] = get_xls_format('bg_red')
                     
                 line6[0].append(get_xls_format('text_grey'))
                 write_xls_mrp_line(WS, row, line6)

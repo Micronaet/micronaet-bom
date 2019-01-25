@@ -182,6 +182,8 @@ class PurchaseOrderXLSX(orm.Model):
             context = {}
         
         context['update_lead_lot'] = True
+        context['update_inventory_category'] = True
+        
         return self.action_import_order(cr, uid, ids, context=context)
 
     def action_import_order(self, cr, uid, ids, context=None):
@@ -191,11 +193,21 @@ class PurchaseOrderXLSX(orm.Model):
             context = {}        
         
         update_lead_lot = context.get('update_lead_lot', False)
+        update_inventory_category = context.get(
+            'update_inventory_category', False)
         
         # Pool used:
         product_pool = self.pool.get('product.product')
         line_pool = self.pool.get('purchase.order.xlsx.line') 
+        inventory_pool = self.pool.get('product.product.inventory.category')
         
+        inventory_db = {}
+        if update_inventory_category:
+            inventory_ids = inventory_pool.search(cr, uid, [], context=context)
+            for item in inventory_pool.browse(cr, uid, inventory_ids, 
+                    context=context):
+                inventory_db[item.name] = inventory.id
+            
         current_proxy = self.browse(cr, uid, ids, context=context)[0]
         
         # ---------------------------------------------------------------------
@@ -244,109 +256,131 @@ class PurchaseOrderXLSX(orm.Model):
                 _('Error XLSX'), 
                 _('Cannot read XLS file: %s' % filename),
                 )
+        
+        # ---------------------------------------------------------------------        
+        # Loop on all pages:
+        # ---------------------------------------------------------------------        
+        for ws_name in WB.sheet_names():
+            if ws_name == 'Non usati':
+                _logger.warning('Jump page: %s' % ws_name)
+                continue
                 
-        WS = WB.sheet_by_index(0)
+            WS = WB.sheet_by_name(ws_name)   
+            _logger.warning('Read page: %s' % ws_name)
 
-        pos = -1
-        error = ''
-        for row in range(row_start, WS.nrows):
-            pos += 1
-            if pos == 1: 
-                # -------------------------------------------------------------
-                # Read product code:
-                # -------------------------------------------------------------
-                default_code = WS.cell(row, 0).value
-                _logger.info('Find material: %s' % default_code)
+            pos = -1
+            error = ''
+            for row in range(row_start, WS.nrows):
+                pos += 1
+                if pos == 1: 
+                    # ---------------------------------------------------------
+                    # Read product code:
+                    # ---------------------------------------------------------
+                    default_code = WS.cell(row, 0).value
+                    _logger.info('Find material: %s' % default_code)
 
-                product_id = False           
-                  
-                # Manage code error:
-                if not default_code:
-                    _logger.error('No material code')
-                    error += 'Riga: %s > No codice materiale\n' % row
-                    continue
-
-                # Search product:
-                product_ids = product_pool.search(cr, uid, [
-                    ('default_code', '=', default_code)
-                    ], context=context)
-                    
-                # Manage product error:
-                if not product_ids: 
-                    _logger.error('No product with code: %s' % default_code)
-                    # FATAL ERROR (maybe file not in correct format so raise:
-                    raise osv.except_osv(
-                        _('Errore (controllare anche il formato del file!)'), 
-                        _('Non trovato il codice prodotto: %s' % default_code),
-                        )
-                    error += 'Riga: %s > No prodotto: %s\n' % (
-                        row, default_code)
-                    continue
-                    
-                # TODO manage warning more than one product
-                elif len(product_ids) > 1:
-                    _logger.error('More material code: %s' % default_code)
-                    error += 'Riga: %s > Codice doppio: %s\n' % (
-                        row, default_code)
-                    pass # TODO multi code
-                
-                product_id = product_ids[0]    
-                product_proxy = product_pool.browse(cr, uid, product_id, 
-                    context=context)
-
-                # -------------------------------------------------------------
-                # Search supplier:
-                # -------------------------------------------------------------
-                # 1. Procurements:
-                if product_proxy.seller_ids:
-                    partner_id = product_proxy.seller_ids[0].name.id
-                
-                # 2. First supplier
-                elif product_proxy.first_supplier_id:
-                    partner_id = product_proxy.first_supplier_id.id
-                else:   
-                    partner_id = False                    
-                    
-            elif pos == 6: # order qty                
-                # -------------------------------------------------------------
-                # Read quantity and get deadline:
-                # -------------------------------------------------------------
-                for col in range(2, 14):
-                    quantity = WS.cell(row, col).value
-                    
-                    try:
-                        # TODO replace . on , ?
-                        quantity = float(quantity)
-                    except:
-                        _logger.warning(
-                            'Problem convert float or empty: %s' % quantity)
-                        quantity = 0.0
-                        
-                    if not quantity:
+                    product_id = False           
+                      
+                    # Manage code error:
+                    if not default_code:
+                        _logger.error('No material code')
+                        error += 'Riga: %s > No codice materiale\n' % row
                         continue
+
+                    # Search product:
+                    product_ids = product_pool.search(cr, uid, [
+                        ('default_code', '=', default_code)
+                        ], context=context)
+                        
+                    # Manage product error:
+                    if not product_ids: 
+                        _logger.error(
+                            'No product with code: %s' % default_code)
+                        # FATAL ERROR (maybe file not in correct format, raise:
+                        raise osv.except_osv(
+                            _('Errore controllare anche il formato del file'), 
+                            _('Non trovato il codice prodotto: %s' % (
+                                default_code)),
+                            )
+                        error += 'Riga: %s > No prodotto: %s\n' % (
+                            row, default_code)
+                        continue
+                        
+                    # TODO manage warning more than one product
+                    elif len(product_ids) > 1:
+                        _logger.error('More material code: %s' % default_code)
+                        error += 'Riga: %s > Codice doppio: %s\n' % (
+                            row, default_code)
+                        pass # TODO multi code
                     
-                    month = month_db[col]
-                    day = '01' # TODO Parameterize (wizard data)
-                    if month in ['09', '10', '11', '12']:
-                        year = year_a
-                    else:
-                        year = year_b    
+                    product_id = product_ids[0]    
+                    product_proxy = product_pool.browse(cr, uid, product_id, 
+                        context=context)
+
+                    # ---------------------------------------------------------
+                    # Search supplier:
+                    # ---------------------------------------------------------
+                    # 1. Procurements:
+                    if product_proxy.seller_ids:
+                        partner_id = product_proxy.seller_ids[0].name.id
                     
-                    line_pool.create(cr, uid, {
-                        'xlsx_id': ids[0],
-                        'product_id': product_id,
-                        'partner_id': partner_id,
-                        'quantity': quantity,
-                        'deadline': '%s-%s-%s' % (year, month, day),
-                        }, context=context)
-                if update_lead_lot:
-                    product_pool.write(cr, uid, product_id, {
-                        'leadtime': WS.cell(row, 14).value,
-                        'purchase_lot_block': WS.cell(row, 15).value, 
-                        }, context=context)
-            elif pos in (7, 8) and not WS.cell(row, 0).value:
-                _logger.warning('Reset pos, row: %s' % row)
-                pos = -1            
+                    # 2. First supplier
+                    elif product_proxy.first_supplier_id:
+                        partner_id = product_proxy.first_supplier_id.id
+                    else:   
+                        partner_id = False                    
+                        
+                elif pos == 6: # order qty                
+                    # ---------------------------------------------------------
+                    # Read quantity and get deadline:
+                    # ---------------------------------------------------------
+                    for col in range(2, 14):
+                        quantity = WS.cell(row, col).value
+                        
+                        try:
+                            # TODO replace . on , ?
+                            quantity = float(quantity)
+                        except:
+                            _logger.warning(
+                                'Problem convert float / empty: %s' % quantity)
+                            quantity = 0.0
+                            
+                        if not quantity:
+                            continue
+                        
+                        month = month_db[col]
+                        day = '01' # TODO Parameterize (wizard data)
+                        if month in ['09', '10', '11', '12']:
+                            year = year_a
+                        else:
+                            year = year_b    
+                        
+                        line_pool.create(cr, uid, {
+                            'xlsx_id': ids[0],
+                            'product_id': product_id,
+                            'partner_id': partner_id,
+                            'quantity': quantity,
+                            'deadline': '%s-%s-%s' % (year, month, day),
+                            }, context=context)
+
+                    if update_lead_lot:
+                        product_pool.write(cr, uid, product_id, {
+                            'leadtime': WS.cell(row, 14).value,
+                            'purchase_lot_block': WS.cell(row, 15).value, 
+                            }, context=context)
+
+                    if update_inventory_category and WS.cell(row, 16).value:                        
+                        inventory_category_id = inventory_db.get(
+                            WS.cell(row, 16).value, False)
+                        if inventory_category_id:
+                            product_pool.write(cr, uid, product_id, {
+                                'inventory_category_id': inventory_category_id,
+                                }, context=context)
+                            
+                                
+                elif pos in (7, 8) and not WS.cell(row, 0).value:
+                    _logger.warning('Reset pos, row: %s' % row)
+                    pos = -1            
 
         # Update status of import record
         _logger.info('Imported: %s' % filename)

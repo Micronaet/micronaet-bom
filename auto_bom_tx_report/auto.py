@@ -324,8 +324,8 @@ class MrpProduction(orm.Model):
             #                            ROW 0
             # -----------------------------------------------------------------
             # Merge cell:
-            WS.merge_range(row, 0, row, 10, '')
-            WS.merge_range(row, 11, row, 12, '') # Category product
+            WS.merge_range(row, 0, row, 12, '')
+            #WS.merge_range(row, 11, row, 12, '') # Category product
             WS.merge_range(row, 13, row, 16, '') # Inventory category
 
             if sal[11] < 0:
@@ -350,7 +350,7 @@ class MrpProduction(orm.Model):
                 ('', format_text),
                 ('', format_text),
                 ('', format_text),
-                (category, format_text),
+                ('', format_text), #(category, format_text),
                 ('', format_text),
                 (inventory_category, format_text),
                 ('', format_text),

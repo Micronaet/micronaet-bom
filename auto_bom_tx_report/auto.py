@@ -314,14 +314,12 @@ class MrpProduction(orm.Model):
             '''
             # Extract element from line_
             (inv, tcar, tscar, mm, oc, of, sal, o, category, hw, hw_total, 
-                purchase) = line
+                purchase, inventory_category) = line
             
             # Jump pipes:
             if category == 'Pipes':    
                 return row # same row
             
-            inventory_category = o.inventory_category_id.name or ''
-    
             # -----------------------------------------------------------------
             #                            ROW 0
             # -----------------------------------------------------------------

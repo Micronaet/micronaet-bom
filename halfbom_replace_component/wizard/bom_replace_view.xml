@@ -10,10 +10,12 @@
                    <header>
                        <button string="Cancel" special="cancel" />
                        <button name="action_select" string="Select" type="object" />
+                       <button name="action_excel" string="Excel" type="object" icon="gtk-update" class="oe_highlight" />
                        <button name="action_update" string="Update" type="object" icon="gtk-update" class="oe_highlight" attrs="{'invisible': [('update_id','=',False)]}"/>
                    </header>                   
                    <group colspan="4" col="4">
                        <field name="select_id" />
+                       <newline/>
                        <field name="update_id" />
                        <field name="qty" />
                    </group>
@@ -30,7 +32,7 @@
       </record>
       <menuitem 
           parent="mrp.menu_mrp_manufacturing" 
-          id="menu__mrp_bom_replace_hw_wizard_view" 
+          id="menu_mrp_bom_replace_hw_wizard_view" 
           action="action_mrp_bom_replace_hw_wizard_view"
           sequence="100"
           />

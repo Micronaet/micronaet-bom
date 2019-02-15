@@ -33,6 +33,7 @@
         'mrp',
         'bom_dynamic_structured', # needed?
         'bom_half_worked',
+        'excel_export',
         ],
     'init_xml': [],
     'demo': [],

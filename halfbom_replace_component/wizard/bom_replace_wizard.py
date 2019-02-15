@@ -58,6 +58,7 @@ class MrpBomReplaceHwWizard(orm.TransientModel):
 
         # Pool used:        
         bom_line_pool = self.pool.get('mrp.bom.line')
+        excel_pool = self.pool.get('excel.writer')
 
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
         
@@ -82,6 +83,64 @@ class MrpBomReplaceHwWizard(orm.TransientModel):
         bom_ids = list(set(bom_ids))
         
         # ---------------------------------------------------------------------
+        # Report mode: 
+        # ---------------------------------------------------------------------
+        if mode == 'excel':
+            # Create Excel file:
+            ws_name = 'Modificati'
+            excel_pool.create_worksheet(ws_name)
+            
+            # Format:
+            excel_pool.set_format()
+            f_title = excel_pool.get_format('title')
+            f_header = excel_pool.get_format('header')
+            f_text = excel_pool.get_format('text')
+            f_number = excel_pool.get_format('number')
+            
+            # Column setup:
+            excel_pool.column_width(ws_name, [
+                4, 15, 40, 30, 10, 30, 10])
+            
+            # Write header:    
+            row = 0
+            from_code = wiz_proxy.select_id.default_code
+            to_code = wiz_proxy.update_id.default_code
+            excel_pool.write_xls_line(ws_name, row, [
+                'Aggiorna DB semilavorato, prodotto da %s a %s, con q. %s' % (
+                    from_code,
+                    to_code,
+                    qty or '/',                    
+                    )
+                ], default_format=f_title)
+            
+            row += 1
+            excel_pool.write_xls_line(ws_name, row, [
+                'ID',
+                'DB Codice',
+                'DB Nome',
+                'Vecchio Componente', 
+                'Vecchia Q.', 
+                'Nuovo componente', 
+                'Nuova Q.' if qty else '',     
+                ], default_format=f_header)
+            
+            
+            for line in  bom_line_pool.browse(cr, uid, bom_line_ids, 
+                    context=context):
+                row += 1
+                excel_pool.write_xls_line(ws_name, row, [
+                    line.id,
+                    line.bom_id.product_tmpl_id.default_code,
+                    line.bom_id.product_tmpl_id.name,
+                    line.product_id.default_code, 
+                    line.product_qty, 
+                    to_code, 
+                    (qty or '/', f_number),
+                    ], default_format=f_text)
+            return excel_pool.return_attachment(
+                cr, uid, 'Esito modifica', context=context)
+        
+        # ---------------------------------------------------------------------
         # Update mode: 
         # ---------------------------------------------------------------------
         if mode == 'update':
@@ -91,7 +150,11 @@ class MrpBomReplaceHwWizard(orm.TransientModel):
             if qty:
                 data['product_qty'] = qty 
             bom_line_pool.write(cr, uid, bom_line_ids, data, context=context)
-            
+
+
+        # ---------------------------------------------------------------------
+        # Both select of update   
+        # ---------------------------------------------------------------------
         return {
             'type': 'ir.actions.act_window',
             'name': _('DB Semilavorati'),
@@ -116,6 +179,14 @@ class MrpBomReplaceHwWizard(orm.TransientModel):
         if context is None: 
             context = {}
         context['wizard_mode'] = 'select'        
+        return self.action_run_in_context_mode(cr, uid, ids, context=context)    
+
+    def action_excel(self, cr, uid, ids, context=None):
+        ''' Select BOM with this filter
+        '''
+        if context is None: 
+            context = {}
+        context['wizard_mode'] = 'excel'        
         return self.action_run_in_context_mode(cr, uid, ids, context=context)    
 
     def action_update(self, cr, uid, ids, context=None):

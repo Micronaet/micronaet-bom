@@ -1,0 +1,85 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* halfbom_replace_component
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-02-15 13:26+0000\n"
+"PO-Revision-Date: 2019-02-15 14:27+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: it\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#. module: halfbom_replace_component
+#: view:mrp.bom.replace.hw.wizard:halfbom_replace_component.mrp_bom_replace_hw_wizard_view
+msgid "Cancel"
+msgstr "Annulla"
+
+#. module: halfbom_replace_component
+#: field:mrp.bom.replace.hw.wizard,create_uid:0
+msgid "Created by"
+msgstr "Creato da"
+
+#. module: halfbom_replace_component
+#: field:mrp.bom.replace.hw.wizard,create_date:0
+msgid "Created on"
+msgstr "Creato il"
+
+#. module: halfbom_replace_component
+#: view:mrp.bom.replace.hw.wizard:halfbom_replace_component.mrp_bom_replace_hw_wizard_view
+msgid "Excel"
+msgstr "Estrai in Excel"
+
+#. module: halfbom_replace_component
+#: field:mrp.bom.replace.hw.wizard,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: halfbom_replace_component
+#: field:mrp.bom.replace.hw.wizard,write_uid:0
+msgid "Last Updated by"
+msgstr "Last Updated by"
+
+#. module: halfbom_replace_component
+#: field:mrp.bom.replace.hw.wizard,write_date:0
+msgid "Last Updated on"
+msgstr "Last Updated on"
+
+#. module: halfbom_replace_component
+#: field:mrp.bom.replace.hw.wizard,qty:0
+msgid "New Q."
+msgstr "Nuova q."
+
+#. module: halfbom_replace_component
+#: field:mrp.bom.replace.hw.wizard,select_id:0
+msgid "Search"
+msgstr "Ricerca"
+
+#. module: halfbom_replace_component
+#: view:mrp.bom.replace.hw.wizard:halfbom_replace_component.mrp_bom_replace_hw_wizard_view
+msgid "Select"
+msgstr "Visualizza DB interessate"
+
+#. module: halfbom_replace_component
+#: view:mrp.bom.replace.hw.wizard:halfbom_replace_component.mrp_bom_replace_hw_wizard_view
+#: field:mrp.bom.replace.hw.wizard,update_id:0
+msgid "Update"
+msgstr "Aggiorna"
+
+#. module: halfbom_replace_component
+#: model:ir.actions.act_window,name:halfbom_replace_component.action_mrp_bom_replace_hw_wizard_view
+#: model:ir.ui.menu,name:halfbom_replace_component.menu_mrp_bom_replace_hw_wizard_view
+msgid "Update product HW BOM"
+msgstr "Sostituisci prodotto in DB semil."
+
+#. module: halfbom_replace_component
+#: view:mrp.bom.replace.hw.wizard:halfbom_replace_component.mrp_bom_replace_hw_wizard_view
+msgid "Wizard"
+msgstr "Wizard"

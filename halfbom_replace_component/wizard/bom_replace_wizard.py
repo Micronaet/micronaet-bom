@@ -144,13 +144,14 @@ class MrpBomReplaceHwWizard(orm.TransientModel):
         # Update mode: 
         # ---------------------------------------------------------------------
         if mode == 'update':
-            data = {
-                'product_id': update_id,
-                }
+            data = {}
+            if update_id:
+                data['product_id'] = update_id
             if qty:
                 data['product_qty'] = qty 
-            bom_line_pool.write(cr, uid, bom_line_ids, data, context=context)
-
+            if data:
+                bom_line_pool.write(
+                    cr, uid, bom_line_ids, data, context=context)
 
         # ---------------------------------------------------------------------
         # Both select of update   

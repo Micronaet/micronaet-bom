@@ -645,9 +645,10 @@ class MrpProduction(orm.Model):
 
                         # Add extra part for keep HW in fabric report:
                         # Update extra line for fabric HW use:
-                        if mp_mode == 'fabric':
-                            update_hw_data_line(y_axis[comp_code], 
-                                product, remain, comp.product_qty)                            
+                        # 19 feb 2019 use also for component:
+                        #if mp_mode == 'fabric':
+                        update_hw_data_line(y_axis[comp_code], 
+                            product, remain, comp.product_qty)                            
                         # go ahead for download component    
 
                 # Direct sale hw or component:
@@ -767,12 +768,13 @@ class MrpProduction(orm.Model):
                                 ))
 
                             # Update extra line for fabric HW use:
-                            if mp_mode == 'fabric':
-                                update_hw_data_line(y_axis[comp_code], 
-                                    item.product_id, # HW reference
-                                    item_remain, # HW remain
-                                    comp.product_qty, # Component remain
-                                    )                            
+                            # 19 feb 2019 use also for component:
+                            #if mp_mode == 'fabric':
+                            update_hw_data_line(y_axis[comp_code], 
+                                item.product_id, # HW reference
+                                item_remain, # HW remain
+                                comp.product_qty, # Component remain
+                                )                            
                         continue # needed?
                     else:
                         continue # no case jump

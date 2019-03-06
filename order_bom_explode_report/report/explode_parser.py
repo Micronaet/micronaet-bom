@@ -417,15 +417,9 @@ class MrpProduction(orm.Model):
         year = datetime.now().year
         if month >= 9:
             period_from = '%s-09-01' % year
-            # XXX 03/01/2018 use all period instead of restart 1/1
-            # XXX because period accounting is [01/09-31/08]
-            #mm_from = '%s-09-01' % year # From 01/09 > ALL (so 31/12)
             period_to = '%s-08-31' % (year + 1)
         else:
             period_from = '%s-09-01' % (year - 1) # for OC and OF
-            # XXX 03/01/2018 use all period instead of restart 1/1
-            # XXX because period accounting is [01/09-31/08]
-            #mm_from = '%s-01-01' % year # From 1/1 
             period_to = '%s-08-31' % year
 
         write_xls_line('extra', (
@@ -618,8 +612,8 @@ class MrpProduction(orm.Model):
                     continue     
 
                 (remain, not_delivered) = \
-                    company_pool.mrp_order_line_to_produce(line)
-                    #company_pool.mrp_order_line_to_produce_assigned(line)
+                    company_pool.mrp_order_line_to_produce_assigned(line)
+                    #company_pool.mrp_order_line_to_produce(line)
 
                 # --------------------------------
                 # OC direct halfwork or component:
@@ -650,7 +644,7 @@ class MrpProduction(orm.Model):
                         # 19 feb 2019 use also for component:
                         #if mp_mode == 'fabric':
                         update_hw_data_line(y_axis[comp_code], 
-                            product, remain, comp.product_qty)                            
+                            product, remain, comp.product_qty)
                         # go ahead for download component    
 
                 # Direct sale hw or component:

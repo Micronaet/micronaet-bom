@@ -50,7 +50,7 @@ class ResCompany(orm.Model):
     def mrp_order_line_to_produce(self, line):
         ''' Get order line to produce depend on OC-B-Delivery (and assigned)
         '''
-        ready_qty = line.product_uom_maked_sync_qty#TODO + line.mx_assigned_qty
+        ready_qty = line.product_uom_maked_sync_qty
         if ready_qty >= line.delivered_qty:
             return (
                 # Remain to make:

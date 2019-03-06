@@ -324,8 +324,8 @@ class Parser(report_sxw.rml_parse):
                 # ---------------
                 # Use utility function:
                 (oc_remain, not_delivered) = \
-                    company_pool.mrp_order_line_to_produce(line)
-                    #TODO company_pool.mrp_order_line_to_produce_assigned(line)
+                    company_pool.mrp_order_line_to_produce_assigned(line)
+                    #company_pool.mrp_order_line_to_produce(line)
                 parent_todo[parent][2] += oc_remain
                 # TODO oc_remain must be checked with stock_net here!!!!!!!!!!
                 parent_todo[parent][5] += not_delivered                

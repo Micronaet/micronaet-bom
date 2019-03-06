@@ -313,8 +313,9 @@ class Parser(report_sxw.rml_parse):
                     # Check negative stock for highlight:
                     if stock_net < 0:
                         parent_todo[parent][3] += 1
-                    
-                    parent_todo[parent][1] += stock_net # Net in stock (once)
+
+                    # Net in stock (once x product)
+                    parent_todo[parent][1] += stock_net 
                 else:
                     extra['stock_check'] += 'not used' # XXX +=?
                     stock_net = 0.0 # no used    

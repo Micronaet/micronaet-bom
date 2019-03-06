@@ -183,7 +183,8 @@ class MrpProduction(orm.Model):
             if product.default_code not in hw_fabric:
                 # Create empty record with fixed data:
                 hw_fabric[product.default_code] = [
-                    product.mx_net_mrp_qty, # 0. Stock (Before: mx_net_qty)
+                    # 0. Stock - MRP - assigned (Before was: mx_net_qty)
+                    product.mx_net_mrp_qty - product.mx_assigned_qty, 
                     0.0, # 1. OC remain HW
                     0.0, # 2. Stock Component (mt  of fabric)
                     #mt, # 3. Mt. from BOM
@@ -618,6 +619,7 @@ class MrpProduction(orm.Model):
 
                 (remain, not_delivered) = \
                     company_pool.mrp_order_line_to_produce(line)
+                    #company_pool.mrp_order_line_to_produce_assigned(line)
 
                 # --------------------------------
                 # OC direct halfwork or component:

@@ -194,12 +194,12 @@ class Parser(report_sxw.rml_parse):
                 qty = sol.product_uom_qty
                 qty_maked = sol.product_uom_maked_sync_qty 
                 qty_delivered = sol.delivered_qty
-                #qty_assigned = sol.mx_assigned_qty
-                #qty_ready = qty_maked + qty_assigned
+                qty_assigned = sol.mx_assigned_qty
+                qty_ready = qty_maked + qty_assigned
                 
                 # Depend on maked or delivery check:
-                if qty_maked >= qty_delivered:
-                    todo = qty - qty_maked
+                if qty_ready >= qty_delivered:
+                    todo = qty - qty_ready
                 else:    
                     todo = qty - qty_delivered
 
@@ -266,9 +266,12 @@ class Parser(report_sxw.rml_parse):
             qty_maked = sol.product_uom_maked_sync_qty
             qty_delivered = sol.delivered_qty
             
+            qty_assigned = sol.mx_assigned_qty
+            qty_ready = qty_maked + qty_assigned
+            
             # Depend on maked or delivery check:
-            if qty_maked >= qty_delivered:
-                order_remain = qty - qty_maked
+            if qty_ready >= qty_delivered:
+                order_remain = qty - qty_ready
             else:    
                 order_remain = qty - qty_delivered
                 
@@ -334,6 +337,8 @@ class Parser(report_sxw.rml_parse):
                 stock_today = mrp_unload.get(component.id, 0.0)
                 stock_net_qty = component.mx_net_qty # XXX without mrp unload!
                 stock = stock_net_qty + stock_today + delta_stock_qty
+                # TODO remove mx_assigend_qty for component?
+
                 oc_period = mrp_order.get(component.id, 0.0)   
                 of = component.mx_of_in
                 of_move = ''

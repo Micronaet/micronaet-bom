@@ -182,9 +182,11 @@ class MrpProduction(orm.Model):
             #total = data[10] # list of one element (save total mt usable)
             if product.default_code not in hw_fabric:
                 # Create empty record with fixed data:
+                available_qty = \
+                    product.mx_net_mrp_qty - product.mx_mrp_b_locked
                 hw_fabric[product.default_code] = [
                     # 0. Stock - MRP - assigned (Before was: mx_net_qty)
-                    product.mx_net_mrp_qty,# - product.mx_locked_qty, 
+                    available_qty if available_qty else 0.0, 
                     0.0, # 1. OC remain HW
                     0.0, # 2. Stock Component (mt  of fabric)
                     #mt, # 3. Mt. from BOM
@@ -192,11 +194,12 @@ class MrpProduction(orm.Model):
             current = hw_fabric[product.default_code] # readability            
             current[1] += remain # OC total        
             # XXX better once when end totalise remain
+
             # Test: OC >= Stock:
             if current[1] >= current[0]: # Use all stock (OC >= stock)
-                current[2] = current[0] * mt
+                current[2] = current[0] * mt # All stock raw material
             else: # use all OC (extra stock not useable)
-                current[2] = current[1] * mt
+                current[2] = current[1] * mt # All ordered raw material
                 #total[0] += stock_mt
             return True
                         

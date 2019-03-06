@@ -46,17 +46,44 @@ class ResCompany(orm.Model):
     # -------------------------------------------------------------------------
     # Utility for report generation:
     # -------------------------------------------------------------------------         
+    # TODO To be removed:
     def mrp_order_line_to_produce(self, line):
-        ''' Get order line to produce depend on OC-B-Delivery
-        '''      
-        if line.product_uom_maked_sync_qty >= line.delivered_qty:
+        ''' Get order line to produce depend on OC-B-Delivery (and assigned)
+        '''
+        ready_qty = line.product_uom_maked_sync_qty#TODO + line.mx_assigned_qty
+        if ready_qty >= line.delivered_qty:
             return (
-                line.product_uom_qty - line.product_uom_maked_sync_qty,
-                line.product_uom_maked_sync_qty - line.delivered_qty,
+                # Remain to make:
+                line.product_uom_qty - ready_qty,
+                # Remain to delivery:
+                ready_qty - line.delivered_qty,
                 )
         else:    
             return (
+                # Remain to make:
                 line.product_uom_qty - line.delivered_qty,
+                # Remain to delivery:
+                0.0,
+                )
+
+    def mrp_order_line_to_produce_assigned(self, line):
+        ''' Get order line to produce depend on OC-B-Delivery (and assigned)
+            TODO New function will replace previous
+        '''
+        ready_qty = line.product_uom_maked_sync_qty + line.mx_assigned_qty
+        if ready_qty >= line.delivered_qty:
+            remain = line.product_uom_qty - ready_qty
+            return (
+                # Remain to make:
+                remain if remain > 0.0 else 0.0,
+                # Remain to delivery:
+                ready_qty - line.delivered_qty,
+                )
+        else:    
+            return (
+                # Remain to make:
+                line.product_uom_qty - line.delivered_qty,
+                # Remain to delivery:
                 0.0,
                 )
 

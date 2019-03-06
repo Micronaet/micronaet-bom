@@ -53,7 +53,7 @@ class Parser(report_sxw.rml_parse):
             'get_date': self.get_date,
             'get_parent_oc_period': self.get_parent_oc_period,
             'get_pipe_unused': self.get_pipe_unused,
-        })
+            })
         
     def get_parent_oc_period(self, parent):
         res = ''
@@ -184,9 +184,9 @@ class Parser(report_sxw.rml_parse):
             return
             
         # ---------------------------------------------------------------------
-        #                                Procedure:
+        #                               PROCEDURE:
         # ---------------------------------------------------------------------
-        self.order_month = {} # Parent distribution for month
+        self.order_month = {} # Parent distribution for month (extra row info)
                 
         if data is None:
             data = {}
@@ -235,7 +235,6 @@ class Parser(report_sxw.rml_parse):
         # Pool used:
         company_pool = self.pool.get('res.company')
         sale_pool = self.pool.get('sale.order')
-        #sol_pool = self.pool.get('sale.order.line') 
         mrp_pool = self.pool.get('mrp.production')
         product_pool = self.pool.get('product.product')
         
@@ -252,17 +251,17 @@ class Parser(report_sxw.rml_parse):
         hws = {} # Halfworked database for collect HW informations
         cmpts = {} # Component database for collect needed pipe
 
+        # Open order:
         order_ids = company_pool.mrp_domain_sale_order_line(
             cr, uid, context=context)
         if data.get('simulation_order_ids', False):
             _logger.info('Add simulated order')
             order_ids.append(data['simulation_order_ids'])
-            
+
         for order in sale_pool.browse(cr, uid, order_ids, context=context):
             for line in order.order_line: # order line
                 # Reset log:
-                extra['code_check'] = ''
-                extra['stock_check'] = ''
+                extra['code_check'] = extra['stock_check'] = ''
                 
                 if line.mx_closed:
                     continue
@@ -326,6 +325,7 @@ class Parser(report_sxw.rml_parse):
                 # Use utility function:
                 (oc_remain, not_delivered) = \
                     company_pool.mrp_order_line_to_produce(line)
+                    #TODO company_pool.mrp_order_line_to_produce_assigned(line)
                 parent_todo[parent][2] += oc_remain
                 # TODO oc_remain must be checked with stock_net here!!!!!!!!!!
                 parent_todo[parent][5] += not_delivered                

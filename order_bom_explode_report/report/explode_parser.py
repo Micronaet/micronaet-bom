@@ -184,7 +184,7 @@ class MrpProduction(orm.Model):
                 # Create empty record with fixed data:
                 hw_fabric[product.default_code] = [
                     # 0. Stock - MRP - assigned (Before was: mx_net_qty)
-                    product.mx_net_mrp_qty - product.mx_assigned_qty, 
+                    product.mx_net_mrp_qty,# - product.mx_locked_qty, 
                     0.0, # 1. OC remain HW
                     0.0, # 2. Stock Component (mt  of fabric)
                     #mt, # 3. Mt. from BOM

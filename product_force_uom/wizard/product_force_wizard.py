@@ -66,7 +66,7 @@ class ProductProductUomForceWizard(orm.TransientModel):
             cr, uid, active_id, context=context)    
         previous_uom = product_proxy.uom_id.name    
             
-        wiz_proxy = self.browse(cr, uid, ids, context=context)
+        wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
         
         current_uom = wiz_proxy.uom_id.name
         uom_id = wiz_proxy.uom_id.id

@@ -260,6 +260,7 @@ class PurchaseOrderXLSX(orm.Model):
         # ---------------------------------------------------------------------        
         # Loop on all pages:
         # ---------------------------------------------------------------------        
+        today = now[:10]
         for ws_name in WB.sheet_names():
             if ws_name == 'Non usati':
                 _logger.warning('Jump page: %s' % ws_name)
@@ -353,14 +354,19 @@ class PurchaseOrderXLSX(orm.Model):
                         if month in ['09', '10', '11', '12']:
                             year = year_a
                         else:
-                            year = year_b    
+                            year = year_b
+
+                        # Note: Deadline minimun today!
+                        deadline = '%s-%s-%s' % (year, month, day)                        
+                        if deadline < today:
+                            deadline = today
                         
                         line_pool.create(cr, uid, {
                             'xlsx_id': ids[0],
                             'product_id': product_id,
                             'partner_id': partner_id,
                             'quantity': quantity,
-                            'deadline': '%s-%s-%s' % (year, month, day),
+                            'deadline': deadline,
                             }, context=context)
 
                     if update_lead_lot:

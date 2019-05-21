@@ -84,6 +84,7 @@ class PurchaseOrderXLSX(orm.Model):
         pol_pool = self.pool.get('purchase.order.line')
         location_pool = self.pool.get('stock.location')
         
+        today = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         purchase_db = {} # list of purchase order per partner
         for line in self.browse(cr, uid, ids, context=context)[0].line_ids:
             partner = line.partner_id
@@ -109,8 +110,7 @@ class PurchaseOrderXLSX(orm.Model):
                 # Generate header:
                 data.update({
                     'partner_id': partner.id,
-                    'date_order': datetime.now().strftime(
-                        DEFAULT_SERVER_DATETIME_FORMAT),
+                    'date_order': today,
                     'location_id': location_ids[0],
                     })
                 purchase_id = purchase_pool.create(cr, uid, data, 

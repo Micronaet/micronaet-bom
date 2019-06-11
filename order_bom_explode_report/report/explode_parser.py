@@ -975,7 +975,6 @@ class MrpProduction(orm.Model):
             # Add extra component not used
             if mp_mode != 'fabric': # only for component  
                 used_ids = []              
-                import pdb; pdb.set_trace()
                 for product in product_pool.browse(
                         cr, uid, all_component_ids, context=context):
                     if product.product.mx_net_mrp_qty <= 0.0:    

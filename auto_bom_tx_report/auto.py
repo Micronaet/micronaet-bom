@@ -328,6 +328,7 @@ class MrpProduction(orm.Model):
             #WS.merge_range(row, 11, row, 12, '') # Category product
             WS.merge_range(row, 13, row, 16, '') # Inventory category
 
+            # TODO add extra color here!
             if sal[11] < 0:
                 format_text = get_xls_format('bg_red')
             else:

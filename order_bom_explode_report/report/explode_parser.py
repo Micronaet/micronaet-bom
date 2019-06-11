@@ -977,17 +977,17 @@ class MrpProduction(orm.Model):
                 used_ids = []              
                 for product in product_pool.browse(
                         cr, uid, all_component_ids, context=context):
-                    if product.product.mx_net_mrp_qty <= 0.0:    
+                    if product.mx_net_mrp_qty <= 0.0:    
                         continue
                     
-                    category = item.category_id.type_id.name if \
-                        item.category_id and item.category_id.type_id else \
+                    category = product.category_id.type_id.name if \
+                        product.category_id and product.category_id.type_id else \
                             _('No category')
                     #product.inventory_category_id.name        
                     
                     if not category:
                         continue
-                    used_ids.append(unused.id)
+                    used_ids.append(product.id)
                     add_x_item(
                         y_axis, product, category, purchase_db, 'product') 
                                                         

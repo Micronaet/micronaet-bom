@@ -321,7 +321,6 @@ class MrpProduction(orm.Model):
         for product in product_proxy: # XXX Product ordered for now
             for item in product.dynamic_bom_line_ids: # XXX All Halfworked:
                 # TODO Remove log:
-                
             
                 # Note: 12/12/2017 Remove placehoder elements:
                 if item.product_id.bom_placeholder or \
@@ -967,13 +966,33 @@ class MrpProduction(orm.Model):
 
         # Restore previous state:
         user_pool.set_no_inventory_status(
-            cr, uid, value=previous_status, context=context)            
+            cr, uid, value=previous_status, context=context)
 
         # Return depend on request inventory or report        
         if for_inventory_delta:
             return inventory_delta
-        else:    
-            return res, all_component_ids    
+        else:
+            # Add extra component not used
+            if mp_mode != 'fabric': # only for component  
+                used_ids = []              
+                import pdb; pdb.set_trace()
+                for product in product_pool.browse(
+                        cr, uid, all_component_ids, context=context):
+                    if product.product.mx_net_mrp_qty <= 0.0:    
+                        continue
+                    
+                    category = item.category_id.type_id.name if \
+                        item.category_id and item.category_id.type_id else \
+                            _('No category')
+                    #product.inventory_category_id.name        
+                    
+                    if not category:
+                        continue
+                    used_ids.append(unused.id)
+                    add_x_item(
+                        y_axis, product, category, purchase_db, 'product') 
+                                                        
+            return res, list(set(all_component_ids) - set(used_ids)), used_ids
     
 class Parser(report_sxw.rml_parse):
     counters = {}
@@ -1021,7 +1040,7 @@ class Parser(report_sxw.rml_parse):
         context = {}
         mrp_pool = self.pool.get('mrp.production')
         
-        res, all_component_ids = mrp_pool.get_explode_report_object(
+        res, all_component_ids, used_ids = mrp_pool.get_explode_report_object(
             cr, uid, data=data, context=context)
         return res    
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

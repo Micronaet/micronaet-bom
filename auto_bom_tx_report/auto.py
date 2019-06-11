@@ -631,7 +631,7 @@ class MrpProduction(orm.Model):
         get_xls_format(mode=False, WB=WB)
         
         # Generate data report:
-        res, all_component_ids = self.get_explode_report_object(
+        res, all_component_ids, used_ids = self.get_explode_report_object(
             cr, uid, data=data, context=context)
         
         # Loop all record to write:

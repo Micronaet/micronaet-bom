@@ -32,9 +32,9 @@ from datetime import datetime
 from openerp.report import report_sxw
 from openerp.report.report_sxw import rml_parse
 from openerp.tools.translate import _
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
-    DEFAULT_SERVER_DATETIME_FORMAT, 
-    DATETIME_FORMATS_MAP, 
+from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DATETIME_FORMATS_MAP,
     float_compare)
 
 
@@ -42,9 +42,9 @@ _logger = logging.getLogger(__name__)
 
 class MrpProduction(orm.Model):
     """ Model name: MrpProduction
-    """    
+    """
     _inherit = 'mrp.production'
-    
+
     # Utility:
     def _get_all_product_in_bom(self, cr, uid, data=None, context=None):
         ''' Search product in bom line with particular category:
@@ -59,38 +59,38 @@ class MrpProduction(orm.Model):
                 domain.append(
                     ('product_id.recent_supplier_id', '=', first_supplier_id),
                     )
-                # TODO use also manual supplier?    
+                # TODO use also manual supplier?
                 #domain.extend([
                 #    '|',
                 #    ('product_id.recent_supplier_id', '=', first_supplier_id),
                 #    ('product_id.first_supplier_id', '=', first_supplier_id),
                 #    ])
-            
+
         line_pool = self.pool.get('mrp.bom.line')
         line_ids = line_pool.search(cr, uid, domain, context=context)
         res = []
         for item in line_pool.browse(cr, uid, line_ids, context=context):
             if item.product_id.id not in res:
                 res.append(item.product_id.id)
-        return res        
-        
+        return res
+
     # Moved here utility for call externally:
     def get_explode_report_object(self, cr, uid, data=None, context=None):
         ''' Search all product elements
-            data: 
+            data:
                 mode: use (product), halfwork, component for choose row
                 elements
-                
+
                 # TODO:
                 period: period type week, month
                 period: number of period for columns, max 12
-                
+
         '''
         def get_date():
             ''' Get filter selected
             '''
             return datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
-            
+
         # ---------------------------------------------------------------------
         # Utility function embedded:
         # ---------------------------------------------------------------------
@@ -98,7 +98,7 @@ class MrpProduction(orm.Model):
             ''' Add new item to record
                 y_axis: list of records
                 item: bom browse obj
-                mode: 
+                mode:
                     'line' = item > sale order line
                     'product' = item > product
             '''
@@ -107,18 +107,18 @@ class MrpProduction(orm.Model):
             else: # 'product'
                 product = item
             if purchase is None:
-                purchase = {}    
-                
-            default_code = product.default_code or ''            
+                purchase = {}
+
+            default_code = product.default_code or ''
             if default_code in y_axis:
                 return # yet present (for component check)
-                
+
             y_axis[default_code] = [ # halfworked of component
-                # Reset counter for this product    
+                # Reset counter for this product
                 # 04/01/2017: change inventory with new
                 product.mx_start_qty,
                 #product.inventory_start + product.inventory_delta, # inv+delta
-                
+
                 0.0, # tcar
                 0.0, # tscar
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # MM  (+ extra per.)
@@ -134,7 +134,7 @@ class MrpProduction(orm.Model):
                 product.inventory_category_id.name or '',
                 ]
             return
-            
+
         def get_position_season(date):
             ''' Return position in array for correct season month:
             '''
@@ -142,24 +142,24 @@ class MrpProduction(orm.Model):
                 _logger.error('Date not found')
                 return False
             month = int(date[5:7])
-            if month >= 9: # september = 0                
+            if month >= 9: # september = 0
                 return month - 9
-            # january = 4            
-            return month + 3    
-        
+            # january = 4
+            return month + 3
+
         def write_xls_line(mode, line):
             ''' Write line in correct WS with mode selection
             '''
             row = self.counter[mode]
-            
+
             col = 0
             for item in line:
                 self.WS[mode].write(row, col, item)
                 col += 1
-        
+
             self.counter[mode] += 1 # row update
-            return 
-            
+            return
+
         def has_mandatory_placeholder(default_code, product_id):
             ''' Check if the product: default_code has a component that is
                 mandatory (placeholder set and rule if present)
@@ -186,13 +186,13 @@ class MrpProduction(orm.Model):
                     product.mx_net_mrp_qty - product.mx_mrp_b_locked
                 hw_fabric[product.default_code] = [
                     # 0. Stock - MRP - assigned (Before was: mx_net_qty)
-                    available_qty if available_qty else 0.0, 
+                    available_qty if available_qty else 0.0,
                     0.0, # 1. OC remain HW
                     0.0, # 2. Stock Component (mt  of fabric)
                     #mt, # 3. Mt. from BOM
                     ]
-            current = hw_fabric[product.default_code] # readability            
-            current[1] += remain # OC total        
+            current = hw_fabric[product.default_code] # readability
+            current[1] += remain # OC total
             # XXX better once when end totalise remain
 
             # Test: OC >= Stock:
@@ -202,7 +202,7 @@ class MrpProduction(orm.Model):
                 current[2] = current[1] * mt # All ordered raw material
                 #total[0] += stock_mt
             return True
-                        
+
         # ---------------------------------------------------------------------
         # Start procedure:
         # ---------------------------------------------------------------------
@@ -231,22 +231,22 @@ class MrpProduction(orm.Model):
             exclude_inventory_ids = inventory_pool.search(cr, uid, [
                 ('not_in_report', '=', True),
                 ], context=context)
-        else:                    
-            exclude_inventory_ids = [] 
-        
+        else:
+            exclude_inventory_ids = []
+
         # Add inventory check block:
-        for_inventory_delta = data.get('for_inventory_delta', False)        
+        for_inventory_delta = data.get('for_inventory_delta', False)
         inventory_delta = {}
-        
+
         # ---------------------------------------------------------------------
-        # XLS Log file: 
+        # XLS Log file:
         # ---------------------------------------------------------------------
         now = '%s' % datetime.now()
         xls_log = '/home/administrator/photo/log/report_explode_%s_%s.xlsx' % (
             mode,
             now.replace('/', '_').replace(':', '.'),
             )
-        _logger.warning('Log file: %s' % xls_log)        
+        _logger.warning('Log file: %s' % xls_log)
         WB = xlsxwriter.Workbook(xls_log)
 
         # Work Sheet:
@@ -254,17 +254,17 @@ class MrpProduction(orm.Model):
             'move': WB.add_worksheet('Movimenti'),
             'extra': WB.add_worksheet('Extra'),
             }
-                     
+
         # Row counters:
         self.counter = {
-            'move': 0, 
+            'move': 0,
             'extra': 0,
             }
-            
+
         # Write Header line:
         write_xls_line('move', (
             'Blocco', 'Stato', 'Documento', 'Origine', 'Data', 'Posizione',
-            'Prodotto', 'Mat. prima', 'Calcolo', 'MM', 'OC', 'OF', 
+            'Prodotto', 'Mat. prima', 'Calcolo', 'MM', 'OC', 'OF',
             'Note', 'Categoria'
             ))
         # NOTE: no extra page header
@@ -277,34 +277,34 @@ class MrpProduction(orm.Model):
         move_pool = self.pool.get('stock.move')
         bom_pool = self.pool.get('mrp.bom')
         mrp_pool = self.pool.get('mrp.production')
-        
+
         # Load Y axis for report (halfwork or component):
         y_axis = {}
         category_fabric = _('Fabric')
-        
+
         # Get purchase information:
         _logger.info('Start get purchase information (date)')
         purchase_db = move_pool._get_purchase_product_last_date(
             cr, uid, context=context)
-            
+
         # ADD all fabrics in axis before all check:
         if mp_mode == 'fabric': # fabric
             fabric_list = (
-                'T3D', 'TES', 'TEX', 'TGT', 'TIO', 'TJO', 'TSK', 'TSQ', 'TWH', 
+                'T3D', 'TES', 'TEX', 'TGT', 'TIO', 'TJO', 'TSK', 'TSQ', 'TWH',
                 'TWL', 'TWM', 'TXM', 'TXI', 'TXR',
                 )
-            # TODO add also not_in_report check!!!  and not_in_report='f'  
+            # TODO add also not_in_report check!!!  and not_in_report='f'
             query = '''
-                SELECT id from product_product 
+                SELECT id from product_product
                 WHERE substring(default_code, 1, 3) IN ('%s');
-                ''' % "','".join(fabric_list)                
-                
-            cr.execute(query)  
+                ''' % "','".join(fabric_list)
+
+            cr.execute(query)
             fabric_ids = [item[0] for item in cr.fetchall()]
             for fabric in product_pool.browse(
                     cr, uid, fabric_ids, context=context):
                 add_x_item(
-                    y_axis, fabric, category_fabric, 
+                    y_axis, fabric, category_fabric,
                     purchase_db, mode='product',
                     )
 
@@ -312,23 +312,23 @@ class MrpProduction(orm.Model):
         product_data = sale_pool.get_component_in_product_order_open(
             cr, uid, context=context)
         product_proxy = product_data['product']
-        
-        # TODO manage all product for particular category? 
-        # SO: filter product in category instead of ordered product    
+
+        # TODO manage all product for particular category?
+        # SO: filter product in category instead of ordered product
 
         # Maybe removed:
         inventory_pos = get_position_season(get_date()) # for inventory mangm.1
         for product in product_proxy: # XXX Product ordered for now
             for item in product.dynamic_bom_line_ids: # XXX All Halfworked:
                 # TODO Remove log:
-            
+
                 # Note: 12/12/2017 Remove placehoder elements:
                 if item.product_id.bom_placeholder or \
                         item.product_id.bom_alternative:
                     _logger.warning('Placeholder product jumped: %s' % \
-                        item.product_id.default_code)    
+                        item.product_id.default_code)
                     continue
-                    
+
                 # XXX NOTE: Filter category always in hw not component!
                 if with_type_ids and \
                         item.category_id.type_id.id not in with_type_ids:
@@ -338,35 +338,35 @@ class MrpProduction(orm.Model):
                     continue # Jump not in category selected
                 if exclude_inventory_ids and \
                         item.product_id.inventory_category_id.id\
-                        in exclude_inventory_ids:    
-                    _logger.warning('Product category not in report')    
-                    continue # Jump BOM element in excluded category    
-                    
-                # in halfwork use only hw component:    
-                half_bom_ids = item.product_id.half_bom_ids    
+                        in exclude_inventory_ids:
+                    _logger.warning('Product category not in report')
+                    continue # Jump BOM element in excluded category
+
+                # in halfwork use only hw component:
+                half_bom_ids = item.product_id.half_bom_ids
                 if mode == 'halfwork' and half_bom_ids: # hw with component
                     # 10/01/2018 change first with recent
                     if first_supplier_id and first_supplier_id != \
                                 item.product_id.recent_supplier_id.id:
-                        continue # Jump not supplier present   
-                         
+                        continue # Jump not supplier present
+
                     category = item.category_id.type_id.name if \
                         item.category_id and item.category_id.type_id else \
                             _('No category')
-                    add_x_item(y_axis, item, category, purchase_db)                                        
+                    add_x_item(y_axis, item, category, purchase_db)
                 elif mode == 'component' and not half_bom_ids: # cmpt in BOM
                     # 10/01/2018 restore supplier filter on recent_supplier_id
                     if first_supplier_id and first_supplier_id != \
                                 item.product_id.recent_supplier_id.id:
-                        continue # Jump not supplier present    
-                        
+                        continue # Jump not supplier present
+
                     if mp_mode == 'fabric' and item.product_id.id not in \
                             fabric_ids: # jump not fabric
                         continue
                     category = item.category_id.type_id.name if \
                         item.category_id and item.category_id.type_id else \
                             _('No category')
-                    # TODO write category as component mode (pipe/fabric)        
+                    # TODO write category as component mode (pipe/fabric)
                     add_x_item(y_axis, item, category, purchase_db)
                 elif mode == 'component': # >>> component HW and component BOM
                     # TODO log halfcomponent with empty list
@@ -375,7 +375,7 @@ class MrpProduction(orm.Model):
                         # 10/01/2018 supplier filter on recent_supplier_id
                         if first_supplier_id and first_supplier_id != \
                                     item.product_id.recent_supplier_id.id:
-                            continue # Jump not supplier present    
+                            continue # Jump not supplier present
 
                         if mp_mode == 'fabric' and component.product_id.id \
                                 not in fabric_ids:
@@ -383,36 +383,36 @@ class MrpProduction(orm.Model):
 
                         if exclude_inventory_ids and \
                                 component.product_id.inventory_category_id.id\
-                                in exclude_inventory_ids:    
-                            continue # Jump BOM element in excluded category    
-                        
+                                in exclude_inventory_ids:
+                            continue # Jump BOM element in excluded category
+
                         # Create ad hoc category:
                         if component.product_id.is_pipe:
                             category = _('Pipes')
-                        else:    
+                        else:
                             category = _('Fabric (or extra)')
                         add_x_item(y_axis, component, category, purchase_db)
-                else: 
+                else:
                     # no above cases
-                    continue        
-                        
-        write_xls_line('extra', ('Component / Halfworked selected:', ))            
-        for code in y_axis.keys():    
-            write_xls_line('extra', (code, ))        
-        
+                    continue
+
+        write_xls_line('extra', ('Component / Halfworked selected:', ))
+        for code in y_axis.keys():
+            write_xls_line('extra', (code, ))
+
         # =====================================================================
         # Get parameters for search:
         # =====================================================================
         company_ids = company_pool.search(cr, uid, [])
         company_proxy = company_pool.browse(cr, uid, company_ids)[0]
-            
+
         # Exclude partner list:
         exclude_partner_ids = []
 
-        # Append also this company partner for inventory that need to be excl.    
+        # Append also this company partner for inventory that need to be excl.
         # TODO check if is correct the remove of company:
         exclude_partner_ids.append(company_proxy.partner_id.id)
-        
+
         # From date:
         # Period range for documents
         month = datetime.now().month
@@ -434,28 +434,28 @@ class MrpProduction(orm.Model):
         block = 'OF, BF, CL, CL prod., CL lav., CL inv.'
         # Keep exclude_partner_ids for CL production esclusion?
         # XXX Note: first for creation of new elements if not present in OC
-        
+
         in_picking_type_ids = []
 
         # Use textilene company page:
         for item in company_proxy.stock_report_tx_load_in_ids:
             in_picking_type_ids.append(item.id)
-            
-        pick_ids = pick_pool.search(cr, uid, [     
-            ('picking_type_id', 'in', in_picking_type_ids),            
-            ('partner_id', 'not in', exclude_partner_ids),            
+
+        pick_ids = pick_pool.search(cr, uid, [
+            ('picking_type_id', 'in', in_picking_type_ids),
+            ('partner_id', 'not in', exclude_partner_ids),
             # check data date (old method
             #('date', '>=', from_date), # XXX correct for virtual?
             #('date', '<=', to_date),
             # TODO state filter
             ])
-            
+
         for pick in pick_pool.browse(cr, uid, pick_ids, context=context):
             pos = get_position_season(pick.date) # for done cols  (min_date?)
             for line in pick.move_lines:
-                default_code = line.product_id.default_code                              
+                default_code = line.product_id.default_code
                 qty = line.product_uom_qty
-                
+
                 if default_code not in y_axis:
                     write_xls_line('move', (
                         block, 'NOT USED', pick.name, pick.origin, pick.date,
@@ -463,7 +463,7 @@ class MrpProduction(orm.Model):
                         default_code, '', 0, 0, 0,
                         'OF / BF WARNING CODE NOT IN SELECTED LIST (X)',
                         ''
-                        )) 
+                        ))
                     continue
 
                 # -------------------------------------------------------------
@@ -477,21 +477,21 @@ class MrpProduction(orm.Model):
                         write_xls_line('move', (
                             block, 'NOT USED', pick.name, pick.origin,
                             line.date_expected, '', # POS
-                            '', # product_code                                
+                            '', # product_code
                             default_code, '', 0, 0, 0,
                             'OF date expected extra range!: Q.: %s' % qty,
                             ''
-                            )) 
+                            ))
                         continue
 
                     pos = get_position_season(line.date_expected)
                     y_axis[default_code][5][pos] += qty # OF block
                     write_xls_line('move', (
-                        block, 'USED', pick.name, pick.origin, 
-                        line.date_expected, pos, '', # product_code                                
+                        block, 'USED', pick.name, pick.origin,
+                        line.date_expected, pos, '', # product_code
                         default_code, '', 0, 0, qty, 'OF',
                         ''
-                        ))                      
+                        ))
                     continue
 
                 # -------------------------------------------------------------
@@ -502,7 +502,7 @@ class MrpProduction(orm.Model):
                     date = pick.date or pick.date_done or pick.min_date
                     # 28 gen. 2017 data is now first, after is the last!
                     pos = get_position_season(date)
-                
+
                     # USE order data:
                     # Change for jump year 04/01/2017 (for year change 1/1)
                     #if date > period_to or date < period_from: # extra range
@@ -510,98 +510,98 @@ class MrpProduction(orm.Model):
                     if (date < period_from) or (date > period_to): # extrarange
                         write_xls_line('move', (
                             block, 'NOT USED', pick.name, pick.origin,
-                            date, pos, '', # product_code                                
+                            date, pos, '', # product_code
                             default_code, '', 0, 0, 0,
                             'BF date doc extra range!!: Q.: %s' % qty,
                             ''
-                            )) 
+                            ))
                         continue
-                    
+
                     y_axis[default_code][3][pos] += qty # MM block
-                    y_axis[default_code][1] += qty # TCAR                    
+                    y_axis[default_code][1] += qty # TCAR
                     write_xls_line('move', (
                         block, 'USED', pick.name, pick.origin, date,
-                        pos, '', # product_code                                
+                        pos, '', # product_code
                         default_code, '', qty, # +MM
                         0, 0, 'BF ADD IN TCAR',
                         ''
-                        ))                      
+                        ))
                     continue
 
         # =====================================================================
         # UNLOAD PICKING (CUSTOMER ORDER PICK OUT) DIRECT SALE OF COMPONENT
         # =====================================================================
-        # TODO manage inventory_id > stock.inventory for manual correction 
+        # TODO manage inventory_id > stock.inventory for manual correction
         block = 'BC PICK OUT' # Direct sale of halfwork
         # XXX Note: no unload MM during BC (only production)
-            
+
         out_picking_type_ids = []
-        for item in company_proxy.stock_report_tx_load_out_ids: 
+        for item in company_proxy.stock_report_tx_load_out_ids:
             out_picking_type_ids.append(item.id)
-            
-        pick_ids = pick_pool.search(cr, uid, [     
+
+        pick_ids = pick_pool.search(cr, uid, [
             ('picking_type_id', 'in', out_picking_type_ids),
             ('partner_id', 'not in', exclude_partner_ids), # current company
-            
+
             # Only in period # TODO remove if check extra data
             # XXX OLD: 04/01/2017 Changed for clean before 1/1
             # XXX no more use with period: [01/09-31/08]
             ('date', '>=', period_from), # XXX 01/09
-            ('date', '<=', period_to), 
+            ('date', '<=', period_to),
             ])
-            
+
         for pick in pick_pool.browse(cr, uid, pick_ids):
             pos = get_position_season(pick.date) # cols  (min_date?)
             # TODO no check for period range
-            for line in pick.move_lines:               
+            for line in pick.move_lines:
                 product_code = line.product_id.default_code
-                product = line.product_id                
+                product = line.product_id
                 if line.state != 'done':
                     write_xls_line('move', (
-                        block, 'NOT USED', pick.name, pick.origin, pick.date, 
+                        block, 'NOT USED', pick.name, pick.origin, pick.date,
                         pos, product_code, '', '', 0, 0, 0,
                         'BC MOVE State not in done (jumped)',
                         ''
                         ))
-                    continue    
-                    
+                    continue
+
                 # check direct sale:
                 if product_code in y_axis: # Component direct:
-                    qty = line.product_uom_qty # for direct sale            
-                    y_axis[product_code][3][pos] -= qty # MM block  
+                    qty = line.product_uom_qty # for direct sale
+                    y_axis[product_code][3][pos] -= qty # MM block
                     y_axis[product_code][2] -= qty # TSCAR
                     write_xls_line('move', (
                         block, 'USED', pick.name, pick.origin,
                         pick.date, pos, '', product_code, # Prod is MP
                         '', -qty, # MM
-                        0, 0, 
+                        0, 0,
                         'BC MOVE Direct sale of component (ADD IN TSCAR)',
                         ''
                         ))
-                    continue    
-                
+                    continue
+
         # =====================================================================
         #                 CUSTOMER ORDER TO PRODUCE (NOT DELIVERED)
         # =====================================================================
         block = 'OC (not delivered)'
-        # XXX Note: used only for manage OC remain: 
+        # XXX Note: used only for manage OC remain:
         #    OC - B if B > Del.
         #    OC - Del if B < Del.
-        
+
         order_ids = company_pool.mrp_domain_sale_order_line(
             cr, uid, context=context)
 
         for order in sale_pool.browse(cr, uid, order_ids, context=context):
             # Search in order line:
-            for line in order.order_line:                
+            for line in order.order_line:
                 # FC order no deadline (use date)
-                #datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)) 
+                #datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT))
                 product = line.product_id # readability
                 product_code = line.product_id.default_code
                 date = line.date_deadline or order.date_order
                 pos = get_position_season(date)
-                
-                # OC exclude no parcels product:                
+
+                # OC exclude no parcels product:
                 if product.exclude_parcels:
                     write_xls_line('move', (
                         block, 'NOT USED', order.name, '', date, pos, '', #code
@@ -610,8 +610,8 @@ class MrpProduction(orm.Model):
                         0, # XXX keep 0 (-OC)
                         0, 'OC NO PARCELS PRODUCT',
                         ''
-                        ))                      
-                    continue     
+                        ))
+                    continue
 
                 (remain, not_delivered) = \
                     company_pool.mrp_order_line_to_produce_assigned(line)
@@ -622,7 +622,7 @@ class MrpProduction(orm.Model):
                 # --------------------------------
                 # Explode HW subcomponent for report 2
                 if mode != 'halfwork': # component
-                    for comp in product.half_bom_ids:             
+                    for comp in product.half_bom_ids:
                         comp_code = comp.product_id.default_code
                         if comp_code not in y_axis: # OC out item (no prod.):
                             # TODO log component not used
@@ -631,7 +631,7 @@ class MrpProduction(orm.Model):
                         comp_remain = remain * comp.product_qty
                         y_axis[comp_code][4][pos] -= comp_remain # OC
                         write_xls_line('move', (
-                            block, 'USED', order.name, '', date, pos, 
+                            block, 'USED', order.name, '', date, pos,
                             product_code, # Code
                             comp_code, # component
                             '', 0, # +MM
@@ -645,9 +645,9 @@ class MrpProduction(orm.Model):
                         # Update extra line for fabric HW use:
                         # 19 feb 2019 use also for component:
                         #if mp_mode == 'fabric':
-                        update_hw_data_line(y_axis[comp_code], 
+                        update_hw_data_line(y_axis[comp_code],
                             product, remain, comp.product_qty)
-                        # go ahead for download component    
+                        # go ahead for download component
 
                 # Direct sale hw or component:
                 if product_code in y_axis: # HW or component direct:
@@ -659,10 +659,10 @@ class MrpProduction(orm.Model):
                         remain, # -OC
                         0, 'OC DIRECT SALE HALFWORK OR COMPONENT',
                         ''
-                        ))                      
-                    continue                          
-                
-                # No bom for this product: 
+                        ))
+                    continue
+
+                # No bom for this product:
                 if not len(product.dynamic_bom_line_ids):
                     write_xls_line('move', (
                         block, 'NOT USED', order.name, '', date, pos,
@@ -671,7 +671,7 @@ class MrpProduction(orm.Model):
                         0, # -OC
                         0, 'OC PRODUCT WITHOUT BOM, Q.: %s' % remain,
                         ''
-                        ))                      
+                        ))
                     continue
 
                 # TODO error for negative?
@@ -682,11 +682,11 @@ class MrpProduction(orm.Model):
                         '', 0, # +MM
                         0, 0, 'OC ALL DELIVERED OR NEGATIVE DELIVER',
                         ''
-                        ))  
+                        ))
                     continue
-                
+
                 # USE order data:
-                # Note: Remain period_from instead of mm_from exclude extra 
+                # Note: Remain period_from instead of mm_from exclude extra
                 # period order always 1/9
                 if date < period_from or date > period_to: # extra range
                     write_xls_line('move', (
@@ -695,7 +695,7 @@ class MrpProduction(orm.Model):
                         '', 0, # +MM
                         0, 0, 'OC EXTRA RANGE, qty: %s' % remain,
                         ''
-                        ))                      
+                        ))
                     continue
 
                 # -----------------------------------
@@ -704,13 +704,13 @@ class MrpProduction(orm.Model):
                 for item in product.dynamic_bom_line_ids:
                     item_code = item.product_id.default_code
                     item_remain = remain * item.product_qty
-                    
-                    half_bom_ids = item.product_id.half_bom_ids    
+
+                    half_bom_ids = item.product_id.half_bom_ids
                     if mode == 'halfwork' and half_bom_ids: # hw with comp.
                         if item_code in y_axis: # OC out item (no prod.):
                             y_axis[item_code][4][pos] -= item_remain # OC block
                             write_xls_line('move', (
-                                block, 'USED', order.name, '', date, pos, 
+                                block, 'USED', order.name, '', date, pos,
                                 product_code, # code
                                 item_code, # MP
                                 '', 0, # +MM
@@ -718,14 +718,14 @@ class MrpProduction(orm.Model):
                                 0, 'OC HALFWORKED REMAIN (HW)',
                                 item.category_id.name if item.category_id \
                                     else 'NO CATEGORY',
-                                ))                      
-                        # else: TODO log not used        
-                        
+                                ))
+                        # else: TODO log not used
+
                     elif mode == 'component' and not half_bom_ids: # cmpt BOM
                         if item_code in y_axis: # OC out item (no prod.):
                             y_axis[item_code][4][pos] -= item_remain # OC block
                             write_xls_line('move', (
-                                block, 'USED', order.name, '', date, pos, 
+                                block, 'USED', order.name, '', date, pos,
                                 product_code, # code
                                 item_code, # MP
                                 '', 0, # +MM
@@ -733,16 +733,16 @@ class MrpProduction(orm.Model):
                                 0, 'OC HALFWORKED REMAIN (HW-0)',
                                 item.category_id.name if item.category_id \
                                     else 'NO CATEGORY',
-                                ))                      
-                    
+                                ))
+
                     elif mode == 'component':
                         for comp in item.product_id.half_bom_ids:
                             comp_code = comp.product_id.default_code
                             comp_remain = item_remain * comp.product_qty
-                            
+
                             if comp_code not in y_axis: # OC out item (no prod.):
                                 write_xls_line('move', (
-                                    block, 'NOT USED', order.name, '', date, 
+                                    block, 'NOT USED', order.name, '', date,
                                     pos, item_code, # Code
                                     comp_code, # component
                                     '', 0, # +MM
@@ -752,10 +752,10 @@ class MrpProduction(orm.Model):
                                         else 'NO CATEGORY',
                                     ))
                                 continue
-                                
+
                             y_axis[comp_code][4][pos] -= comp_remain # OC
                             write_xls_line('move', (
-                                block, 'USED', order.name, '', date, pos, 
+                                block, 'USED', order.name, '', date, pos,
                                 item_code, # Code
                                 comp_code, # component
                                 '', 0, # +MM
@@ -768,47 +768,47 @@ class MrpProduction(orm.Model):
                             # Update extra line for fabric HW use:
                             # 19 feb 2019 use also for component:
                             #if mp_mode == 'fabric':
-                            update_hw_data_line(y_axis[comp_code], 
+                            update_hw_data_line(y_axis[comp_code],
                                 item.product_id, # HW reference
                                 item_remain, # HW remain
                                 comp.product_qty, # Component remain
-                                )                            
+                                )
                         continue # needed?
                     else:
                         continue # no case jump
-                        
+
         # =====================================================================
         #                  UNLOAD FOR PRODUCTION MRP ORDER
         # =====================================================================
         block = 'MRP (unload component prod.)'
-        # XXX Note: used only for manage OC remain: 
-        
+        # XXX Note: used only for manage OC remain:
+
         #if mode == 'halfwork': # only half explode MRP (comp > lavoration)
-        mrp_ids = mrp_pool.search(cr, uid, [        
+        mrp_ids = mrp_pool.search(cr, uid, [
             # State filter:
             ('state', '!=', 'cancel'), # TODO correct? for unload element?
-            
+
             # Period filter:
             # XXX OLD: 04/01/2017 MRP from 1/9 or 1/1 depend on change year
             # XXX no more use with period: [01/09-31/08]
             ('date_planned', '>=', period_from), # 1/9 or 1/1
             ('date_planned', '<=', period_to),
-            
+
             # No customer exclude filter
             ])
-        
+
         for order in mrp_pool.browse(cr, uid, mrp_ids, context=context):
             date = order.date_planned
-            
+
             # Search in order line:
             for line in order.order_line_ids:
                 product = line.product_id # readability
                 product_code = line.product_id.default_code
-                pos = get_position_season(date)                                
+                pos = get_position_season(date)
                 qty = line.product_uom_maked_sync_qty
 
                 # XXX No direct production (use lavorat. CL / CL for this):
-                
+
                 if not len(product.dynamic_bom_line_ids): # no bom
                     write_xls_line('move', (
                         block, 'NOT USED', order.name, '', date, pos,
@@ -817,7 +817,7 @@ class MrpProduction(orm.Model):
                         0, # -OC
                         0, 'MRP PRODUCT WITHOUT BOM, Q.: %s' % qty,
                         '',
-                        ))                      
+                        ))
                     continue
 
                 # --------------------
@@ -825,88 +825,88 @@ class MrpProduction(orm.Model):
                 # --------------------
                 for comp in product.dynamic_bom_line_ids:
                     comp_code = comp.product_id.default_code
-                    comp_qty = qty * comp.product_qty 
+                    comp_qty = qty * comp.product_qty
 
                     # Check placehoder:
                     if has_mandatory_placeholder(
                             product_code, comp.product_id):# bom_alternative?
                         write_xls_line('move', (
-                            block, 'NOT USED', order.name, '', date, 
+                            block, 'NOT USED', order.name, '', date,
                             pos, product_code,
                             comp_code, # MP
                             '', -comp_qty,
                             0, 0, 'MRP PRESENTE UN [DA ASSEGNARE]',
                             comp.category_id.name if comp.category_id\
                                  else 'NO CATEGORY',
-                            ))                 
+                            ))
                         continue
 
                     if comp_code in y_axis: # OC out component (no prod.):
                         y_axis[comp_code][3][pos] -= comp_qty # MM block
                         y_axis[comp_code][2] -= comp_qty #TSCAR for MRP
                         write_xls_line('move', (
-                            block, 'USED', order.name, '', date, pos, 
+                            block, 'USED', order.name, '', date, pos,
                             product_code,
                             comp_code, # MP
                             '', -comp_qty, # -MM
                             0, 0, 'MRP COMPONENT UNLOAD (ADD in TSCAR)',
                             comp.category_id.name if comp.category_id else\
                                 'NO CATEGORY',
-                            ))                       
+                            ))
                         continue
                     else:
                         write_xls_line('move', (
-                            block, 'NOT USED', order.name, '', date, pos, 
+                            block, 'NOT USED', order.name, '', date, pos,
                             product_code,
                             comp_code, # MP
                             '', -comp_qty, # -MM
                             0, 0, 'MRP COMPONENT NOT IN LIST',
                             comp.category_id.name if comp.category_id \
                                 else 'NO CATEGORY',
-                            ))  
-                        continue                         
+                            ))
+                        continue
 
         # ---------------------------------------------------------------------
         # Prepare data for report:
         # ---------------------------------------------------------------------
         res = []
         self.jumped = []
-    
+
         # Fabric has different sort block:
         if mp_mode == 'fabric':
             _logger.info('Set sort for fabric')
             order_mode = lambda code: (
-                y_axis[code][8], 
-                code[0:3], 
-                code[6:12], 
+                y_axis[code][8],
+                code[0:3],
+                code[6:12],
                 code[3:6],
                 )
         else:
             _logger.info('Set sort for all')
             order_mode = lambda code: (
-                y_axis[code][12], 
+                y_axis[code][12],
                 code,
                 )
-                
+
         write_xls_line('extra', ('Remove lines:', ))
-        
+
         all_component_ids = self._get_all_product_in_bom(
             cr, uid, data=data, context=context)
         # TODO remove unwanted category:
 
         for key in sorted(y_axis, key=order_mode):
-            # -----------------------------------------------------------------    
+            # -----------------------------------------------------------------
             # Normal report block:
-            # -----------------------------------------------------------------    
+            # -----------------------------------------------------------------
             current = y_axis[key] # readability:
             product = current[7]
-            
+
             # Remove component for check:
             if product.id in all_component_ids:
                 all_component_ids.remove(product.id)
 
             total = 0.0 # INV 0.0
-            
+
             # XXX NOTE: INV now is 31/12 next put Sept. (old information)
             # inv_pos = 3 # December # TODO never use this!!!
             inv_pos = 0 # September (always append here inventory)
@@ -919,7 +919,7 @@ class MrpProduction(orm.Model):
                 current[3][i] = int(round(current[3][i], 0))
                 current[4][i] = int(round(current[4][i], 0))
                 current[5][i] = int(round(current[5][i], 0))
-                
+
                 # Empty block test:
                 if not(any(current[3]) or any(current[4]) or \
                         any(current[5]) or current[0]> 0.0):
@@ -927,11 +927,11 @@ class MrpProduction(orm.Model):
                     self.jumped.append(current[7]) # product proxy
                     jumped = True
                     # XXX Maybe optimize: Repeat loop for nothing?
-                    continue    
-                
+                    continue
+
                 if i == inv_pos:
                     # TODO remove from TCAR inventory!!!
-                    #current[1] -= round(current[0], 0) # TCAR                
+                    #current[1] -= round(current[0], 0) # TCAR
                     total += round(current[0], 0) # Add inv.
 
                 total += round(
@@ -939,11 +939,11 @@ class MrpProduction(orm.Model):
                 current[6][i] = int(total)
                 if only_negative and current[6][i] < 0.0:
                     negative = True
-                
-            # -----------------------------------------------------------------    
+
+            # -----------------------------------------------------------------
             # Inventory managenent block:
-            # -----------------------------------------------------------------  
-            # XXX maybe remove:  
+            # -----------------------------------------------------------------
+            # XXX maybe remove:
             if for_inventory_delta and \
                     product.default_code not in inventory_delta:
                 inventory_delta[product.default_code] = (
@@ -957,47 +957,47 @@ class MrpProduction(orm.Model):
             # Append progress totals:
             if jumped:
                 write_xls_line('extra', (product.default_code, ))
-            else:  
+            else:
                 if only_negative:
                     if negative:
                         res.append(current)
-                else:    
+                else:
                     res.append(current)
 
         # Restore previous state:
         user_pool.set_no_inventory_status(
             cr, uid, value=previous_status, context=context)
 
-        # Return depend on request inventory or report        
+        # Return depend on request inventory or report
         if for_inventory_delta:
             return inventory_delta
         else:
             # Add extra component not used
-            if mp_mode != 'fabric': # only for component  
-                used_ids = []              
+            if mp_mode != 'fabric': # only for component
+                used_ids = []
                 for product in product_pool.browse(
                         cr, uid, all_component_ids, context=context):
-                    if product.mx_net_mrp_qty <= 0.0:    
+                    if product.mx_net_mrp_qty <= 0.0:
                         continue
-                    
+
                     category = product.category_id.type_id.name if \
-                        product.category_id and product.category_id.type_id else \
-                            _('No category')
-                    #product.inventory_category_id.name        
-                    
+                        product.category_id and \
+                        product.category_id.type_id else _('No category')
+                    #product.inventory_category_id.name
+
                     if not category:
                         continue
                     used_ids.append(product.id)
                     add_x_item(
-                        y_axis, product, category, purchase_db, 'product') 
-                                                        
+                        y_axis, product, category, purchase_db, 'product')
+
             return res, list(set(all_component_ids) - set(used_ids)), used_ids
-    
+
 class Parser(report_sxw.rml_parse):
     counters = {}
     headers = {}
-    
-    def __init__(self, cr, uid, name, context):        
+
+    def __init__(self, cr, uid, name, context):
         super(Parser, self).__init__(cr, uid, name, context)
         self.localcontext.update({
             'get_object': self.get_object,
@@ -1024,22 +1024,22 @@ class Parser(report_sxw.rml_parse):
 
     def get_object(self, data):
         ''' Search all product elements
-            data: 
+            data:
                 mode: use (product), halfwork, component for choose row
                 elements
-                
+
                 # TODO:
                 period: period type week, month
                 period: number of period for columns, max 12
-                
+
         '''
-        # Readability:    
+        # Readability:
         cr = self.cr
         uid = self.uid
         context = {}
         mrp_pool = self.pool.get('mrp.production')
-        
+
         res, all_component_ids, used_ids = mrp_pool.get_explode_report_object(
             cr, uid, data=data, context=context)
-        return res    
+        return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

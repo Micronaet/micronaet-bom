@@ -1031,7 +1031,6 @@ class Parser(report_sxw.rml_parse):
                 # TODO:
                 period: period type week, month
                 period: number of period for columns, max 12
-
         '''
         # Readability:
         cr = self.cr

@@ -980,13 +980,13 @@ class MrpProduction(orm.Model):
                     if product.mx_net_mrp_qty <= 0.0:
                         continue
 
-                    category = product.category_id.type_id.name if \
-                        product.category_id and \
-                        product.category_id.type_id else _('No category')
-                    #product.inventory_category_id.name
+                    #category = product.category_id.type_id.name if \
+                    #    product.category_id and \
+                    #    product.category_id.type_id else _('No category')
+                    category = '' # XXX product.inventory_category_id.name
 
-                    if not category:
-                        continue
+                    #if not category:
+                    #    continue
                     used_ids.append(product.id)
                     add_x_item(
                         y_axis, product, category, purchase_db, 'product')

@@ -57,4 +57,15 @@ class ProductProductInventoryCategory(orm.Model):
     _columns = {
         'not_in_report': fields.boolean('No report'),
         }
+
+'''class ProductProduct(orm.Model):
+    """ Model name: ProductProduct
+    """
+    
+    _inherit = 'product.product'
+    
+    _columns = {
+        'is_obsolete': fields.boolean('Is obsolete'),
+        }
+'''     
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

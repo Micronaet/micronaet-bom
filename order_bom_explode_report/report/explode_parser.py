@@ -901,12 +901,28 @@ class MrpProduction(orm.Model):
 
         write_xls_line('extra', ('Remove lines:', ))
 
-        import pdb; pdb.set_trace()
         if mp_mode == 'fabric':
             all_component_ids = [] # not need in fabric report!
-        else:                
+        else: # component
+            # Search all product with inventory category used:
             all_component_ids = self._get_all_product_in_bom(
-                cr, uid, data=data, exclude_inventory_ids, context=context)
+                cr, uid, 
+                data=data, 
+                exclude_inventory_ids=exclude_inventory_ids, 
+                context=context)
+
+            # Remove the one with stock:
+            for product in product_pool.browse(
+                    cr, uid, all_component_ids, context=context):
+                if product.mx_net_mrp_qty <= 0.0:
+                    continue
+                category = '' # XXX no more used?
+                add_x_item(
+                    y_axis, product, category, purchase_db, 'product')
+
+                # Remove component for check:
+                if product.id in all_component_ids:
+                    all_component_ids.remove(product.id)
 
         for key in sorted(y_axis, key=order_mode):
             # -----------------------------------------------------------------
@@ -914,10 +930,6 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             current = y_axis[key] # readability:
             product = current[7]
-
-            # Remove component for check:
-            if product.id in all_component_ids:
-                all_component_ids.remove(product.id)
 
             total = 0.0 # INV 0.0
 
@@ -986,19 +998,7 @@ class MrpProduction(orm.Model):
         if for_inventory_delta:
             return inventory_delta
 
-        # B. Case: Fabric textilene
-        if mp_mode == 'fabric': # only for component
-            return res, all_component_ids
-    
-        # C. CAse: Component
-        for product in product_pool.browse(
-                cr, uid, all_component_ids, context=context):
-            if product.mx_net_mrp_qty <= 0.0:
-                continue
-            category = '' # XXX product.inventory_category_id.name
-            add_x_item(
-                y_axis, product, category, purchase_db, 'product')
-
+        # B. Case: Component, Fabric textilene
         return res, all_component_ids
 
 class Parser(report_sxw.rml_parse):

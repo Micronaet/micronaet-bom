@@ -12,15 +12,7 @@
                 </field>
             </field>
         </record>
-        
-        <!--<record model="ir.ui.view" id="view_product_product_obsolete_form">
-            <field name="name">product.product.form</field>
-            <field name="model">product.product</field>
-            <field name="inherit_id" ref="product.product_normal_form_view"/>
-            <field name="arch" type="xml">
-                
-            </field>
-        </record>-->
+
         <record model="ir.ui.view" id="view_product_product_inventory_category_no_report_tree">
             <field name="name">product.product.inventory.category.tree</field>
             <field name="model">product.product.inventory.category</field>

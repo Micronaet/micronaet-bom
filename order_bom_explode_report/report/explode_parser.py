@@ -46,13 +46,21 @@ class MrpProduction(orm.Model):
     _inherit = 'mrp.production'
 
     # Utility:
-    def _get_all_product_in_bom(self, cr, uid, data=None, context=None):
+    def _get_all_product_in_bom(self, cr, uid, data=None, 
+            exclude_inventory_ids=None, context=None):
         ''' Search product in bom line with particular category:
         '''
         # TODO Write a parameter for print only in scheduled launch
         domain = [
             ('bom_id.bom_category', 'in', ('dynamic', 'half', 'parent')),
             ]
+        
+        # Remove product in excluded category:
+        if exclude_inventory_ids is not None:
+            domain.append((
+                'bom_id.product_id.inventory_category_id', 'not in', 
+                exclude_inventory_ids))
+                
         if data is not None:
             first_supplier_id = data.get('first_supplier_id')
             if first_supplier_id:
@@ -224,6 +232,9 @@ class MrpProduction(orm.Model):
         exclude_inventory_category = data.get(
             'exclude_inventory_category', False)
 
+        # ---------------------------------------------------------------------
+        # Exclude marked "no report" inventory category:
+        # ---------------------------------------------------------------------
         if exclude_inventory_category:
             # TODO load exlude category:
             inventory_pool = self.pool.get(
@@ -890,9 +901,12 @@ class MrpProduction(orm.Model):
 
         write_xls_line('extra', ('Remove lines:', ))
 
-        all_component_ids = self._get_all_product_in_bom(
-            cr, uid, data=data, context=context)
-        # TODO remove unwanted category:
+        import pdb; pdb.set_trace()
+        if mp_mode == 'fabric':
+            all_component_ids = [] # not need in fabric report!
+        else:                
+            all_component_ids = self._get_all_product_in_bom(
+                cr, uid, data=data, exclude_inventory_ids, context=context)
 
         for key in sorted(y_axis, key=order_mode):
             # -----------------------------------------------------------------
@@ -968,30 +982,26 @@ class MrpProduction(orm.Model):
         user_pool.set_no_inventory_status(
             cr, uid, value=previous_status, context=context)
 
-        # Return depend on request inventory or report
+        # A. Case: Inventory data:
         if for_inventory_delta:
             return inventory_delta
-        else:
-            # Add extra component not used
-            if mp_mode != 'fabric': # only for component
-                used_ids = []
-                for product in product_pool.browse(
-                        cr, uid, all_component_ids, context=context):
-                    if product.mx_net_mrp_qty <= 0.0:
-                        continue
 
-                    #category = product.category_id.type_id.name if \
-                    #    product.category_id and \
-                    #    product.category_id.type_id else _('No category')
-                    category = '' # XXX product.inventory_category_id.name
+        # B. Case: Fabric textilene
+        if mp_mode == 'fabric': # only for component
+            return res, all_component_ids, []
+    
+        # C. CAse: Component
+        used_ids = []
+        for product in product_pool.browse(
+                cr, uid, all_component_ids, context=context):
+            if product.mx_net_mrp_qty <= 0.0:
+                continue
+            category = '' # XXX product.inventory_category_id.name
+            used_ids.append(product.id)
+            add_x_item(
+                y_axis, product, category, purchase_db, 'product')
 
-                    #if not category:
-                    #    continue
-                    used_ids.append(product.id)
-                    add_x_item(
-                        y_axis, product, category, purchase_db, 'product')
-
-            return res, list(set(all_component_ids) - set(used_ids)), used_ids
+        return res, list(set(all_component_ids) - set(used_ids)), used_ids
 
 class Parser(report_sxw.rml_parse):
     counters = {}

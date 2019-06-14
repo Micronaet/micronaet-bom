@@ -140,6 +140,7 @@ class MrpProduction(orm.Model):
             #'mp_mode': False,# TODO check
             #'days': 30, 
             #'first_supplier_id': False, 
+            'exclude_inventory_category': True, # Remove category not used
             }
 
         # ---------------------------------------------------------------------

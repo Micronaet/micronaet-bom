@@ -631,11 +631,15 @@ class MrpProduction(orm.Model):
         # Generate format database:
         get_xls_format(mode=False, WB=WB)
         
-        # Generate data report:
+        # ---------------------------------------------------------------------
+        # A. Generate data report:
+        # ---------------------------------------------------------------------
         res, all_component_ids, used_ids = self.get_explode_report_object(
             cr, uid, data=data, context=context)
         
-        # Loop all record to write:
+        # ---------------------------------------------------------------------
+        # Data record in different sheet: Loop all record to write
+        # ---------------------------------------------------------------------
         for line in res:
             category_name = line[12] or 'Non presente'
             if category_name not in WS_page:
@@ -648,50 +652,53 @@ class MrpProduction(orm.Model):
             # Save row returned:
             WS_page[category_name][1] = write_xls_block_line(WS, row, line)
             
-        # Write unused lines:    
-        _logger.warning('Write unused lines in Excel') 
-        product_pool = self.pool.get('product.product')
-        WS = WB.add_worksheet(_('Non usati'))
-        WS.set_column('A:A', 30)
-        WS.set_column('B:B', 15)
-        WS.set_column('C:D', 30)
-        WS.set_column('E:F', 15)
-        
-        # Header
-        format_text = get_xls_format('text')
-        row = 0
-        write_xls_mrp_line(WS, row, [(
-            'Elenco componenti non presenti nella stampa appartenenti a: '
-            'DB Dinamiche, padre e semilavorato (se filtro fornitore attivo '
-            'viene applicato anche qui)', format_text),
-            ])
-        row = 1
-        write_xls_mrp_line(WS, row, [
-            ('Categoria inv.', format_text),
-            ('Codice', format_text), 
-            ('Nome', format_text),
-            ('Ultimo forn.', format_text),
-            ('Netto', format_text),
-            ('Lordo', format_text),
-            ])
-
-        # Sorted method:
-        sorted_product = sorted(product_pool.browse(
-            cr, uid, all_component_ids, context=context), 
-            key=lambda x: (x.inventory_category_id.name, x.default_code),
-            )
-
-        # Line:
-        for product in sorted_product:
-            row += 1    
-            write_xls_mrp_line(WS, row, [
-                (product.inventory_category_id.name, format_text),
-                (product.default_code or '', format_text),
-                (product.name, format_text),
-                (product.recent_supplier_id.name or '', format_text),
-                (product.mx_net_mrp_qty, format_text),
-                (product.mx_lord_mrp_qty, format_text),
+        # ---------------------------------------------------------------------
+        # B. Extra page unused component
+        # ---------------------------------------------------------------------
+        if all_component_ids: 
+            _logger.warning('Write unused lines in Excel') 
+            product_pool = self.pool.get('product.product')
+            WS = WB.add_worksheet(_('Non usati'))
+            WS.set_column('A:A', 30)
+            WS.set_column('B:B', 15)
+            WS.set_column('C:D', 30)
+            WS.set_column('E:F', 15)
+            
+            # Header
+            format_text = get_xls_format('text')
+            row = 0
+            write_xls_mrp_line(WS, row, [(
+                'Elenco componenti non presenti nella stampa appartenenti a: '
+                'DB Dinamiche, padre e semilavorato (se filtro fornitore '
+                'attivo viene applicato anche qui)', format_text),
                 ])
+            row = 1
+            write_xls_mrp_line(WS, row, [
+                ('Categoria inv.', format_text),
+                ('Codice', format_text), 
+                ('Nome', format_text),
+                ('Ultimo forn.', format_text),
+                ('Netto', format_text),
+                ('Lordo', format_text),
+                ])
+
+            # Sort data:
+            sorted_product = sorted(product_pool.browse(
+                cr, uid, all_component_ids, context=context), 
+                key=lambda x: (x.inventory_category_id.name, x.default_code),
+                )
+
+            # Line:
+            for product in sorted_product:
+                row += 1    
+                write_xls_mrp_line(WS, row, [
+                    (product.inventory_category_id.name, format_text),
+                    (product.default_code or '', format_text),
+                    (product.name, format_text),
+                    (product.recent_supplier_id.name or '', format_text),
+                    (product.mx_net_mrp_qty, format_text),
+                    (product.mx_lord_mrp_qty, format_text),
+                    ])
 
         WB.close()
         _logger.info('End creation file %s' % filename)
@@ -730,7 +737,7 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         now = now.replace('-', '_').replace(':', '.')
-        if mode == 'odt':                
+        if mode == 'odt': # XXX no more used  
             report_name = 'stock_status_explode_report'
     
             # -----------------------------------------------------------------

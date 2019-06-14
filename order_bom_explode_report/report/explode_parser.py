@@ -43,7 +43,7 @@ _logger = logging.getLogger(__name__)
 class MrpProduction(orm.Model):
     """ Model name: MrpProduction
     """
-    _inherit = 'mrp.production'
+    _inherit = 'mrp.production' 
 
     # Utility:
     def _get_all_product_in_bom(self, cr, uid, data=None, 

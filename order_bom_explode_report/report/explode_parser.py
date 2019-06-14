@@ -243,7 +243,7 @@ class MrpProduction(orm.Model):
                 ('not_in_report', '=', True),
                 ], context=context)
             _logger.warning('Excluded [%s] inventory category' % (
-                exlude_inventory_ids, )) 
+                exclude_inventory_ids, )) 
         else:
             exclude_inventory_ids = []
 

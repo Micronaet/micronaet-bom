@@ -358,7 +358,7 @@ class MrpProduction(orm.Model):
                 ('', format_text),
                 ('', format_text),
                 ('' if any(oc) else 'NON IN ORD.', format_text),
-                ('OBSOLETO' if o.state == 'obsolete' else '', format_text),
+                ('OBSOLETO!' if o.state == 'obsolete' else '', format_text),
                 ]        
             write_xls_mrp_line(WS, row, line0)
             row += 1
@@ -525,6 +525,7 @@ class MrpProduction(orm.Model):
             # Extra data (leadtime and order lot):        
             lineOrd.append((o.leadtime or 0, format_number))
             lineOrd.append((o.purchase_lot_block or 0, format_number))
+            lineOrd.append(('', format_text))
             lineOrd.append(('', format_text))
                 
             write_xls_mrp_line(WS, row, lineOrd)

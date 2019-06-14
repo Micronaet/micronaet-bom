@@ -326,7 +326,8 @@ class MrpProduction(orm.Model):
             # Merge cell:
             WS.merge_range(row, 0, row, 12, '')
             #WS.merge_range(row, 11, row, 12, '') # Category product
-            WS.merge_range(row, 13, row, 16, '') # Inventory category
+            WS.merge_range(row, 13, row, 15, '') # Inventory category
+            # Not order status
 
             # TODO add extra color here!
             if sal[11] < 0:
@@ -356,7 +357,7 @@ class MrpProduction(orm.Model):
                 (inventory_category, format_text),
                 ('', format_text),
                 ('', format_text),
-                ('', format_text),
+                ('' if any(oc) else 'NON IN ORD.', format_text),
                 ]        
             write_xls_mrp_line(WS, row, line0)
             row += 1
@@ -617,7 +618,7 @@ class MrpProduction(orm.Model):
         
         # Current month cell:
         convert_month = {
-            1: 5, 2: 6, 3: 7, 4: 8, 5:9, 6: 10, 7: 11, 8: 12,
+            1: 5, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10, 7: 11, 8: 12,
             9: 1, 10: 2, 11: 3, 12: 4,            
             }
         self.current_day_cell = convert_month[datetime.now().month]
@@ -634,7 +635,7 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         # A. Generate data report:
         # ---------------------------------------------------------------------
-        res, all_component_ids, used_ids = self.get_explode_report_object(
+        res, all_component_ids = self.get_explode_report_object(
             cr, uid, data=data, context=context)
         
         # ---------------------------------------------------------------------

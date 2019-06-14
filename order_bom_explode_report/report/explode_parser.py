@@ -988,20 +988,18 @@ class MrpProduction(orm.Model):
 
         # B. Case: Fabric textilene
         if mp_mode == 'fabric': # only for component
-            return res, all_component_ids, []
+            return res, all_component_ids
     
         # C. CAse: Component
-        used_ids = []
         for product in product_pool.browse(
                 cr, uid, all_component_ids, context=context):
             if product.mx_net_mrp_qty <= 0.0:
                 continue
             category = '' # XXX product.inventory_category_id.name
-            used_ids.append(product.id)
             add_x_item(
                 y_axis, product, category, purchase_db, 'product')
 
-        return res, list(set(all_component_ids) - set(used_ids)), used_ids
+        return res, all_component_ids
 
 class Parser(report_sxw.rml_parse):
     counters = {}
@@ -1048,7 +1046,7 @@ class Parser(report_sxw.rml_parse):
         context = {}
         mrp_pool = self.pool.get('mrp.production')
 
-        res, all_component_ids, used_ids = mrp_pool.get_explode_report_object(
+        res, all_component_ids = mrp_pool.get_explode_report_object(
             cr, uid, data=data, context=context)
         return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

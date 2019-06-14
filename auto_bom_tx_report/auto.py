@@ -358,6 +358,7 @@ class MrpProduction(orm.Model):
                 ('', format_text),
                 ('', format_text),
                 ('' if any(oc) else 'NON IN ORD.', format_text),
+                ('', format_text), # TODO obsoleto status
                 ]        
             write_xls_mrp_line(WS, row, line0)
             row += 1
@@ -390,6 +391,7 @@ class MrpProduction(orm.Model):
                 ('LEADTIME', format_header),
                 ('LOTTO', format_header),
                 ('INV. CAT.', format_header),
+                ('OBSOLETO', format_header),
                 ]
             write_xls_mrp_line(WS, row, line1)
             row += 1
@@ -416,9 +418,10 @@ class MrpProduction(orm.Model):
                 (mm[9], format_number),
                 (mm[10], format_number),
                 (mm[11], format_number),
-                ('', format_header),
-                ('', format_header),
-                ('', format_header),
+                ('', format_header), # Leadtime
+                ('', format_header), # Lotto
+                ('', format_header), # Inv Cat.
+                ('', format_header), # Obsoleto
                 ]
             write_xls_mrp_line(WS, row, line2)
             row += 1
@@ -442,6 +445,7 @@ class MrpProduction(orm.Model):
                 (oc[9], format_number),
                 (oc[10], format_number),
                 (oc[11], format_number),
+                ('', format_header),
                 ('', format_header),
                 ('', format_header),
                 ('', format_header),
@@ -471,6 +475,7 @@ class MrpProduction(orm.Model):
                 ('', format_header),
                 ('', format_header),
                 ('', format_header),
+                ('', format_header),
                 ]
             write_xls_mrp_line(WS, row, line4)
             row += 1
@@ -494,6 +499,7 @@ class MrpProduction(orm.Model):
                 (sal[9], format_number),
                 (sal[10], format_number),
                 (sal[11], format_number),
+                ('', format_header),
                 ('', format_header),
                 ('', format_header),
                 ('', format_header),

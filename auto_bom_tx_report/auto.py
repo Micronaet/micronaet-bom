@@ -483,6 +483,13 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             #                            ROW 5
             # -----------------------------------------------------------------
+            # XXX Stock value end season:
+            if sal[11] > 0 and purchase:
+                stock_value = sal[11] * purchase
+            else:
+                stock_value = 0
+
+                    
             line5 = [
                 ('Mag.: %s' % o.mx_net_mrp_qty, get_xls_format(
                     'text_bg_yellow')),
@@ -503,14 +510,16 @@ class MrpProduction(orm.Model):
                 ('', format_header),
                 ('', format_header),
                 ('', format_header),
+                
+                # XXX Stock value last col:                
+                (stock_value, format_number),
                 ]
             write_xls_mrp_line(WS, row, line5)
             row += 1
 
             # -----------------------------------------------------------------
             #                            Order block
-            # -----------------------------------------------------------------
-            
+            # -----------------------------------------------------------------            
             format_order = get_xls_format('bg_order')
             lineOrd = [
                 ('Ordinare:', format_order),
@@ -551,6 +560,11 @@ class MrpProduction(orm.Model):
                     [0, get_xls_format('number_blue')], # initial setup
                     # To be ordered - used = Total order                    
                     [0, get_xls_format('bg_green')], # initial setup green!
+
+                    # XXX Stock value:
+                    ('', format_text), ('', format_text), 
+                    ('', format_text), ('', format_text), 
+                    [0, format_number],
                     ]
                 hw_total_mt = 0.0
                 for hw_code, hw_status in hw.iteritems():
@@ -587,6 +601,13 @@ class MrpProduction(orm.Model):
                     line6[14][1] = get_xls_format('bg_red')
                     
                 line6[0].append(get_xls_format('text_grey'))
+                
+                # -------------------------------------------------------------
+                # XXX Stock value block:
+                # -------------------------------------------------------------
+                if order_total > 0 and purchase:
+                    line[18][0] = order_total * purchase
+
                 write_xls_mrp_line(WS, row, line6)
                 row += 1
                 

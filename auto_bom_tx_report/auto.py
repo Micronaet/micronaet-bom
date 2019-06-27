@@ -561,9 +561,9 @@ class MrpProduction(orm.Model):
                     [0, get_xls_format('bg_green')], # initial setup green!
 
                     # XXX Stock value:
-                    ('', format_text), ('', format_text), 
-                    ('', format_text), ('', format_text), 
-                    [0, format_number],
+                    #('', format_text), ('', format_text), 
+                    #('', format_text), ('', format_text), 
+                    #[0, format_number],
                     ]
                 hw_total_mt = 0.0
                 for hw_code, hw_status in hw.iteritems():
@@ -604,8 +604,8 @@ class MrpProduction(orm.Model):
                 # -------------------------------------------------------------
                 # XXX Stock value block:
                 # -------------------------------------------------------------
-                if order_total > 0 and purchase:
-                    line[18][0] = order_total * purchase
+                #if order_total > 0 and purchase:
+                #    line[18][0] = order_total * purchase
 
                 write_xls_mrp_line(WS, row, line6)
                 row += 1

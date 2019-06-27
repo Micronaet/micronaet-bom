@@ -488,7 +488,6 @@ class MrpProduction(orm.Model):
                 stock_value = sal[11] * purchase
             else:
                 stock_value = 0
-
                     
             line5 = [
                 ('Mag.: %s' % o.mx_net_mrp_qty, get_xls_format(

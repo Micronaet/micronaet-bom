@@ -483,15 +483,6 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             #                            ROW 5
             # -----------------------------------------------------------------
-            # XXX Stock value end season:
-            stock_value = 0.0
-            try:                
-                if sal[11] > 0 and purchase:
-                    stock_value = sal[11] * float(
-                        purchase.split(']')[0].split(' ')[-1])
-            except:
-                pass # remain 0
-                    
             line5 = [
                 ('Mag.: %s' % o.mx_net_mrp_qty, get_xls_format(
                     'text_bg_yellow')),
@@ -512,16 +503,14 @@ class MrpProduction(orm.Model):
                 ('', format_header),
                 ('', format_header),
                 ('', format_header),
-                
-                # XXX Stock value last col:                
-                (stock_value, format_number),
                 ]
             write_xls_mrp_line(WS, row, line5)
             row += 1
 
             # -----------------------------------------------------------------
             #                            Order block
-            # -----------------------------------------------------------------            
+            # -----------------------------------------------------------------
+            
             format_order = get_xls_format('bg_order')
             lineOrd = [
                 ('Ordinare:', format_order),
@@ -598,7 +587,6 @@ class MrpProduction(orm.Model):
                     line6[14][1] = get_xls_format('bg_red')
                     
                 line6[0].append(get_xls_format('text_grey'))
-                
                 write_xls_mrp_line(WS, row, line6)
                 row += 1
                 
@@ -757,7 +745,7 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         now = now.replace('-', '_').replace(':', '.')
-        if mode == 'odt': # TODO remove, no more used!
+        if mode == 'odt': # XXX no more used  
             report_name = 'stock_status_explode_report'
     
             # -----------------------------------------------------------------

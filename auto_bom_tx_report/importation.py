@@ -183,6 +183,7 @@ class PurchaseOrderXLSX(orm.Model):
         
         context['update_lead_lot'] = True
         context['update_inventory_category'] = True
+        context['obsolete'] = True
         
         return self.action_import_order(cr, uid, ids, context=context)
 
@@ -195,6 +196,7 @@ class PurchaseOrderXLSX(orm.Model):
         update_lead_lot = context.get('update_lead_lot', False)
         update_inventory_category = context.get(
             'update_inventory_category', False)
+        update_obsolete = context.get('obsolete', False)
         
         # Pool used:
         product_pool = self.pool.get('product.product')
@@ -382,7 +384,13 @@ class PurchaseOrderXLSX(orm.Model):
                             product_pool.write(cr, uid, product_id, {
                                 'inventory_category_id': inventory_category_id,
                                 }, context=context)
-                            
+
+                    if update_obsolete:
+                        obsolete_text = (WS.cell(row, 17).value or '').upper()
+                        if obsolete_text in 'XS':
+                            product_pool.write(cr, uid, product_id, {
+                                'status': 'obsolete',
+                                }, context=context)
                                 
                 elif pos in (7, 8) and not WS.cell(row, 0).value:
                     _logger.warning('Reset pos, row: %s' % row)

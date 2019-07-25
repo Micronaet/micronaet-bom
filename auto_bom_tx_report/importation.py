@@ -371,6 +371,7 @@ class PurchaseOrderXLSX(orm.Model):
                             'deadline': deadline,
                             }, context=context)
 
+                    # Extra data:
                     if update_lead_lot:
                         product_pool.write(cr, uid, product_id, {
                             'leadtime': WS.cell(row, 14).value,

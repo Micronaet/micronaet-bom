@@ -263,7 +263,7 @@ class MrpBomIndustrialHistory(orm.Model):
             DEFAULT_SERVER_DATE_FORMAT)
 
         excel_pool.column_width(WS_name, [
-            15, 30, 
+            15, 45, 
             10, 10, 10, 10, 
             10, 10, 
             ])

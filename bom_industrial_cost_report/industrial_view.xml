@@ -192,8 +192,13 @@
                      <field name="default_code" />
                      <field name="name" />
                      <button name="open_current_dynamic_bom" string="Manage dynamic lines" type="object" icon="gtk-justify-fill"/>
+                     
                      <field name="from_industrial" />
                      <field name="to_industrial" />
+
+                     <field name="current_from_industrial" />
+                     <field name="current_to_industrial" />
+                     
                      <field name="industrial_sale_a" />
                      <field name="industrial_sale_b" />
                      <field name="state" invisible="1" />

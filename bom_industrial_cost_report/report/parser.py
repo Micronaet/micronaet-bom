@@ -415,9 +415,16 @@ class ProductProduct(orm.Model):
         # Need update record price:
         update_record = datas.get('update_record', False)
         if update_record:
-            _logger.warning('Product price will be updated from report!')
+            _logger.warning('Product price will save in history!')
         else:    
             _logger.warning('No product price updated!')
+
+        update_current_industrial = datas.get(
+            'update_current_industrial', False)
+        if update_current_industrial:
+            _logger.warning('Product price current will be updated!')
+        else:    
+            _logger.warning('No current product price updated!')
         
         # Range date:
         from_date = datas.get('from_date', False)
@@ -689,6 +696,10 @@ class ProductProduct(orm.Model):
                 
             # Write status in row:    
             data[7]['index'] = industrial_index_get_text(data[6])
+            
+            # -----------------------------------------------------------------
+            # Update product industrial price:
+            # -----------------------------------------------------------------
             if update_record:
                 self.write(cr, uid, product.id, {
                     'from_industrial': data[0],
@@ -696,7 +707,16 @@ class ProductProduct(orm.Model):
                     'industrial_missed': data[2],
                     'industrial_index': data[7]['index'],
                     }, context=context)  
-                       
+
+            # -----------------------------------------------------------------
+            # Update product current industrial price:
+            # -----------------------------------------------------------------
+            if update_current_industrial:
+                self.write(cr, uid, product.id, {
+                    'current_from_industrial': data[0],
+                    'current_to_industrial': data[1],
+                    }, context=context)  
+                
             # Total text:      
             # Mat + Extra + Cost1 + Cost2
             for t in type_i18n:

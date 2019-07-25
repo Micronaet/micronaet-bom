@@ -217,6 +217,116 @@ class MrpBomIndustrialHistory(orm.Model):
     _rec_name = 'name'
     _order = 'name'
     
+    def scheduled_update_current_price(
+            self, cr, uid, always_report=False, gap=5.0, context=None):
+        ''' Scheduled update of current price
+        '''
+        product_pool = self.pool.get('product.product')
+        excel_pool = self.pool.get('excel.writer')
+
+        if context is None:
+            context = {}
+        context['update_current_industrial'] = True        
+
+        # Call update button parameter update current:        
+        # TODO REMOVE COMMENT: self.button_history_now(cr, uid, False, context=context)
+        
+        # Generate report if necessary:
+        product_ids = product_pool.search(cr, uid, [
+            ('bom_selection', '=', True)], context=context)
+
+        # ---------------------------------------------------------------------
+        # Excel report:
+        # ---------------------------------------------------------------------
+        WS_name = _('Fatture commercializzati')        
+        excel_pool.create_worksheet(WS_name)
+        
+        # Format used:
+        excel_pool.set_format()
+        format_mode = {
+            'title': excel_pool.get_format('title'),
+            'header': excel_pool.get_format('header'),
+            
+            'text': {
+                'white': excel_pool.get_format('text'),
+                'red': excel_pool.get_format('text_red'),
+                },
+            'number': {
+                'white': excel_pool.get_format('number'),
+                'red': excel_pool.get_format('number_red'),
+                },           
+            }
+
+        now = datetime.now().strftime(
+            DEFAULT_SERVER_DATE_FORMAT)
+
+        excel_pool.column_width(WS_name, [
+            15, 30, 
+            5, 5, 5, 5, 
+            5, 5
+            ])
+
+        #`Title line:
+        row = 0 # Start line
+        excel_pool.write_xls_line(
+            WS_name, row, [
+                'Variazione costi industriali prodotti (modello):'
+                ], default_format=format_mode['title'])
+
+        # Header line:
+        row += 2
+        excel_pool.write_xls_line(
+            WS_name, row, [
+                'Codice', 'Descrizione',
+                'Storico min.', 'Storico max.', 
+                'Attuale min.', 'Attuale max.',
+                'Differenza', 'In %', 
+                ], default_format=format_mode['header'])
+
+        gap_total = 0
+        for product in product_pool.browse(
+                cr, uid, product_ids, context=context):
+            history = product.from_industrial    
+            if not history:
+                continue # jump no price
+            current = product.current_from_industrial    
+                    
+            difference = history - current
+            difference_rate = 100.0 * abs(difference) / history
+            if difference_rate >= gap:
+                found = True
+                gap_total += 1
+            else:
+                found = False
+    
+            if always_report or found:
+                row += 1
+                excel_pool.write_xls_line(
+                    WS_name, row, [
+                        product.default_code, 
+                        product.name,
+                        product.from_industrial,
+                        product.to_industrial,
+                        product.current_from_industrial,
+                        product.current_to_industrial,
+                        difference,
+                        difference_rate,
+                        ], default_format=format_mode['header'])
+                
+        if always_report or gap_total > 0:
+            excel_pool.send_mail_to_group(cr, uid, 
+                'bom_industrial_cost_report.group_bom_cost_manager',
+                'Confronto prezzi DB modello %s' % (
+                    '[PRESENTI GAP!]' if gap_total > 0 else '[NON PRESENTI]',
+                    ), 
+                'Confronto costi DB modello storico e attuale: %s' % now, 
+                'template_check_cost.xlsx',
+                context=context)
+        else:
+            _logger.warning('Current industrial cost are all right < %s' % gap)            
+            excel_pool.close_workbook() # remove file
+            return True
+        
     def button_history_now(self, cr, uid, ids, context=None):
         ''' History button
         '''
@@ -243,6 +353,15 @@ class MrpBomIndustrialHistory(orm.Model):
              for p in product_pool.browse(
                 cr, uid, product_ids, context=context)]
         previous_text = u'\n'.join(sorted(previous_list))
+
+        # 2 mode of update: current value, history value:        
+        if context.get('update_current_industrial'):
+            update_current_industrial = True
+            update_record = False
+        else:    
+            update_current_industrial = False
+            update_record = True
+            
         
         # Datas for report
         datas = {
@@ -253,7 +372,8 @@ class MrpBomIndustrialHistory(orm.Model):
             'context': context,
 
             # Datas setup:
-            'update_record': True,
+            'update_record': update_record,
+            'update_current_industrial': update_current_industrial,
             'wizard': True,
             }
 
@@ -435,6 +555,11 @@ class ProductProduct(orm.Model):
         'bom_industrial_no_price': fields.boolean('BOM no price OK', 
             help='Se il prodotto fa parte di DB viene indicato senza prezzo',
             ),
+
+        'current_from_industrial': fields.float(
+            'Current from industrial cost', digits=(16, 3)),
+        'current_to_industrial': fields.float(
+            'Current to industrial cost', digits=(16, 3)),
         
         'from_industrial': fields.float(
             'From industrial cost', digits=(16, 3)),

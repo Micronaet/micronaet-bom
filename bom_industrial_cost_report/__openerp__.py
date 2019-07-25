@@ -45,6 +45,8 @@
         'industrial_view.xml',
         'report/report_bom.xml',
         'wizard/open_report_view.xml',
+        
+        'scheduler.xml',
         ],
     'active': False,
     'installable': True,

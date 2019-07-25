@@ -249,11 +249,13 @@ class MrpBomIndustrialHistory(orm.Model):
             
             'text': {
                 'white': excel_pool.get_format('text'),
-                'red': excel_pool.get_format('text_red'),
+                'red': excel_pool.get_format('bg_red'),
+                'blue': excel_pool.get_format('bg_blue'),
                 },
             'number': {
                 'white': excel_pool.get_format('number'),
-                'red': excel_pool.get_format('number_red'),
+                'red': excel_pool.get_format('bg_red_number'),
+                'blue': excel_pool.get_format('bg_blue_number'),
                 },           
             }
 
@@ -262,8 +264,8 @@ class MrpBomIndustrialHistory(orm.Model):
 
         excel_pool.column_width(WS_name, [
             15, 30, 
-            5, 5, 5, 5, 
-            5, 5
+            7, 7, 7, 7, 
+            7, 7,
             ])
 
         #`Title line:
@@ -292,8 +294,8 @@ class MrpBomIndustrialHistory(orm.Model):
             current = product.current_from_industrial    
                     
             difference = history - current
-            difference_rate = 100.0 * abs(difference) / history
-            if difference_rate >= gap:
+            difference_rate = 100.0 * difference / history
+            if abs(difference_rate) >= gap:
                 found = True
                 gap_total += 1
             else:
@@ -301,20 +303,30 @@ class MrpBomIndustrialHistory(orm.Model):
     
             if always_report or found:
                 row += 1
+                text_format = format_mode['text']['white']
+                number_format = format_mode['number']['white']
+                if found:
+                    if difference < 0:
+                        text_format = format_mode['text']['blue']
+                        number_format = format_mode['number']['blue']
+                    else:    
+                        text_format = format_mode['text']['red']
+                        number_format = format_mode['number']['red']
+                        
                 excel_pool.write_xls_line(
                     WS_name, row, [
-                        product.default_code, 
-                        product.name,
+                        (product.default_code, text_format), 
+                        (product.name, text_format),
                         product.from_industrial,
                         product.to_industrial,
                         product.current_from_industrial,
                         product.current_to_industrial,
                         difference,
                         difference_rate,
-                        ], default_format=format_mode['header'])
-                
+                        ], default_format=number_format)
+
         if always_report or gap_total > 0:
-            excel_pool.send_mail_to_group(cr, uid, 
+            return excel_pool.send_mail_to_group(cr, uid, 
                 'bom_industrial_cost_report.group_bom_cost_manager',
                 'Confronto prezzi DB modello %s' % (
                     '[PRESENTI GAP!]' if gap_total > 0 else '[NON PRESENTI]',

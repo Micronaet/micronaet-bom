@@ -329,7 +329,8 @@ class MrpBomIndustrialHistory(orm.Model):
             return excel_pool.send_mail_to_group(cr, uid, 
                 'bom_industrial_cost_report.group_bom_cost_manager',
                 'Confronto prezzi DB modello %s' % (
-                    '[PRESENTI GAP!]' if gap_total > 0 else '[NON PRESENTI]',
+                    ('[PRESENTI GAP: %s!]' % gap_total) if gap_total > 0 \
+                        else '[NON PRESENTI]',
                     ), 
                 'Confronto costi DB modello storico e attuale: %s' % now, 
                 'template_check_cost.xlsx',

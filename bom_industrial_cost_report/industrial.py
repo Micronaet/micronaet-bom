@@ -228,8 +228,8 @@ class MrpBomIndustrialHistory(orm.Model):
             context = {}
         context['update_current_industrial'] = True        
 
-        # Call update button parameter update current:        
-        # TODO REMOVE COMMENT: self.button_history_now(cr, uid, False, context=context)
+        # Call update button parameter update current:
+        self.button_history_now(cr, uid, False, context=context)
         
         # Generate report if necessary:
         product_ids = product_pool.search(cr, uid, [

@@ -242,7 +242,7 @@ class MrpBomIndustrialHistory(orm.Model):
         excel_pool.create_worksheet(WS_name)
         
         # Format used:
-        excel_pool.set_format()
+        excel_pool.set_format(number_format='#,##0.#0')
         format_mode = {
             'title': excel_pool.get_format('title'),
             'header': excel_pool.get_format('header'),
@@ -264,8 +264,8 @@ class MrpBomIndustrialHistory(orm.Model):
 
         excel_pool.column_width(WS_name, [
             15, 30, 
-            7, 7, 7, 7, 
-            7, 7,
+            10, 10, 10, 10, 
+            10, 10, 
             ])
 
         #`Title line:
@@ -282,7 +282,7 @@ class MrpBomIndustrialHistory(orm.Model):
                 'Codice', 'Descrizione',
                 'Storico min.', 'Storico max.', 
                 'Attuale min.', 'Attuale max.',
-                'Differenza', 'In %', 
+                'Diff. min.', '%', 
                 ], default_format=format_mode['header'])
 
         gap_total = 0

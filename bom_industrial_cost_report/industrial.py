@@ -306,7 +306,7 @@ class MrpBomIndustrialHistory(orm.Model):
                 text_format = format_mode['text']['white']
                 number_format = format_mode['number']['white']
                 if found:
-                    if difference < 0:
+                    if difference > 0:
                         text_format = format_mode['text']['blue']
                         number_format = format_mode['number']['blue']
                     else:    

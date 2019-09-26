@@ -261,6 +261,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     ]
                 record.extend(['' for i in range(0, 2 * pos)])    
                 record.append('') # Note
+                record.append('') # Note # TODO remove
+                record.append('') # Note
                     
                 for line in product.dynamic_bom_line_ids:
                     product = line.product_id

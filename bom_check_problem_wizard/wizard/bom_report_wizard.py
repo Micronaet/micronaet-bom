@@ -292,7 +292,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     ws_name, row, record, default_format=cell_format['text'])
 
         if page_error:
-            logger.error('Page error: %s' % (page_error, ))
+            _logger.error('Page error: %s' % (page_error, ))
         return excel_pool.return_attachment(
             cr, uid, 'BOM check', context=context)
 

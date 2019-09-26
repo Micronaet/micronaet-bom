@@ -229,8 +229,9 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
 
             # Note:    
             header.append('Note')
-            last = (2 * pos) + extra_col + 1 # TODO Check
             width.append(40)
+
+            last = len(header) + 1
                 
             # -----------------------------------------------------------------
             # Title:

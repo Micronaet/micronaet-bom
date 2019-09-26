@@ -220,12 +220,15 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     
                 width.append(16)
                 width.append(3)
-                #excel_pool.merge_cell(ws_name, [row, pos, row, pos + 1])
+                
+                excel_pool.merge_cell(ws_name, [
+                    row, (2 * pos) + extra_col, 
+                    row, (2 * pos) + extra_col + 1])
                 pos += 1
 
             # Note:    
             header.append('Note')
-            last = pos + extra_col + 1
+            last = pos + extra_col + 2 # TODO Check
             width.append(40)
                 
             # -----------------------------------------------------------------

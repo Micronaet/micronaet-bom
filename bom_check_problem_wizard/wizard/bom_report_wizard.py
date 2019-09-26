@@ -107,7 +107,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ('parent_bom_id', '!=', False),
             ], context=None)
             
-        #product_ids = product_ids[:30] # TODO remove
+        product_ids = product_ids[:30] # TODO remove
         parents = {}
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
@@ -155,6 +155,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         excel_pool.write_xls_line(ws_name, row, [
             u'DB Padre', u'Prodotto', u'Elenco DB figlio',
             ], default_format=cell_format['header'])
+        header_row = row    
 
         # TODO needed?
         page_error = []
@@ -222,8 +223,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 width.append(3)
                 
                 excel_pool.merge_cell(ws_name, [
-                    row, (2 * pos) + extra_col, 
-                    row, (2 * pos) + extra_col + 1])
+                    header_row, (2 * pos) + extra_col, 
+                    header_row, (2 * pos) + extra_col + 1])
                 pos += 1
 
             # Note:    
@@ -265,7 +266,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     category = line.category_id.name
                     qty = line.product_qty
                     if category not in category_db:
-                        record[last] += u'[No %s]' % category
+                        record[last] = u'[No %s]' % category # TODO += needed!!!
                         continue
                     col = category_db[category][0]
 

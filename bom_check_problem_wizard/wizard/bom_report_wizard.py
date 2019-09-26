@@ -255,8 +255,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             for product in sorted(parents[parent], 
                     key=lambda x: x.default_code):
                 record = [
-                    product.default_code,
-                    product.name,
+                    u'%s' % product.default_code,
+                    u'%s' % product.name,
                     ]
                 record.extend(['' for i in range(0, 2 * pos)])    
                 record.append('') # Note

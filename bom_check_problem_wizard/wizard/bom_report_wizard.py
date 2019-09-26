@@ -192,14 +192,13 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             for line in parent.bom_line_ids:
                 category = line.category_id
                 product = line.product_id    
-                if category not in categories:
-                    categories.append((
-                        category, 
-                        is_placeholder(product),
-                        # Compare with lines:
-                        product,
-                        line.product_qty,
-                        ))
+                categories.append((
+                    category, 
+                    is_placeholder(product),
+                    # Compare with lines:
+                    product,
+                    line.product_qty,
+                    ))
                     
             pos = 0
             for category, placeholder, product, qty in sorted(

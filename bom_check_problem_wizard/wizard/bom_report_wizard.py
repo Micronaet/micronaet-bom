@@ -231,7 +231,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             header.append('Note')
             width.append(40)
 
-            last = len(header) + 1
+            last = len(header) - 1
                 
             # -----------------------------------------------------------------
             # Title:
@@ -260,8 +260,6 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     u'%s' % product.name,
                     ]
                 record.extend(['' for i in range(0, 2 * pos)])    
-                record.append('') # Note
-                record.append('') # Note # TODO remove
                 record.append('') # Note
                     
                 for line in product.dynamic_bom_line_ids:

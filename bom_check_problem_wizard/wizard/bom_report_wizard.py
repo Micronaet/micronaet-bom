@@ -119,7 +119,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Excel file:
         # ---------------------------------------------------------------------
-        ws_name = 'Dettaglio'
+        ws_name = u'Dettaglio'
         excel_pool.create_worksheet(ws_name)
 
         excel_pool.set_format()
@@ -165,12 +165,12 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             # Create sheet:
             # -----------------------------------------------------------------
-            _logger.warning('New page: %s' % ws_name)
+            _logger.warning(u'New page: %s' % ws_name)
             ws_name = parent_product.default_code or str(parent_product.id)
             try:
                 excel_pool.create_worksheet(ws_name)
             except: 
-                _logger.error('Cannot create %s sheet' % ws_name)
+                _logger.error(u'Cannot create %s sheet' % ws_name)
                 page_error.append(ws_name)
                 continue
             
@@ -180,7 +180,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             width = [
                 20, 40, 
                 ]
-
+            
             extra_col = len(header)
 
             # -----------------------------------------------------------------
@@ -204,19 +204,23 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             for category, placeholder, product, qty in sorted(
                     categories, key=lambda x: x[0].name):
                 category_db[category.name] = (
-                    #(2 * pos) + extra_col,
-                    pos + extra_col,
+                    (2 * pos) + extra_col,
                     placeholder,
                     product,
                     qty,
                     )
-                    
+      
+                # 2 Header column (2nd empty will be merged)              
                 header.append(u'%s%s%s' % (
                     u'[' if placeholder else u'',
                     category.name,
                     u']' if placeholder else u'',
                     ))
-                width.append(18)
+                header.append(u'')
+                    
+                width.append(16)
+                width.append(3)
+                #excel_pool.merge_cell(ws_name, [row, pos, row, pos + 1])
                 pos += 1
 
             # Note:    
@@ -250,21 +254,19 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     product.default_code,
                     product.name,
                     ]
-                record.extend(['' for i in range(0, pos)])    
+                record.extend(['' for i in range(0, 2 * pos)])    
                 record.append('') # Note
                     
                 for line in product.dynamic_bom_line_ids:
                     product = line.product_id
                     category = line.category_id.name
+                    qty = line.product_qty
                     if category not in category_db:
                         record[last] += u'[No %s]' % category
                         continue
                     col = category_db[category][0]
 
-                    cell_text = u'%s x %s' % (
-                        product.default_code,
-                        line.product_qty,
-                        )
+                    cell_text = u'%s' % product.default_code
                     if is_placeholder(product):
                         record[col] = (
                             cell_text, cell_format['bg']['red'])
@@ -273,12 +275,19 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     else:
                         record[col] = (
                             cell_text, cell_format['bg']['blue'])
+
+                    if qty == category_db[category][3]:
+                        record[col + 1] = qty
+                    else:
+                        record[col + 1] = (
+                            qty, cell_format['bg']['blue'])
                     
                 row += 1
                 excel_pool.write_xls_line(
                     ws_name, row, record, default_format=cell_format['text'])
 
-        _logger.error('Page error: %s' % (page_error, ))
+        if page_error:
+            logger.error('Page error: %s' % (page_error, ))
         return excel_pool.return_attachment(cr, uid, 'BOM check')
 
     def action_print(self, cr, uid, ids, context=None):

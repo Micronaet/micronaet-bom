@@ -225,7 +225,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
 
             # Note:    
             header.append('Note')
-            last = pos + extra_col
+            last = pos + extra_col + 1
             width.append(40)
                 
             # -----------------------------------------------------------------
@@ -288,7 +288,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
 
         if page_error:
             logger.error('Page error: %s' % (page_error, ))
-        return excel_pool.return_attachment(cr, uid, 'BOM check')
+        return excel_pool.return_attachment(
+            cr, uid, 'BOM check', context=context)
 
     def action_print(self, cr, uid, ids, context=None):
         ''' Event for button print

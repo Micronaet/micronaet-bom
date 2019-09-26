@@ -229,7 +229,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
 
             # Note:    
             header.append('Note')
-            last = pos + extra_col + 2 # TODO Check
+            last = (2 * pos) + extra_col + 1 # TODO Check
             width.append(40)
                 
             # -----------------------------------------------------------------
@@ -266,7 +266,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     category = line.category_id.name
                     qty = line.product_qty
                     if category not in category_db:
-                        record[last] = u'[No %s]' % category # TODO += needed!!!
+                        record[last] += u'[No %s]' % category
                         continue
                     col = category_db[category][0]
 

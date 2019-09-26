@@ -107,7 +107,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ('parent_bom_id', '!=', False),
             ], context=None)
             
-        #product_ids = product_ids[:1000] # TODO remove
+        product_ids = product_ids[:30] # TODO remove
         parents = {}
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
@@ -204,13 +204,14 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             for category, placeholder, product, qty in sorted(
                     categories, key=lambda x: x[0].name):
                 category_db[category.name] = (
+                    #(2 * pos) + extra_col,
                     pos + extra_col,
                     placeholder,
                     product,
                     qty,
                     )
                     
-                header.append('%s%s%s' % (
+                header.append(u'%s%s%s' % (
                     u'[' if placeholder else u'',
                     category.name,
                     u']' if placeholder else u'',

@@ -145,7 +145,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         row = 0
         excel_pool.write_xls_line(ws_name, row, [
-            'Elenco distinte basi padre con prodotti', 
+            u'Elenco distinte basi padre con prodotti', 
             ], default_format=cell_format['title'])
         row += 1
 
@@ -153,11 +153,11 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         # Header:    
         # ---------------------------------------------------------------------
         excel_pool.write_xls_line(ws_name, row, [
-            'DB Padre', 'Prodotto', 'Elenco DB figlio',
+            u'DB Padre', u'Prodotto', u'Elenco DB figlio',
             ], default_format=cell_format['header'])
 
         # TODO needed?
-
+        page_error = []
         for parent in sorted(parents, 
                 key=lambda x: x.product_id.default_code):
             parent_product = parent.product_id
@@ -171,10 +171,11 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 excel_pool.create_worksheet(ws_name)
             except: 
                 _logger.error('Cannot create %s sheet' % ws_name)
+                page_error.append(ws_name)
                 continue
             
             header = [
-                'Prodotto', 'Nome', 
+                u'Prodotto', u'Nome', 
                 ]
             width = [
                 20, 40, 
@@ -210,9 +211,9 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     )
                     
                 header.append('%s%s%s' % (
-                    '[' if placeholder else '',
+                    u'[' if placeholder else u'',
                     category.name,
-                    ']' if placeholder else '',
+                    u']' if placeholder else u'',
                     ))
                 width.append(18)
                 pos += 1
@@ -228,7 +229,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             excel_pool.column_width(ws_name, width)
             row = 0
             excel_pool.write_xls_line(ws_name, row, [
-                'Elenco DB con padre: %s' % ws_name, 
+                u'Elenco DB con padre: %s' % ws_name, 
                 ], default_format=cell_format['title'])
 
             # -----------------------------------------------------------------
@@ -255,11 +256,11 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     product = line.product_id
                     category = line.category_id.name
                     if category not in category_db:
-                        record[last] += '[No %s]' % category
+                        record[last] += u'[No %s]' % category
                         continue
                     col = category_db[category][0]
 
-                    cell_text = '%s x %s' % (
+                    cell_text = u'%s x %s' % (
                         product.default_code,
                         line.product_qty,
                         )
@@ -271,12 +272,12 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     else:
                         record[col] = (
                             cell_text, cell_format['bg']['blue'])
-
                     
                 row += 1
                 excel_pool.write_xls_line(
                     ws_name, row, record, default_format=cell_format['text'])
 
+        _logger.error('Page error: %s' % (page_error, ))
         return excel_pool.return_attachment(cr, uid, 'BOM check')
 
     def action_print(self, cr, uid, ids, context=None):

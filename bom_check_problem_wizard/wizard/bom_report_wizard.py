@@ -166,7 +166,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             # Create sheet:
             # -----------------------------------------------------------------
             _logger.warning('New page: %s' % ws_name)
-            ws_name = parent_product.default_code or '?'
+            ws_name = parent_product.default_code or str(parent_product.id)
             excel_pool.create_worksheet(ws_name)
             
             header = [

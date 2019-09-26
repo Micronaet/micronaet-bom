@@ -89,7 +89,192 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             'target': 'current', # 'new'
             'nodestroy': False,
             }
+
+    def excel_extract_bom_check(self, cr, uid, wizard, context=None):
+        ''' Report for excel
+        '''
+        def is_placeholder(product):
+            ''' Check if product is a placeholder
+            '''
+            return product.bom_placeholder or product.bom_alternative
+
+        product_pool = self.pool.get('product.product')
+        mrp_pool = self.pool.get('mrp.bom')
+        mrp_line_pool = self.pool.get('mrp.bom.line')
+        excel_pool = self.pool.get('excel.writer')
+        
+        product_ids = product_pool.search(cr, uid, [
+            ('parent_bom_id', '!=', False),
+            ], context=None)
             
+        product_ids = product_ids[:1000] # TODO remove
+        parents = {}
+        for product in product_pool.browse(
+                cr, uid, product_ids, context=context):
+            parent_bom = product.parent_bom_id
+            if parent_bom not in parents:
+                parents[parent_bom] = []
+            parents[parent_bom].append(product)
+        
+        # ---------------------------------------------------------------------
+        # Excel file:
+        # ---------------------------------------------------------------------
+        ws_name = 'Dettaglio'
+        excel_pool.create_worksheet(ws_name)
+
+        excel_pool.set_format()
+        cell_format = {
+            'title': excel_pool.get_format('title'),
+            'header': excel_pool.get_format('header'),
+            'text': excel_pool.get_format('text'),
+            'number': excel_pool.get_format('number'),
+            
+            'bg': {
+                'red': excel_pool.get_format('bg_red'),
+                'blue': excel_pool.get_format('bg_blue'),
+                'header_blue': excel_pool.get_format('bg_blue_number_bold'),
+                },
+            }
+
+        excel_pool.column_width(ws_name, [
+            15, 30, 50
+            ])
+
+        # ---------------------------------------------------------------------
+        # Title:    
+        # ---------------------------------------------------------------------
+        row = 0
+        excel_pool.write_xls_line(ws_name, row, [
+            'Elenco distinte basi padre con prodotti', 
+            ], default_format=cell_format['title'])
+        row += 1
+
+        # ---------------------------------------------------------------------
+        # Header:    
+        # ---------------------------------------------------------------------
+        excel_pool.write_xls_line(ws_name, row, [
+            'DB Padre', 'Prodotto', 'Elenco DB figlio',
+            ], default_format=cell_format['header'])
+
+        # TODO needed?
+
+        for parent in sorted(parents, 
+                key=lambda x: x.product_id.default_code):
+            parent_product = parent.product_id
+            
+            # -----------------------------------------------------------------
+            # Create sheet:
+            # -----------------------------------------------------------------
+            _logger.warning('New page: %s' % ws_name)
+            ws_name = parent_product.default_code or '?'
+            excel_pool.create_worksheet(ws_name)
+            
+            header = [
+                'Prodotto', 'Nome', 
+                ]
+            width = [
+                20, 40, 
+                ]
+
+            extra_col = len(header)
+
+            # -----------------------------------------------------------------
+            # Extract category list:
+            # -----------------------------------------------------------------
+            category_db = {} # DB used for col header and pos translation
+            categories = [] # temp list
+            for line in parent.bom_line_ids:
+                category = line.category_id
+                product = line.product_id    
+                if category not in categories:
+                    categories.append((
+                        category, 
+                        is_placeholder(product),
+                        # Compare with lines:
+                        product,
+                        line.product_qty,
+                        ))
+                    
+            pos = 0
+            for category, placeholder, product, qty in sorted(
+                    categories, key=lambda x: x[0].name):
+                category_db[category.name] = (
+                    pos + extra_col,
+                    placeholder,
+                    product,
+                    qty,
+                    )
+                    
+                header.append('%s%s%s' % (
+                    '[' if placeholder else '',
+                    category.name,
+                    ']' if placeholder else '',
+                    ))
+                width.append(18)
+                pos += 1
+
+            # Note:    
+            header.append('Note')
+            last = pos + extra_col
+            width.append(40)
+                
+            # -----------------------------------------------------------------
+            # Title:
+            # -----------------------------------------------------------------
+            excel_pool.column_width(ws_name, width)
+            row = 0
+            excel_pool.write_xls_line(ws_name, row, [
+                'Elenco DB con padre: %s' % ws_name, 
+                ], default_format=cell_format['title'])
+
+            # -----------------------------------------------------------------
+            # Header:    
+            # -----------------------------------------------------------------
+            row += 1
+            excel_pool.write_xls_line(ws_name, row, header, 
+                default_format=cell_format['header'])
+            excel_pool.row_height(ws_name, [row], height=30)
+            
+            # -----------------------------------------------------------------
+            # Create page with parent bom:        
+            # -----------------------------------------------------------------
+            for product in sorted(parents[parent], 
+                    key=lambda x: x.default_code):
+                record = [
+                    product.default_code,
+                    product.name,
+                    ]
+                record.extend(['' for i in range(0, pos)])    
+                record.append('') # Note
+                    
+                for line in product.dynamic_bom_line_ids:
+                    product = line.product_id
+                    category = line.category_id.name
+                    if category not in category_db:
+                        record[last] += '[No %s]' % category
+                        continue
+                    col = category_db[category][0]
+
+                    cell_text = '%s x %s' % (
+                        product.default_code,
+                        line.product_qty,
+                        )
+                    if is_placeholder(product):
+                        record[col] = (
+                            cell_text, cell_format['bg']['red'])
+                    elif product == category_db[category][2]:
+                        record[col] = cell_text
+                    else:
+                        record[col] = (
+                            cell_text, cell_format['bg']['blue'])
+
+                    
+                row += 1
+                excel_pool.write_xls_line(
+                    ws_name, row, record, default_format=cell_format['text'])
+
+        return excel_pool.return_attachment(cr, uid, 'BOM check')
+
     def action_print(self, cr, uid, ids, context=None):
         ''' Event for button print
         '''
@@ -124,6 +309,9 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             report_name = 'aeroo_product_in_bom_report'
         elif wiz_proxy.mode == 'not_product':
             report_name = 'aeroo_product_not_in_bom_report'
+        elif wiz_proxy.mode == 'excel':
+            return self.excel_extract_bom_check(
+                cr, uid, wiz_proxy, context=context)
         else:
             _logger.error('No report mode %s!') % wiz_proxy.mode            
 
@@ -142,6 +330,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ('pipe', 'Pipe in Halfworked'),
             ('line', 'Product presence bom'),
             ('not_product', 'Excluded product'),
+            ('excel', 'Excel check'),
             ], 'Report mode', required=True),            
             
         'from_order': fields.boolean('From order'),    

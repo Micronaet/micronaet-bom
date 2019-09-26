@@ -31,6 +31,10 @@
         'base',
         'mrp',
         'order_bom', # BOM check on product order
+
+        # Excel check bom:
+        'excel_export',
+        'bom_dynamic_structured',
         ],
     'init_xml': [],
     'demo': [],

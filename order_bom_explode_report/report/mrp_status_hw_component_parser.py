@@ -221,10 +221,11 @@ class Parser(report_sxw.rml_parse):
         
         # Dynamic generate reference date:
         now = datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+        now_year = int(now[:4])
         if now[5:7] >= '09':
-            reference_date = '%s-09-01 00:00:00' % now[:4]
-        else:    
-            reference_date = '%s-09-01 00:00:00' % (int(now[:4]) - 1)
+            reference_date = '%s-09-01 00:00:00' % now_year
+        else:
+            reference_date = '%s-09-01 00:00:00' % (now_year - 1)
         _logger.warning('Reference date for HW: %s' % reference_date    
         
         # TODO manage day range

@@ -60,13 +60,13 @@ for line in bom_line_pool.browse(line_ids):
     mask = line.dynamic_mask
     mask0 = '0' + mask[1:]
     mask1 = '1' + mask[1:]
-    print 'From %s to %s and %s' % (mask, mask0, mask1)
+    print '\nFrom %s to %s and %s' % (mask, mask0, mask1)
     
     # Create new rule:
     data = {
         #'product_uos_qty': line.,
         #'date_stop': line.,
-        'product_uom': line.product_uom,
+        'product_uom': line.product_uom.id,
         'sequence': line.sequence,
         'date_start': line.date_start,
         #'routing_id': line.,
@@ -89,16 +89,17 @@ for line in bom_line_pool.browse(line_ids):
         #waste_cut
         #pipe_total
         #part_x_pipe
-        })
-    print ' Cretate: %s' % (data, )
-    #bom_line_pool.create(data)  
+        }
+    print ' Create: %s' % (data, )
+    bom_line_pool.create(data)  
     
     # Update previous rule:
     data = {
         'dynamic_mask': mask1,        
         }
     print 'Update %s: %s' % (line.id, data, )    
-    #bom_line_pool.write([line.id], data)  
+    bom_line_pool.write([line.id], data) 
+    import pdb; pdb.set_trace()
     
     
 

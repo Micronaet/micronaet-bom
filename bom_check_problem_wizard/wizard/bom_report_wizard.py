@@ -40,6 +40,15 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+class ProductProduct(orm.Model):
+    """ Model name: ProductProduct
+    """
+    
+    _inherit = 'product.product'
+    
+    _columns = {
+        'dynamic_bom_checked': fields.boolean('Bom checked'),
+        }
 
 class MrpBomCheckProblemWizard(orm.TransientModel):
     ''' Wizard for
@@ -102,6 +111,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         mrp_pool = self.pool.get('mrp.bom')
         mrp_line_pool = self.pool.get('mrp.bom.line')
         excel_pool = self.pool.get('excel.writer')
+        sale_line_pool = self.pool.get('sale.order.line')
         
         product_ids = product_pool.search(cr, uid, [
             ('parent_bom_id', '!=', False),
@@ -119,6 +129,21 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Excel file:
         # ---------------------------------------------------------------------
+        # Parameters
+        check_order = True
+        reference_date = '2017-09-01'
+        
+        ordered_product = []
+        if check_order:
+            sale_line_ids = sale_line_pool.search([
+                ('order_id.state', 'not in', ('draft', 'cancel', 'sent')),
+                ('order_id.date_order', '>=', reference_date)
+                ])
+            for line in sale_line_pool.browse(sale_line_ids):
+                product = line.product_id
+                if product not in ordered_product:
+                    ordered_product.append(product)
+        
         ws_name = u'Dettaglio'
         excel_pool.create_worksheet(ws_name)
 
@@ -176,10 +201,10 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 continue
             
             header = [
-                u'Prodotto', u'Nome', 
+                u'OK', 'Controllare', u'Prodotto', u'Nome', 
                 ]
             width = [
-                20, 40, 
+                3, 5, 20, 40, 
                 ]
             
             extra_col = len(header)
@@ -255,6 +280,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             for product in sorted(parents[parent], 
                     key=lambda x: x.default_code):
                 record = [
+                    'X' if product.dynamic_bom_checked,
+                    'X' if product in ordered_product else '',
                     u'%s' % product.default_code,
                     u'%s' % product.name,
                     ]

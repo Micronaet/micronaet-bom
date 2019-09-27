@@ -226,7 +226,7 @@ class Parser(report_sxw.rml_parse):
             reference_date = '%s-09-01 00:00:00' % now_year
         else:
             reference_date = '%s-09-01 00:00:00' % (now_year - 1)
-        _logger.warning('Reference date for HW: %s' % reference_date    
+        _logger.warning('Reference date for HW: %s' % reference_date)
         
         # TODO manage day range
         if days:

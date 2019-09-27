@@ -141,6 +141,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         # Product and bom data:
         product_ids = product_pool.search(cr, uid, [
             ('parent_bom_id', '!=', False),
+            #('default_code', '=ilike', '036TXA%'), # TODO remove (for test)
             ], context=None)
             
         if demo:
@@ -170,8 +171,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Excel file:
         # ---------------------------------------------------------------------        
-        ws_name = u'Dettaglio'
-        excel_pool.create_worksheet(ws_name)
+        ws_note_name = u'Note'
+        excel_pool.create_worksheet(ws_note_name)
 
         excel_pool.set_format()
         cell_format = {
@@ -189,24 +190,24 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 },
             }
 
-        excel_pool.column_width(ws_name, [
-            15, 30, 50
+        excel_pool.column_width(ws_note_name, [
+            50
             ])
 
         # ---------------------------------------------------------------------
         # Title:    
         # ---------------------------------------------------------------------
-        row = 0
-        excel_pool.write_xls_line(ws_name, row, [
-            u'Elenco distinte basi padre con prodotti', 
+        note_row = 0
+        excel_pool.write_xls_line(ws_note_name, note_row, [
+            u'Elenco annotazioni generiche di controllo:', 
             ], default_format=cell_format['title'])
-        row += 1
+        note_row += 1
 
         # ---------------------------------------------------------------------
         # Header:    
         # ---------------------------------------------------------------------
-        excel_pool.write_xls_line(ws_name, row, [
-            u'DB Padre', u'Prodotto', u'Elenco DB figlio',
+        excel_pool.write_xls_line(ws_note_name, row, [
+            u'Note',
             ], default_format=cell_format['header'])
         header_row = row    
 
@@ -220,7 +221,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             # Create sheet:
             # -----------------------------------------------------------------
             _logger.warning(u'New page: %s' % ws_name)
-            ws_name = parent_product.default_code or str(parent_product.id)
+            ws_name = parent_product.default_code or (
+                'ID %s' % parent_product.id)
             try:
                 excel_pool.create_worksheet(ws_name)
             except: 
@@ -232,7 +234,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 u'OK', 'Venduto', u'Prodotto', u'Nome', u'Pz',
                 ]
             width = [
-                3, 6, 20, 40, 6,
+                3, 6, 12, 40, 4,
                 ]
             
             extra_col = len(header)
@@ -354,7 +356,11 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     ws_name, row, record, default_format=cell_format['text'])
 
         if page_error:
-            _logger.error('Page error: %s' % (page_error, ))
+            excel_pool.write_xls_line(ws_note_name, note_row, [
+                u'Errori pagine non create: %s' % (page_error, ), 
+                ], default_format=cell_format['title'])
+            note_row += 1
+            
         return excel_pool.return_attachment(
             cr, uid, 'BOM check', context=context)
 

@@ -117,7 +117,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ('parent_bom_id', '!=', False),
             ], context=None)
             
-        product_ids = product_ids[:30] # TODO remove
+        #product_ids = product_ids[:30] # TODO remove
         parents = {}
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):

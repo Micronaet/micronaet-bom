@@ -233,6 +233,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             header = [
                 u'OK', 'Venduto', u'Prodotto', u'Nome', u'Pz',
                 ]
+            footer = []
             width = [
                 3, 6, 12, 40, 4,
                 ]
@@ -272,6 +273,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     u']' if placeholder else u'',
                     ))
                 header.append(u'')
+                footer.append(u'')
                     
                 width.append(16)
                 width.append(3)

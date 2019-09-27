@@ -117,7 +117,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ('parent_bom_id', '!=', False),
             ], context=None)
             
-        #product_ids = product_ids[:30] # TODO remove
+        product_ids = product_ids[:30] # TODO remove
         parents = {}
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
@@ -135,11 +135,12 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         
         ordered_product = []
         if check_order:
-            sale_line_ids = sale_line_pool.search([
+            sale_line_ids = sale_line_pool.search(cr, uid, [
                 ('order_id.state', 'not in', ('draft', 'cancel', 'sent')),
                 ('order_id.date_order', '>=', reference_date)
-                ])
-            for line in sale_line_pool.browse(sale_line_ids):
+                ], context=context)
+            for line in sale_line_pool.browse(cr, uid, sale_line_ids, 
+                    context=context):
                 product = line.product_id
                 if product not in ordered_product:
                     ordered_product.append(product)
@@ -201,7 +202,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 continue
             
             header = [
-                u'OK', 'Controllare', u'Prodotto', u'Nome', 
+                u'OK', 'Venduto', u'Prodotto', u'Nome', 
                 ]
             width = [
                 3, 5, 20, 40, 
@@ -280,7 +281,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             for product in sorted(parents[parent], 
                     key=lambda x: x.default_code):
                 record = [
-                    'X' if product.dynamic_bom_checked,
+                    'X' if product.dynamic_bom_checked else '',
                     'X' if product in ordered_product else '',
                     u'%s' % product.default_code,
                     u'%s' % product.name,

@@ -102,11 +102,34 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
     def excel_extract_bom_check(self, cr, uid, wizard, context=None):
         ''' Report for excel
         '''
+        # ---------------------------------------------------------------------
+        # Parameters
+        # ---------------------------------------------------------------------
+        check_order = True        
+        demo = False
+
+        # Generate dynamic reference date (2 years)
+        now = '%s' % datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+        now_year = int(now[:4])
+        if now[5:7] >= '09':
+            reference_date = '%s-09-01' % (now_year - 2)
+        else:    
+            reference_date = '%s-09-01' % (now_year - 1)
+        _logger.info('Reference date: %s' % reference_date)  
+        if demo:  
+            reference_date = '2019-09-01'
+            
+        # ---------------------------------------------------------------------
+        # Utility:
+        # ---------------------------------------------------------------------
         def is_placeholder(product):
             ''' Check if product is a placeholder
             '''
             return product.bom_placeholder or product.bom_alternative
 
+        # ---------------------------------------------------------------------
+        # Pool used:
+        # ---------------------------------------------------------------------
         product_pool = self.pool.get('product.product')
         mrp_pool = self.pool.get('mrp.bom')
         mrp_line_pool = self.pool.get('mrp.bom.line')
@@ -117,7 +140,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ('parent_bom_id', '!=', False),
             ], context=None)
             
-        #product_ids = product_ids[:30] # TODO remove
+        if demo:
+            product_ids = product_ids[:30]
         parents = {}
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
@@ -129,9 +153,6 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Excel file:
         # ---------------------------------------------------------------------
-        # Parameters
-        check_order = True
-        reference_date = '2017-09-01'
         
         ordered_product = []
         if check_order:
@@ -158,6 +179,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             'bg': {
                 'red': excel_pool.get_format('bg_red'),
                 'blue': excel_pool.get_format('bg_blue'),
+                'yellow': excel_pool.get_format('bg_yellow'),
+                'green': excel_pool.get_format('bg_green'),
                 'header_blue': excel_pool.get_format('bg_blue_number_bold'),
                 },
             }
@@ -202,10 +225,10 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 continue
             
             header = [
-                u'OK', 'Venduto', u'Prodotto', u'Nome', 
+                u'OK', 'Venduto', u'Prodotto', u'Nome', u'Pz',
                 ]
             width = [
-                3, 5, 20, 40, 
+                3, 6, 20, 40, 6,
                 ]
             
             extra_col = len(header)
@@ -253,7 +276,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 pos += 1
 
             # Note:    
-            header.append('Note')
+            header.append(u'Note')
             width.append(40)
 
             last = len(header) - 1
@@ -280,11 +303,19 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             for product in sorted(parents[parent], 
                     key=lambda x: x.default_code):
+                if product == parent.product_id:
+                    format_mode = cell_format['bg']['yellow']
+                elif product in ordered_product:
+                    format_mode = cell_format['bg']['green']
+                else:    
+                    format_mode = cell_format['text']
+
                 record = [
-                    'X' if product.dynamic_bom_checked else '',
-                    'X' if product in ordered_product else '',
-                    u'%s' % product.default_code,
-                    u'%s' % product.name,
+                    (u'X' if product.dynamic_bom_checked else '', format_mode),
+                    (u'X' if product in ordered_product else '', format_mode),
+                    (u'%s' % product.default_code, format_mode),
+                    (u'%s' % product.name, format_mode),
+                    (u'%s' % product.q_x_pack, format_mode),
                     ]
                 record.extend(['' for i in range(0, 2 * pos)])    
                 record.append('') # Note

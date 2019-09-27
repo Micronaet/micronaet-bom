@@ -115,7 +115,6 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             reference_date = '%s-09-01' % (now_year - 2)
         else:    
             reference_date = '%s-09-01' % (now_year - 1)
-        _logger.info('Reference date: %s' % reference_date)  
         if demo:  
             reference_date = '2019-09-01'
             
@@ -136,6 +135,10 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         excel_pool = self.pool.get('excel.writer')
         sale_line_pool = self.pool.get('sale.order.line')
         
+        # ---------------------------------------------------------------------
+        # Collect data::
+        # ---------------------------------------------------------------------
+        # Product and bom data:
         product_ids = product_pool.search(cr, uid, [
             ('parent_bom_id', '!=', False),
             ], context=None)
@@ -150,10 +153,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 parents[parent_bom] = []
             parents[parent_bom].append(product)
         
-        # ---------------------------------------------------------------------
-        # Excel file:
-        # ---------------------------------------------------------------------
-        
+        # Sale order product:
+        _logger.info('Read order from reference date: %s' % reference_date)  
         ordered_product = []
         if check_order:
             sale_line_ids = sale_line_pool.search(cr, uid, [
@@ -165,7 +166,10 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 product = line.product_id
                 if product not in ordered_product:
                     ordered_product.append(product)
-        
+
+        # ---------------------------------------------------------------------
+        # Excel file:
+        # ---------------------------------------------------------------------        
         ws_name = u'Dettaglio'
         excel_pool.create_worksheet(ws_name)
 

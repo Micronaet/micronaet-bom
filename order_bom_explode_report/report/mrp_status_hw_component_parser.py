@@ -219,10 +219,13 @@ class Parser(report_sxw.rml_parse):
         # Create deadline period in report:
         with_deadline = data.get('with_deadline', False) 
         
-        # TODO change used for now!!!!!!
-        #reference_date = '2016-10-15 00:00:00' 
-        # 04/01/2017 Change after inventory
-        reference_date = '2019-09-01 00:00:00' # TODO keep in parameter
+        # Dynamic generate reference date:
+        now = datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+        if now[5:7] >= '09':
+            reference_date = '%s-09-01 00:00:00' % (now[:4])
+        else:    
+            reference_date = '%s-09-01 00:00:00' % (int(now[:4]) - 1)
+        _logger.warning('Reference date for HW: %s' % reference_date    
         
         # TODO manage day range
         if days:

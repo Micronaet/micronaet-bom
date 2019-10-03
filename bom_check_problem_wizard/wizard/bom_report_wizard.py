@@ -105,8 +105,9 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Parameters
         # ---------------------------------------------------------------------
-        check_order = True        
+        check_order = True 
         demo = False
+        with_hw = True
 
         # Generate dynamic reference date (2 years)
         now = '%s' % datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
@@ -141,12 +142,13 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         # Product and bom data:
         product_ids = product_pool.search(cr, uid, [
             ('parent_bom_id', '!=', False),
-            #('default_code', '=ilike', '036TXA%'), # TODO remove (for test)
             ], context=None)
             
         if demo:
             product_ids = product_ids[:30]
         parents = {}
+        hw = [] # HW BOM
+        
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
             parent_bom = product.parent_bom_id
@@ -206,10 +208,10 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Header:    
         # ---------------------------------------------------------------------
-        excel_pool.write_xls_line(ws_note_name, row, [
+        excel_pool.write_xls_line(ws_note_name, note_row, [
             u'Note',
             ], default_format=cell_format['header'])
-        header_row = row    
+        header_row = note_row    
 
         # TODO needed?
         page_error = []
@@ -353,6 +355,13 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                         record[col + 1] = (
                             qty, cell_format['bg']['blue'])
                     
+                    # ---------------------------------------------------------
+                    # HW part:
+                    # ---------------------------------------------------------
+                    if with_hw:
+                        if product.half_bom_id:
+                            hw.append(product)
+
                 row += 1
                 excel_pool.write_xls_line(
                     ws_name, row, record, default_format=cell_format['text'])
@@ -362,6 +371,49 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 u'Errori pagine non create: %s' % (page_error, ), 
                 ], default_format=cell_format['title'])
             note_row += 1
+
+        # ---------------------------------------------------------------------
+        #                                    HW Page
+        # ---------------------------------------------------------------------
+        if with_hw:
+            # Title:
+            ws_name = 'Semilavorati'
+            excel_pool.column_width(ws_name, [
+                35, 10, 
+                12, 5, 12, 5, 12, 5, 12, 5, 12, 5, 12, 5, 12, 5, 12, 5, 12, 5, 
+                ])
+            row = 0
+            excel_pool.write_xls_line(ws_name, row, [
+                u'Distinte base: %s' % ws_name, 
+                ], default_format=cell_format['title'])
+
+            # Header:
+            row += 1
+            excel_pool.write_xls_line(ws_name, row, [
+                'Semilavorato', 'Codice', 'Componente', 'Q.',
+                ], default_format=cell_format['header'])
+            
+            # -----------------------------------------------------------------
+            # Create page with parent bom:        
+            # -----------------------------------------------------------------
+            for product in sorted(hw, 
+                    key=lambda x: x.default_code):                
+                row += 1
+                excel_pool.write_xls_line(ws_name, row, [
+                    product.name, product.default_code,
+                    ], default_format=cell_format['text'])
+
+                # Expand component
+                col = 0                    
+                for component in sorted(product.half_bom_id,
+                        key=lambda x: x.product_id.default_code):                
+                    col += 2
+                    product_cmpt = component.product_id
+                    excel_pool.write_xls_line(ws_name, row, [
+                        product_cmpt.default_code,
+                        component.product_qty,
+                        ], default_format=cell_format['text'], col=col)
+                    
             
         return excel_pool.return_attachment(
             cr, uid, 'BOM check', context=context)

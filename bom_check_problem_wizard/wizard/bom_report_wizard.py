@@ -381,8 +381,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             excel_pool.create_worksheet(ws_name)
             
             excel_pool.column_width(ws_name, [
-                35, 10, 
-                12, 5, 12, 5, 12, 5, 12, 5, 12, 5, 12, 5, 12, 5, 12, 5, 12, 5, 
+                15, 35, 
+                12, 4, 12, 4, 12, 4, 12, 4, 12, 4, 12, 4, 12, 4, 12, 4, 12, 4, 
                 ])
             row = 0
             excel_pool.write_xls_line(ws_name, row, [
@@ -407,7 +407,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
 
                 # Expand component
                 col = 0                    
-                for component in sorted(product.half_bom_id,
+                for component in sorted(product.half_bom_ids,
                         key=lambda x: x.product_id.default_code):                
                     col += 2
                     product_cmpt = component.product_id

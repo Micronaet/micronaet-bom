@@ -222,9 +222,9 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             # Create sheet:
             # -----------------------------------------------------------------
-            _logger.warning(u'New page: %s' % ws_name)
             ws_name = parent_product.default_code or (
                 'ID %s' % parent_product.id)
+            _logger.warning(u'New page: %s' % ws_name)
             try:
                 excel_pool.create_worksheet(ws_name)
             except: 
@@ -378,6 +378,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         if with_hw:
             # Title:
             ws_name = 'Semilavorati'
+            excel_pool.create_worksheet(ws_name)
+            
             excel_pool.column_width(ws_name, [
                 35, 10, 
                 12, 5, 12, 5, 12, 5, 12, 5, 12, 5, 12, 5, 12, 5, 12, 5, 12, 5, 

@@ -65,13 +65,37 @@ try:
 except:
     print 'Errore reading file: %s' % file_excel
     sys.exit()
-import pdb; pdb.set_trace()        
+
+log_f = open('./update.log', 'w')
 for name in wb.sheet_names():
     sheet = wb.sheet_by_name(name)
     for row in range(2, sheet.nrows): # jump title, header row
         dynamic_bom_checked = sheet.cell_value(row, 0)
-        default_code = sheet.cell_value(row, 2)
-
+        default_code = sheet.cell_value(row, 2)        
+        if dynamic_bom_checked.upper() != 'X':
+            message = '%s. NOT UPDATE Sheet: %s, Code: %s\n' % (
+                row, name, default_code
+                )
+            print message 
+            log_f.write(message)    
+            continue
         
+        product_ids = product_pool.search([
+            ('default_code', '=', default_code)])
+        if product_ids:
+            product_pool.write(product_ids, {
+                'dynamic_bom_checked': True, 
+                })
+            message = '%s. UPDATED Sheet: %s, Code: %s\n' % (
+                row, name, default_code,
+                )
+            print message 
+            log_f.write(message)    
+                
+        else:
+            message = '%s. PRODUCT NOT FOUND Sheet: %s, Code: %s\n' % (
+                row, name, default_code,
+                )
+            print message 
+            log_f.write(message)    
         
-

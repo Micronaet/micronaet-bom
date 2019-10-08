@@ -116,9 +116,12 @@ class Parser(report_sxw.rml_parse):
         sol_pool = self.pool.get('sale.order.line') 
         mrp_pool = self.pool.get('mrp.production')
         
-        #reference_date = '2016-10-15 00:00:00' 
-        # 04/01/2017 Change after inventory
-        reference_date = '2018-09-01 00:00:00' # TODO keep in parameter
+        now = '%s' % datetime.now() 
+        if now[5:7] >= '09':
+            year_now = now[:4]
+        else: # next year for 01 > 08
+            year_now = int(now[:4]) - 1
+        reference_date = '%s-09-01 00:00:00' % year_now
         
         limit_date = '%s 23:59:59' % (
             datetime.now() + timedelta(days=days)).strftime(

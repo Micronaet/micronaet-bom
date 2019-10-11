@@ -63,8 +63,8 @@ col_names = {
     'MT': ('[Materassino]', 29),
     'TL': ('[Telo]', 26),
     }
-#bom_id = 11256 #DYNAMIC.2
-bom_id = 7366 #DYNAMIC.1
+bom_id = 11256 #DYNAMIC.2
+#bom_id = 7366 #DYNAMIC.1
 
 try:
     wb = xlrd.open_workbook(file_excel)
@@ -165,7 +165,7 @@ for page in wb.sheet_names():
         # ---------------------------------------------------------------------
         # Rule creation:
         # ---------------------------------------------------------------------
-        dynamic_mask = (default_code + '%').replace(' ', '_')
+        dynamic_mask = (default_code[:12] + '%').replace(' ', '_')
         line_ids = line_pool.search([
             ('bom_id', '=', bom_id),
             ('product_id', '=', correct_id),
@@ -195,5 +195,4 @@ for page in wb.sheet_names():
                 dynamic_mask,
                 1,
                 ))
-            import pdb; pdb.set_trace()
-            line_pool.create(data)            
+            #line_pool.create(data)            

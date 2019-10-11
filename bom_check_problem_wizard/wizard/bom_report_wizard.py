@@ -99,7 +99,9 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             'nodestroy': False,
             }
 
-    def excel_extract_bom_check(self, cr, uid, wizard, context=None):
+        
+    def excel_extract_bom_check(self, cr, uid, wizard, only_hw=False, 
+            context=None):
         ''' Report for excel
         '''
         # ---------------------------------------------------------------------
@@ -139,10 +141,19 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Collect data::
         # ---------------------------------------------------------------------
-        # Product and bom data:
-        product_ids = product_pool.search(cr, uid, [
+        domain = [
             ('parent_bom_id', '!=', False),
-            ], context=None)
+            ]
+            
+        if only_hw:
+            domain.extend([
+            '|',
+            ('default_code', '=ilike', 'MT%'),
+            ('default_code', '=ilike', 'TL%'),
+            ])
+
+        # Product and bom data:
+        product_ids = product_pool.search(cr, uid, domain, context=context)
             
         if demo:
             product_ids = product_ids[:30]
@@ -457,8 +468,11 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         elif wiz_proxy.mode == 'excel':
             return self.excel_extract_bom_check(
                 cr, uid, wiz_proxy, context=context)
+        elif wiz_proxy.mode == 'excel_hw':
+            return self.excel_extract_bom_check(
+                cr, uid, wiz_proxy, only_hw=True, context=context)
         else:
-            _logger.error('No report mode %s!') % wiz_proxy.mode            
+            _logger.error('No report mode %s!' % wiz_proxy.mode)
 
         return {
             'type': 'ir.actions.report.xml',
@@ -476,6 +490,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ('line', 'Product presence bom'),
             ('not_product', 'Excluded product'),
             ('excel', 'Excel check'),
+            ('excel_hw', 'Excel semilavorati'),
             ], 'Report mode', required=True),            
             
         'from_order': fields.boolean('From order'),    

@@ -28,7 +28,7 @@ import xlrd
 # -----------------------------------------------------------------------------
 # Read configuration parameter:
 # -----------------------------------------------------------------------------
-cfg_file = os.path.expanduser('./openerp.cfg')
+cfg_file = os.path.expanduser('../openerp.cfg')
 
 config = ConfigParser.ConfigParser()
 config.read([cfg_file])

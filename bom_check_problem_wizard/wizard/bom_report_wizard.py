@@ -413,7 +413,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     key=lambda x: x.default_code):                
                 row += 1
                 excel_pool.write_xls_line(ws_name, row, [
-                    product.name, product.default_code,
+                    product.default_code,
+                    product.name, 
                     ], default_format=cell_format['text'])
 
                 # Expand component

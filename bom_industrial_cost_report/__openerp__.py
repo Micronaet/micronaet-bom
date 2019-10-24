@@ -35,6 +35,7 @@
         'product',
         'bom_production_cost',
         'bom_dynamic_structured', # for dynamic bom structure       
+        'bom_check_problem_wizard', # For checked bom
         ],
     'init_xml': [],
     'demo': [],

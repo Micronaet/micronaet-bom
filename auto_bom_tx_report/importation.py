@@ -373,9 +373,16 @@ class PurchaseOrderXLSX(orm.Model):
 
                     # Extra data:
                     if update_lead_lot:
+                        leadtime = WS.cell(row, 14).value
+                        if type(leadtime) != float:
+                            leadtime = 0
+                        purchase_lot_block = WS.cell(row, 15).value
+                        if type(purchase_lot_block) != float:
+                            purchase_lot_block = 0
+                        
                         product_pool.write(cr, uid, product_id, {
-                            'leadtime': WS.cell(row, 14).value,
-                            'purchase_lot_block': WS.cell(row, 15).value, 
+                            'leadtime': leadtime,
+                            'purchase_lot_block': purchase_lot_block,
                             }, context=context)
 
                     if update_inventory_category and WS.cell(row, 16).value:                        

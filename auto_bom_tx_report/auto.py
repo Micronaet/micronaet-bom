@@ -316,6 +316,10 @@ class MrpProduction(orm.Model):
             (inv, tcar, tscar, mm, oc, of, sal, o, category, hw, hw_total, 
                 purchase, inventory_category) = line
             
+            # Hide not active product:
+            if not o.active:
+                return row
+                
             # Jump pipes:
             if category == 'Pipes':    
                 return row # same row

@@ -150,7 +150,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             '|', '|',
             #('default_code', '=ilike', 'MT%'),
             #('default_code', '=ilike', 'TL%'),
-            #('default_code', '=ilike', 'PO%'),
+            ('default_code', '=ilike', 'PO%'),
             ('default_code', '=ilike', 'MS%'),
             ('default_code', '=ilike', 'TS%'),
             ])

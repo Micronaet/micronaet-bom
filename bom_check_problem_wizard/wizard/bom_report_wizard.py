@@ -147,9 +147,10 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             
         if only_hw:
             domain.extend([
-            '|',
+            '|', '|',
             ('default_code', '=ilike', 'MT%'),
             ('default_code', '=ilike', 'TL%'),
+            ('default_code', '=ilike', 'PO%'),
             ])
 
         # Product and bom data:

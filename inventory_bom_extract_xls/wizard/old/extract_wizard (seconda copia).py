@@ -402,7 +402,6 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         use_dynamic = False # Force tempate bom use
         code_part = 6
-        xls_reload_file = '/home/administrator/photo/xls/stock/reload_%s.xlsx'
         xls_file = '/home/administrator/photo/xls/stock/inventory_%s.xlsx'
         xls_infile = '/home/administrator/photo/xls/stock/use_inv_%s.xlsx'
         mm_infile = '/home/administrator/photo/xls/stock/mori_fin_%s.csv'
@@ -430,7 +429,6 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # XLS output file:
         # ---------------------------------------------------------------------            
         # Insert year in filename:
-        xls_reload_file = xls_reload_file % year
         xls_file = xls_file % year
         xls_infile = xls_infile % year
         mm_infile = mm_infile % year
@@ -500,11 +498,9 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         _logger.info('Start extract sale from invoice, year %s' % year)
         line_pool = self.pool.get('account.invoice.line')
         line_ids = line_pool.search(cr, uid, [
-            ('invoice_id.date_invoice', '>', '%s-08-31' % year),
-            ('invoice_id.date_invoice', '<', '%s-09-01' % (year + 1)),
-            #('invoice_id.date_invoice', '>=', '%s-01-01' % year),
-            #('invoice_id.date_invoice', '<', '%s-01-01' % (year + 1)),
+            ('invoice_id.date_invoice', '>=', '%s-01-01' % year),
             #('invoice_id.date_invoice', '<', '%s-02-01' % year),
+            ('invoice_id.date_invoice', '<', '%s-01-01' % (year + 1)),
             ('invoice_id.state', '=', 'open'),
             ], context=context)
                 
@@ -538,32 +534,6 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             month = int(date_invoice[5:7])
             inventory_product[default_code][month - 1] += quantity   
             inventory[parent_code][month] += quantity   
-
-
-
-        # ---------------------------------------------------------------------
-        # Correct inventory_product with reload file:
-        # ---------------------------------------------------------------------
-        if os.path.isfile(xls_reload_file):
-            _logger.warning(
-                'Reload parent invoiced product: %s' % xls_reload_file)
-            wb = xlrd.open_workbook(xls_reload_file) 
-            ws = wb.sheet_by_index(1)  
-            for row in range(1, ws.nrows):            
-                default_code = '%s' % ws.cell_value(row, 0)
-                if default_code.endswith('.0'):
-                   default_code = default_code[:-2]
-                if default_code not in inventory:
-                    import pdb; pdb.set_trace()
-                    
-                inventory[default_code] = [0.0, ]
-                for col in range(2, 14):    
-                    inventory[default_code].append(
-                        ws.cell_value(row, col))
-                inventory[default_code].append(0.0)                
-        # ---------------------------------------------------------------------
-
-
 
         # Export in XLSX file:
         xls_sheet_write(WB, '1. Vendite prodotti', inventory_product, 
@@ -642,11 +612,6 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             # Product data information used:
             # ------------------------------
             # Normal product (check in BOM template):
-            if default_code not in products:
-                _logger.error('Code not found: %s' % default_code)
-                # TODO not to be!
-                continue
-
             product = products[default_code] # Browse obj
             code6 = default_code[:6].strip()
             industrial_ids = {}

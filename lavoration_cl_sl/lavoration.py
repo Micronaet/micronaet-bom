@@ -113,7 +113,11 @@ class StockMove(orm.Model):
                         sl.product_qty,
                         )
             else: # show BOM:
-                for bom in item.product_id.half_bom_ids:
+                for bom in item.product_id.half_bom_ids:                    
+                    if item.remove_obtainable and bom.obtainable_component:
+                        _logger.warning('Remove obtainable component: %s' % \
+                            bom.product_id.default_code)
+                        continue
                     res[item.id] += '%s: %s\n' % (
                         bom.product_id.default_code or '??',
                         bom.product_qty * (
@@ -132,6 +136,8 @@ class StockMove(orm.Model):
             _get_linked_sl_status, method=True, 
             type='text', string='SL movement', 
             store=False),                         
+        'remove_obtainable': fields.boolean('No ricavabili', 
+            help='Rimuove dalla distinta i componenti ricavabili'),
         }
 
 class MRPLavoration(orm.Model):  
@@ -278,6 +284,11 @@ class MRPLavoration(orm.Model):
                 }, context=context)
             
             for component in product.half_bom_ids:
+                if load.remove_obtainable and component.obtainable_component:
+                    _logger.warning('Remove obtainable stock move: %s' % \
+                        component.product_id.default_code)
+                    continue
+                    
                 product = component.product_id
                 unload_qty = component.product_qty * load_fail_qty
                 if unload_qty <= 0.0:

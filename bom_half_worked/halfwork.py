@@ -56,6 +56,8 @@ class MrpBomLine(orm.Model):
     _inherit = 'mrp.bom.line'
     
     _columns = {
+        'obtainable_component': fields.boolean('Ricavabile', 
+            help='Questo componente può essere ricavato dal taglio tela'),
         'halfwork_id': fields.many2one(
             'product.product', 'Halfwork product'),
         # TODO remove? yet used?    

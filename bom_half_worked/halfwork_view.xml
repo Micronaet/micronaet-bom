@@ -57,6 +57,7 @@
                 <xpath expr="//field[@name='bom_line_ids']/tree/field[@name='product_id']" position="after">
                     <button name="open_halfwork_form" string="Open halfwork bom" icon="STOCK_JUSTIFY_FILL" type="object" 
                        attrs="{'invisible': [('relative_type','!=','half')]}"/>
+                    <field name="obtainable_component" />
                 </xpath>
                 <field name="bom_line_ids" position="attributes">
                     <attribute name="context">{'default_halfwork_id': halfwork_id}</attribute>

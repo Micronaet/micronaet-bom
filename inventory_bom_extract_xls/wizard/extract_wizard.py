@@ -505,7 +505,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             #('invoice_id.date_invoice', '>=', '%s-01-01' % year),
             #('invoice_id.date_invoice', '<', '%s-01-01' % (year + 1)),
             #('invoice_id.date_invoice', '<', '%s-02-01' % year),
-            ('invoice_id.state', '=', 'open'),
+            #('invoice_id.state', '=', 'open'),
+            ('invoice_id.type', '!=', 'out_refund'),
             ], context=context)
                 
         # Database:    
@@ -538,32 +539,6 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             month = int(date_invoice[5:7])
             inventory_product[default_code][month - 1] += quantity   
             inventory[parent_code][month] += quantity   
-
-
-
-        # ---------------------------------------------------------------------
-        # Correct inventory_product with reload file:
-        # ---------------------------------------------------------------------
-        if os.path.isfile(xls_reload_file):
-            _logger.warning(
-                'Reload parent invoiced product: %s' % xls_reload_file)
-            wb = xlrd.open_workbook(xls_reload_file) 
-            ws = wb.sheet_by_index(1)  
-            for row in range(1, ws.nrows):            
-                default_code = '%s' % ws.cell_value(row, 0)
-                if default_code.endswith('.0'):
-                   default_code = default_code[:-2]
-                if default_code not in inventory:
-                    import pdb; pdb.set_trace()
-                    
-                inventory[default_code] = [0.0, ]
-                for col in range(2, 14):    
-                    inventory[default_code].append(
-                        ws.cell_value(row, col))
-                inventory[default_code].append(0.0)                
-        # ---------------------------------------------------------------------
-
-
 
         # Export in XLSX file:
         xls_sheet_write(WB, '1. Vendite prodotti', inventory_product, 
@@ -603,6 +578,31 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             for col in range(1, 15):
                 inventory[parent_code][col - 1] += clean_float(row[col].value)
         _logger.info('End inventory adjust file: %s' % xls_infile),
+
+        # ---------------------------------------------------------------------
+        # Correct inventory_product with reload file:
+        # ---------------------------------------------------------------------
+        '''
+        import pdb; pdb.set_trace()
+        if os.path.isfile(xls_reload_file):
+            _logger.warning(
+                'Reload parent invoiced product: %s' % xls_reload_file)
+            wb = xlrd.open_workbook(xls_reload_file) 
+            ws = wb.sheet_by_index(1)  
+            for row in range(1, ws.nrows):            
+                parent_code = '%s' % ws.cell_value(row, 0)
+                if parent_code.endswith('.0'):
+                   parent_code = parent_code[:-2]
+                #if default_code not in inventory:
+                #    import pdb; pdb.set_trace()
+                    
+                inventory[parent_code] = [0.0, ]
+                for col in range(2, 14):    
+                    inventory[parent_code].append(
+                        ws.cell_value(row, col))
+                inventory[parent_code].append(0.0)                
+        '''
+        # ---------------------------------------------------------------------
 
         # Export in XLSX file:
         xls_sheet_write(WB, '3. Correzione padre', inventory, header)

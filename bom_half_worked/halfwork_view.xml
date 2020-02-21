@@ -33,6 +33,7 @@
                             <tree string="Half BOM component" editable="bottom">
                                 <field name="bom_id" invisible="1"/>
                                 <field name="product_id"/>
+                                <field name="obtainable_component" />
                                 <field name="product_qty" />
                                 <field name="product_uom" />
                             </tree>

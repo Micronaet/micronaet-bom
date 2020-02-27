@@ -515,8 +515,10 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             #parent_code = default_code[:code_part].strip()
                                 
             qty = line.quantity
+            if not qty:
+                continue
             subtotal = line.price_subtotal
-            price = subtotal / quantity
+            price = subtotal / qty
             date = line.invoice_id.date_invoice
             date = '%s%s15' % (
                 date[:4],
@@ -530,7 +532,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 price,
                 ))
                 
-        out_file = open('/home/administrator/photo/xls/stock/InventarioFiscale2018/mexal/pf_unload.csv', 'w')
+        out_file = open(
+            '/home/administrator/photo/xls/stock/InventarioFiscale2018/mexal/pf_unload.csv', 'w')
         for record in sorted(export_data):            
             out_file.write(record)                
         return True

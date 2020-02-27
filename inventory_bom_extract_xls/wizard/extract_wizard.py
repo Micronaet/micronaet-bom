@@ -502,342 +502,38 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         line_ids = line_pool.search(cr, uid, [
             ('invoice_id.date_invoice', '>', '%s-08-31' % year),
             ('invoice_id.date_invoice', '<', '%s-09-01' % (year + 1)),
-            #('invoice_id.date_invoice', '>=', '%s-01-01' % year),
-            #('invoice_id.date_invoice', '<', '%s-01-01' % (year + 1)),
-            #('invoice_id.date_invoice', '<', '%s-02-01' % year),
-            #('invoice_id.state', '=', 'open'),
-            ('invoice_id.type', '!=', 'out_refund'),
             ], context=context)
                 
-        # Database:    
-        inventory_product = {}
-        inventory = {}        
-        products = {}
         _logger.info('Read %s invoice line' % len(line_ids))        
+        export_data = []
         for line in line_pool.browse(
                 cr, uid, line_ids, context=context):
             default_code = line.product_id.default_code
             if not default_code:
                 _logger.error('No default code')
                 continue                
-            parent_code = default_code[:code_part].strip()
+            #parent_code = default_code[:code_part].strip()
                                 
-            quantity = line.quantity
-            date_invoice = line.invoice_id.date_invoice
-                        
-            if default_code not in inventory_product:
-                inventory_product[default_code] = [
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    ]
-                products[default_code] = line.product_id     
-            if parent_code not in inventory:
-                inventory[parent_code] = [
-                    0, # Start inv.
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, # End inv.
-                    ]
-            month = int(date_invoice[5:7])
-            inventory_product[default_code][month - 1] += quantity   
-            inventory[parent_code][month] += quantity   
-
-        # Export in XLSX file:
-        xls_sheet_write(WB, '1. Vendite prodotti', inventory_product, 
-            header_product)
-        xls_sheet_write(WB, '2. Vendite padre', inventory, header)
-        
-        # ---------------------------------------------------------------------
-        # B. Integrate unload inventory:
-        # ---------------------------------------------------------------------
-        _logger.info('Read inventory adjust file: %s' % xls_infile),
-        # Open file:
-        try:
-            # from xlrd.sheet import ctype_text   
-            WB_inv = xlrd.open_workbook(xls_infile)
-            WS_inv = WB_inv.sheet_by_index(0)
-        except:
-            raise osv.except_osv(
-                _('Open file error'), 
-                _('Cannot open file: %s' % xls_infile),
+            qty = line.quantity
+            subtotal = line.price_subtotal
+            price = subtotal / quantity
+            date = line.invoice_id.date_invoice
+            date = '%s%s15' % (
+                date[:4],
+                date[5:7],
                 )
 
-        for i in range(start_row, WS_inv.nrows):
-            row = WS_inv.row(i)
-            parent_code = row[0].value
-            if not parent_code: # end import
-                _logger.info('End import at line: %s' % i)
-                break
-            
-            if parent_code not in inventory:
-                _logger.warning('Code not found: %s' % parent_code)
-                inventory[parent_code] = [
-                    0, # Start inv.
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, # End inv.
-                    ]                    
-
-            for col in range(1, 15):
-                inventory[parent_code][col - 1] += clean_float(row[col].value)
-        _logger.info('End inventory adjust file: %s' % xls_infile),
-
-        # ---------------------------------------------------------------------
-        # Correct inventory_product with reload file:
-        # ---------------------------------------------------------------------
-        '''
-        import pdb; pdb.set_trace()
-        if os.path.isfile(xls_reload_file):
-            _logger.warning(
-                'Reload parent invoiced product: %s' % xls_reload_file)
-            wb = xlrd.open_workbook(xls_reload_file) 
-            ws = wb.sheet_by_index(1)  
-            for row in range(1, ws.nrows):            
-                parent_code = '%s' % ws.cell_value(row, 0)
-                if parent_code.endswith('.0'):
-                   parent_code = parent_code[:-2]
-                #if default_code not in inventory:
-                #    import pdb; pdb.set_trace()
-                    
-                inventory[parent_code] = [0.0, ]
-                for col in range(2, 14):    
-                    inventory[parent_code].append(
-                        ws.cell_value(row, col))
-                inventory[parent_code].append(0.0)                
-        '''
-        # ---------------------------------------------------------------------
-
-        # Export in XLSX file:
-        xls_sheet_write(WB, '3. Correzione padre', inventory, header)
-
-        # ---------------------------------------------------------------------
-        # C. Assign product unload depend on inventory database
-        # ---------------------------------------------------------------------
-        for default_code, unload_list in inventory_product.iteritems():
-            parent_code = default_code[:code_part].strip()
-            # loop on month:
-            for col in range(0, 12):
-                product_qty = inventory_product[default_code][col]
-                parent_qty = inventory[parent_code][col + 1]
-                
-                # 3 case:
-                if not parent_qty:
-                    inventory_product[default_code][col] = 0.0
-                elif product_qty <= parent_qty: 
-                    inventory[parent_code][col + 1] -= product_qty                     
-                else: # product qty > parent_qty
-                    inventory_product[default_code][col] = parent_qty
-                    inventory[parent_code][col + 1] = 0.0
-        # Export in XLSX file:
-        xls_sheet_write(WB, '4. Correzione prodotti', inventory_product, 
-            header_product)
-
-        # ---------------------------------------------------------------------
-        # D. Extra material from sales
-        # ---------------------------------------------------------------------
-        materials = {}
-        jumped = {} # Material not managed
-        no_bom6 = {}
-        for default_code, unload_list in inventory_product.iteritems():
-            _logger.info('Extract material for code: %s' % default_code)
-            
-            # ------------------------------
-            # Product data information used:
-            # ------------------------------
-            # Normal product (check in BOM template):
-            if default_code not in products:
-                _logger.error('Code not found: %s' % default_code)
-                # TODO not to be!
-                continue
-
-            product = products[default_code] # Browse obj
-            code6 = default_code[:6].strip()
-            industrial_ids = {}
-            dynamic_ids = []
-            # TODO choose another template instead
-            
-            if code6 in template_bom:
-                (dynamic_ids, industrial_ids) = template_bom[code6]
-                # TODO manage industrial
-            else:
-                if code6 not in no_bom6:
-                    no_bom6[code6] = []
-                if default_code not in no_bom6[code6]: # Log no bom product
-                    no_bom6[code6].append(default_code)
-            
-            # Use BOM from product instead of template bom
-            if not use_dynamic:
-                dynamic_ids = product.dynamic_bom_line_ids
-                
-            # Halfworked product:
-            half_line_ids = product.half_bom_ids # bom_ids            
-            
-            # -----------------------------------------------------------------
-            # I. Raw material (Invoice direct sale for material):
-            # -----------------------------------------------------------------
-            if not dynamic_ids and not half_line_ids:                
-                if not_in_inventory_selection(# Not used:
-                        product, jumped, costs):
-                    continue # jump not used (update the list)!
-                    
-                # Add in inventory:
-                setup_materials(product, materials, costs, mm_total, 
-                    mm_code_unused)
-                
-                # Loop on all period:
-                for col in range (0, 12):
-                    product_qty = unload_list[col]
-                    if not product_qty: # nothing to do, is empty
-                        continue
-                        
-                    setup_materials_q(product, col, product_qty, materials, 
-                        costs)
-                continue
-            # -----------------------------------------------------------------
-
-            # -----------------------------------------------------------------
-            # II. Halfwork explose (Halfwork explosed with material present):
-            # -----------------------------------------------------------------
-            for line in half_line_ids:
-                component = line.product_id
-                component_code = component.default_code
-                
-                # Component not used:
-                if not_in_inventory_selection(component, jumped, costs):
-                    continue
-
-                # Add to inventory:
-                setup_materials(component, materials, costs, mm_total, 
-                    mm_code_unused)
-                
-                # Loop on all period:
-                for col in range (0, 12):
-                    product_qty = unload_list[col]
-                    if not product_qty: # nothing to do, is empty
-                        #_logger.info('Jumped 0: %s' % default_code)
-                        continue
-                
-                    setup_materials_q(
-                        component, col, 
-                        product_qty * line.product_qty, 
-                        materials,
-                        costs
-                        )
-                continue
-            # -----------------------------------------------------------------
-
-            # -----------------------------------------------------------------
-            # III. Product explose (Explode product, first level, raw mat.):
-            # -----------------------------------------------------------------
-            for line in dynamic_ids: # has bom
-                # TODO change product_qty
-                component = line.product_id
-                component_code = component.default_code
-
-                # -------------------------------------------------------------
-                # a. HW in product explose:
-                # -------------------------------------------------------------
-                # Explode material in halfworked level:
-                # TODO save also halfwork material
-                if component.half_bom_ids:
-                    for hw_line in component.half_bom_ids:
-                        hw_product = hw_line.product_id
-                        hw_product_code = hw_product.default_code
-                        
-                        # Not used:
-                        if not_in_inventory_selection(hw_product, jumped, 
-                                costs):                                
-                            continue # jump not used!
-                        
-                        # Add to inventory:
-                        setup_materials(hw_product, materials, costs, mm_total, 
-                            mm_code_unused)
-
-                        for col in range (0, 12):
-                            product_qty = unload_list[col]
-                            if not product_qty: # nothing to do, is empty
-                                #_logger.info('Jumped 0: %s' % default_code)
-                                continue
-
-                            setup_materials_q(
-                                hw_product, col, 
-                                product_qty * hw_line.product_qty, # q.
-                                materials,
-                                costs,
-                                )
-                    continue # no other material        
-
-                # -------------------------------------------------------------
-                # b. Prime material in product explose:
-                # -------------------------------------------------------------
-                # Take material in first level                
-                if not_in_inventory_selection(component, jumped, costs):
-                    continue # Not used jumped
-                                    
-                for col in range (0, 12):
-                    product_qty = unload_list[col]
-                    if not product_qty: # nothing to do, is empty
-                        continue
-                        
-                    if component_code not in materials: # Add to inventory:
-                        setup_materials(component, materials, costs, mm_total, 
-                            mm_code_unused)
-                    setup_materials_q(
-                        component, col, 
-                        product_qty * line.product_qty, 
-                        materials,
-                        costs,
-                        )
-
-        # ---------------------------------------------------------------------                
-        # Used materials
-        # ---------------------------------------------------------------------                
-        xls_sheet_write(
-            WB, '5. Materiali utilizzati', materials, material_product)
-            
-        # ---------------------------------------------------------------------                
-        # Unused materials:
-        # ---------------------------------------------------------------------                
-        xls_sheet_write_table(
-            WB, '6. Materiali saltati', jumped, (
-                'Codice materiale', 'Nome', 'Costo', 'Ricavo', 'Fornitore', 
-                'Prezzo',
+            export_data.append('%-8s|%-18s|%20.6f|%20.6f\r\n' % (
+                date,            
+                default_code,
+                qty,
+                price,
                 ))
-
-        # ---------------------------------------------------------------------                
-        # Write extra page for BOM not found from product template:
-        # ---------------------------------------------------------------------                
-        WS = WB.add_worksheet('7. Prodotti senza modello DB')
-        row = 0
-        WS.write(row, 0, 'Codice padre (template)')
-        WS.write(row, 1, 'Elenco prodotti')
-        for code6 in sorted(no_bom6):
-            row += 1
-            WS.write(row, 0, code6)
-            WS.write(row, 1, ', '.join(no_bom6[code6]))
-
-        # ---------------------------------------------------------------------                
-        # Write extra page for Account total movement 2016
-        # ---------------------------------------------------------------------                
-        WS = WB.add_worksheet('8. Movimenti Mexal')
-        row = 0
-        WS.write(row, 0, 'Codice prodotto')
-        WS.write(row, 1, 'Totale movimenti')
-        for code in sorted(mm_total):
-            row += 1
-            WS.write(row, 0, code)
-            WS.write(row, 1, mm_total[code])
-
-        # ---------------------------------------------------------------------                
-        # Write extra page for Account total movement 2016
-        # ---------------------------------------------------------------------                
-        WS = WB.add_worksheet('9. Prodotti non utilizzati ')
-        row = 0
-        WS.write(row, 0, 'Prodotti presenti in mexal non utilizzati')
-        row += 1
-        WS.write(row, 0, 'Codice prodotto')
-        WS.write(row, 1, 'Movimentato')
-        for code in sorted(mm_code_unused):
-            row += 1
-            WS.write(row, 0, code)
-            WS.write(row, 1, mm_total.get(code, '?'))
+                
+        out_file = open('/home/administrator/photo/xls/stock/InventarioFiscale2018/mexal/pf_unload.csv', 'w')
+        for record in sorted(export_data):            
+            out_file.write(record)                
+        return True
                         
     _columns = {
         'year': fields.integer('Year', required=True),

@@ -509,6 +509,8 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         for line in line_pool.browse(
                 cr, uid, line_ids, context=context):
             default_code = line.product_id.default_code
+            standard_price = line.product_id.standard_price
+
             if not default_code:
                 _logger.error('No default code')
                 continue                
@@ -525,11 +527,12 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 date[5:7],
                 )
 
-            export_data.append('%-8s|%-18s|%20.6f|%20.6f\r\n' % (
+            export_data.append('%-8s|%-18s|%20.6f|%20.6f|%20.6f\r\n' % (
                 date,            
                 default_code,
                 qty,
                 price,
+                standard_price,
                 ))
                 
         out_file = open(

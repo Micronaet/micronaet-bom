@@ -526,13 +526,19 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 continue                
             #parent_code = default_code[:code_part].strip()
                                 
+            qty = line.quantity
             if not qty:
                 continue
-            qty = sign * line.quantity
+
+            qty *= sign    
             subtotal = line.price_subtotal
             price = subtotal / qty
             date = line.invoice_id.date_invoice
             date = '%s%s15' % (
+                date[:4],
+                date[5:7],
+                )
+            hw_date = '%s%s10' % (
                 date[:4],
                 date[5:7],
                 )
@@ -546,31 +552,27 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 ))
             
             # Get halfwork list (from history if present:
-            import pdb; pdb.set_trace()
             if default_code not in product_half_history:                
                 dynamic_ids = product.dynamic_bom_line_ids
                 if dynamic_ids: # is dynamic product:
                     product_half_history[default_code] = {}
-                    if dyn_line in dynamic_ids:                        
+                    for dyn_line in dynamic_ids:
                         half_line_ids = dyn_line.product_id.half_bom_ids
                         if not half_line_ids:
                             continue
-                    product_half_history[default_code][dyn_line.product_id] = \
-                        line.product_qty
+                        product_half_history[default_code][
+                            dyn_line.product_id] = dyn_line.product_qty
 
             if default_code not in product_half_history:                
                 continue # no dynamic product
                             
             for hw_product in product_half_history[default_code]:
-                half_movement.append(
-                    export_data.append('%-8s|%-18s|%20.6f|%20.6f\r\n' % (
-                        date,            
+                half_movement.append('%-8s|%-18s|%20.6f|%20.6f\r\n' % (
+                        hw_date,            
                         hw_product.default_code,
                         product_half_history[default_code][hw_product] * qty,
-                        '', # TODO price,
-                        #standard_price,
+                        0.0, # TODO price,
                         ))
-                    )
                 
         # Final product:
         out_file = open(
@@ -580,7 +582,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
 
         # Final HW unload:
         out_file = open(
-            '/home/administrator/photo/xls/stock/InventarioFiscale2018/mexal/hw_unload.csv', 'w')
+            '/home/administrator/photo/xls/stock/InventarioFiscale2018/mexal/hw.csv', 'w')
         for record in sorted(half_movement):            
             out_file.write(record)                
         return True

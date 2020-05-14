@@ -8,7 +8,8 @@
             <field name="arch" type="xml">
                 <xpath expr="//page[@string='Related BOM']/group/separator[1]" position="after">
                     <group colspan="4" col="4" attrs="{'invisible': [('relative_type','!=','parent')]}">
-                        <field name="parent_bom_id" attrs="{'required': [('relative_type','=','parent')]}"/>
+                        <field name="parent_bom_code" on_change="onchange_bom_code(parent_bom_code)"/>
+                        <field name="parent_bom_id" attrs="{'required': [('relative_type','=','parent')]}" domain="[('bom_category', '=', 'parent')]"/>
                         
                         <separator string="Default component:" colspan="4"/>
                         <field name="parent_bom_line_ids" colspan="4" nolabel="1" readonly="1">

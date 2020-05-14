@@ -59,8 +59,25 @@ class ProductProduct(orm.Model):
         except:
             res[ids[0]] = []
         return res
+
+    def onchange_bom_code(self, cr, uid, ids, parent_bom_code, context=None):
+        """ Add filter in BOM
+        """
+        if parent_bom_code:
+            return {'domain': {
+                'parent_bom_id': [
+                    ('bom_category', '=', 'parent'),
+                    ('product_id.default_code', 'ilike', parent_bom_code),
+                    ]}}
+        else:
+            return {'domain': {
+                'parent_bom_id': [
+                    ('bom_category', '=', 'parent'),
+                    ],
+                }}
     
     _columns = {
+        'parent_bom_code': fields.char('Codice DB', size=20),
         'parent_bom_id': fields.many2one(
             'mrp.bom', 'Parent default BOM', 
             help='Use for get list of categorized element for default'),

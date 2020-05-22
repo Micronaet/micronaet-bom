@@ -345,10 +345,9 @@ class MrpProduction(orm.Model):
             #                            ROW 0
             # -----------------------------------------------------------------
             # Merge cell:
-            WS.merge_range(row, 0, row, 12, '')
-            # WS.merge_range(row, 11, row, 12, '')  # Category product
-            WS.merge_range(row, 13, row, 15, '')  # Inventory category
-            # Not order status
+            WS.merge_range(row, 0, row, 13, '')
+            WS.merge_range(row, 15, row, 18, '')  # Inventory category
+            WS.merge_range(row, 19, row, 21, '')  # Not order status
 
             # TODO add extra color here!
             if sal[11] < 0:
@@ -375,12 +374,18 @@ class MrpProduction(orm.Model):
                 ('', format_text),
                 ('', format_text),
                 ('', format_text),
-                ('', format_text),  # (category, format_text),
-                ('', format_text),
-                (inventory_category, format_text),
                 ('', format_text),
                 ('', format_text),
-                ('' if any(oc) else 'NON IN ORD.', format_text),
+                ('', format_text),
+
+                ('', format_text),
+
+                (inventory_category, format_text),  # P
+                ('', format_text),
+                ('', format_text),
+                ('', format_text),
+                ('CON ORDINI' if any(oc) else 'SENZA ORDINI', format_text),
+                ('', format_text),
                 ('OBSOLETO!' if o.status == 'obsolete' else '', format_text),
                 ]
             write_xls_mrp_line(WS, row, line0)

@@ -22,6 +22,7 @@ import sys
 import logging
 import openerp
 import xlsxwriter
+from xlsxwriter.utility import xl_rowcol_to_cell
 import openerp.netsvc as netsvc
 import openerp.addons.decimal_precision as dp
 from openerp.osv import fields, osv, expression, orm
@@ -607,6 +608,20 @@ class MrpProduction(orm.Model):
                 ('', format_number),
                 ]
             write_xls_mrp_line(WS, row, line5)
+
+            # Add comment:
+            WS.write_comment(
+                xl_rowcol_to_cell(row, 18),
+                'Utilizzare i nomi dei fogli per scegliere la nuova categoria',
+            )
+            WS.write_comment(
+                xl_rowcol_to_cell(row, 19),
+                'Indicare S, Y o O per impostarlo obsoleto; N per rimuoverlo',
+            )
+            WS.write_comment(
+                xl_rowcol_to_cell(row, 20),
+                'Indicare la q. di riordino (sotto la testata diventa gialla)',
+            )
             row += 1
 
             # -----------------------------------------------------------------

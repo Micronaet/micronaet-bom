@@ -178,7 +178,7 @@ class MrpProduction(orm.Model):
                         'font_size': 9,
                         'align': 'center',
                         'valign': 'vcenter',
-                        'bg_color': '#4f4f4f',  # gray dark
+                        'bg_color': '#808080',  # gray dark
                         'border': 1,
                         # 'text_wrap': True,
                         }),
@@ -222,6 +222,15 @@ class MrpProduction(orm.Model):
                         'bold': True,
                         'font_color': 'black',
                         'bg_color': '#A7F2B4',
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'left',
+                        'border': 1,
+                        }),
+                    'bg_blue': WB.add_format({
+                        'bold': True,
+                        'font_color': 'black',
+                        'bg_color': '#99CCFF',
                         'font_name': 'Courier 10 pitch',
                         'font_size': 9,
                         'align': 'left',
@@ -389,7 +398,7 @@ class MrpProduction(orm.Model):
                 ('', format_text),
                 ('', format_text),
 
-                ('', format_text),
+                '',
 
                 (inventory_category, format_text),  # P
                 ('', format_text),
@@ -429,7 +438,7 @@ class MrpProduction(orm.Model):
                 ('Lug.', format_header),
                 ('Ago.', format_header),
 
-                ('', format_header),
+                '',
 
                 ('', format_header),
                 ('', format_header),
@@ -439,11 +448,6 @@ class MrpProduction(orm.Model):
                 ('', format_header),
                 ('', format_header),
                 ('', format_header),
-
-                #('LEADTIME', format_header),
-                #('LOTTO', format_header),
-                #('INV. CAT.', format_header),
-                #('OBSOLETO', format_header),
                 ]
             write_xls_mrp_line(WS, row, line1)
             row += 1
@@ -474,7 +478,7 @@ class MrpProduction(orm.Model):
                 (mm[10], format_number),
                 (mm[11], format_number),
 
-                ('', format_header),
+                '',
 
                 ('Dettagli extra', format_header_extra),
                 ('', format_header),
@@ -507,10 +511,17 @@ class MrpProduction(orm.Model):
                 (oc[9], format_number),
                 (oc[10], format_number),
                 (oc[11], format_number),
+
+                '',
+
                 ('', format_header),
-                ('', format_header),
-                ('', format_header),
-                ('', format_header),
+                ('Leadtime', format_header),
+                ('Lotto', format_header),
+                ('Inv. cat.', format_header),
+                ('Stato', format_header),
+                ('Liv. riord.', format_header),
+                ('Note', format_header),
+                ('Valore mag.', format_header),
                 ]
             write_xls_mrp_line(WS, row, line3)
             row += 1
@@ -534,10 +545,18 @@ class MrpProduction(orm.Model):
                 (of[9], format_number),
                 (of[10], format_number),
                 (of[11], format_number),
-                ('', format_header),
-                ('', format_header),
-                ('', format_header),
-                ('', format_header),
+
+                '',
+
+                ('Attuale', format_header),
+                # TODO:
+                ('$leadtime', format_number),
+                ('$lotto', format_header),
+                ('$invcat', format_header),
+                ('$stato', format_header),
+                ('$minimum_stock', format_header),
+                ('$note', format_header),
+                ('$stock_value', format_header),
                 ]
             write_xls_mrp_line(WS, row, line4)
             row += 1
@@ -545,6 +564,7 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             #                            ROW 5
             # -----------------------------------------------------------------
+            format_text_blue = get_xls_format('bg_green')
             # XXX Stock value end season:
             stock_value = 0.0
             try:

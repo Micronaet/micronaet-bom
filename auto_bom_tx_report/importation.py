@@ -348,12 +348,12 @@ class PurchaseOrderXLSX(orm.Model):
                             extra_data['status'] = 'catalog'
 
                     # 21. Minimum stock:
-                    minimum_qty = (WS.cell(row, 21).value or '').upper()
+                    minimum_qty = WS.cell(row, 21).value
                     if type(minimum_qty) in (float, int):
                         extra_data['report_minimum_qty'] = minimum_qty
 
                     # Note
-                    report_note = (WS.cell(row, 22).value or '').upper()
+                    report_note = WS.cell(row, 22).value
                     if report_note:
                         extra_data['report_note'] = report_note
 

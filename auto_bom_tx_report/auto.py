@@ -636,7 +636,8 @@ class MrpProduction(orm.Model):
             )
             WS.write_comment(
                 xl_rowcol_to_cell(row, 20),
-                'Indicare S, Y o O per impostarlo obsoleto; N per rimuoverlo',
+                'Indicare X, S, Y oppure O per impostarlo obsoleto; '
+                'N per rimuoverlo',
             )
             WS.write_comment(
                 xl_rowcol_to_cell(row, 21),

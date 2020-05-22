@@ -231,7 +231,7 @@ class MrpProduction(orm.Model):
                     'bg_blue': WB.add_format({
                         'bold': True,
                         'font_color': 'black',
-                        'bg_color': '#99CCFF',
+                        'bg_color': '#77C0F7',
                         'font_name': 'Courier 10 pitch',
                         'font_size': 9,
                         'align': 'left',
@@ -365,10 +365,11 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             #                            ROW 0
             # -----------------------------------------------------------------
+            format_white = get_xls_format('text')
             # Merge cell:
             WS.merge_range(row, 0, row, 13, '')
             WS.merge_range(row, 16, row, 19, '')  # Inventory category
-            WS.merge_range(row, 20, row, 22, '')  # Not order status
+            WS.merge_range(row, 20, row, 23, '')  # Not order status
 
             # TODO add extra color here!
             if sal[11] < 0:
@@ -399,8 +400,8 @@ class MrpProduction(orm.Model):
                 ('', format_text),
                 ('', format_text),
 
-                ('', format_text),
-                ('', format_text),
+                ('', format_white),
+                ('', format_white),
 
                 (inventory_category, format_text),
                 ('', format_text),
@@ -440,8 +441,8 @@ class MrpProduction(orm.Model):
                 ('Lug.', format_header),
                 ('Ago.', format_header),
 
-                ('', format_text),
-                ('', format_text),
+                ('', format_white),
+                ('', format_white),
 
                 ('', format_header),
                 ('', format_header),
@@ -481,8 +482,8 @@ class MrpProduction(orm.Model):
                 (mm[10], format_number),
                 (mm[11], format_number),
 
-                ('', format_text),
-                ('', format_text),
+                ('', format_white),
+                ('', format_white),
 
                 ('Dettagli extra', format_header_extra),
                 ('', format_header),
@@ -516,8 +517,8 @@ class MrpProduction(orm.Model):
                 (oc[10], format_number),
                 (oc[11], format_number),
 
-                ('', format_text),
-                ('', format_text),
+                ('', format_white),
+                ('', format_white),
 
                 ('', format_header),
                 ('Leadtime', format_header),
@@ -564,8 +565,8 @@ class MrpProduction(orm.Model):
                 (of[10], format_number),
                 (of[11], format_number),
 
-                ('', format_text),
-                ('', format_text),
+                ('', format_white),
+                ('', format_white),
 
                 ('Attuale', format_header),
                 (o.leadtime or 0, text_center),
@@ -614,8 +615,8 @@ class MrpProduction(orm.Model):
                 (sal[10], format_number),
                 (sal[11], format_number),
 
-                ('', format_text),
-                ('', format_text),
+                ('', format_white),
+                ('', format_white),
 
                 ('Nuovo', format_header),
                 ('', format_text_blue),
@@ -748,12 +749,11 @@ class MrpProduction(orm.Model):
             WS.set_column('A:A', 19)
             WS.set_column('B:B', 3)
             WS.set_column('C:O', 8)
-            WS.set_column('O:O', 1)
-            WS.set_column('P:R', 7)
-            WS.set_column('S:S', 13)
-            WS.set_column('T:U', 13)
-            WS.set_column('V:V', 25)
-            WS.set_column('W:W', 8)
+            WS.set_column('P:P', 1)
+            WS.set_column('Q:S', 7)
+            WS.set_column('T:V', 13)
+            WS.set_column('W:W', 25)
+            WS.set_column('Z:Z', 8)
             return WS
 
         # ---------------------------------------------------------------------

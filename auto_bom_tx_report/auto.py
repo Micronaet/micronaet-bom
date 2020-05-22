@@ -561,10 +561,6 @@ class MrpProduction(orm.Model):
 
                 '', '',
 
-                # Extra data (leadtime and order lot):
-                lineOrd.append(('', format_text))
-                lineOrd.append(('', format_text))
-
                 ('Attuale', format_header),
                 (o.leadtime or 0, text_center),
                 (o.purchase_lot_block or 0, text_center),

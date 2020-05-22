@@ -30,9 +30,9 @@
     'depends': [
         'base',
         'mrp',
-        'purchase', # For create operation from XLSX
-        'order_bom_explode_report', # report and wizard
-        'textilene_status', # only for group management TODO extract group!
+        'purchase',  # For create operation from XLSX
+        'order_bom_explode_report',  # report and wizard
+        'textilene_status',  # only for group management TODO extract group!
         'purchase_line_description',
         ],
     'init_xml': [],

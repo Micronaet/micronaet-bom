@@ -49,6 +49,11 @@ class ProductProduct(orm.Model):
     _columns = {
         'old_tcar': fields.integer('Old Tscar'),
         'old_tscar': fields.integer('Old Tscar'),
+
+        'report_minimum_qty': fields.float(
+            'Liv. riordino',
+            help='Livello di riordino report approvvigionamenti'),
+        'report_note': fields.text('Note report'),
         }
 
 
@@ -109,7 +114,7 @@ class ComponentStatusReportWizard(orm.TransientModel):
             }, context=context)
 
         return {
-            'type' : 'ir.actions.act_url',
+            'type': 'ir.actions.act_url',
             'url': '/web/binary/saveas?model=ir.attachment&field=datas&'
                    'filename_field=datas_fname&id=%s' % attachment_id,
             'target': 'self',
@@ -158,11 +163,11 @@ class MrpProduction(orm.Model):
                     'header': WB.add_format({
                         'bold': True,
                         'font_color': 'black',
-                        'font_name': 'Courier 10 pitch', # 'Arial'
+                        'font_name': 'Courier 10 pitch',  # 'Arial'
                         'font_size': 9,
                         'align': 'center',
                         'valign': 'vcenter',
-                        'bg_color': '#cfcfcf', # gray
+                        'bg_color': '#cfcfcf',  # gray
                         'border': 1,
                         # 'text_wrap': True,
                         }),
@@ -187,7 +192,16 @@ class MrpProduction(orm.Model):
                     'bg_red': WB.add_format({
                         'bold': True,
                         'font_color': 'black',
-                        'bg_color': '#ff420e',
+                        'bg_color': '#FFBBB5',
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'left',
+                        'border': 1,
+                        }),
+                    'bg_yellow': WB.add_format({
+                        'bold': True,
+                        'font_color': 'black',
+                        'bg_color': '#FDFF9C',
                         'font_name': 'Courier 10 pitch',
                         'font_size': 9,
                         'align': 'left',
@@ -196,7 +210,7 @@ class MrpProduction(orm.Model):
                     'bg_green': WB.add_format({
                         'bold': True,
                         'font_color': 'black',
-                        'bg_color': '#99cc66',
+                        'bg_color': '#A7F2B4',
                         'font_name': 'Courier 10 pitch',
                         'font_size': 9,
                         'align': 'left',
@@ -241,7 +255,7 @@ class MrpProduction(orm.Model):
                         'text_wrap': True
                         }),
                     'text_green': WB.add_format({
-                        'font_color': '#328238',  ##99cc66
+                        'font_color': '#328238',  # #99cc66
                         'font_name': 'Courier 10 pitch',
                         'font_size': 9,
                         'align': 'left',
@@ -298,7 +312,7 @@ class MrpProduction(orm.Model):
                         'align': 'left',
                         'bg_color': '#DDDDDD',
                         'border': 1,
-                        #'text_wrap': True,
+                        # 'text_wrap': True,
                         }),
                     'number_total': WB.add_format({
                         'bold': True,
@@ -339,6 +353,8 @@ class MrpProduction(orm.Model):
             # TODO add extra color here!
             if sal[11] < 0:
                 format_text = get_xls_format('bg_red')
+            elif sal[11] < o.report_minimum_qty:
+                format_text = get_xls_format('bg_yellow')
             else:
                 format_text = get_xls_format('bg_green')
 
@@ -359,7 +375,7 @@ class MrpProduction(orm.Model):
                 ('', format_text),
                 ('', format_text),
                 ('', format_text),
-                ('', format_text),  #(category, format_text),
+                ('', format_text),  # (category, format_text),
                 ('', format_text),
                 (inventory_category, format_text),
                 ('', format_text),

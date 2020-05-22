@@ -574,7 +574,7 @@ class MrpProduction(orm.Model):
                 (inventory_category, text_center),
                 ('OBSOLETO' if o.status == 'obsolete' else '', text_center),
                 (o.report_minimum_qty, text_center),
-                (o.report_note, text_center),
+                (o.report_note or '', text_center),
                 (stock_value, format_number),
                 ]
             write_xls_mrp_line(WS, row, line4)
@@ -583,11 +583,11 @@ class MrpProduction(orm.Model):
             if o.report_note:
                 WS.write_comment(
                     xl_rowcol_to_cell(row, 22),
-                    o.report_note,
+                    o.report_note or '',
                 )
             WS.write_comment(
                 xl_rowcol_to_cell(row, 23),
-                'Cliccare sulla colonna W per vedere il totale del foglio'
+                'Cliccare sulla colonna Z per vedere il totale del foglio'
                 '(valorizzazione fatta con prezzo ultimo doc. di acquisto)',
             )
 
@@ -640,7 +640,8 @@ class MrpProduction(orm.Model):
             )
             WS.write_comment(
                 xl_rowcol_to_cell(row, 21),
-                'Indicare la q. di riordino (sotto la testata diventa gialla)',
+                'Indicare la q. di riordino (se va sotto tale valore la '
+                'la testata della tabella diventa gialla)',
             )
 
             row += 1
@@ -686,7 +687,7 @@ class MrpProduction(orm.Model):
                     ]
                 hw_total_mt = 0.0
                 for hw_code, hw_status in hw.iteritems():
-                    hw_total_mt += hw_status[2] # usabled
+                    hw_total_mt += hw_status[2]  # usabled
 
                     # OC covered with stock (color the HW text):
                     if hw_status[1] <= hw_status[0]: # black
@@ -713,6 +714,7 @@ class MrpProduction(orm.Model):
                 # -------------------------------------------------------------
                 # Total with color:
                 # -------------------------------------------------------------
+                # TODO comment the total
                 order_total = int(sal[11] + hw_total_mt)
                 line6[14][0] = order_total # Total to be ordered
                 if order_total <= 0:
@@ -753,7 +755,7 @@ class MrpProduction(orm.Model):
             WS.set_column('Q:S', 7)
             WS.set_column('T:V', 13)
             WS.set_column('W:W', 25)
-            WS.set_column('Z:Z', 8)
+            WS.set_column('Z:Z', 9)
             return WS
 
         # ---------------------------------------------------------------------

@@ -143,7 +143,7 @@ class MrpProduction(orm.Model):
             for record in line:
                 if len(record) == 2:  # Normal text, format
                     WS.write(row, col, *record)
-                else: # Rich format
+                else:  # Rich format
                     WS.write_rich_string(row, col, *record)
                 col += 1
             return True
@@ -401,7 +401,7 @@ class MrpProduction(orm.Model):
 
                 '', '',
 
-                (inventory_category, format_text),  # P
+                (inventory_category, format_text),
                 ('', format_text),
                 ('', format_text),
                 ('', format_text),
@@ -863,7 +863,7 @@ class MrpProduction(orm.Model):
 
             # Datas setup:
             'mp_mode': 'fabric',
-            'only_negative': False, # TODO
+            'only_negative': False,  # TODO
             'without_type_ids': [],
             'mode': 'component',
             'type_id': False,

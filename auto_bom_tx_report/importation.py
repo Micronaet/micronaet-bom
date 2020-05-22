@@ -186,22 +186,16 @@ class PurchaseOrderXLSX(orm.Model):
         if context is None:
             context = {}
 
-        update_lead_lot = context.get('update_lead_lot', False)
-        update_inventory_category = context.get(
-            'update_inventory_category', False)
-        update_obsolete = context.get('obsolete', False)
-
         # Pool used:
         product_pool = self.pool.get('product.product')
         line_pool = self.pool.get('purchase.order.xlsx.line')
         inventory_pool = self.pool.get('product.product.inventory.category')
 
         inventory_db = {}
-        if update_inventory_category:
-            inventory_ids = inventory_pool.search(cr, uid, [], context=context)
-            for item in inventory_pool.browse(cr, uid, inventory_ids,
-                    context=context):
-                inventory_db[item.name] = item.id
+        inventory_ids = inventory_pool.search(cr, uid, [], context=context)
+        for item in inventory_pool.browse(cr, uid, inventory_ids,
+                context=context):
+            inventory_db[item.name] = item.id
 
         current_proxy = self.browse(cr, uid, ids, context=context)[0]
 
@@ -233,11 +227,11 @@ class PurchaseOrderXLSX(orm.Model):
         # Parameters:
         row_start = 0
         month_current = datetime.now().month
-        year_current =  datetime.now().year
+        year_current = datetime.now().year
         if month_current in [9, 10, 11, 12]:
             year_a = year_current
             year_b = year_current + 1
-        else: # 1 > 8
+        else:  # 1 > 8
             year_a = year_current - 1
             year_b = year_current
 
@@ -310,8 +304,8 @@ class PurchaseOrderXLSX(orm.Model):
                         pass # TODO multi code
 
                     product_id = product_ids[0]
-                    product_proxy = product_pool.browse(cr, uid, product_id,
-                        context=context)
+                    product_proxy = product_pool.browse(
+                        cr, uid, product_id, context=context)
 
                     # ---------------------------------------------------------
                     # Search supplier:
@@ -347,8 +341,11 @@ class PurchaseOrderXLSX(orm.Model):
 
                     # 20. Status
                     obsolete_text = (WS.cell(row, 20).value or '').upper()
-                    if obsolete_text and obsolete_text in 'XSYO':
-                        extra_data['status'] = 'obsolete'
+                    if obsolete_text:
+                        if obsolete_text in 'XSYO':
+                            extra_data['status'] = 'obsolete'
+                        elif obsolete_text in 'N':
+                            extra_data['status'] = 'catalog'
 
                     # 21. Minimum stock:
                     minimum_qty = (WS.cell(row, 21).value or '').upper()

@@ -31,64 +31,66 @@ from openerp import SUPERUSER_ID, api
 from openerp import tools
 from openerp.tools.translate import _
 from openerp.tools.float_utils import float_round as round
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
-    DEFAULT_SERVER_DATETIME_FORMAT, 
-    DATETIME_FORMATS_MAP, 
+from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DATETIME_FORMATS_MAP,
     float_compare)
 
 
 _logger = logging.getLogger(__name__)
 
+
 class ProductProduct(orm.Model):
     """ Model name: MrpProduction
     """
-    
+
     _inherit = 'product.product'
-    
+
     _columns = {
         'old_tcar': fields.integer('Old Tscar'),
         'old_tscar': fields.integer('Old Tscar'),
         }
 
+
 class ComponentStatusReportWizard(orm.TransientModel):
-    ''' Wizard for print status
-    '''
+    """ Wizard for print status
+    """
     _inherit = 'component.status.report.wizard'
 
     # --------------------
     # Wizard button event:
     # --------------------
     def action_open_report_xlsx(self, cr, uid, ids, context=None):
-        ''' Event for button done
-        '''
-        if context is None: 
+        """ Event for button done
+        """
+        if context is None:
             context = {
                 'lang': 'it_IT',
                 }
-        mrp_pool = self.pool.get('mrp.production')     
+        mrp_pool = self.pool.get('mrp.production')
         attachment_pool = self.pool.get('ir.attachment')
-        
-        wiz_browse = self.browse(cr, uid, ids, context=context)[0]        
+
+        wiz_browse = self.browse(cr, uid, ids, context=context)[0]
         datas = {
-            'mode': wiz_browse.mode, #'mode': 'component', 
-            'mp_mode': wiz_browse.mp_mode, # 'mp_mode': 'fabric', 
+            'mode': wiz_browse.mode,  # 'mode': 'component',
+            'mp_mode': wiz_browse.mp_mode,  # 'mp_mode': 'fabric',
             'days': wiz_browse.days,
             'first_supplier_id': wiz_browse.first_supplier_id.id or False,
-            #'negative_start': wiz_browse.negative_start,
+            # 'negative_start': wiz_browse.negative_start,
             'type_id': False, # TODO remove ex. wiz_browse.type_id.id or
-            'with_type_ids': 
+            'with_type_ids':
                 [item.id for item in wiz_browse.with_type_ids],
-            'without_type_ids': 
+            'without_type_ids':
                 [item.id for item in wiz_browse.without_type_ids],
-            'with_deadline': wiz_browse.with_deadline,    
+            'with_deadline': wiz_browse.with_deadline,
             'only_negative': wiz_browse.only_negative,
-            'exclude_inventory_category': 
+            'exclude_inventory_category':
                 wiz_browse.exclude_inventory_category,
             # Report setup:
-            #'model': 'mrp.production',
-            #'active_id': False,
-            #'active_ids': [],
-            #'context': context,
+            # 'model': 'mrp.production',
+            # 'active_id': False,
+            # 'active_ids': [],
+            # 'context': context,
             }
 
         filename = mrp_pool.extract_mrp_production_report_xlsx(
@@ -109,228 +111,229 @@ class ComponentStatusReportWizard(orm.TransientModel):
         return {
             'type' : 'ir.actions.act_url',
             'url': '/web/binary/saveas?model=ir.attachment&field=datas&'
-                'filename_field=datas_fname&id=%s' % attachment_id,
+                   'filename_field=datas_fname&id=%s' % attachment_id,
             'target': 'self',
             }
+
 
 class MrpProduction(orm.Model):
     """ Model name: MrpProduction
     """
-    
+
     _inherit = 'mrp.production'
-    
+
     # TODO MOVE IN MODULE? used also from component auto report
     def extract_mrp_production_report_xlsx(
             self, cr, uid, data=None, context=None):
-        ''' Extract data from report and put in excel mode
-        '''
+        """ Extract data from report and put in excel mode
+        """
         # ---------------------------------------------------------------------
         # Utility:
         # ---------------------------------------------------------------------
         def write_xls_mrp_line(WS, row, line):
-            ''' Write line in excel file
-            '''
+            """ Write line in excel file
+            """
             col = 0
             for record in line:
-                if len(record) == 2: # Normal text, format
+                if len(record) == 2:  # Normal text, format
                     WS.write(row, col, *record)
                 else: # Rich format
                     WS.write_rich_string(row, col, *record)
                 col += 1
             return True
 
-        def get_xls_format(mode=False, WB=None):  
-            ''' Database for format cells
+        def get_xls_format(mode=False, WB=None):
+            """ Database for format cells
                 first call is with mode not present and WB pased
                 next call with only mode
-            '''
+            """
             if not mode or not self.xls_format_db:
                 self.xls_format_db = {
-                'title' : WB.add_format({
-                    'bold': True, 
-                    'font_name': 'Courier 10 pitch', # 'Arial'
-                    'font_size': 11,
-                    'align': 'left',
-                    }),
-                'header': WB.add_format({
-                    'bold': True, 
-                    'font_color': 'black',
-                    'font_name': 'Courier 10 pitch', # 'Arial'
-                    'font_size': 9,
-                    'align': 'center',
-                    'valign': 'vcenter',
-                    'bg_color': '#cfcfcf', # gray
-                    'border': 1,
-                    #'text_wrap': True,
-                    }),
-                'text': WB.add_format({
-                    'font_color': 'black',
-                    'font_name': 'Courier 10 pitch',
-                    'font_size': 9,
-                    'align': 'left',
-                    'border': 1,
-                    }),
-                'text_center': WB.add_format({
-                    'font_color': 'black',
-                    'font_name': 'Courier 10 pitch',
-                    'font_size': 9,
-                    'align': 'center',
-                    'border': 1,
-                    }),
-                    
-                # -------------------------------------------------------------
-                # With text color:
-                # -------------------------------------------------------------
-                'bg_red': WB.add_format({
-                    'bold': True, 
-                    'font_color': 'black',
-                    'bg_color': '#ff420e',
-                    'font_name': 'Courier 10 pitch',
-                    'font_size': 9,
-                    'align': 'left',
-                    'border': 1,
-                    }),
-                'bg_green': WB.add_format({
-                    'bold': True, 
-                    'font_color': 'black',
-                    'bg_color': '#99cc66',
-                    'font_name': 'Courier 10 pitch',
-                    'font_size': 9,
-                    'align': 'left',
-                    'border': 1,
-                    }),
-                'bg_order': WB.add_format({
-                    'bold': True, 
-                    'font_color': 'black',
-                    'bg_color': '#cc9900',
-                    'font_name': 'Courier 10 pitch',
-                    'font_size': 9,
-                    'align': 'right',
-                    'border': 1,
-                    'num_format': num_format,
-                    }),
+                    'title': WB.add_format({
+                        'bold': True,
+                        'font_name': 'Courier 10 pitch',  # 'Arial'
+                        'font_size': 11,
+                        'align': 'left',
+                        }),
+                    'header': WB.add_format({
+                        'bold': True,
+                        'font_color': 'black',
+                        'font_name': 'Courier 10 pitch', # 'Arial'
+                        'font_size': 9,
+                        'align': 'center',
+                        'valign': 'vcenter',
+                        'bg_color': '#cfcfcf', # gray
+                        'border': 1,
+                        # 'text_wrap': True,
+                        }),
+                    'text': WB.add_format({
+                        'font_color': 'black',
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'left',
+                        'border': 1,
+                        }),
+                    'text_center': WB.add_format({
+                        'font_color': 'black',
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'center',
+                        'border': 1,
+                        }),
 
-                # -------------------------------------------------------------
-                # With text color:
-                # -------------------------------------------------------------
-                'text_black': WB.add_format({
-                    'font_color': 'black',
-                    'font_name': 'Courier 10 pitch',
-                    'font_size': 9,
-                    'align': 'left',
-                    'border': 1,
-                    'text_wrap': True
-                    }),
-                'text_blue': WB.add_format({
-                    'font_color': 'blue',
-                    'font_name': 'Courier 10 pitch',
-                    'font_size': 9,
-                    'align': 'left',
-                    'border': 1,
-                    'text_wrap': True
-                    }),
-                'text_red': WB.add_format({
-                    'font_color': '#ff420e',
-                    'font_name': 'Courier 10 pitch',
-                    'font_size': 9,
-                    'align': 'left',
-                    'border': 1,
-                    'text_wrap': True
-                    }),
-                'text_green': WB.add_format({
-                    'font_color': '#328238', ##99cc66
-                    'font_name': 'Courier 10 pitch',
-                    'font_size': 9,
-                    'align': 'left',
-                    'border': 1,
-                    'text_wrap': True
-                    }),
+                    # ---------------------------------------------------------
+                    # With text color:
+                    # ---------------------------------------------------------
+                    'bg_red': WB.add_format({
+                        'bold': True,
+                        'font_color': 'black',
+                        'bg_color': '#ff420e',
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'left',
+                        'border': 1,
+                        }),
+                    'bg_green': WB.add_format({
+                        'bold': True,
+                        'font_color': 'black',
+                        'bg_color': '#99cc66',
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'left',
+                        'border': 1,
+                        }),
+                    'bg_order': WB.add_format({
+                        'bold': True,
+                        'font_color': 'black',
+                        'bg_color': '#cc9900',
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'right',
+                        'border': 1,
+                        'num_format': num_format,
+                        }),
 
-                'text_grey': WB.add_format({
-                    'font_color': '#eeeeee',
-                    'font_name': 'Courier 10 pitch',
-                    'font_size': 9,
-                    'align': 'left',
-                    'border': 1,
-                    }),                
-                'text_wrap': WB.add_format({
-                    'font_color': 'black',
-                    'font_name': 'Courier 10 pitch',
-                    'font_size': 9,
-                    'align': 'left',
-                    'border': 1,
-                    'text_wrap': True,
-                    }),
+                    # ---------------------------------------------------------
+                    # With text color:
+                    # ---------------------------------------------------------
+                    'text_black': WB.add_format({
+                        'font_color': 'black',
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'left',
+                        'border': 1,
+                        'text_wrap': True
+                        }),
+                    'text_blue': WB.add_format({
+                        'font_color': 'blue',
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'left',
+                        'border': 1,
+                        'text_wrap': True
+                        }),
+                    'text_red': WB.add_format({
+                        'font_color': '#ff420e',
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'left',
+                        'border': 1,
+                        'text_wrap': True
+                        }),
+                    'text_green': WB.add_format({
+                        'font_color': '#328238',  ##99cc66
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'left',
+                        'border': 1,
+                        'text_wrap': True
+                        }),
 
-                'text_bg_yellow': WB.add_format({
-                    'bold': True, 
-                    'font_color': 'black',
-                    'bg_color': '#ffff99',
-                    'font_name': 'Courier 10 pitch',
-                    'font_size': 9,
-                    'align': 'left',
-                    'border': 1,
-                    }),
-                    
-                'number': WB.add_format({
-                    'font_name': 'Courier 10 pitch',
-                    'font_size': 9,
-                    'align': 'right',
-                    'border': 1,
-                    'num_format': num_format,
-                    }),
-                'number_blue': WB.add_format({
-                    'font_color': 'blue',
-                    'font_name': 'Courier 10 pitch',
-                    'font_size': 9,
-                    'align': 'right',
-                    'border': 1,
-                    'num_format': num_format,
-                    }),
-                'text_total': WB.add_format({
-                    'bold': True, 
-                    'font_color': 'black',
-                    'font_name': 'Courier 10 pitch',
-                    'font_size': 9,
-                    'align': 'left',
-                    'bg_color': '#DDDDDD',
-                    'border': 1,
-                    #'text_wrap': True,
-                    }),
-                'number_total': WB.add_format({
-                    'bold': True, 
-                    'font_name': 'Courier 10 pitch',
-                    'font_size': 9,
-                    'align': 'right',
-                    'bg_color': '#DDDDDD',
-                    'border': 1,
-                    'num_format': num_format,
-                    }),
+                    'text_grey': WB.add_format({
+                        'font_color': '#eeeeee',
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'left',
+                        'border': 1,
+                        }),
+                    'text_wrap': WB.add_format({
+                        'font_color': 'black',
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'left',
+                        'border': 1,
+                        'text_wrap': True,
+                        }),
+
+                    'text_bg_yellow': WB.add_format({
+                        'bold': True,
+                        'font_color': 'black',
+                        'bg_color': '#ffff99',
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'left',
+                        'border': 1,
+                        }),
+
+                    'number': WB.add_format({
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'right',
+                        'border': 1,
+                        'num_format': num_format,
+                        }),
+                    'number_blue': WB.add_format({
+                        'font_color': 'blue',
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'right',
+                        'border': 1,
+                        'num_format': num_format,
+                        }),
+                    'text_total': WB.add_format({
+                        'bold': True,
+                        'font_color': 'black',
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'left',
+                        'bg_color': '#DDDDDD',
+                        'border': 1,
+                        #'text_wrap': True,
+                        }),
+                    'number_total': WB.add_format({
+                        'bold': True,
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'right',
+                        'bg_color': '#DDDDDD',
+                        'border': 1,
+                        'num_format': num_format,
+                        }),
                 }
             return self.xls_format_db.get(mode, False)
-            
+
         def write_xls_block_line(WS, row, line):
-            ''' Write line block for fabric, return new row position
-            '''
+            """ Write line block for fabric, return new row position
+            """
             # Extract element from line_
-            (inv, tcar, tscar, mm, oc, of, sal, o, category, hw, hw_total, 
+            (inv, tcar, tscar, mm, oc, of, sal, o, category, hw, hw_total,
                 purchase, inventory_category) = line
-            
+
             # Hide not active product:
             if not o.active:
                 return row
-                
+
             # Jump pipes:
-            if category == 'Pipes':    
-                return row # same row
-            
+            if category == 'Pipes':
+                return row  # same row
+
             # -----------------------------------------------------------------
             #                            ROW 0
             # -----------------------------------------------------------------
             # Merge cell:
             WS.merge_range(row, 0, row, 12, '')
-            #WS.merge_range(row, 11, row, 12, '') # Category product
-            WS.merge_range(row, 13, row, 15, '') # Inventory category
+            # WS.merge_range(row, 11, row, 12, '')  # Category product
+            WS.merge_range(row, 13, row, 15, '')  # Inventory category
             # Not order status
 
             # TODO add extra color here!
@@ -338,13 +341,13 @@ class MrpProduction(orm.Model):
                 format_text = get_xls_format('bg_red')
             else:
                 format_text = get_xls_format('bg_green')
-            
+
             line0 = [
                 ('%s - %s (forn. abit.: %s) %s' % (
                     o.name,
                     o.colour,
                     o.recent_supplier_id.name or o.first_supplier_id or '',
-                    purchase,                    
+                    purchase,
                     ), format_text),
                 ('', format_text),
                 ('', format_text),
@@ -356,26 +359,26 @@ class MrpProduction(orm.Model):
                 ('', format_text),
                 ('', format_text),
                 ('', format_text),
-                ('', format_text), #(category, format_text),
+                ('', format_text),  #(category, format_text),
                 ('', format_text),
                 (inventory_category, format_text),
                 ('', format_text),
                 ('', format_text),
                 ('' if any(oc) else 'NON IN ORD.', format_text),
                 ('OBSOLETO!' if o.status == 'obsolete' else '', format_text),
-                ]        
+                ]
             write_xls_mrp_line(WS, row, line0)
             row += 1
-            
+
             # -----------------------------------------------------------------
             #                            ROW 1
             # -----------------------------------------------------------------
             format_header = get_xls_format('header')
             format_number = get_xls_format('number')
-            
-            # Merge cell:            
+
+            # Merge cell:
             WS.merge_range(row, 0, row, 1, '')
-            
+
             # Create row data:
             line1 = [
                 ('%s' % o.default_code, format_header),
@@ -399,12 +402,12 @@ class MrpProduction(orm.Model):
                 ]
             write_xls_mrp_line(WS, row, line1)
             row += 1
-                
+
             # -----------------------------------------------------------------
             #                            ROW 2
             # -----------------------------------------------------------------
             format_text = get_xls_format('text')
-            
+
             # Create row data:
             line2 = [
                 ('Inv. %s: %s' % (
@@ -429,7 +432,7 @@ class MrpProduction(orm.Model):
                 ]
             write_xls_mrp_line(WS, row, line2)
             row += 1
-            
+
             # -----------------------------------------------------------------
             #                            ROW 3
             # -----------------------------------------------------------------
@@ -483,19 +486,19 @@ class MrpProduction(orm.Model):
                 ]
             write_xls_mrp_line(WS, row, line4)
             row += 1
-                            
+
             # -----------------------------------------------------------------
             #                            ROW 5
             # -----------------------------------------------------------------
             # XXX Stock value end season:
             stock_value = 0.0
-            try:                
+            try:
                 if sal[11] > 0 and purchase:
                     stock_value = sal[11] * float(
                         purchase.split(']')[0].split(' ')[-1])
             except:
-                pass # remain 0
-                    
+                pass  # remain 0
+
             line5 = [
                 ('Mag.: %s' % o.mx_net_mrp_qty, get_xls_format(
                     'text_bg_yellow')),
@@ -516,8 +519,8 @@ class MrpProduction(orm.Model):
                 ('', format_header),
                 ('', format_header),
                 ('', format_header),
-                
-                # XXX Stock value last col:                
+
+                # XXX Stock value last col:
                 (stock_value, format_number),
                 ]
             write_xls_mrp_line(WS, row, line5)
@@ -525,27 +528,27 @@ class MrpProduction(orm.Model):
 
             # -----------------------------------------------------------------
             #                            Order block
-            # -----------------------------------------------------------------            
+            # -----------------------------------------------------------------
             format_order = get_xls_format('bg_order')
             lineOrd = [
                 ('Ordinare:', format_order),
                 (o.uom_id.name or '?', get_xls_format('text_center')),
                 ]
-            # Order only from now to the end of block:    
+            # Order only from now to the end of block:
             for i in range(1, 13):
                 if i >= self.current_day_cell:
                     lineOrd.append(('',  format_order))
-                else:    
+                else:
                     lineOrd.append(('', format_text))
-            # Extra data (leadtime and order lot):        
+            # Extra data (leadtime and order lot):
             lineOrd.append((o.leadtime or 0, format_number))
             lineOrd.append((o.purchase_lot_block or 0, format_number))
             lineOrd.append(('', format_text))
             lineOrd.append(('', format_text))
-                
+
             write_xls_mrp_line(WS, row, lineOrd)
             row += 1
-            
+
             # -----------------------------------------------------------------
             #                            ROW Halfwork
             # -----------------------------------------------------------------
@@ -555,7 +558,7 @@ class MrpProduction(orm.Model):
 
                 # Create row data:
                 line6 = [
-                    [], # rich text format
+                    [],  # rich text format
                     ('', format_text), ('', format_text), ('', format_text),
                     ('', format_text), ('', format_text), ('', format_text),
                     ('', format_text), ('', format_text), ('', format_text),
@@ -563,9 +566,9 @@ class MrpProduction(orm.Model):
 
                     # Total:
                     # HW in Mt. of fabric that can be used:
-                    [0, get_xls_format('number_blue')], # initial setup
-                    # To be ordered - used = Total order                    
-                    [0, get_xls_format('bg_green')], # initial setup green!
+                    [0, get_xls_format('number_blue')],  # initial setup
+                    # To be ordered - used = Total order
+                    [0, get_xls_format('bg_green')],  # initial setup green!
                     ]
                 hw_total_mt = 0.0
                 for hw_code, hw_status in hw.iteritems():
@@ -573,26 +576,26 @@ class MrpProduction(orm.Model):
 
                     # OC covered with stock (color the HW text):
                     if hw_status[1] <= hw_status[0]: # black
-                        line6[0].append(get_xls_format('text')) 
-                    else: # red
+                        line6[0].append(get_xls_format('text'))
+                    else:  # red
                         line6[0].append(get_xls_format('text_red'))
-                    
+
                     line6[0].append('%s OC:%s' % (
                         hw_code,
                         int(hw_status[1]),
                         ))
-                        
+
                     # Green:
                     line6[0].append(get_xls_format('text_green'))
                     line6[0].append(' M.:%s' % int(hw_status[0]))
                     line6[0].append(get_xls_format('text_black'))
-                    #line6[0].append('(%s)>>>' % hw_status[3])
+                    # line6[0].append('(%s)>>>' % hw_status[3])
                     line6[0].append('>>>')
                     line6[0].append(get_xls_format('text_blue'))
                     line6[0].append('%s ' % int(hw_status[2]))
-                    #line6[0].append(get_xls_format('text_wrap'))
-                line6[13][0] = int(hw_total_mt)# Update total mt. calc here
-                
+                    # line6[0].append(get_xls_format('text_wrap'))
+                line6[13][0] = int(hw_total_mt)  # Update total mt. calc here
+
                 # -------------------------------------------------------------
                 # Total with color:
                 # -------------------------------------------------------------
@@ -600,30 +603,30 @@ class MrpProduction(orm.Model):
                 line6[14][0] = order_total # Total to be ordered
                 if order_total <= 0:
                     line6[14][1] = get_xls_format('bg_red')
-                    
+
                 line6[0].append(get_xls_format('text_grey'))
-                
+
                 write_xls_mrp_line(WS, row, line6)
                 row += 1
-                
+
             # -----------------------------------------------------------------
             #                          EXTRA ROW
             # -----------------------------------------------------------------
             row += 1
             return row
-        
-        filename = '/tmp/extract_fabric_report.xlsx'        
+
+        filename = '/tmp/extract_fabric_report.xlsx'
         _logger.info('Start create file %s' % filename)
-        
+
         # ---------------------------------------------------------------------
         # Utility:
         # ---------------------------------------------------------------------
         def get_add_page(WB, name):
-            ''' Add WS with that name
+            """ Add WS with that name
                 if present return WS reference
-            '''
+            """
             WS = WB.add_worksheet(name)
-            
+
             # -----------------------------------------------------------------
             # Format columns width:
             # -----------------------------------------------------------------
@@ -632,35 +635,35 @@ class MrpProduction(orm.Model):
             WS.set_column('C:N', 8)
             WS.set_column('O:P', 6)
             return WS
-            
+
         # ---------------------------------------------------------------------
-        # Create Excel file:    
+        # Create Excel file:
         # ---------------------------------------------------------------------
         WB = xlsxwriter.Workbook(filename)
         WS_page = {}
-        
+
         # Current month cell:
         convert_month = {
             1: 5, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10, 7: 11, 8: 12,
-            9: 1, 10: 2, 11: 3, 12: 4,            
+            9: 1, 10: 2, 11: 3, 12: 4,
             }
         self.current_day_cell = convert_month[datetime.now().month]
-        
-        # Format for cell:            
+
+        # Format for cell:
         num_format = '#,##0'
-        
+
         # ---------------------------------------------------------------------
         #                     EXPORT EXCEL REPORT
         # ---------------------------------------------------------------------
         # Generate format database:
         get_xls_format(mode=False, WB=WB)
-        
+
         # ---------------------------------------------------------------------
         # A. Generate data report:
         # ---------------------------------------------------------------------
         res, all_component_ids = self.get_explode_report_object(
             cr, uid, data=data, context=context)
-        
+
         # ---------------------------------------------------------------------
         # Data record in different sheet: Loop all record to write
         # ---------------------------------------------------------------------
@@ -672,22 +675,22 @@ class MrpProduction(orm.Model):
                     0, # row
                     ]
             WS, row = WS_page[category_name]
-            
+
             # Save row returned:
             WS_page[category_name][1] = write_xls_block_line(WS, row, line)
-            
+
         # ---------------------------------------------------------------------
         # B. Extra page unused component
         # ---------------------------------------------------------------------
-        if all_component_ids: 
-            _logger.warning('Write unused lines in Excel') 
+        if all_component_ids:
+            _logger.warning('Write unused lines in Excel')
             product_pool = self.pool.get('product.product')
             WS = WB.add_worksheet(_('Non usati'))
             WS.set_column('A:A', 30)
             WS.set_column('B:B', 15)
             WS.set_column('C:D', 30)
             WS.set_column('E:F', 15)
-            
+
             # Header
             format_text = get_xls_format('text')
             row = 0
@@ -699,7 +702,7 @@ class MrpProduction(orm.Model):
             row = 1
             write_xls_mrp_line(WS, row, [
                 ('Categoria inv.', format_text),
-                ('Codice', format_text), 
+                ('Codice', format_text),
                 ('Nome', format_text),
                 ('Ultimo forn.', format_text),
                 ('Netto', format_text),
@@ -708,13 +711,13 @@ class MrpProduction(orm.Model):
 
             # Sort data:
             sorted_product = sorted(product_pool.browse(
-                cr, uid, all_component_ids, context=context), 
+                cr, uid, all_component_ids, context=context),
                 key=lambda x: (x.inventory_category_id.name, x.default_code),
                 )
 
             # Line:
             for product in sorted_product:
-                row += 1    
+                row += 1
                 write_xls_mrp_line(WS, row, [
                     (product.inventory_category_id.name, format_text),
                     (product.default_code or '', format_text),
@@ -727,11 +730,11 @@ class MrpProduction(orm.Model):
         WB.close()
         _logger.info('End creation file %s' % filename)
         return filename
-        
+
     def send_fabric_mrp_report_scheduler(
             self, cr, uid, mode='odt', context=None):
-        ''' Generate PDF with data and send mail
-        '''
+        """ Generate PDF with data and send mail
+        """
         if context is None:
             context = {
                 'lang': 'it_IT',
@@ -745,14 +748,14 @@ class MrpProduction(orm.Model):
             'context': context,
 
             # Datas setup:
-            'mp_mode': 'fabric', 
+            'mp_mode': 'fabric',
             'only_negative': False, # TODO
-            'without_type_ids': [], 
-            'mode': 'component', 
+            'without_type_ids': [],
+            'mode': 'component',
             'type_id': False,
-            'with_deadline': False, 
-            'days': 30, 
-            'first_supplier_id': False, 
+            'with_deadline': False,
+            'days': 30,
+            'first_supplier_id': False,
             'with_type_ids': []
             }
 
@@ -763,9 +766,9 @@ class MrpProduction(orm.Model):
         now = now.replace('-', '_').replace(':', '.')
         if mode == 'odt': # TODO remove, no more used!
             report_name = 'stock_status_explode_report'
-    
+
             # -----------------------------------------------------------------
-            # Call report:            
+            # Call report:
             # -----------------------------------------------------------------
             # Procedure for problem in setup language in ODT report
             mrp_ids = self.search(cr, uid, [], context=context)
@@ -773,26 +776,26 @@ class MrpProduction(orm.Model):
                 mrp_id = mrp_ids[0]
             else:
                 mrp_id = False
-                    
+
             try:
                 result, extension = openerp.report.render_report(
                     cr, uid, [mrp_id], report_name, datas, context)
             except:
                 _logger.error('Error generation TX report [%s]' % (
                     sys.exc_info(),))
-                return False            
+                return False
             attachments = [('Completo_%s.odt' % now, result)]
         elif mode == 'xlsx':
             filename = self.extract_mrp_production_report_xlsx(
-                cr, uid, data=datas, context=context)                
+                cr, uid, data=datas, context=context)
 
-            # Create attachment block for send after:    
+            # Create attachment block for send after:
             xlsx_raw = open(filename, 'rb').read()
-            attachments = [('Stato_tessuti_%s.xlsx' % now, xlsx_raw)]            
+            attachments = [('Stato_tessuti_%s.xlsx' % now, xlsx_raw)]
         else:
             _logger.error('Only odt or xlsx mode for this report!')
             return False
-                
+
         # ---------------------------------------------------------------------
         # Send report:
         # ---------------------------------------------------------------------
@@ -801,22 +804,21 @@ class MrpProduction(orm.Model):
         model_pool = self.pool.get('ir.model.data')
         thread_pool = self.pool.get('mail.thread')
         group_id = model_pool.get_object_reference(
-            cr, uid, 'textilene_status', 'group_textilene_admin')[1]    
+            cr, uid, 'textilene_status', 'group_textilene_admin')[1]
         partner_ids = []
         for user in group_pool.browse(
                 cr, uid, group_id, context=context).users:
             partner_ids.append(user.partner_id.id)
-            
+
         thread_pool = self.pool.get('mail.thread')
-        thread_pool.message_post(cr, uid, False, 
-            type='email', 
-            body='Stato tessuti settimanale', 
+        thread_pool.message_post(cr, uid, False,
+            type='email',
+            body='Stato tessuti settimanale',
             subject='Invio automatico stato tessuto: %s' % (
                 datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT),
                 ),
             partner_ids=[(6, 0, partner_ids)],
-            attachments=attachments, 
+            attachments=attachments,
             context=context,
             )
         return True
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

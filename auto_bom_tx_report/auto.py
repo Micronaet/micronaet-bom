@@ -748,7 +748,7 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             WS.set_column('A:A', 19)
             WS.set_column('B:B', 3)
-            WS.set_column('C:O', 8)
+            WS.set_column('C:O', 7)
             WS.set_column('P:P', 1)
             WS.set_column('Q:S', 7)
             WS.set_column('T:V', 13)

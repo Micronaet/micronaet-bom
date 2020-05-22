@@ -399,7 +399,8 @@ class MrpProduction(orm.Model):
                 ('', format_text),
                 ('', format_text),
 
-                '', '',
+                ('', format_text),
+                ('', format_text),
 
                 (inventory_category, format_text),
                 ('', format_text),
@@ -439,7 +440,8 @@ class MrpProduction(orm.Model):
                 ('Lug.', format_header),
                 ('Ago.', format_header),
 
-                '', '',
+                ('', format_text),
+                ('', format_text),
 
                 ('', format_header),
                 ('', format_header),
@@ -479,7 +481,8 @@ class MrpProduction(orm.Model):
                 (mm[10], format_number),
                 (mm[11], format_number),
 
-                '', '',
+                ('', format_text),
+                ('', format_text),
 
                 ('Dettagli extra', format_header_extra),
                 ('', format_header),
@@ -513,7 +516,8 @@ class MrpProduction(orm.Model):
                 (oc[10], format_number),
                 (oc[11], format_number),
 
-                '', '',
+                ('', format_text),
+                ('', format_text),
 
                 ('', format_header),
                 ('Leadtime', format_header),
@@ -560,7 +564,8 @@ class MrpProduction(orm.Model):
                 (of[10], format_number),
                 (of[11], format_number),
 
-                '', '',
+                ('', format_text),
+                ('', format_text),
 
                 ('Attuale', format_header),
                 (o.leadtime or 0, text_center),
@@ -609,7 +614,8 @@ class MrpProduction(orm.Model):
                 (sal[10], format_number),
                 (sal[11], format_number),
 
-                '', '',
+                ('', format_text),
+                ('', format_text),
 
                 ('Nuovo', format_header),
                 ('', format_text_blue),

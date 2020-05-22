@@ -517,7 +517,7 @@ class MrpProduction(orm.Model):
                 ('', format_header),
                 ('Leadtime', format_header),
                 ('Lotto', format_header),
-                ('Inv. cat.', format_header),
+                ('Categ. invent.', format_header),
                 ('Stato', format_header),
                 ('Liv. riord.', format_header),
                 ('Note', format_header),
@@ -529,7 +529,18 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             #                            ROW 4
             # -----------------------------------------------------------------
+            text_center = get_xls_format('text_center')
+            # Stock value end season:
+            stock_value = 0.0
+            try:
+                if sal[11] > 0 and purchase:
+                    stock_value = sal[11] * float(
+                        purchase.split(']')[0].split(' ')[-1])
+            except:
+                pass  # remain 0
+
             old_tcar = ' (%s)' % o.old_tcar if o.old_tcar else ''
+
             line4 = [
                 ('Tot. Car.: %s%s' % (tcar, old_tcar), format_text),
                 ('OF', get_xls_format('text_center')),
@@ -548,15 +559,18 @@ class MrpProduction(orm.Model):
 
                 '',
 
+                # Extra data (leadtime and order lot):
+                lineOrd.append(('', format_text))
+                lineOrd.append(('', format_text))
+
                 ('Attuale', format_header),
-                # TODO:
-                ('$leadtime', format_number),
-                ('$lotto', format_header),
-                ('$invcat', format_header),
-                ('$stato', format_header),
-                ('$minimum_stock', format_header),
-                ('$note', format_header),
-                ('$stock_value', format_header),
+                (o.leadtime or 0, text_center),
+                (o.purchase_lot_block or 0, text_center),
+                (inventory_category, text_center),
+                ('OBSOLETO' if o.status == 'obsolete' else '', text_center),
+                (o.report_minimum_qty, text_center),
+                (o.report_note, text_center),
+                (stock_value, format_number),
                 ]
             write_xls_mrp_line(WS, row, line4)
             row += 1
@@ -565,14 +579,6 @@ class MrpProduction(orm.Model):
             #                            ROW 5
             # -----------------------------------------------------------------
             format_text_blue = get_xls_format('bg_green')
-            # XXX Stock value end season:
-            stock_value = 0.0
-            try:
-                if sal[11] > 0 and purchase:
-                    stock_value = sal[11] * float(
-                        purchase.split(']')[0].split(' ')[-1])
-            except:
-                pass  # remain 0
 
             line5 = [
                 ('Mag.: %s' % o.mx_net_mrp_qty, get_xls_format(
@@ -590,19 +596,23 @@ class MrpProduction(orm.Model):
                 (sal[9], format_number),
                 (sal[10], format_number),
                 (sal[11], format_number),
-                ('', format_header),
-                ('', format_header),
-                ('', format_header),
-                ('', format_header),
 
-                # XXX Stock value last col:
-                (stock_value, format_number),
+                '',
+
+                ('Nuovo', format_header),
+                ('', format_text_blue),
+                ('', format_text_blue),
+                ('', format_text_blue),
+                ('', format_text_blue),
+                ('', format_text_blue),
+                ('', format_text_blue),
+                ('', format_number),
                 ]
             write_xls_mrp_line(WS, row, line5)
             row += 1
 
             # -----------------------------------------------------------------
-            #                            Order block
+            #                            Order line:
             # -----------------------------------------------------------------
             format_order = get_xls_format('bg_order')
             lineOrd = [
@@ -615,11 +625,6 @@ class MrpProduction(orm.Model):
                     lineOrd.append(('',  format_order))
                 else:
                     lineOrd.append(('', format_text))
-            # Extra data (leadtime and order lot):
-            lineOrd.append((o.leadtime or 0, format_number))
-            lineOrd.append((o.purchase_lot_block or 0, format_number))
-            lineOrd.append(('', format_text))
-            lineOrd.append(('', format_text))
 
             write_xls_mrp_line(WS, row, lineOrd)
             row += 1

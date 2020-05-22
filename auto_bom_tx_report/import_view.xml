@@ -6,15 +6,15 @@
            <field name="name">purchase.order.xlsx.line.search</field>
            <field name="model">purchase.order.xlsx.line</field>
            <field name="arch" type="xml">
-               <search string="Righe" version="7.0">        
+               <search string="Righe" version="7.0">
                    <field name="partner_id" filter_domain="[('partner_id.name','ilike',self)]"/>
                    <field name="product_id" filter_domain="['|',('product_id.default_code','ilike',self),('product_id.name','ilike',self)]"/>
-                   
+
                    <group expand="0" string="Group By...">
                        <filter name="group_partner" string="Partner" context="{'group_by': 'partner_id'}"/>
                        <filter name="group_product" string="Prodotto" context="{'group_by': 'product_id'}"/>
                        <filter name="group_deadline" string="Scadenza" context="{'group_by': 'deadline'}"/>
-                   </group>                
+                   </group>
                </search>
            </field>
        </record>
@@ -34,7 +34,7 @@
                </tree>
            </field>
        </record>
-       
+
        <!-- purchase.order.xlsx -->
        <record id="purchase_order_xlsx_tree_view" model="ir.ui.view">
             <field name="name">Import order for material</field>
@@ -53,10 +53,9 @@
                 <form string="Import order" version="7.0">
                    <header>
                        <button string="Cancel" special="cancel" />
-                       <button name="action_import_order" string="Import" type="object" icon="gtk-jump-to" class="oe_highlight" attrs="{'invisible': [('mode','!=','draft')]}"/>
-                       <button name="action_import_leadtime_lot" string="Importa (con leadtime, lotto, obsoleto e categoria)" type="object" class="oe_highlight" icon="gtk-jump-to" attrs="{'invisible': [('mode','!=','draft')]}" assert="Aggiorno leadtime a lotto acquisto?"/>
+                       <button name="action_import_with_update" string="Importa (con aggiornamento dati)" type="object" class="oe_highlight" icon="gtk-jump-to" attrs="{'invisible': [('mode','!=','draft')]}" assert="Aggiorno leadtime a lotto acquisto?"/>
                        <button name="action_create_order" string="Create order" type="object" icon="gtk-jump-to" class="oe_highlight" attrs="{'invisible': [('mode','!=','imported')]}" assert="Delete if present previous order, will be generated again!"/>
-                   </header>                   
+                   </header>
                    <group colspan="4" col="4">
                         <field name="file" colspan="4" attrs="{'invisible': [('mode','!=','draft')]}"/>
                         <field name="mode" invisible="1" />
@@ -72,7 +71,7 @@
                                              <field name="product_id" />
                                              <field name="uom_id" />
                                              <field name="quantity" />
-                                             <field name="deadline" />                            
+                                             <field name="deadline" />
                                         </tree>
                                     </field>
                                 </group>
@@ -90,7 +89,7 @@
                                 </group>
                             </page>
                         </notebook>
-                   </group>                   
+                   </group>
                 </form>
             </field>
       </record>
@@ -101,10 +100,10 @@
           <field name="view_mode">tree,form</field>
           <field name="view_id" ref="purchase_order_xlsx_tree_view"/>
       </record>
-      <menuitem 
-          parent="purchase.menu_purchase_rfq" 
-          id="menu_purchase_order_xlsx" 
+      <menuitem
+          parent="purchase.menu_purchase_rfq"
+          id="menu_purchase_order_xlsx"
           action="action_purchase_order_xlsx_view"
-          />      
+          />
     </data>
 </openerp>

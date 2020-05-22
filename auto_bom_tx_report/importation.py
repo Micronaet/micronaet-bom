@@ -72,7 +72,7 @@ class PurchaseOrderXLSX(orm.Model):
             'views': [(view_id, 'tree')],
             'domain': [('id', 'in', line_ids)],
             'context': context,
-            'target': 'current', # 'new'
+            'target': 'current',  # 'new'
             'nodestroy': False,
             }
 
@@ -180,20 +180,8 @@ class PurchaseOrderXLSX(orm.Model):
             }, context=context)
         return True
 
-    def action_import_leadtime_lot(self, cr, uid, ids, context=None):
+    def action_import_with_update(self, cr, uid, ids, context=None):
         """ Event for button done force update lead lot
-        """
-        if context is None:
-            context = {}
-
-        context['update_lead_lot'] = True
-        context['update_inventory_category'] = True
-        context['obsolete'] = True
-
-        return self.action_import_order(cr, uid, ids, context=context)
-
-    def action_import_order(self, cr, uid, ids, context=None):
-        """ Event for button done
         """
         if context is None:
             context = {}
@@ -337,8 +325,47 @@ class PurchaseOrderXLSX(orm.Model):
                         partner_id = product_proxy.first_supplier_id.id
                     else:
                         partner_id = False
+                elif pos == 5:  # extra data update:
+                    extra_data = {}
 
-                elif pos == 6: # order qty
+                    # 17. Lead time:
+                    leadtime = WS.cell(row, 17).value
+                    if type(leadtime) == (float, int):
+                        extra_data['leadtime'] = leadtime
+
+                    # 18. Lot
+                    purchase_lot_block = WS.cell(row, 18).value
+                    if type(purchase_lot_block) == (float, int):
+                        extra_data['purchase_lot_block'] = purchase_lot_block
+
+                    # 19. Inventory category:
+                    inventory_category_id = inventory_db.get(
+                        WS.cell(row, 19).value, False)
+                    if inventory_category_id:
+                        extra_data['inventory_category_id'] = \
+                            inventory_category_id
+
+                    # 20. Status
+                    obsolete_text = (WS.cell(row, 20).value or '').upper()
+                    if obsolete_text and obsolete_text in 'XSYO':
+                        extra_data['status'] = 'obsolete'
+
+                    # 21. Minimum stock:
+                    minimum_qty = (WS.cell(row, 21).value or '').upper()
+                    if type(minimum_qty) in (float, int):
+                        extra_data['report_minimum_qty'] = minimum_qty
+
+                    # Note
+                    report_note = (WS.cell(row, 22).value or '').upper()
+                    if report_note:
+                        extra_data['report_note'] = report_note
+
+                    if extra_data:
+                        _logger.info('Updating extra data: %s' % default_code)
+                        product_pool.write(
+                            cr, uid, [product_id], extra_data, context=context)
+
+                elif pos == 6:  # order qty
                     # ---------------------------------------------------------
                     # Read quantity and get deadline:
                     # ---------------------------------------------------------
@@ -363,7 +390,7 @@ class PurchaseOrderXLSX(orm.Model):
                         else:
                             year = year_b
 
-                        # Note: Deadline minimun today!
+                        # Note: Deadline minimum today!
                         deadline = '%s-%s-%s' % (year, month, day)
                         if deadline < today:
                             deadline = today
@@ -375,35 +402,6 @@ class PurchaseOrderXLSX(orm.Model):
                             'quantity': quantity,
                             'deadline': deadline,
                             }, context=context)
-
-                    # Extra data:
-                    if update_lead_lot:
-                        leadtime = WS.cell(row, 14).value
-                        if type(leadtime) != float:
-                            leadtime = 0
-                        purchase_lot_block = WS.cell(row, 15).value
-                        if type(purchase_lot_block) != float:
-                            purchase_lot_block = 0
-
-                        product_pool.write(cr, uid, product_id, {
-                            'leadtime': leadtime,
-                            'purchase_lot_block': purchase_lot_block,
-                            }, context=context)
-
-                    if update_inventory_category and WS.cell(row, 16).value:
-                        inventory_category_id = inventory_db.get(
-                            WS.cell(row, 16).value, False)
-                        if inventory_category_id:
-                            product_pool.write(cr, uid, product_id, {
-                                'inventory_category_id': inventory_category_id,
-                                }, context=context)
-
-                    if update_obsolete:
-                        obsolete_text = (WS.cell(row, 17).value or '').upper()
-                        if obsolete_text in 'XS':
-                            product_pool.write(cr, uid, product_id, {
-                                'status': 'obsolete',
-                                }, context=context)
 
                 elif pos in (7, 8) and not WS.cell(row, 0).value:
                     _logger.warning('Reset pos, row: %s' % row)

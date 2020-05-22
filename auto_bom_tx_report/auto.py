@@ -572,6 +572,19 @@ class MrpProduction(orm.Model):
                 (stock_value, format_number),
                 ]
             write_xls_mrp_line(WS, row, line4)
+
+            # Add comment:
+            if o.report_note:
+                WS.write_comment(
+                    xl_rowcol_to_cell(row, 22),
+                    o.report_note,
+                )
+            WS.write_comment(
+                xl_rowcol_to_cell(row, 23),
+                'Cliccare sulla colonna W per vedere il totale del foglio'
+                '(valorizzazione fatta con prezzo ultimo doc. di acquisto)',
+            )
+
             row += 1
 
             # -----------------------------------------------------------------
@@ -611,17 +624,18 @@ class MrpProduction(orm.Model):
 
             # Add comment:
             WS.write_comment(
-                xl_rowcol_to_cell(row, 18),
+                xl_rowcol_to_cell(row, 19),
                 'Utilizzare i nomi dei fogli per scegliere la nuova categoria',
             )
             WS.write_comment(
-                xl_rowcol_to_cell(row, 19),
+                xl_rowcol_to_cell(row, 20),
                 'Indicare S, Y o O per impostarlo obsoleto; N per rimuoverlo',
             )
             WS.write_comment(
-                xl_rowcol_to_cell(row, 20),
+                xl_rowcol_to_cell(row, 21),
                 'Indicare la q. di riordino (sotto la testata diventa gialla)',
             )
+
             row += 1
 
             # -----------------------------------------------------------------

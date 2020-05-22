@@ -171,6 +171,17 @@ class MrpProduction(orm.Model):
                         'border': 1,
                         # 'text_wrap': True,
                         }),
+                    'header_extra': WB.add_format({
+                        'bold': True,
+                        'font_color': 'black',
+                        'font_name': 'Courier 10 pitch',  # 'Arial'
+                        'font_size': 9,
+                        'align': 'center',
+                        'valign': 'vcenter',
+                        'bg_color': '#4f4f4f',  # gray dark
+                        'border': 1,
+                        # 'text_wrap': True,
+                        }),
                     'text': WB.add_format({
                         'font_color': 'black',
                         'font_name': 'Courier 10 pitch',
@@ -398,7 +409,8 @@ class MrpProduction(orm.Model):
             format_number = get_xls_format('number')
 
             # Merge cell:
-            WS.merge_range(row, 0, row, 1, '')
+            WS.merge_range(row, 0, row, 1, '')  # Code
+            WS.merge_range(row, 15, row, 22, '')  # Interline
 
             # Create row data:
             line1 = [
@@ -416,10 +428,22 @@ class MrpProduction(orm.Model):
                 ('Giu.', format_header),
                 ('Lug.', format_header),
                 ('Ago.', format_header),
-                ('LEADTIME', format_header),
-                ('LOTTO', format_header),
-                ('INV. CAT.', format_header),
-                ('OBSOLETO', format_header),
+
+                ('', format_header),
+
+                ('', format_header),
+                ('', format_header),
+                ('', format_header),
+                ('', format_header),
+                ('', format_header),
+                ('', format_header),
+                ('', format_header),
+                ('', format_header),
+
+                #('LEADTIME', format_header),
+                #('LOTTO', format_header),
+                #('INV. CAT.', format_header),
+                #('OBSOLETO', format_header),
                 ]
             write_xls_mrp_line(WS, row, line1)
             row += 1
@@ -427,7 +451,10 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             #                            ROW 2
             # -----------------------------------------------------------------
+            WS.merge_range(row, 15, row, 22, '')  # Extra table header
+
             format_text = get_xls_format('text')
+            format_header_extra = get_xls_format('header_extra')
 
             # Create row data:
             line2 = [
@@ -446,10 +473,17 @@ class MrpProduction(orm.Model):
                 (mm[9], format_number),
                 (mm[10], format_number),
                 (mm[11], format_number),
-                ('', format_header), # Leadtime
-                ('', format_header), # Lotto
-                ('', format_header), # Inv Cat.
-                ('', format_header), # Obsoleto
+
+                ('', format_header),
+
+                ('Dettagli extra', format_header_extra),
+                ('', format_header),
+                ('', format_header),
+                ('', format_header),
+                ('', format_header),
+                ('', format_header),
+                ('', format_header),
+                ('', format_header),
                 ]
             write_xls_mrp_line(WS, row, line2)
             row += 1

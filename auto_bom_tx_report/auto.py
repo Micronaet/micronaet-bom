@@ -587,7 +587,7 @@ class MrpProduction(orm.Model):
                 )
             WS.write_comment(
                 xl_rowcol_to_cell(row, 23),
-                'Cliccare sulla colonna Z per vedere il totale del foglio'
+                'Cliccare sulla colonna X per vedere il totale del foglio'
                 '(valorizzazione fatta con prezzo ultimo doc. di acquisto)',
             )
 
@@ -756,7 +756,7 @@ class MrpProduction(orm.Model):
             WS.set_column('Q:S', 7)
             WS.set_column('T:V', 13)
             WS.set_column('W:W', 25)
-            WS.set_column('Z:Z', 9)
+            WS.set_column('X:X', 9)
             return WS
 
         # ---------------------------------------------------------------------

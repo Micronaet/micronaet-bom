@@ -324,13 +324,19 @@ class PurchaseOrderXLSX(orm.Model):
 
                     # 17. Lead time:
                     leadtime = WS.cell(row, 17).value
-                    if type(leadtime) == (float, int):
+                    try:
+                        leadtime = int(leadtime)
                         extra_data['leadtime'] = leadtime
+                    except:
+                        pass
 
                     # 18. Lot
                     purchase_lot_block = WS.cell(row, 18).value
-                    if type(purchase_lot_block) == (float, int):
+                    try:
+                        purchase_lot_block = (purchase_lot_block)
                         extra_data['purchase_lot_block'] = purchase_lot_block
+                    except:
+                        pass
 
                     # 19. Inventory category:
                     inventory_category_id = inventory_db.get(
@@ -345,7 +351,7 @@ class PurchaseOrderXLSX(orm.Model):
                         if obsolete_text in 'XSYO':
                             extra_data['status'] = 'obsolete'
                         elif obsolete_text in 'N':
-                            extra_data['status'] = 'catalog'
+                            extra_data['status'] = 'todo'
 
                     # 21. Minimum stock:
                     minimum_qty = WS.cell(row, 21).value

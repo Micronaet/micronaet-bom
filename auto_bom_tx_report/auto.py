@@ -204,7 +204,7 @@ class MrpProduction(orm.Model):
                     'bg_red': WB.add_format({
                         'bold': True,
                         'font_color': 'black',
-                        'bg_color': '#FFBBB5',
+                        'bg_color': '#FF6500',
                         'font_name': 'Courier 10 pitch',
                         'font_size': 9,
                         'align': 'left',
@@ -213,7 +213,7 @@ class MrpProduction(orm.Model):
                     'bg_yellow': WB.add_format({
                         'bold': True,
                         'font_color': 'black',
-                        'bg_color': '#FDFF9C',
+                        'bg_color': '#FFFF01',
                         'font_name': 'Courier 10 pitch',
                         'font_size': 9,
                         'align': 'left',
@@ -222,7 +222,7 @@ class MrpProduction(orm.Model):
                     'bg_green': WB.add_format({
                         'bold': True,
                         'font_color': 'black',
-                        'bg_color': '#A7F2B4',
+                        'bg_color': '5FCE03',  # '#A7F2B4',
                         'font_name': 'Courier 10 pitch',
                         'font_size': 9,
                         'align': 'left',
@@ -231,7 +231,7 @@ class MrpProduction(orm.Model):
                     'bg_blue': WB.add_format({
                         'bold': True,
                         'font_color': 'black',
-                        'bg_color': '#77C0F7',
+                        'bg_color': '#4F8DD8',
                         'font_name': 'Courier 10 pitch',
                         'font_size': 9,
                         'align': 'left',
@@ -247,6 +247,16 @@ class MrpProduction(orm.Model):
                         'border': 1,
                         'num_format': num_format,
                         }),
+                    'bg_no_order': WB.add_format({
+                        'bold': True,
+                        'font_color': 'white',
+                        'bg_color': '#000000',
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 9,
+                        'align': 'right',
+                        'border': 1,
+                        'num_format': num_format,
+                    }),
 
                     # ---------------------------------------------------------
                     # With text color:
@@ -636,8 +646,8 @@ class MrpProduction(orm.Model):
             )
             WS.write_comment(
                 xl_rowcol_to_cell(row, 20),
-                'Indicare X, S, Y oppure O per impostarlo obsoleto; '
-                'N per rimuoverlo',
+                'Mettere X, S, Y oppure O per impostarlo come obsoleto;\n'
+                'Mettere N per impostarlo come NON obsoleto',
             )
             WS.write_comment(
                 xl_rowcol_to_cell(row, 21),
@@ -650,7 +660,11 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             #                            Order line:
             # -----------------------------------------------------------------
-            format_order = get_xls_format('bg_order')
+            if o.status == 'obsolete':
+                format_order = get_xls_format('bg_no_order')
+            else:
+                format_order = get_xls_format('bg_order')
+
             lineOrd = [
                 ('Ordinare:', format_order),
                 (o.uom_id.name or '?', get_xls_format('text_center')),

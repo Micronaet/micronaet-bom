@@ -259,8 +259,13 @@ class PurchaseOrderXLSX(orm.Model):
             _logger.warning('Read page: %s' % ws_name)
 
             pos = -1
+            jump_empty = True
             error = ''
             for row in range(row_start, WS.nrows):
+                if jump_empty:  # Jump only first line
+                    jump_empty = False
+                    continue
+
                 pos += 1
                 if pos == 1:
                     # ---------------------------------------------------------

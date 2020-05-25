@@ -136,10 +136,9 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         # Utility:
         # ---------------------------------------------------------------------
-        def write_xls_mrp_line(WS, row, line):
+        def write_xls_list_line(WS, row, line, col=0):
             """ Write line in excel file
             """
-            col = 0
             for record in line:
                 if len(record) == 2:  # Normal text, format
                     WS.write(row, col, *record)
@@ -234,6 +233,15 @@ class MrpProduction(orm.Model):
                         'bg_color': '#4F8DD8',
                         'font_name': 'Courier 10 pitch',
                         'font_size': 9,
+                        'align': 'left',
+                        'border': 1,
+                        }),
+                    'hide': WB.add_format({
+                        'bold': True,
+                        'font_color': 'white',
+                        'bg_color': '#000000',
+                        'font_name': 'Courier 10 pitch',
+                        'font_size': 6,
                         'align': 'left',
                         'border': 1,
                         }),
@@ -375,11 +383,16 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             #                            ROW 0
             # -----------------------------------------------------------------
+            status_filter = (
+                'obsoleto' if o.status == 'obsolete' else 'non obsoleto',
+                get_xls_format('hide'),
+            )
             format_white = get_xls_format('text')
+
             # Merge cell:
             WS.merge_range(row, 0, row, 13, '')
             WS.merge_range(row, 16, row, 19, '')  # Inventory category
-            WS.merge_range(row, 20, row, 23, '')  # Not order status
+            WS.merge_range(row, 20, row, 22, '')  # Not order status
 
             # TODO add extra color here!
             if sal[11] < 0:
@@ -419,9 +432,11 @@ class MrpProduction(orm.Model):
                 ('', format_text),
                 ('CON ORDINI' if any(oc) else 'SENZA ORDINI', format_text),
                 ('', format_text),
+                ('', format_text),
                 ('OBSOLETO!' if o.status == 'obsolete' else '', format_text),
-                ]
-            write_xls_mrp_line(WS, row, line0)
+                status_filter,
+            ]
+            write_xls_list_line(WS, row, line0)
             row += 1
 
             # -----------------------------------------------------------------
@@ -462,8 +477,9 @@ class MrpProduction(orm.Model):
                 ('', format_header),
                 ('', format_header),
                 ('', format_header),
+                status_filter,
                 ]
-            write_xls_mrp_line(WS, row, line1)
+            write_xls_list_line(WS, row, line1)
             row += 1
 
             # -----------------------------------------------------------------
@@ -503,8 +519,9 @@ class MrpProduction(orm.Model):
                 ('', format_header),
                 ('', format_header),
                 ('', format_header),
+                status_filter,
                 ]
-            write_xls_mrp_line(WS, row, line2)
+            write_xls_list_line(WS, row, line2)
             row += 1
 
             # -----------------------------------------------------------------
@@ -538,8 +555,9 @@ class MrpProduction(orm.Model):
                 ('Liv. riord.', format_header),
                 ('Note', format_header),
                 ('Valore mag.', format_header),
+                status_filter,
                 ]
-            write_xls_mrp_line(WS, row, line3)
+            write_xls_list_line(WS, row, line3)
             row += 1
 
             # -----------------------------------------------------------------
@@ -586,8 +604,9 @@ class MrpProduction(orm.Model):
                 (o.report_minimum_qty, text_center),
                 (o.report_note or '', text_center),
                 (stock_value, format_number),
+                status_filter,
                 ]
-            write_xls_mrp_line(WS, row, line4)
+            write_xls_list_line(WS, row, line4)
 
             # Add comment:
             if o.report_note:
@@ -606,7 +625,7 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             #                            ROW 5
             # -----------------------------------------------------------------
-            format_text_blue = get_xls_format('bg_green')
+            format_text_blue = get_xls_format('bg_blue')
 
             line5 = [
                 ('Mag.: %s' % o.mx_net_mrp_qty, get_xls_format(
@@ -636,8 +655,9 @@ class MrpProduction(orm.Model):
                 ('', format_text_blue),
                 ('', format_text_blue),
                 ('', format_number),
+                status_filter,
                 ]
-            write_xls_mrp_line(WS, row, line5)
+            write_xls_list_line(WS, row, line5)
 
             # Add comment:
             WS.write_comment(
@@ -676,7 +696,7 @@ class MrpProduction(orm.Model):
                 else:
                     lineOrd.append(('', format_text))
 
-            write_xls_mrp_line(WS, row, lineOrd)
+            write_xls_list_line(WS, row, lineOrd)
             row += 1
 
             # -----------------------------------------------------------------
@@ -739,15 +759,22 @@ class MrpProduction(orm.Model):
 
                 line6[0].append(get_xls_format('text_grey'))
 
-                write_xls_mrp_line(WS, row, line6)
+                write_xls_list_line(WS, row, line6)
+                # Write obsolete filter cell:
+                write_xls_list_line(
+                    WS, [status_filter], col=obsolete_filter_col)
                 row += 1
 
             # -----------------------------------------------------------------
             #                          EXTRA ROW
             # -----------------------------------------------------------------
-            row += 1
+            write_xls_list_line(
+                WS, [status_filter], col=obsolete_filter_col)
+            row += 1  # TODO remove?!?!?
             return row
 
+        # Parameters:
+        obsolete_filter_col = 24  # Y column
         filename = '/tmp/extract_fabric_report.xlsx'
         _logger.info('Start create file %s' % filename)
 
@@ -807,10 +834,21 @@ class MrpProduction(orm.Model):
         for line in res:
             category_name = line[12] or 'Non presente'
             if category_name not in WS_page:
+                WS = get_add_page(WB, category_name)
                 WS_page[category_name] = [
-                    get_add_page(WB, category_name), # WS
-                    0, # row
+                    WS,
+                    1,  # row
                     ]
+
+                # Write title for filter line:
+                empty_filter_line = ['' for c in range(obsolete_filter_col)]
+                self._empty_interline = empty_filter_line[:]  # Save for block
+                empty_filter_line.append('Stato')
+                write_xls_list_line(
+                    WS, 0, empty_filter_line)
+                WS.merge_range(row, 0, row, obsolete_filter_col - 1, '')
+                WS.autofilter(0, obsolete_filter_col, 0, obsolete_filter_col)
+
             WS, row = WS_page[category_name]
 
             # Save row returned:
@@ -831,13 +869,13 @@ class MrpProduction(orm.Model):
             # Header
             format_text = get_xls_format('text')
             row = 0
-            write_xls_mrp_line(WS, row, [(
+            write_xls_list_line(WS, row, [(
                 'Elenco componenti non presenti nella stampa appartenenti a: '
                 'DB Dinamiche, padre e semilavorato (se filtro fornitore '
                 'attivo viene applicato anche qui)', format_text),
                 ])
             row = 1
-            write_xls_mrp_line(WS, row, [
+            write_xls_list_line(WS, row, [
                 ('Categoria inv.', format_text),
                 ('Codice', format_text),
                 ('Nome', format_text),
@@ -855,7 +893,7 @@ class MrpProduction(orm.Model):
             # Line:
             for product in sorted_product:
                 row += 1
-                write_xls_mrp_line(WS, row, [
+                write_xls_list_line(WS, row, [
                     (product.inventory_category_id.name, format_text),
                     (product.default_code or '', format_text),
                     (product.name, format_text),

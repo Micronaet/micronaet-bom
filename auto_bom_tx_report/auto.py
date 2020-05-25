@@ -765,7 +765,6 @@ class MrpProduction(orm.Model):
                 write_xls_list_line(WS, row, line6)
 
                 # Write obsolete filter cell:
-                print row, status_filter, obsolete_filter_col
                 write_xls_list_line(
                     WS, row, [status_filter], col=obsolete_filter_col)
                 row += 1

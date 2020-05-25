@@ -237,9 +237,9 @@ class MrpProduction(orm.Model):
                         'border': 1,
                         }),
                     'hide': WB.add_format({
-                        'bold': True,
+                        'bold': False,
                         'font_color': 'white',
-                        'bg_color': '#000000',
+                        'bg_color': '#FFFFFF',
                         'font_name': 'Courier 10 pitch',
                         'font_size': 6,
                         'align': 'left',
@@ -697,6 +697,10 @@ class MrpProduction(orm.Model):
                     lineOrd.append(('', format_text))
 
             write_xls_list_line(WS, row, lineOrd)
+
+            # Obsolete filter:
+            write_xls_list_line(
+                WS, row, [status_filter], col=obsolete_filter_col)
             row += 1
 
             # -----------------------------------------------------------------
@@ -756,20 +760,21 @@ class MrpProduction(orm.Model):
                     line6[14][1] = get_xls_format('bg_red')
                 elif order_total < o.report_minimum_qty:
                     line6[14][1] = get_xls_format('bg_yellow')
-
                 line6[0].append(get_xls_format('text_grey'))
 
                 write_xls_list_line(WS, row, line6)
+
                 # Write obsolete filter cell:
+                print row, status_filter, obsolete_filter_col
                 write_xls_list_line(
-                    WS, [status_filter], col=obsolete_filter_col)
+                    WS, row, [status_filter], col=obsolete_filter_col)
                 row += 1
 
             # -----------------------------------------------------------------
             #                          EXTRA ROW
             # -----------------------------------------------------------------
             write_xls_list_line(
-                WS, [status_filter], col=obsolete_filter_col)
+                WS, row, [status_filter], col=obsolete_filter_col)
             row += 1  # TODO remove?!?!?
             return row
 
@@ -844,7 +849,7 @@ class MrpProduction(orm.Model):
                 # Write title for filter line:
                 write_xls_list_line(
                     WS, 0, [('Stato', format_text)], col=obsolete_filter_col)
-                WS.merge_range(row, 0, row, obsolete_filter_col - 1, '')
+                WS.merge_range(0, 0, 0, obsolete_filter_col - 1, '')
                 WS.autofilter(0, obsolete_filter_col, 0, obsolete_filter_col)
 
             WS, row = WS_page[category_name]

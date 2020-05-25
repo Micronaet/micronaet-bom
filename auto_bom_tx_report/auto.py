@@ -821,6 +821,7 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         # Generate format database:
         get_xls_format(mode=False, WB=WB)
+        format_text = get_xls_format('text')
 
         # ---------------------------------------------------------------------
         # A. Generate data report:
@@ -841,11 +842,8 @@ class MrpProduction(orm.Model):
                     ]
 
                 # Write title for filter line:
-                empty_filter_line = ['' for c in range(obsolete_filter_col)]
-                self._empty_interline = empty_filter_line[:]  # Save for block
-                empty_filter_line.append('Stato')
                 write_xls_list_line(
-                    WS, 0, empty_filter_line)
+                    WS, 0, [('Stato', format_text)], col=obsolete_filter_col)
                 WS.merge_range(row, 0, row, obsolete_filter_col - 1, '')
                 WS.autofilter(0, obsolete_filter_col, 0, obsolete_filter_col)
 

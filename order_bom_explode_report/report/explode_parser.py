@@ -43,10 +43,10 @@ _logger = logging.getLogger(__name__)
 class MrpProduction(orm.Model):
     """ Model name: MrpProduction
     """
-    _inherit = 'mrp.production' 
+    _inherit = 'mrp.production'
 
     # Utility:
-    def _get_all_product_in_bom(self, cr, uid, data=None, 
+    def _get_all_product_in_bom(self, cr, uid, data=None,
             exclude_inventory_ids=None, context=None):
         ''' Search product in bom line with particular category:
         '''
@@ -54,13 +54,13 @@ class MrpProduction(orm.Model):
         domain = [
             ('bom_id.bom_category', 'in', ('dynamic', 'half', 'parent')),
             ]
-        
+
         # Remove product in excluded category:
         if exclude_inventory_ids is not None:
             domain.append((
-                'bom_id.product_id.inventory_category_id', 'not in', 
+                'bom_id.product_id.inventory_category_id', 'not in',
                 exclude_inventory_ids))
-                
+
         if data is not None:
             first_supplier_id = data.get('first_supplier_id')
             if first_supplier_id:
@@ -243,7 +243,7 @@ class MrpProduction(orm.Model):
                 ('not_in_report', '=', True),
                 ], context=context)
             _logger.warning('Excluded [%s] inventory category' % (
-                exclude_inventory_ids, )) 
+                exclude_inventory_ids, ))
         else:
             exclude_inventory_ids = []
 
@@ -301,10 +301,11 @@ class MrpProduction(orm.Model):
             cr, uid, context=context)
 
         # ADD all fabrics in axis before all check:
-        if mp_mode == 'fabric': # fabric
+        if mp_mode == 'fabric':  # fabric
             fabric_list = (
-                'T3D', 'TES', 'TEX', 'TGT', 'TIO', 'TJO', 'TSK', 'TSQ', 'TWH',
-                'TWL', 'TWM', 'TXM', 'TXI', 'TXR',
+                'T3D',
+                #'TES', 'TEX', 'TGT', 'TIO', 'TJO', 'TSK', 'TSQ', 'TWH',
+                #'TWL', 'TWM', 'TXM', 'TXI', 'TXR',
                 )
             # TODO add also not_in_report check!!!  and not_in_report='f'
             query = '''
@@ -908,9 +909,9 @@ class MrpProduction(orm.Model):
         else: # component
             # Search all product with inventory category used:
             all_component_ids = self._get_all_product_in_bom(
-                cr, uid, 
-                data=data, 
-                exclude_inventory_ids=exclude_inventory_ids, 
+                cr, uid,
+                data=data,
+                exclude_inventory_ids=exclude_inventory_ids,
                 context=context)
 
             # Remove the one with stock:

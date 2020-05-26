@@ -865,7 +865,8 @@ class MrpProduction(orm.Model):
                         ('Colore', format_text),
                     ], col=obsolete_filter_col)
                 WS.merge_range(0, 0, 0, obsolete_filter_col - 1, '')
-                WS.autofilter(0, obsolete_filter_col, 0, obsolete_filter_col)
+                WS.autofilter(
+                    0, obsolete_filter_col, 0, obsolete_filter_col + 1)
 
             WS, row = WS_page[category_name]
 

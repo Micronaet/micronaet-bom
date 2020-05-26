@@ -40,6 +40,7 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+
 class MrpProduction(orm.Model):
     """ Model name: MrpProduction
     """
@@ -48,8 +49,8 @@ class MrpProduction(orm.Model):
     # Utility:
     def _get_all_product_in_bom(self, cr, uid, data=None,
             exclude_inventory_ids=None, context=None):
-        ''' Search product in bom line with particular category:
-        '''
+        """ Search product in bom line with particular category:
+        """
         # TODO Write a parameter for print only in scheduled launch
         domain = [
             ('bom_id.bom_category', 'in', ('dynamic', 'half', 'parent')),
@@ -68,7 +69,7 @@ class MrpProduction(orm.Model):
                     ('product_id.recent_supplier_id', '=', first_supplier_id),
                     )
                 # TODO use also manual supplier?
-                #domain.extend([
+                # domain.extend([
                 #    '|',
                 #    ('product_id.recent_supplier_id', '=', first_supplier_id),
                 #    ('product_id.first_supplier_id', '=', first_supplier_id),
@@ -84,7 +85,7 @@ class MrpProduction(orm.Model):
 
     # Moved here utility for call externally:
     def get_explode_report_object(self, cr, uid, data=None, context=None):
-        ''' Search all product elements
+        """ Search all product elements
             data:
                 mode: use (product), halfwork, component for choose row
                 elements
@@ -93,59 +94,59 @@ class MrpProduction(orm.Model):
                 period: period type week, month
                 period: number of period for columns, max 12
 
-        '''
+        """
         def get_date():
-            ''' Get filter selected
-            '''
+            """ Get filter selected
+            """
             return datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
 
         # ---------------------------------------------------------------------
         # Utility function embedded:
         # ---------------------------------------------------------------------
         def add_x_item(y_axis, item, category, purchase=None, mode='line'):
-            ''' Add new item to record
+            """ Add new item to record
                 y_axis: list of records
                 item: bom browse obj
                 mode:
                     'line' = item > sale order line
                     'product' = item > product
-            '''
+            """
             if mode == 'line':
                 product = item.product_id
-            else: # 'product'
+            else:  # 'product'
                 product = item
             if purchase is None:
                 purchase = {}
 
             default_code = product.default_code or ''
             if default_code in y_axis:
-                return # yet present (for component check)
+                return  # yet present (for component check)
 
-            y_axis[default_code] = [ # halfworked of component
+            y_axis[default_code] = [  # halfworked of component
                 # Reset counter for this product
                 # 04/01/2017: change inventory with new
                 product.mx_start_qty,
                 #product.inventory_start + product.inventory_delta, # inv+delta
 
-                0.0, # tcar
-                0.0, # tscar
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # MM  (+ extra per.)
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # OC  (+ extra per.)
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # OF  (+ extra per.)
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # SAL (+ extra per.)
-                product, # product or halfworked
+                0.0,  # tcar
+                0.0,  # tscar
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # MM  (+ extra per.)
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # OC  (+ extra per.)
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # OF  (+ extra per.)
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # SAL (+ extra per.)
+                product,  # product or halfworked
                 category,
-                {}, # (HW that contain fabric) > fabric mode report
+                {},  # (HW that contain fabric) > fabric mode report
                 # XXX No more used, not deleted for extra position:
-                [0.0], # Total for mt fabrics (fabric report)
+                [0.0],  # Total for mt fabrics (fabric report)
                 purchase.get(product.id, ''),
                 product.inventory_category_id.name or '',
                 ]
             return
 
         def get_position_season(date):
-            ''' Return position in array for correct season month:
-            '''
+            """ Return position in array for correct season month:
+            """
             if not date:
                 _logger.error('Date not found')
                 return False
@@ -156,8 +157,8 @@ class MrpProduction(orm.Model):
             return month + 3
 
         def write_xls_line(mode, line):
-            ''' Write line in correct WS with mode selection
-            '''
+            """ Write line in correct WS with mode selection
+            """
             row = self.counter[mode]
 
             col = 0
@@ -169,9 +170,9 @@ class MrpProduction(orm.Model):
             return
 
         def has_mandatory_placeholder(default_code, product_id):
-            ''' Check if the product: default_code has a component that is
+            """ Check if the product: default_code has a component that is
                 mandatory (placeholder set and rule if present)
-            '''
+            """
             if not product_id.bom_placeholder:
                 return False
             if product_id.bom_placeholder_rule:
@@ -179,12 +180,12 @@ class MrpProduction(orm.Model):
             return True # Mandatory if not rule
 
         def update_hw_data_line(data, product, remain, mt):
-            ''' Update data line for remain hw line
+            """ Update data line for remain hw line
                 data: xls line list
                 product: browse of current product
                 remain: OC remain to deliver / produce
                 mt: q. from BOM
-            '''
+            """
             hw_fabric = data[9]
             # No more used (calculated during report):
             # total = data[10] # list of one element (save total mt usable)
@@ -1017,23 +1018,23 @@ class Parser(report_sxw.rml_parse):
             })
 
     def get_jumped(self, ):
-        ''' Get filter selected
-        '''
+        """ Get filter selected
+        """
         return self.jumped
 
     def get_date(self, ):
-        ''' Get filter selected
-        '''
+        """ Get filter selected
+        """
         return datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
 
     def get_filter(self, data):
-        ''' Get filter selected
-        '''
+        """ Get filter selected
+        """
         data = data or {}
         return data.get('partner_name', '')
 
     def get_object(self, data):
-        ''' Search all product elements
+        """ Search all product elements
             data:
                 mode: use (product), halfwork, component for choose row
                 elements
@@ -1041,7 +1042,7 @@ class Parser(report_sxw.rml_parse):
                 # TODO:
                 period: period type week, month
                 period: number of period for columns, max 12
-        '''
+        """
         # Readability:
         cr = self.cr
         uid = self.uid

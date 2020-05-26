@@ -397,10 +397,14 @@ class MrpProduction(orm.Model):
             # TODO add extra color here!
             if sal[11] < 0:
                 format_text = get_xls_format('bg_red')
+                color = 'Rosso'
             elif sal[11] < o.report_minimum_qty:
                 format_text = get_xls_format('bg_yellow')
+                color = 'Giallo'
             else:
                 format_text = get_xls_format('bg_green')
+                color = 'Verde'
+            filter_color = (color, get_xls_format('hide'))
 
             line0 = [
                 ('%s - %s (forn. abit.: %s) %s' % (
@@ -435,6 +439,7 @@ class MrpProduction(orm.Model):
                 ('', format_text),
                 ('OBSOLETO!' if o.status == 'obsolete' else '', format_text),
                 status_filter,
+                filter_color,
             ]
             write_xls_list_line(WS, row, line0)
             row += 1
@@ -478,6 +483,7 @@ class MrpProduction(orm.Model):
                 ('', format_header),
                 ('', format_header),
                 status_filter,
+                filter_color,
                 ]
             write_xls_list_line(WS, row, line1)
             row += 1
@@ -520,6 +526,7 @@ class MrpProduction(orm.Model):
                 ('', format_header),
                 ('', format_header),
                 status_filter,
+                filter_color,
                 ]
             write_xls_list_line(WS, row, line2)
             row += 1
@@ -556,6 +563,7 @@ class MrpProduction(orm.Model):
                 ('Note', format_header),
                 ('Valore mag.', format_header),
                 status_filter,
+                filter_color,
                 ]
             write_xls_list_line(WS, row, line3)
             row += 1
@@ -605,6 +613,7 @@ class MrpProduction(orm.Model):
                 (o.report_note or '', text_center),
                 (stock_value, format_number),
                 status_filter,
+                filter_color,
                 ]
             write_xls_list_line(WS, row, line4)
 
@@ -656,6 +665,7 @@ class MrpProduction(orm.Model):
                 ('', format_text_blue),
                 ('', format_number),
                 status_filter,
+                filter_color,
                 ]
             write_xls_list_line(WS, row, line5)
 
@@ -700,7 +710,8 @@ class MrpProduction(orm.Model):
 
             # Obsolete filter:
             write_xls_list_line(
-                WS, row, [status_filter], col=obsolete_filter_col)
+                WS, row, [
+                    status_filter, filter_color], col=obsolete_filter_col)
             row += 1
 
             # -----------------------------------------------------------------
@@ -755,7 +766,7 @@ class MrpProduction(orm.Model):
                 # -------------------------------------------------------------
                 # TODO comment the total
                 order_total = int(sal[11] + hw_total_mt)
-                line6[14][0] = order_total # Total to be ordered
+                line6[14][0] = order_total  # Total to be ordered
                 if order_total <= 0:
                     line6[14][1] = get_xls_format('bg_red')
                 elif order_total < o.report_minimum_qty:
@@ -766,14 +777,15 @@ class MrpProduction(orm.Model):
 
                 # Write obsolete filter cell:
                 write_xls_list_line(
-                    WS, row, [status_filter], col=obsolete_filter_col)
+                    WS, row, [status_filter, filter_color], col=obsolete_filter_col)
                 row += 1
 
             # -----------------------------------------------------------------
             #                          EXTRA ROW
             # -----------------------------------------------------------------
             write_xls_list_line(
-                WS, row, [status_filter], col=obsolete_filter_col)
+                WS, row, [status_filter, filter_color],
+                col=obsolete_filter_col)
             row += 1  # TODO remove?!?!?
             return row
 
@@ -847,7 +859,10 @@ class MrpProduction(orm.Model):
 
                 # Write title for filter line:
                 write_xls_list_line(
-                    WS, 0, [('Stato', format_text)], col=obsolete_filter_col)
+                    WS, 0, [
+                        ('Stato', format_text),
+                        ('Colore', format_text),
+                    ], col=obsolete_filter_col)
                 WS.merge_range(0, 0, 0, obsolete_filter_col - 1, '')
                 WS.autofilter(0, obsolete_filter_col, 0, obsolete_filter_col)
 

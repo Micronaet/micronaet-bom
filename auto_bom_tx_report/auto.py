@@ -777,7 +777,8 @@ class MrpProduction(orm.Model):
 
                 # Write obsolete filter cell:
                 write_xls_list_line(
-                    WS, row, [status_filter, filter_color], col=obsolete_filter_col)
+                    WS, row, [
+                        status_filter, filter_color], col=obsolete_filter_col)
                 row += 1
 
             # -----------------------------------------------------------------

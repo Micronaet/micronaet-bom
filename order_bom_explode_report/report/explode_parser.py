@@ -186,8 +186,8 @@ class MrpProduction(orm.Model):
                 mt: q. from BOM
             '''
             hw_fabric = data[9]
-            # # No more used (calculated during report):
-            #total = data[10] # list of one element (save total mt usable)
+            # No more used (calculated during report):
+            # total = data[10] # list of one element (save total mt usable)
             if product.default_code not in hw_fabric:
                 # Create empty record with fixed data:
                 available_qty = \
@@ -195,9 +195,9 @@ class MrpProduction(orm.Model):
                 hw_fabric[product.default_code] = [
                     # 0. Stock - MRP - assigned (Before was: mx_net_qty)
                     available_qty if available_qty else 0.0,
-                    0.0, # 1. OC remain HW
-                    0.0, # 2. Stock Component (mt  of fabric)
-                    #mt, # 3. Mt. from BOM
+                    0.0,  # 1. OC remain HW
+                    0.0,  # 2. Stock Component (mt  of fabric)
+                    # mt, # 3. Mt. from BOM
                     ]
             current = hw_fabric[product.default_code] # readability
             current[1] += remain # OC total

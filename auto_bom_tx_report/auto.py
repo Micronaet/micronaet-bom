@@ -230,7 +230,7 @@ class MrpProduction(orm.Model):
                     'bg_blue': WB.add_format({
                         'bold': True,
                         'font_color': 'black',
-                        'bg_color': 'BED0F5',  #'#4F8DD8',
+                        'bg_color': 'BED0F5',  # '#4F8DD8',
                         'font_name': 'Courier 10 pitch',
                         'font_size': 9,
                         'align': 'left',

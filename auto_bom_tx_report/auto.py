@@ -132,11 +132,11 @@ class MrpProduction(orm.Model):
         """ Return translation for terms
         """
         status_translate = {
-            'catalog': 'A CATALOGO',
-            'exit': 'IN USCITA',
-            'obsolete': 'OBSOLETO',
-            'used': 'UTILIZZATO',
-            'kurtz': 'KURTZ',
+            'catalog': 'A Catalogo',
+            'exit': 'In Uscita',
+            'obsolete': 'Obsoleto',
+            'used': 'Utilizzato Attivo',
+            'kurtz': 'Kurtz',
         }
         return status_translate.get(status, '')
 

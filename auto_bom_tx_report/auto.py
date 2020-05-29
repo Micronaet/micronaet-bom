@@ -677,8 +677,11 @@ class MrpProduction(orm.Model):
             )
             WS.write_comment(
                 xl_rowcol_to_cell(row, 20),
-                'Mettere X, S, Y oppure O per impostarlo come obsoleto;\n'
-                'Mettere N per impostarlo come NON obsoleto',
+                'Mettere O per impostarlo come Obsoleto;\n'
+                'Mettere C per impostarlo come Catalogo;\n'
+                'Mettere U per impostarlo come Uscente;\n'
+                'Mettere K per impostarlo come Kurtz;\n\n'
+                'Mettere A per farlo tornare Attivo (in uso)',
             )
             WS.write_comment(
                 xl_rowcol_to_cell(row, 21),

@@ -156,7 +156,7 @@ class MrpProduction(orm.Model):
                 self.xls_format_db = {
                     'title': WB.add_format({
                         'bold': True,
-                        'font_name': 'Courier 10 pitch',  # 'Arial'
+                        'font_name': 'Courier 10 pitch',
                         'font_size': 11,
                         'align': 'left',
                         }),
@@ -694,10 +694,13 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             #                            Order line:
             # -----------------------------------------------------------------
-            if o.status in ('obsolete', 'exit'):
-                format_order = get_xls_format('bg_no_order')
-            else:
-                format_order = get_xls_format('bg_order')
+            try:
+                if o.status in ('obsolete', 'exit'):
+                    format_order = get_xls_format('bg_no_order')
+                else:
+                    format_order = get_xls_format('bg_order')
+            except:
+                import pdb; pdb.set_trace()
 
             lineOrd = [
                 ('Ordinare:', format_order),

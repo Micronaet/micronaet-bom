@@ -128,6 +128,18 @@ class MrpProduction(orm.Model):
 
     _inherit = 'mrp.production'
 
+    def _get_gamma_terms(self, status):
+        """ Return translation for terms
+        """
+        status_translate = {
+            'catalog': 'A CATALOGO',
+            'exit': 'IN USCITA',
+            'obsolete': 'OBSOLETO',
+            'used': 'UTILIZZATO',
+            'kurtz': 'KURTZ',
+        }
+        return status_translate.get(status, '')
+
     # TODO MOVE IN MODULE? used also from component auto report
     def extract_mrp_production_report_xlsx(
             self, cr, uid, data=None, context=None):
@@ -383,7 +395,7 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             #                            ROW 0
             # -----------------------------------------------------------------
-            gamma_status = (o.status or '').upper()
+            gamma_status = self._get_gamma_terms(o.status)
             status_filter = (
                 gamma_status,
                 get_xls_format('hide'),

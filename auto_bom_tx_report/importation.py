@@ -353,10 +353,19 @@ class PurchaseOrderXLSX(orm.Model):
                     # 20. Status
                     obsolete_text = (WS.cell(row, 20).value or '').upper()
                     if obsolete_text:
-                        if obsolete_text in 'XSYO':
+                        if obsolete_text in 'O':
                             extra_data['status'] = 'obsolete'
-                        elif obsolete_text in 'N':
-                            extra_data['status'] = 'todo'
+                        elif obsolete_text in 'K':
+                            extra_data['status'] = 'kurtz'
+                        elif obsolete_text in 'C':
+                            extra_data['status'] = 'catalog'
+                        elif obsolete_text in 'U':
+                            extra_data['status'] = 'exit'
+                        elif obsolete_text in 'A':
+                            extra_data['status'] = 'used'
+                        else:
+                            _logger.warning(
+                                'Obsolete text not used: %s' % obsolete_text)
 
                     # 21. Minimum stock:
                     minimum_qty = WS.cell(row, 21).value

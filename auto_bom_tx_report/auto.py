@@ -383,8 +383,9 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             #                            ROW 0
             # -----------------------------------------------------------------
+            gamma_status = (o.status or '').upper()
             status_filter = (
-                'obsoleto' if o.status == 'obsolete' else 'non obsoleto',
+                gamma_status,
                 get_xls_format('hide'),
             )
             format_white = get_xls_format('text')
@@ -437,7 +438,7 @@ class MrpProduction(orm.Model):
                 ('CON ORDINI' if any(oc) else 'SENZA ORDINI', format_text),
                 ('', format_text),
                 ('', format_text),
-                ('OBSOLETO!' if o.status == 'obsolete' else '', format_text),
+                (gamma_status, format_text),
                 status_filter,
                 filter_color,
             ]
@@ -608,7 +609,7 @@ class MrpProduction(orm.Model):
                 (o.leadtime or 0, text_center),
                 (o.purchase_lot_block or 0, text_center),
                 (inventory_category, text_center),
-                ('OBSOLETO' if o.status == 'obsolete' else '', text_center),
+                (gamma_status, text_center),
                 (o.report_minimum_qty, text_center),
                 (o.report_note or '', text_center),
                 (stock_value, format_number),
@@ -690,7 +691,7 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             #                            Order line:
             # -----------------------------------------------------------------
-            if o.status == 'obsolete':
+            if o.status in ('obsolete', 'exit'):
                 format_order = get_xls_format('bg_no_order')
             else:
                 format_order = get_xls_format('bg_order')

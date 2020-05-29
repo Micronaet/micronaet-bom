@@ -149,7 +149,7 @@ class MrpProduction(orm.Model):
 
         def get_xls_format(mode=False, WB=None):
             """ Database for format cells
-                first call is with mode not present and WB pased
+                first call is with mode not present and WB passed
                 next call with only mode
             """
             if not mode or not self.xls_format_db:
@@ -844,7 +844,7 @@ class MrpProduction(orm.Model):
         #                     EXPORT EXCEL REPORT
         # ---------------------------------------------------------------------
         # Generate format database:
-        get_xls_format(mode=False, WB=WB)
+        get_xls_format(mode=False, WB=WB)  # First call for create formats
         format_text = get_xls_format('text')
 
         # ---------------------------------------------------------------------

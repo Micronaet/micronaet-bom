@@ -304,9 +304,8 @@ class MrpProduction(orm.Model):
         # ADD all fabrics in axis before all check:
         if mp_mode == 'fabric':  # fabric
             fabric_list = (
-                'T3D',
-                #'TES', 'TEX', 'TGT', 'TIO', 'TJO', 'TSK', 'TSQ', 'TWH',
-                #'TWL', 'TWM', 'TXM', 'TXI', 'TXR',
+                'T3D', 'TES', 'TEX', 'TGT', 'TIO', 'TJO', 'TSK', 'TSQ', 'TWH',
+                'TWL', 'TWM', 'TXM', 'TXI', 'TXR',
                 )
             # TODO add also not_in_report check!!!  and not_in_report='f'
             query = '''

@@ -135,7 +135,7 @@ class MrpProduction(orm.Model):
             'catalog': 'A Catalogo',
             'exit': 'In Uscita',
             'obsolete': 'Obsoleto',
-            'used': 'Utilizzato Attivo',
+            'used': 'Attivo',
             'kurtz': 'Kurtz',
         }
         return status_translate.get(status, '')

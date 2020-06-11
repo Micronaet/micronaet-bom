@@ -708,14 +708,16 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             try:
                 if o.status in ('obsolete', 'exit'):
+                    order_text = 'Non ordinare:'
                     format_order = get_xls_format('bg_no_order')
                 else:
+                    order_text = 'Ordinare:'
                     format_order = get_xls_format('bg_order')
             except:
                 import pdb; pdb.set_trace()
 
             lineOrd = [
-                ('Ordinare:', format_order),
+                (order_text, format_order),
                 (o.uom_id.name or '?', get_xls_format('text_center')),
                 ]
             # Order only from now to the end of block:

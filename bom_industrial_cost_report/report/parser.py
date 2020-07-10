@@ -738,8 +738,19 @@ class Parser(report_sxw.rml_parse):
         super(Parser, self).__init__(cr, uid, name, context)
         self.localcontext.update({
             'get_objects': self.get_objects,
+            'get_date': self.get_date,
             })
         
+    def get_date(self, ):
+        """ Return date
+        """
+        date = '%s' % datetime.now()
+        return '%s/%s/%s' % (
+            date[8:10],
+            date[5:7],
+            date[:4],
+            )
+    
     def get_objects(self, datas=None):
         ''' Return single report or list of selected bom 
         '''        

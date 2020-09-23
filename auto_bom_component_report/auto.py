@@ -156,9 +156,9 @@ class MrpProduction(orm.Model):
             _logger.info('Extracted file in %s' % filename)
 
             # Create attachment block for send after:
-            result = open(filename, 'rb').read() #xlsx raw
+            result = open(filename, 'rb').read()  # xlsx raw
         else: # odt
-            mode = 'odt' # for extension
+            mode = 'odt'  # for extension
             # Procedure for problem in setup language in ODT report
             mrp_ids = self.search(cr, uid, [], context=context)
             if mrp_ids:
@@ -194,7 +194,8 @@ class MrpProduction(orm.Model):
             partner_ids.append(user.partner_id.id)
 
         thread_pool = self.pool.get('mail.thread')
-        thread_pool.message_post(cr, uid, False,
+        thread_pool.message_post(
+            cr, uid, False,
             type='email',
             body='Stato componenti settimanale',
             subject='Invio automatico stato componenti: %s' % (

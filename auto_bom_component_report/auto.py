@@ -131,7 +131,7 @@ class MrpProduction(orm.Model):
             'context': context,
 
             # Datas setup:
-            'mode': 'component',  # halfwork'
+            'mode': 'component',  # XXX halfwork'
             'without_type_ids': [],
             'with_type_ids': [],
             'type_id': False,

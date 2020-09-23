@@ -291,7 +291,6 @@ class MrpProduction(orm.Model):
         pick_pool = self.pool.get('stock.picking')
         sale_pool = self.pool.get('sale.order')
         move_pool = self.pool.get('stock.move')
-        bom_pool = self.pool.get('mrp.bom')
         mrp_pool = self.pool.get('mrp.production')
 
         # Load Y axis for report (halfwork or component):
@@ -829,7 +828,7 @@ class MrpProduction(orm.Model):
                 pos = get_position_season(date)
                 qty = line.product_uom_maked_sync_qty
 
-                # XXX No direct production (use lavorat. CL / CL for this):
+                # XXX No direct production (use job. CL / CL for this):
 
                 if not len(product.dynamic_bom_line_ids):  # no bom
                     write_xls_line('move', (
@@ -969,7 +968,7 @@ class MrpProduction(orm.Model):
                 if i == inv_pos:
                     # TODO remove from T. CAR inventory!!!
                     # current[1] -= round(current[0], 0) # T. CAR
-                    total += round(current[0], 0) # Add inv.
+                    total += round(current[0], 0)  # Add inv.
 
                 total += round(
                     current[3][i] + current[4][i] + current[5][i], 0)
@@ -1045,7 +1044,7 @@ class Parser(report_sxw.rml_parse):
     def get_object(self, data):
         """ Search all product elements
             data:
-                mode: use (product), halfwork, component for choose row
+                mode: use (product), half-work, component for choose row
                 elements
 
                 # TODO:

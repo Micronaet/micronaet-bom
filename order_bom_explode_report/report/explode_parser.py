@@ -126,7 +126,8 @@ class MrpProduction(orm.Model):
                 # Reset counter for this product
                 # 04/01/2017: change inventory with new
                 product.mx_start_qty,
-                #product.inventory_start + product.inventory_delta, # inv+delta
+                # product.inventory_start + product.inventory_delta,
+                # inv+delta
 
                 0.0,  # tcar
                 0.0,  # tscar
@@ -151,7 +152,7 @@ class MrpProduction(orm.Model):
                 _logger.error('Date not found')
                 return False
             month = int(date[5:7])
-            if month >= 9: # september = 0
+            if month >= 9:  # september = 0
                 return month - 9
             # january = 4
             return month + 3
@@ -166,7 +167,7 @@ class MrpProduction(orm.Model):
                 self.WS[mode].write(row, col, item)
                 col += 1
 
-            self.counter[mode] += 1 # row update
+            self.counter[mode] += 1  # row update
             return
 
         def has_mandatory_placeholder(default_code, product_id):
@@ -201,15 +202,15 @@ class MrpProduction(orm.Model):
                     # mt, # 3. Mt. from BOM
                     ]
             current = hw_fabric[product.default_code] # readability
-            current[1] += remain # OC total
+            current[1] += remain  # OC total
             # XXX better once when end totalise remain
 
             # Test: OC >= Stock:
             if current[1] >= current[0]: # Use all stock (OC >= stock)
                 current[2] = current[0] * mt # All stock raw material
-            else: # use all OC (extra stock not useable)
-                current[2] = current[1] * mt # All ordered raw material
-                #total[0] += stock_mt
+            else:  # use all OC (extra stock not useable)
+                current[2] = current[1] * mt  # All ordered raw material
+                # total[0] += stock_mt
             return True
 
         # ---------------------------------------------------------------------
@@ -284,7 +285,7 @@ class MrpProduction(orm.Model):
         # NOTE: no extra page header
 
         # pool used:
-        company_pool = self.pool.get('res.company') # for utility
+        company_pool = self.pool.get('res.company')  # for utility
         product_pool = self.pool.get('product.product')
         pick_pool = self.pool.get('stock.picking')
         sale_pool = self.pool.get('sale.order')

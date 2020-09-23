@@ -30,90 +30,90 @@ from openerp import SUPERUSER_ID, api
 from openerp import tools
 from openerp.tools.translate import _
 from openerp.tools.float_utils import float_round as round
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
-    DEFAULT_SERVER_DATETIME_FORMAT, 
-    DATETIME_FORMATS_MAP, 
+from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DATETIME_FORMATS_MAP,
     float_compare)
 
 
 _logger = logging.getLogger(__name__)
 
+
 class SaleOrder(orm.Model):
     """ Model name: SaleOrder
-    """    
+    """
     _inherit = 'sale.order'
-    
+
     # -------------------------------------------------------------------------
     #                               UTILITY
     # -------------------------------------------------------------------------
     def get_component_in_product_order_open(
             self, cr, uid, logfile=False, context=None):
-        ''' Check open order and return list of product present
+        """ Check open order and return list of product present
             (for line not closed)
-            chose logfile if report need to log operation            
-        '''
+            chose logfile if report need to log operation
+        """
         line_pool = self.pool.get('sale.order.line')
-        
+
         # ---------------------------------------------------------------------
         # Database:
         # ---------------------------------------------------------------------
         data = {
             # Data database
             'product': [], # database for product
-            #'component': [], # database for compoment
-            
-            # TODO 
-            #'order': [], # order header
-            #'line': [], # order line
-            
+            # 'component': [], # database for compoment
+
+            # TODO
+            # 'order': [], # order header
+            # 'line': [], # order line
+
             # Check error database:
             'no_product': [],
             'no_structure': [],
-            #'no_component': [],
+            # 'no_component': [],
             }
-        
+
         # Search open order:
         line_ids = line_pool.search(cr, uid, [
             ('order_id.state', 'not in', ('cancel', 'sent', 'draft')),
             ('order_id.pricelist_order', '=', False),
-            ('product_id.exclude_parcels', '=', False), # remove no parcels product
-            
+            # remove no parcels product:
+            ('product_id.exclude_parcels', '=', False),
+
             ('order_id.mx_closed', '=', False), # order open
-            ('mx_closed', '=', False), # line open 
-            #('product_id.default_code', 'ilike', '004PP%'), # TODO remove!!!!!!!
+            ('mx_closed', '=', False), # line open
             # Remove product without col!
             ], context=context)
 
         forecasted_ids = line_pool.search(cr, uid, [
             ('order_id.forecasted_production_id', '!=', False),
-            ('order_id.forecasted_production_id.state', 'not in', ('done', 'cancel')),
+            ('order_id.forecasted_production_id.state', 'not in', (
+                'done', 'cancel')),
             ])
-        line_ids.extend(forecasted_ids) # no double FC is draft mode
+        line_ids.extend(forecasted_ids)  # no double FC is draft mode
 
-        for line in line_pool.browse(cr, uid, line_ids, context=context):            
-            product = line.product_id # Readability:
+        for line in line_pool.browse(cr, uid, line_ids, context=context):
+            product = line.product_id  # Readability:
 
             # -----------------------------------------------------------------
             # Check no product:
             # -----------------------------------------------------------------
             if not product:
-                data['no_product'].append(line) # browse line no product
+                data['no_product'].append(line)  # browse line no product
                 continue
-                
-            structure = product.structure_id # Readability
-                
-            # -----------------------------------------------------------------
-            # Save for explode in report:
-            # -----------------------------------------------------------------            
-            if product not in data['product']:
-                data['product'].append(product)                        
+
+            structure = product.structure_id  # Readability
 
             # -----------------------------------------------------------------
-            # Check structure:            
-            # -----------------------------------------------------------------            
+            # Save for explode in report:
+            # -----------------------------------------------------------------
+            if product not in data['product']:
+                data['product'].append(product)
+
+            # -----------------------------------------------------------------
+            # Check structure:
+            # -----------------------------------------------------------------
             if not structure and product not in data['no_structure']:
                 data['no_structure'].append(product)
-                
+
         return data
-        
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

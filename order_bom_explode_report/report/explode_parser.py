@@ -204,12 +204,12 @@ class MrpProduction(orm.Model):
                     ]
             current = hw_fabric[product.default_code]  # readability
             current[1] += remain  # OC total
-            # XXX better once when end totalise remain
+            # XXX better once when end totalize remain
 
             # Test: OC >= Stock:
             if current[1] >= current[0]:  # Use all stock (OC >= stock)
                 current[2] = current[0] * mt  # All stock raw material
-            else:  # use all OC (extra stock not useable)
+            else:  # use all OC (extra stock not usable)
                 current[2] = current[1] * mt  # All ordered raw material
                 # total[0] += stock_mt
             return True
@@ -333,12 +333,12 @@ class MrpProduction(orm.Model):
         # SO: filter product in category instead of ordered product
 
         # Maybe removed:
-        inventory_pos = get_position_season(get_date()) # for inventory mangm.1
-        for product in product_proxy: # XXX Product ordered for now
-            for item in product.dynamic_bom_line_ids: # XXX All Halfworked:
+        inventory_pos = get_position_season(get_date())  # for inventory mangm
+        for product in product_proxy:  # XXX Product ordered for now
+            for item in product.dynamic_bom_line_ids:  # XXX All Halfworked:
                 # TODO Remove log:
 
-                # Note: 12/12/2017 Remove placehoder elements:
+                # Note: 12/12/2017 Remove placeholder elements:
                 if item.product_id.bom_placeholder or \
                         item.product_id.bom_alternative:
                     _logger.warning('Placeholder product jumped: %s' %

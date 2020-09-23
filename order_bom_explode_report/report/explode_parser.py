@@ -388,7 +388,7 @@ class MrpProduction(orm.Model):
                     # TODO write category as component mode (pipe/fabric)
                     add_x_item(y_axis, item, category, purchase_db)
                 elif mode == 'component':  # >>> component HW and component BOM
-                    # TODO log halfcomponent with empty list
+                    # TODO log half-component with empty list
                     # relative_type = 'half'
                     for component in half_bom_ids:
                         # 10/01/2018 supplier filter on recent_supplier_id
@@ -403,7 +403,7 @@ class MrpProduction(orm.Model):
                         if exclude_inventory_ids and \
                                 component.product_id.inventory_category_id.id\
                                 in exclude_inventory_ids:
-                            continue # Jump BOM element in excluded category
+                            continue  # Jump BOM element in excluded category
 
                         # Create ad hoc category:
                         if component.product_id.is_pipe:
@@ -451,7 +451,7 @@ class MrpProduction(orm.Model):
         # 1. LOAD PICKING (CUSTOMER ORDER AND PICK IN)
         # =====================================================================
         block = 'OF, BF, CL, CL prod., CL lav., CL inv.'
-        # Keep exclude_partner_ids for CL production esclusion?
+        # Keep exclude_partner_ids for CL production exclusion?
         # XXX Note: first for creation of new elements if not present in OC
 
         in_picking_type_ids = []
@@ -526,7 +526,8 @@ class MrpProduction(orm.Model):
                     # Change for jump year 04/01/2017 (for year change 1/1)
                     # if date > period_to or date < period_from:  # extra range
                     # XXX no more mm_from use with period: [01/09-31/08]
-                    if (date < period_from) or (date > period_to):  # extrarange
+                    # Extra range:
+                    if (date < period_from) or (date > period_to):
                         write_xls_line('move', (
                             block, 'NOT USED', pick.name, pick.origin,
                             date, pos, '',  # product_code
@@ -551,7 +552,7 @@ class MrpProduction(orm.Model):
         # UNLOAD PICKING (CUSTOMER ORDER PICK OUT) DIRECT SALE OF COMPONENT
         # =====================================================================
         # TODO manage inventory_id > stock.inventory for manual correction
-        block = 'BC PICK OUT' # Direct sale of half-processed
+        block = 'BC PICK OUT'  # Direct sale of half-processed
         # XXX Note: no unload MM during BC (only production)
 
         out_picking_type_ids = []
@@ -588,7 +589,7 @@ class MrpProduction(orm.Model):
                 if product_code in y_axis:  # Component direct:
                     qty = line.product_uom_qty  # for direct sale
                     y_axis[product_code][3][pos] -= qty  # MM block
-                    y_axis[product_code][2] -= qty  # TSCAR
+                    y_axis[product_code][2] -= qty  # T. SCAR.
                     write_xls_line('move', (
                         block, 'USED', pick.name, pick.origin,
                         pick.date, pos, '', product_code,  # Prod is MP
@@ -623,7 +624,7 @@ class MrpProduction(orm.Model):
                 # OC exclude no parcels product:
                 if product.exclude_parcels:
                     write_xls_line('move', (
-                        block, 'NOT USED', order.name, '', date, pos, '', #code
+                        block, 'NOT USED', order.name, '', date, pos, '',
                         product_code,  # Direct component
                         '', 0,  # +MM
                         0,  # XXX keep 0 (-OC)
@@ -634,10 +635,10 @@ class MrpProduction(orm.Model):
 
                 (remain, not_delivered) = \
                     company_pool.mrp_order_line_to_produce_assigned(line)
-                    # company_pool.mrp_order_line_to_produce(line)
+                # company_pool.mrp_order_line_to_produce(line)
 
                 # --------------------------------
-                # OC direct halfwork or component:
+                # OC direct half-work or component:
                 # --------------------------------
                 # Explode HW subcomponent for report 2
                 if mode != 'halfwork':  # component
@@ -648,13 +649,13 @@ class MrpProduction(orm.Model):
                             continue
 
                         comp_remain = remain * comp.product_qty
-                        y_axis[comp_code][4][pos] -= comp_remain # OC
+                        y_axis[comp_code][4][pos] -= comp_remain  # OC
                         write_xls_line('move', (
                             block, 'USED', order.name, '', date, pos,
                             product_code,  # Code
                             comp_code,  # component
                             '', 0,  # +MM
-                            comp_remain, # -OC
+                            comp_remain,  # -OC
                             0, 'OC DIRECT SALE HW SO COMPONENT UNLOAD',
                             comp.category_id.name if comp.category_id else\
                                 'NO CATEGORY',

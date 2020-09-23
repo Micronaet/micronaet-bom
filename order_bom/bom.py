@@ -45,7 +45,7 @@ class SaleOrder(orm.Model):
         data = {
             # Data database
             'product': [],  # database for product
-            # 'component': [], # database for compoment
+            # 'component': [], # database for component
 
             # TODO
             # 'order': [], # order header

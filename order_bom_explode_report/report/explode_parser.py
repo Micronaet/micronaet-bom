@@ -335,7 +335,7 @@ class MrpProduction(orm.Model):
         # Maybe removed:
         inventory_pos = get_position_season(get_date())  # for inventory mangm
         for product in product_proxy:  # XXX Product ordered for now
-            for item in product.dynamic_bom_line_ids:  # XXX All Halfworked:
+            for item in product.dynamic_bom_line_ids:  # XXX All Semi-worked:
                 # TODO Remove log:
 
                 # Note: 12/12/2017 Remove placeholder elements:
@@ -345,7 +345,10 @@ class MrpProduction(orm.Model):
                                     item.product_id.default_code)
                     continue
 
-                # XXX NOTE: Filter category always in hw not component!
+                # -------------------------------------------------------------
+                # Filter:
+                # -------------------------------------------------------------
+                # NOTE: Filter category always in hw not component!
                 if with_type_ids and \
                         item.category_id.type_id.id not in with_type_ids:
                     continue  # Jump not in category selected
@@ -364,17 +367,17 @@ class MrpProduction(orm.Model):
                     # 10/01/2018 change first with recent
                     if first_supplier_id and first_supplier_id != \
                                 item.product_id.recent_supplier_id.id:
-                        continue # Jump not supplier present
+                        continue  # Jump not supplier present
 
                     category = item.category_id.type_id.name if \
                         item.category_id and item.category_id.type_id else \
                         _('No category')
                     add_x_item(y_axis, item, category, purchase_db)
-                elif mode == 'component' and not half_bom_ids:  # cmpt in BOM
+                elif mode == 'component' and not half_bom_ids:  # comp. in BOM
                     # 10/01/2018 restore supplier filter on recent_supplier_id
                     if first_supplier_id and first_supplier_id != \
                                 item.product_id.recent_supplier_id.id:
-                        continue # Jump not supplier present
+                        continue  # Jump not supplier present
 
                     if mp_mode == 'fabric' and item.product_id.id not in \
                             fabric_ids:  # jump not fabric

@@ -123,20 +123,20 @@ class MrpProduction(orm.Model):
             if default_code in y_axis:
                 return  # yet present (for component check)
 
-            y_axis[default_code] = [  # halfworked of component
+            y_axis[default_code] = [  # half-worked of component
                 # Reset counter for this product
                 # 04/01/2017: change inventory with new
                 product.mx_start_qty,
                 # product.inventory_start + product.inventory_delta,
                 # inv+delta
 
-                0.0,  # tcar
-                0.0,  # tscar
+                0.0,  # t. car.
+                0.0,  # t. scar.
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # MM  (+ extra per.)
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # OC  (+ extra per.)
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # OF  (+ extra per.)
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # SAL (+ extra per.)
-                product,  # product or halfworked
+                product,  # product or half-worked
                 category,
                 {},  # (HW that contain fabric) > fabric mode report
                 # XXX No more used, not deleted for extra position:
@@ -204,7 +204,7 @@ class MrpProduction(orm.Model):
                     ]
             current = hw_fabric[product.default_code]  # readability
             current[1] += remain  # OC total
-            # XXX better once when end totalize remain
+            # XXX better once when end totalization remain
 
             # Test: OC >= Stock:
             if current[1] >= current[0]:  # Use all stock (OC >= stock)

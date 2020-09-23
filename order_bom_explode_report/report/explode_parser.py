@@ -293,7 +293,7 @@ class MrpProduction(orm.Model):
         move_pool = self.pool.get('stock.move')
         mrp_pool = self.pool.get('mrp.production')
 
-        # Load Y axis for report (halfwork or component):
+        # Load Y axis for report (half-work or component):
         y_axis = {}
         category_fabric = _('Fabric')
 
@@ -323,7 +323,7 @@ class MrpProduction(orm.Model):
                     purchase_db, mode='product',
                     )
 
-        # Get product BOM dyamic lines (from active order):
+        # Get product BOM dynamic lines (from active order):
         product_data = sale_pool.get_component_in_product_order_open(
             cr, uid, context=context)
         product_proxy = product_data['product']
@@ -332,7 +332,7 @@ class MrpProduction(orm.Model):
         # SO: filter product in category instead of ordered product
 
         # Maybe removed:
-        inventory_pos = get_position_season(get_date())  # for inventory mangm
+        inventory_pos = get_position_season(get_date())  # for inventory mgmt.
         for product in product_proxy:  # XXX Product ordered for now
             for item in product.dynamic_bom_line_ids:  # XXX All Semi-worked:
                 # TODO Remove log:

@@ -62,11 +62,11 @@ class ComponentStatusReportWizard(orm.TransientModel):
         wiz_browse = self.browse(cr, uid, ids, context=context)[0]
         datas = {
             'mode': wiz_browse.mode,  # 'mode': 'component',
-            'mp_mode': wiz_browse.mp_mode, # 'mp_mode': 'fabric',
+            'mp_mode': wiz_browse.mp_mode,  # 'mp_mode': 'fabric',
             'days': wiz_browse.days,
             'first_supplier_id': wiz_browse.first_supplier_id.id or False,
             # 'negative_start': wiz_browse.negative_start,
-            'type_id': False, # TODO remove ex. wiz_browse.type_id.id or
+            'type_id': False,  # TODO remove ex. wiz_browse.type_id.id or
             'with_type_ids':
                 [item.id for item in wiz_browse.with_type_ids],
             'without_type_ids':
@@ -101,7 +101,7 @@ class ComponentStatusReportWizard(orm.TransientModel):
         return {
             'type': 'ir.actions.act_url',
             'url': '/web/binary/saveas?model=ir.attachment&field=datas&'
-                'filename_field=datas_fname&id=%s' % attachment_id,
+                   'filename_field=datas_fname&id=%s' % attachment_id,
             'target': 'self',
             }
 
@@ -157,7 +157,7 @@ class MrpProduction(orm.Model):
 
             # Create attachment block for send after:
             result = open(filename, 'rb').read()  # xlsx raw
-        else: # odt
+        else:  # odt
             mode = 'odt'  # for extension
             # Procedure for problem in setup language in ODT report
             mrp_ids = self.search(cr, uid, [], context=context)

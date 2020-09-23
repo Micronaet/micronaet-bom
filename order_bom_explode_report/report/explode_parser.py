@@ -657,8 +657,8 @@ class MrpProduction(orm.Model):
                             '', 0,  # +MM
                             comp_remain,  # -OC
                             0, 'OC DIRECT SALE HW SO COMPONENT UNLOAD',
-                            comp.category_id.name if comp.category_id else\
-                                'NO CATEGORY',
+                            comp.category_id.name if comp.category_id else \
+                            'NO CATEGORY',
                             ))
 
                         # Add extra part for keep HW in fabric report:

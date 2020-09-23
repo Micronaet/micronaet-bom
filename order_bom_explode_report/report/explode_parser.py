@@ -394,7 +394,7 @@ class MrpProduction(orm.Model):
                         # 10/01/2018 supplier filter on recent_supplier_id
                         if first_supplier_id and first_supplier_id != \
                                     item.product_id.recent_supplier_id.id:
-                            continue # Jump not supplier present
+                            continue  # Jump not supplier present
 
                         if mp_mode == 'fabric' and component.product_id.id \
                                 not in fabric_ids:
@@ -616,7 +616,7 @@ class MrpProduction(orm.Model):
             for line in order.order_line:
                 # FC order no deadline (use date)
                 # datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT))
-                product = line.product_id # readability
+                product = line.product_id  # readability
                 product_code = line.product_id.default_code
                 date = line.date_deadline or order.date_order
                 pos = get_position_season(date)
@@ -641,7 +641,7 @@ class MrpProduction(orm.Model):
                 # OC direct half-work or component:
                 # --------------------------------
                 # Explode HW subcomponent for report 2
-                if mode != 'halfwork':  # component
+                if mode != 'halfwork':  # only for component
                     for comp in product.half_bom_ids:
                         comp_code = comp.product_id.default_code
                         if comp_code not in y_axis:  # OC out item (no prod.):
@@ -718,9 +718,9 @@ class MrpProduction(orm.Model):
                         ))
                     continue
 
-                # -----------------------------------
-                # OC Halfworked or Component explode:
-                # -----------------------------------
+                # ------------------------------------
+                # OC Half-worked or Component explode:
+                # ------------------------------------
                 for item in product.dynamic_bom_line_ids:
                     item_code = item.product_id.default_code
                     item_remain = remain * item.product_qty
@@ -728,13 +728,13 @@ class MrpProduction(orm.Model):
                     half_bom_ids = item.product_id.half_bom_ids
                     if mode == 'halfwork' and half_bom_ids:  # hw with comp.
                         if item_code in y_axis:  # OC out item (no prod.):
-                            y_axis[item_code][4][pos] -= item_remain  # OCblock
+                            y_axis[item_code][4][pos] -= item_remain  # OC blk
                             write_xls_line('move', (
                                 block, 'USED', order.name, '', date, pos,
                                 product_code,  # code
                                 item_code,  # MP
                                 '', 0,  # +MM
-                                item_remain, # -OC
+                                item_remain,  # -OC
                                 0, 'OC HALFWORKED REMAIN (HW)',
                                 item.category_id.name if item.category_id \
                                     else 'NO CATEGORY',
@@ -743,7 +743,7 @@ class MrpProduction(orm.Model):
 
                     elif mode == 'component' and not half_bom_ids:  # cmpt BOM
                         if item_code in y_axis:  # OC out item (no prod.):
-                            y_axis[item_code][4][pos] -= item_remain # OC block
+                            y_axis[item_code][4][pos] -= item_remain  # OC blk
                             write_xls_line('move', (
                                 block, 'USED', order.name, '', date, pos,
                                 product_code,  # code
@@ -760,20 +760,21 @@ class MrpProduction(orm.Model):
                             comp_code = comp.product_id.default_code
                             comp_remain = item_remain * comp.product_qty
 
-                            if comp_code not in y_axis:  # OC out item (no prod.):
+                            # OC out item (no prod.):
+                            if comp_code not in y_axis:
                                 write_xls_line('move', (
                                     block, 'NOT USED', order.name, '', date,
                                     pos, item_code,  # Code
                                     comp_code,  # component
                                     '', 0,  # +MM
-                                    comp_remain,#-OC
+                                    comp_remain,  # -OC
                                     0, 'COMPONENT NOT IN FILTER X LIST (CMPT)',
                                     comp.category_id.name if comp.category_id\
-                                        else 'NO CATEGORY',
+                                    else 'NO CATEGORY',
                                     ))
                                 continue
 
-                            y_axis[comp_code][4][pos] -= comp_remain # OC
+                            y_axis[comp_code][4][pos] -= comp_remain  # OC
                             write_xls_line('move', (
                                 block, 'USED', order.name, '', date, pos,
                                 item_code,  # Code
@@ -788,7 +789,8 @@ class MrpProduction(orm.Model):
                             # Update extra line for fabric HW use:
                             # 19 feb 2019 use also for component:
                             # if mp_mode == 'fabric':
-                            update_hw_data_line(y_axis[comp_code],
+                            update_hw_data_line(
+                                y_axis[comp_code],
                                 item.product_id,  # HW reference
                                 item_remain,  # HW remain
                                 comp.product_qty,  # Component remain
@@ -870,8 +872,8 @@ class MrpProduction(orm.Model):
                             comp_code,  # MP
                             '', -comp_qty,  # -MM
                             0, 0, 'MRP COMPONENT UNLOAD (ADD in TSCAR)',
-                            comp.category_id.name if comp.category_id else\
-                                'NO CATEGORY',
+                            comp.category_id.name if comp.category_id else \
+                            'NO CATEGORY',
                             ))
                         continue
                     else:
@@ -940,13 +942,13 @@ class MrpProduction(orm.Model):
             current = y_axis[key]  # readability:
             product = current[7]
 
-            total = 0.0 # INV 0.0
+            total = 0.0  # INV 0.0
 
             # XXX NOTE: INV now is 31/12 next put Sept. (old information)
             # inv_pos = 3 # December # TODO never use this!!!
             inv_pos = 0  # September (always append here inventory)
             jumped = False
-            negative = False  # Check if there's negavtive SAL
+            negative = False  # Check if there's negative SAL
 
             for i in range(0, 12):
                 # if i == inv_pos:
@@ -959,14 +961,14 @@ class MrpProduction(orm.Model):
                 if not(any(current[3]) or any(current[4]) or
                         any(current[5]) or current[0] > 0.0):
                     # _logger.warning('Jumped: %s %s %s' % current
-                    self.jumped.append(current[7]) # product proxy
+                    self.jumped.append(current[7])  # product proxy
                     jumped = True
                     # XXX Maybe optimize: Repeat loop for nothing?
                     continue
 
                 if i == inv_pos:
-                    # TODO remove from TCAR inventory!!!
-                    # current[1] -= round(current[0], 0) # TCAR
+                    # TODO remove from T. CAR inventory!!!
+                    # current[1] -= round(current[0], 0) # T. CAR
                     total += round(current[0], 0) # Add inv.
 
                 total += round(
@@ -976,7 +978,7 @@ class MrpProduction(orm.Model):
                     negative = True
 
             # -----------------------------------------------------------------
-            # Inventory managenent block:
+            # Inventory management block:
             # -----------------------------------------------------------------
             # XXX maybe remove:
             if for_inventory_delta and \

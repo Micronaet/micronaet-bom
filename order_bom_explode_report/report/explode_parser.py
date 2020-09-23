@@ -360,7 +360,7 @@ class MrpProduction(orm.Model):
                     _logger.warning('Product category not in report')
                     continue  # Jump BOM element in excluded category
 
-                # in halfwork use only hw component:
+                # in half-work use only hw component:
                 half_bom_ids = item.product_id.half_bom_ids
                 if mode == 'halfwork' and half_bom_ids:  # hw with component
                     # 10/01/2018 change first with recent
@@ -383,8 +383,8 @@ class MrpProduction(orm.Model):
                         continue
                     category = item.category_id.type_id.name if \
                         item.category_id and item.category_id.type_id else \
-                            _('No category')
-                    # TODO write category as component mode (pipe/fabric)
+                        _('No category')
+                    # TODO write category as component mode (pipe / fabric)
                     add_x_item(y_axis, item, category, purchase_db)
                 elif mode == 'component':  # >>> component HW and component BOM
                     # TODO log half-component with empty list

@@ -175,6 +175,11 @@ class PurchaseOrder(orm.Model):
             ('product_id.default_code', '=', code),
             ], context=context)
 
+        if not bom_ids:
+            raise osv.except_osv(
+                _('No DB'), 
+                _('DB padre non presente %s') % code,
+                )
         if len(bom_ids) > 1:
             raise osv.except_osv(
                 _('More BOM'), 

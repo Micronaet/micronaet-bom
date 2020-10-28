@@ -34,44 +34,45 @@ from openerp import SUPERUSER_ID, api
 from openerp import tools
 from openerp.tools.translate import _
 from openerp.tools.float_utils import float_round as round
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
-    DEFAULT_SERVER_DATETIME_FORMAT, 
-    DATETIME_FORMATS_MAP, 
+from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DATETIME_FORMATS_MAP,
     float_compare)
 
 
 _logger = logging.getLogger(__name__)
 
+
 class SaleOrderLine(orm.Model):
-    ''' Link line for stats
-    '''
+    """ Link line for stats
+    """
     _inherit = 'sale.order.line'
 
     # -------------------------------------------------------------------------
-    # Button event:    
+    # Button event:
     # -------------------------------------------------------------------------
     def working_qty_is_done(self, cr, uid, ids, context=None):
-        ''' Set as done this line for the job
-        '''
+        """ Set as done this line for the job
+        """
         current_proxy = self.browse(cr, uid, ids, context=context)[0]
         return self.write(cr, uid, ids, {
             'working_qty': 0,
-            'product_uom_maked_sync_qty': 
+            'product_uom_maked_sync_qty':
                 current_proxy.product_uom_maked_sync_qty + \
                 current_proxy.working_qty,
             }, context=context)
-        
+
     def working_mpr_is_ready(self, cr, uid, ids, context=None):
-        ''' Set as done this line for the job
-        '''
+        """ Set as done this line for the job
+        """
         current_proxy = self.browse(cr, uid, ids, context=context)[0]
         return self.write(cr, uid, ids, {
             'working_ready': True,
             }, context=context)
-        
+
     def working_print_single_label(self, cr, uid, ids, context=None):
-        ''' Print single label
-        '''
+        """ Print single label
+        """
         return True
 
     _columns = {
@@ -80,28 +81,30 @@ class SaleOrderLine(orm.Model):
         'working_sequence': fields.integer('Working seq.'),
         'working_qty': fields.integer('Working q.'),
         'working_done': fields.boolean('Done'), #TODO remove > test working_qty
-        'working_ready': fields.boolean('Ready for input', 
+        'working_ready': fields.boolean('Ready for input',
             help='Line component are ready in line position'),
         }
+
 
 class MrpProductionStatsPallet(orm.Model):
     """ Model name: MrpProductionStatsPallet
     """
-    
+
     _name = 'mrp.production.stats.pallet'
     _description = 'Pallet produced'
     _rec_name = 'sequence'
     _order = 'sequence,id'
-    
-    def _create_qr_code_package(self, cr, uid, ids, fields, args, context=None):
-        ''' Fields function for calculate 
-        '''
+
+    def _create_qr_code_package(self, cr, uid, ids, fields, args,
+                                context=None):
+        """ Fields function for calculate
+        """
         res = {}
         for pallet in self.browse(cr, uid, ids, context=context):
             res[pallet.id] = {}
             qrcode_text = _(
                 'ID: %s [%s in MRP: %s]\nFamily %s\nDate: %s') % (
-                    pallet.id, 
+                    pallet.id,
                     pallet.sequence,
                     pallet.stats_id.mrp_id.name,
                     pallet.stats_id.mrp_id.product_id.name, # Family
@@ -114,7 +117,7 @@ class MrpProductionStatsPallet(orm.Model):
             img_bin = base64.b64encode(s.getvalue())
 
             res[pallet.id]['qrcode_image'] = img_bin
-                    
+
         return res
 
     _columns = {
@@ -124,78 +127,83 @@ class MrpProductionStatsPallet(orm.Model):
         'stats_id': fields.many2one('mrp.production.stats', 'Stats'),
         'ean13': fields.char('EAN 13', size=13),
         'qrcode': fields.function(
-            _create_qr_code_package, method=True, 
-            type='char', size=100, string='QR Code', store=False, 
+            _create_qr_code_package, method=True,
+            type='char', size=100, string='QR Code', store=False,
             readonly=True, multi=True,
-            ), 
+            ),
         'qrcode_image': fields.function(
-            _create_qr_code_package, string='QR Code image',method=True, 
+            _create_qr_code_package, string='QR Code image',method=True,
             type='binary', store=False, readonly=True, multi=True
             ),
         # TODO total pieces
         }
 
+
 class MrpProductionStatsMaterial(orm.Model):
     """ Model name: MrpProductionStatsPallet
     """
-    
+
     _name = 'mrp.production.stats.material'
     _description = 'Produce material'
     _rec_name = 'product_id'
     _order = 'product_id'
-    
+
     _columns = {
         'stats_id': fields.many2one('mrp.production.stats', 'Stats'),
         'sol_id': fields.many2one('sale.order.line', 'Order line'),
         'product_id': fields.many2one('product.product', 'Material'),
         'product_qty': fields.float('Q.ty', digits=(16, 3)),
         'ready_qty': fields.float('Ready', digits=(16, 3)),
-        'bom_qty': fields.float('BOM Qty', digits=(16, 3), 
+        'bom_qty': fields.float('BOM Qty', digits=(16, 3),
             help='Q.ty for make 1 product (used for check total prod.'),
         }
+
 
 class MrpProductionStatsPalletRow(orm.Model):
     """ Model name: MrpProductionStatsPallet
     """
-    
+
     _name = 'mrp.production.stats.pallet.row'
     _description = 'Pallet row produced'
     _rec_name = 'sol_id'
     _order = 'sequence,id'
-    
+
     _columns = {
         'sequence': fields.integer('Seq.'),
-        'pallet_id': fields.many2one('mrp.production.stats.pallet', 'Pallet',
+        'pallet_id': fields.many2one(
+            'mrp.production.stats.pallet', 'Pallet',
             ondelete='cascade'),
         'sol_id': fields.many2one('sale.order.line', 'Line'),
         'quantity': fields.integer('Q.', required=True),
         'default_code': fields.related('sol_id', 'default_code',
             type='char', string='Default code'),
         'partner_id': fields.related(
-            'sol_id', 'partner_id', 
-            type='many2one', relation='res.partner', string='Partner'),    
+            'sol_id', 'partner_id',
+            type='many2one', relation='res.partner', string='Partner'),
         'order_id': fields.related(
-            'sol_id', 'order_id', 
+            'sol_id', 'order_id',
             type='many2one', relation='sale.order', string='Order'),
         # TODO other related?
         }
 
+
 class MrpProductionStatsPallet(orm.Model):
     """ Model name: MrpProductionStatsPallet
     """
-    
+
     _inherit = 'mrp.production.stats.pallet'
-    
+
     _columns = {
         'content_ids': fields.one2many(
             'mrp.production.stats.pallet.row', 'pallet_id', 'Content'),
         }
 
+
 class MrpProductionStat(orm.Model):
-    ''' Statistic data
-    '''
+    """ Statistic data
+    """
     _inherit = 'mrp.production.stats'
-    
+
     _php_button_bar = '''
         <a href="/default.php">
             <image src="/images/home.jpg" height="32px" /></a>
@@ -208,43 +216,43 @@ class MrpProductionStat(orm.Model):
     # Utility:
     # -------------------------------------------------------------------------
     def get_current_production_number(self, cr, uid, ids, context=None):
-        ''' Calculate current production data sync
-        '''
+        """ Calculate current production data sync
+        """
         total = 0
         for line in self.browse(cr, uid, ids, context=context)[0].working_ids:
-            total += line.product_uom_maked_sync_qty            
+            total += line.product_uom_maked_sync_qty
         return total
 
     # -------------------------------------------------------------------------
     # XMLRPC Function PHP calls:
     # -------------------------------------------------------------------------
-    def set_product_ready_xmlrpc(self, cr, uid, stats_id, product_id, qty, 
-            context=None): 
-        ''' Set product_id ready for production (0 all instead write correct
+    def set_product_ready_xmlrpc(self, cr, uid, stats_id, product_id, qty,
+            context=None):
+        """ Set product_id ready for production (0 all instead write correct
             ready product
-        '''
+        """
         material_pool = self.pool.get('mrp.production.stats.material')
         try:
             qty = float(qty)
         except:
             qty = 0
         all_qty = not qty
-                
-        _logger.info('Register product_id: %s for q: %s' % (product_id, qty))       
+
+        _logger.info('Register product_id: %s for q: %s' % (product_id, qty))
         material_ids = material_pool.search(cr, uid, [
             ('stats_id', '=', stats_id),
             ('product_id', '=', product_id),
             ], context=context)
-        if not material_ids:    
-            _logger.warning('No product found: %s' % product_id)   
+        if not material_ids:
+            _logger.warning('No product found: %s' % product_id)
             return False
-        
+
         update_db = {}
         for material in sorted(
-                material_pool.browse(cr, uid, material_ids, context=context), 
+                material_pool.browse(cr, uid, material_ids, context=context),
                 key=lambda x: (
                     x.sol_id.working_sequence, x.sol_id.mrp_sequence)):
-            product_qty = material.product_qty        
+            product_qty = material.product_qty
             if all_qty:
                 update_db[material.id] = product_qty # all is ready
             else:
@@ -254,31 +262,30 @@ class MrpProductionStat(orm.Model):
                 else: # partial covered (or not covered)
                     update_db[material.id] = qty
                     qty = 0
-                        
+
         for material_id, ready_qty in update_db.iteritems():
             material_pool.write(cr, uid, material_id, {
                 'ready_qty': ready_qty,
-                }, context=context)        
+                }, context=context)
         return True
-        
-    
+
     def set_sol_done_xmlrpc(self, cr, uid, sol_id, mode='line', context=None):
-        ''' Mark as confirmed:
-        '''        
+        """ Mark as confirmed:
+        """
         if mode == 'line':
             return self.pool.get('sale.order.line').working_qty_is_done(
                 cr, uid, [sol_id], context=context)
         else: # 'pre'
             return self.pool.get('sale.order.line').working_mpr_is_ready(
                 cr, uid, [sol_id], context=context)
-    
-    def get_xmlrpc_lines_html(self, cr, uid, context=None):
-        ''' Page default.php for all line
-        '''
-        line_pool = self.pool.get('mrp.workcenter')
-        line_ids = line_pool.search(cr, uid, [], context=context)        
 
-        if context is None: 
+    def get_xmlrpc_lines_html(self, cr, uid, context=None):
+        """ Page default.php for all line
+        """
+        line_pool = self.pool.get('mrp.workcenter')
+        line_ids = line_pool.search(cr, uid, [], context=context)
+
+        if context is None:
             context = {}
 
         total_col = 3
@@ -316,20 +323,20 @@ class MrpProductionStat(orm.Model):
                     line.name,
                     line.code,
                     )
-                        
+
         if col == total_col:
             res += '</tr>'
-        res += '</table>'        
+        res += '</table>'
         return res
-        
+
     def get_xmlrpc_bom_html(self, cr, uid, product_id, context=None):
-        ''' PHP call for get BOM
+        """ PHP call for get BOM
             context parameters:
                 > 'noheader': hide header
                 > 'show_ready': show only show ready category
                 > 'expand': expand halfwork
                 > 'qty': calculate total for qty producey
-        '''   
+        """
         # Read parameters:
         if context is None:
             context = {}
@@ -343,29 +350,29 @@ class MrpProductionStat(orm.Model):
         product_pool = self.pool.get('product.product')
         product_proxy = product_pool.browse(
             cr, uid, product_id, context=context)
-        
+
         # ---------------------------------------------------------------------
         # BOM Lines:
         # ---------------------------------------------------------------------
-        for item in sorted(product_proxy.dynamic_bom_line_ids, 
-                key=lambda x: (
-                    not(x.product_id.half_bom_id), 
-                    x.product_id.default_code,
-                    )):
+        for item in sorted(product_proxy.dynamic_bom_line_ids,
+                           key=lambda x: (
+                               not x.product_id.half_bom_id,
+                               x.product_id.default_code,
+                               )):
             category = item.category_id
             product = item.product_id
-            
+
             if show_ready and not category.show_ready:
-                continue # jump category not in show ready status                
-            
+                continue # jump category not in show ready status
+
             # if item.relative_type == 'half'\
             if product.bom_placeholder:
-                tag_class = 'placeholder'                
+                tag_class = 'placeholder'
             elif product.half_bom_id:
-                tag_class = 'halfworked' 
+                tag_class = 'halfworked'
             else:
                 tag_class = 'component'
-            
+
             bom += '''
                 <tr class="%s">
                     <td colspan="2">%s</td>
@@ -380,11 +387,11 @@ class MrpProductionStat(orm.Model):
                     item.category_id.name,
                     int(item.product_qty * qty),
                     item.product_uom.name.lower(),
-                    )                    
-                    
+                    )
+
             # Add sub elements (for halfworked)
-            if expand: 
-                for cmpt in product.half_bom_id.bom_line_ids:                
+            if expand:
+                for cmpt in product.half_bom_id.bom_line_ids:
                     bom += '''
                     <tr class="material">
                         <td>>>></td>
@@ -398,10 +405,10 @@ class MrpProductionStat(orm.Model):
                         cmpt.product_id.name,
                         cmpt.product_qty,
                         cmpt.product_uom.name.lower(),
-                        )                   
-                                            
+                        )
+
         # ---------------------------------------------------------------------
-        # Add header:    
+        # Add header:
         # ---------------------------------------------------------------------
         if noheader:
             header_title = '''
@@ -409,7 +416,7 @@ class MrpProductionStat(orm.Model):
                     <th colspan="9">Componenti da approntare:</th>
                 </tr>
                 '''
-        else:     
+        else:
             header_title = '''
                 <tr>
                     <th colspan="2">%s</th>
@@ -420,7 +427,7 @@ class MrpProductionStat(orm.Model):
                     product_proxy.default_code,
                     product_proxy.name,
                     )
-            
+
         res = _('''
             <tr colspan="9">
             <table class="bom">
@@ -439,11 +446,11 @@ class MrpProductionStat(orm.Model):
                 bom,
                 )
         return res
-        
+
     def generate_php_material(self, cr, uid, stats, res, redirect_url,
-            context=None): 
-        ''' Manage material mode
-        '''
+            context=None):
+        """ Manage material mode
+        """
         res += '''
             <tr>
                 <th>Codice</th>
@@ -453,24 +460,24 @@ class MrpProductionStat(orm.Model):
                 <th>Conferma</th>
             </tr>
             '''
-        #button_red = '''<img src="/images/red.gif"     
+        # button_red = '''<img src="/images/red.gif"
         #    style="width:16px;height:16px;"
-        #    title="Non pronto"/> 
+        #    title="Non pronto"/>
         #    '''
-        #button_green = '''<img src="/images/green.gif"     
+        # button_green = '''<img src="/images/green.gif"
         #    style="width:16px;height:16px;"
-        #    title="Non pronto"/> 
+        #    title="Non pronto"/>
         #    '''
         row = {}
         for material in stats.material_ids:
             product = material.product_id
-            if product in row:  
-                row[product][1] += material.product_qty  
-                row[product][2] += material.ready_qty             
+            if product in row:
+                row[product][1] += material.product_qty
+                row[product][2] += material.ready_qty
             else:
                 row[product] = [
-                    material, 
-                    material.product_qty, 
+                    material,
+                    material.product_qty,
                     material.ready_qty,
                     ]
 
@@ -508,79 +515,80 @@ class MrpProductionStat(orm.Model):
                     product.name,
                     int(product_qty),
                     int(ready_qty),
-                    #button_green if ready_qty >= product_qty else button_red,
-                    stats.id, # XXX mrp_id non correct
+                    # button_green if ready_qty >= product_qty else button_red,
+                    stats.id,  # XXX mrp_id non correct
                     product.id,
                     redirect_url,
                     )
         res += '</table>'
         return res
-        
+
     def get_ready_status(self, cr, uid, ids, context=None):
-        ''' 
-        '''
+        """
+        """
         item_id = ids[0]
         sol_pool = self.pool.get('sale.order.line')
         res = sol_pool._get_check_material_status(
             cr, uid, ids, False, False, context=context)[item_id]
         return res['material_ready'], res['material_max']
-        
+
     def get_xmlrpc_html(self, cr, uid, line_code, redirect_url, mode='line',
-            context=None):
-        ''' Return HTML view for result php call:
+                        context=None):
+        """ Return HTML view for result php call:
                 manage: line, pre, old mode (last in externa function)
-        '''
+        """
         # ---------------------------------------------------------------------
         # UTILITY:
         # ---------------------------------------------------------------------
         # TODO move in note system:
         def get_notesystem_for_line(self, cr, uid, line, context=None):
-            ''' Note system for line
-            '''
+            """ Note system for line
+            """
             def add_domain_note(self, cr, uid, line, block='pr', context=None):
-                ''' Add domain note after seahch
-                '''
+                """ Add domain note after seahch
+                """
                 label_image = '''
                     <img src="/images/label.jpg" 
                     alt="Etichetta personalizzata" 
                     style="width:16px;height:16px;"
                     title="Etichetta personalizzata"/> 
-                    ''' 
-                    
+                    '''
+
                 # Pool used:
-                product_pool = self.pool.get('product.product')    
+                product_pool = self.pool.get('product.product')
                 note_pool = self.pool.get('note.note')
 
                 domain = product_pool.get_domain_note_event_filter(
-                    cr, uid, line, block=block, context=context)                
-                if domain == False: # no domain
+                    cr, uid, line, block=block, context=context)
+                if domain == False:  # no domain
                     return ''
                 note_ids = note_pool.search(
                     cr, uid, domain, context=context)
 
-                note_text = ''    
+                note_text = ''
                 for note in note_pool.browse(
-                        cr, uid, note_ids, context=context):    
-                    note_text += '<div class="p_note %s">%s<b>%s</b> %s</div>' % (
-                        '"fg_red"' if note.print_label else '',
-                        label_image if note.print_label else '',
-                        note.name or '', 
-                        note.description or '',
-                        )
-                return note_text        
-            
+                        cr, uid, note_ids, context=context):
+                    note_text += \
+                        '<div class="p_note %s">%s<b>%s</b> %s</div>' % (
+                            '"fg_red"' if note.print_label else '',
+                            label_image if note.print_label else '',
+                            note.name or '',
+                            note.description or '',
+                            )
+                return note_text
+
             note_text = ''
             # TODO add only category for production in filter!
-            
+
             # Product note:
             mask = '<b class="category_note">NOTE %s: </b><br/>%s'
             res = add_domain_note(
-                self, cr, uid, line, block='pr', context=context)            
+                self, cr, uid, line, block='pr', context=context)
             if res:
                 note_text += mask % ('PRODOTTO', res)
             # Partner note:
             res = add_domain_note(
-                self, cr, uid, line, block='pa', context=context)            
+                self, cr, uid, line, block='pa', context=context)
             if res:
                 note_text += mask % ('PARTNER', res)
             # Address note:
@@ -613,17 +621,17 @@ class MrpProductionStat(orm.Model):
             res = add_domain_note(
                 self, cr, uid, line, block='pr-or', context=context)
             if res:
-                note_text += mask % ('PRODOTTO-ORDINE', res)            
+                note_text += mask % ('PRODOTTO-ORDINE', res)
             return note_text
-        
+
         # Pool used:
         product_pool = self.pool.get('product.product')
         note_pool = self.pool.get('note.note')
         line_pool = self.pool.get('mrp.workcenter')
 
-        if context is None: 
+        if context is None:
             context = {}
-        
+
         now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         album_ctx = context['album_code'] = 'CHROMA'
 
@@ -633,7 +641,7 @@ class MrpProductionStat(orm.Model):
             ], context=context)
         if not line_ids:
             return _('<p>Line not present</p>')
-            
+
         stats_ids = self.search(cr, uid, [
             ('working_done', '=', False),
             ('workcenter_id', '=', line_ids[0]),
@@ -641,7 +649,7 @@ class MrpProductionStat(orm.Model):
             ], context=context)
         if not stats_ids:
             return _('<p>Nothing to work in line %s today!</p>') % line_code
-        
+
         # ---------------------------------------------------------------------
         # Header:
         # ---------------------------------------------------------------------
@@ -660,32 +668,33 @@ class MrpProductionStat(orm.Model):
                     </tr>
                 ''' % (
                     self._php_button_bar,
-                    stats.workcenter_id.name,        
+                    stats.workcenter_id.name,
                     now,
                     )
 
             first = False
             second = 0
-            
-            if mode == 'pre': 
-                return self.generate_php_material(cr, uid, stats, res,
+
+            if mode == 'pre':
+                return self.generate_php_material(
+                    cr, uid, stats, res,
                     redirect_url, context=context)
 
-            # mode = line                    
-            for line in sorted(stats.working_ids, 
+            # mode = line
+            for line in sorted(stats.working_ids,
                     key=lambda x: (x.working_sequence, x.mrp_sequence)):
-                
-                # -------------------------------------------------------------                    
+
+                # -------------------------------------------------------------
                 # Jump record not used:
-                # -------------------------------------------------------------                    
+                # -------------------------------------------------------------
                 if not line.working_qty:
                     continue # line and production done
 
                 product = line.product_id
                 q_x_pack = int(product.q_x_pack) # item_per_box
                 item_per_pallet = int(product.item_per_pallet)
-                
-                #if line.product_uom_qty <= line.product_uom_maked_sync_qty:
+
+                # if line.product_uom_qty <= line.product_uom_maked_sync_qty:
                 #    continue
                 if not first:
                     first = True
@@ -695,7 +704,7 @@ class MrpProductionStat(orm.Model):
                     # ---------------------------------------------------------
                     note_text = get_notesystem_for_line(
                         self, cr, uid, line, context=context)
-                    
+
                     # ---------------------------------------------------------
                     # Print part:
                     # ---------------------------------------------------------
@@ -741,8 +750,8 @@ class MrpProductionStat(orm.Model):
                             line.mrp_id.name,
                             line.mrp_id.bom_id.name,
                             line.id, redirect_url,
-                            )                            
-                        
+                            )
+
                     # ---------------------------------------------------------
                     # Header block (print button and title)
                     # ---------------------------------------------------------
@@ -753,8 +762,8 @@ class MrpProductionStat(orm.Model):
                             <td>Q. x sc.</td><td>Q. x ban.</td>
                             <td>Conferma</td><td>OK</td>
                         </tr>
-                        ''')      
-                    
+                        ''')
+
                     # ---------------------------------------------------------
                     # Current record:
                     # ---------------------------------------------------------
@@ -782,16 +791,16 @@ class MrpProductionStat(orm.Model):
                             <td><b>%s</b></td>
                         </tr>''') % (
                             'bg_green' if material_ready else 'bg_red',
-                            line.partner_id.name, 
+                            line.partner_id.name,
                             line.order_id.destination_partner_id.name or \
-                                '&nbsp;', 
+                                '&nbsp;',
                             line.order_id.name,
                             line.default_code, line.working_qty,
                             q_x_pack, item_per_pallet,
-                            
+
                             # Confirm form:
                             button_confirm,
-                            line.id, 
+                            line.id,
                             redirect_url,
                             hidden_mode,
                             'X' if material_ready else int(material_max),
@@ -813,15 +822,15 @@ class MrpProductionStat(orm.Model):
                             line.product_id.product_image_context,
                             _('<p class="fg_red">ETICHETTA PERSONALIZZATA</p>'
                                 ) if line.partner_id.has_custom_label else \
-                                    _('<p>ETICHETTA MAGAZZINO</p>'),                              
+                                    _('<p>ETICHETTA MAGAZZINO</p>'),
                             note_text,
                             )
-                                
+
                     #line.order_id.company_id.logo or ''
                     # ---------------------------------------------------------
                     # Next element from here:
                     # ---------------------------------------------------------
-                    res += _('''<table class="table_preview">''') 
+                    res += _('''<table class="table_preview">''')
 
                     res += _('''
                         <tr>
@@ -834,14 +843,14 @@ class MrpProductionStat(orm.Model):
                            <td>OK</td>
                         </tr>
                         ''' % max_queue)
-                        
+
                 else: # second
                     second += 1
                     if second > max_queue:
                         break
                     material_ready, material_max = self.get_ready_status(
                         cr, uid, [line.id], context=context)
-                        
+
                     res += '''
                         <tr class="%s">
                             <td>%s</td><td>%s</td><td>%s</td>
@@ -856,50 +865,50 @@ class MrpProductionStat(orm.Model):
                                 '&nbsp;',
                             line.order_id.name,
                             line.default_code,
-                            line.working_qty,                 
-                            q_x_pack, 
+                            line.working_qty,
+                            q_x_pack,
                             item_per_pallet,
                             'X' if material_ready else int(material_max),
                             )
-        res += '</table>'                
+        res += '</table>'
         return res
-        
+
     # -------------------------------------------------------------------------
-    # Button event:    
-    # -------------------------------------------------------------------------   
+    # Button event:
+    # -------------------------------------------------------------------------
     def generate_material_planned_bom(self, cr, uid, ids, context=None):
-        ''' Generate material list for working product in lavoration
-        '''
+        """ Generate material list for working product in lavoration
+        """
         material_pool = self.pool.get('mrp.production.stats.material')
-        
+
         stats_proxy = self.browse(cr, uid, ids, context=context)[0]
-        
+
         # Delete material before:
         material_ids = [m.id for m in stats_proxy.material_ids]
         material_pool.unlink(cr, uid, material_ids, context=context)
-        
+
         for line in stats_proxy.working_ids:
             for material in line.product_id.dynamic_bom_line_ids:
-                product = material.product_id            
+                product = material.product_id
                 if not material.category_id.show_ready:
                     continue # jump category not in show ready status
-                
+
                 product_qty = material.product_qty * line.working_qty
                 if not product_qty:
                     continue # no q. no line
-                material_pool.create(cr, uid, {  
+                material_pool.create(cr, uid, {
                     'stats_id': ids[0],
                     'sol_id': line.id,
                     'product_id': product.id,
                     'product_qty': product_qty,
                     'bom_qty': material.product_qty,
-                    'ready_qty': 0.0,                                       
+                    'ready_qty': 0.0,
                     }, context=context)
-        return True        
- 
+        return True
+
     def working_new_pallet(self, cr, uid, ids, context=None):
-        ''' New pallet
-        '''
+        """ New pallet
+        """
         working_pallet = {}
         for line in self.browse(cr, uid, ids, context=context)[0].working_ids:
             if line.product_uom_maked_sync_qty:
@@ -908,23 +917,23 @@ class MrpProductionStat(orm.Model):
             'working_pallet': '%s' % (working_pallet, )
             }, context=context)
         return True
-        
+
     def working_end_pallet(self, cr, uid, ids, context=None):
-        ''' End pallet
-        ''' 
+        """ End pallet
+        """
         pallet_pool = self.pool.get('mrp.production.stats.pallet')
         row_pool = self.pool.get('mrp.production.stats.pallet.row')
-        
+
         job_proxy = self.browse(cr, uid, ids, context=context)[0]
-        
+
         previous_pallet = eval(job_proxy.working_pallet) or {}
         sequence = 1 # TODO get last!
         pallet_id = pallet_pool.create(cr, uid, {
-            'sequence': sequence, 
-            #'create_date':,             
+            'sequence': sequence,
+            #'create_date':,
             'stats_id': ids[0],
             }, context=context)
-        sequence = 0    
+        sequence = 0
         for line in job_proxy.working_ids:
             previous = previous_pallet.get(line.id, 0)
             current = line.product_uom_maked_sync_qty
@@ -939,21 +948,21 @@ class MrpProductionStat(orm.Model):
                     }, context=context)
         self.write(cr, uid, ids, {
             'working_pallet': False,
-            }, context=context)            
+            }, context=context)
         return True
-    
+
     # Start / Stop management:
     def working_crono_start(self, cr, uid, ids, context=None):
-        ''' Start event:
-        '''
+        """ Start event:
+        """
         return self.write(cr, uid, ids, {
             'crono_start': datetime.now().strftime(
                 DEFAULT_SERVER_DATETIME_FORMAT),
             }, context=context)
-        
+
     def working_mark_as_done(self, cr, uid, ids, context=None):
-        ''' Print single label
-        '''
+        """ Print single label
+        """
         current_proxy = self.browse(cr, uid, ids, context=context)[0]
         crono_stop = datetime.now()
         if current_proxy.crono_start:
@@ -962,16 +971,16 @@ class MrpProductionStat(orm.Model):
                 DEFAULT_SERVER_DATETIME_FORMAT,
                 )
             hour = (duration.seconds / 3600.0 )  + (duration.days * 24.0)
-        else:        
+        else:
             hour = 0.0
 
         # Auto total count:
         working_end_total = self.get_current_production_number(
-            cr, uid, ids, context=context)        
+            cr, uid, ids, context=context)
         total = working_end_total - current_proxy.working_start_total
         if total <= 0:
             total = 0
-            
+
         return self.write(cr, uid, ids, {
             'total': total,
             'crono_stop': crono_stop.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
@@ -980,19 +989,19 @@ class MrpProductionStat(orm.Model):
             }, context=context)
 
     def working_print_all_label(self, cr, uid, ids, context=None):
-        ''' Print single label
-        '''
+        """ Print single label
+        """
         return True
 
     def nothing(self, cr, uid, ids, context=None):
-        ''' Do nothing
-        '''
-        return True     
+        """ Do nothing
+        """
+        return True
 
     # Fields function:
     def _get_working_line_status(self, cr, uid, ids, fields, args, context=None):
-        ''' Fields function for calculate 
-        '''
+        """ Fields function for calculate
+        """
         css = '''
             <style>
                 .table_bf {
@@ -1020,7 +1029,7 @@ class MrpProductionStat(orm.Model):
         res = {}
 
         for stats in self.browse(cr, uid, ids, context=context):
-            res[stats.id] = {}            
+            res[stats.id] = {}
             res[stats.id]['working_line_current'] = ''
             res[stats.id]['working_line_next'] = '''
                   %s
@@ -1035,7 +1044,7 @@ class MrpProductionStat(orm.Model):
 
             first = False
             second = 0
-            for line in sorted(stats.working_ids, 
+            for line in sorted(stats.working_ids,
                     key=lambda x: (x.working_sequence, x.mrp_sequence)):
                 # Check if is done:
                 if not line.working_qty:
@@ -1080,32 +1089,32 @@ class MrpProductionStat(orm.Model):
                             line.partner_id.name,
                             line.order_id.name,
                             line.default_code,
-                            line.working_qty,                                
+                            line.working_qty,
                             )
 
             res[stats.id]['working_line_next'] += '</table>'
         return res
-        
+
     _columns = {
         # If use crono automatic:
         'crono_start': fields.datetime(
-            'Start time', 
+            'Start time',
             help='Start time for automated hour calc when close the day',
             ),
         'crono_stop': fields.datetime('Stop time'),
-        'working_start_total': fields.integer('Start total ', 
+        'working_start_total': fields.integer('Start total ',
             help='Used for get total at the end of the day'),
-        
+
         # Line data:
         'working_line_current': fields.function(
-            _get_working_line_status, method=True, 
-            type='text', string='Current', 
-            store=False, multi=True), 
+            _get_working_line_status, method=True,
+            type='text', string='Current',
+            store=False, multi=True),
         'working_line_next': fields.function(
-            _get_working_line_status, method=True, 
-            type='text', string='Next', 
-            store=False, multi=True), 
-            
+            _get_working_line_status, method=True,
+            type='text', string='Next',
+            store=False, multi=True),
+
         'material_ids': fields.one2many(
             'mrp.production.stats.material', 'stats_id', 'Material'),
         'pallet_ids': fields.one2many(
@@ -1115,40 +1124,40 @@ class MrpProductionStat(orm.Model):
             help='Sale order line working on this day'),
         'working_done': fields.boolean('Done'),
         'working_pallet': fields.text(
-            'Working pallet situation', 
+            'Working pallet situation',
             help='Not visible: store the data for new pallet situation'),
         }
-    
+
 class MrpBomStructureCategory(orm.Model):
     """ Model name: Manage structure for show bom
     """
-    
+
     _inherit = 'mrp.bom.structure.category'
-    
+
     _columns = {
         'show_ready':fields.boolean('Show ready',
             help='Show in PHP view for MRP status'),
         }
 
 class SaleOrderLine(orm.Model):
-    ''' Link line for stats
-    '''
+    """ Link line for stats
+    """
     _inherit = 'sale.order.line'
 
-    def _get_check_material_status(self, cr, uid, ids, fields, args, 
+    def _get_check_material_status(self, cr, uid, ids, fields, args,
             context=None):
-        ''' Fields function for calculate 
-        '''
+        """ Fields function for calculate
+        """
         res = {}
         for sol in self.browse(cr, uid, ids, context=context):
             res[sol.id] = {}
             res[sol.id]['material_ready'] = True
             res[sol.id]['material_max'] = sol.working_qty # this prod. to work
-            
+
             mrp_id = sol.mrp_id.id
             for material in sol.material_ids:
                 if material.stats_id.mrp_id.id != mrp_id:
-                    continue # production not linked to this MRP                
+                    continue # production not linked to this MRP
                 ready_qty = material.ready_qty
                 product_qty = material.product_qty
                 bom_qty = material.bom_qty
@@ -1156,13 +1165,13 @@ class SaleOrderLine(orm.Model):
                     # If one component non present ready is false:
                     res[sol.id]['material_ready'] = False
                     material_max = ready_qty / bom_qty # TODO round(, 0)?
-                    
+
                     # Max verification:
                     if material_max < res[sol.id]['material_max']:
                         res[sol.id]['material_max'] = material_max
                     if not material_max:
                         break # next sol (0 is the bottom value!)
-        return res    
+        return res
 
     _columns = {
         # Not in views only for calculated field:

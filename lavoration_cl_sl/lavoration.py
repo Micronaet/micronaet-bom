@@ -255,7 +255,7 @@ class MRPLavoration(orm.Model):
                 'date': cl_date,
                 'min_date': cl_date,
                 'origin': _('SL from %s') % origin,
-                'is_mrp_lavoration': False, # SL is hidden
+                'is_mrp_lavoration': False,  # SL is hidden
                 # TODO no more fields?
                 }, context=context)
 
@@ -266,7 +266,7 @@ class MRPLavoration(orm.Model):
                 'date': cl_date,
                 'min_date': cl_date,
                 'origin': _('SL from %s') % origin,
-                'is_mrp_lavoration': False, # SL is hidden
+                'is_mrp_lavoration': False,  # SL is hidden
                 # TODO no more fields?
                 }, context=context)
 
@@ -280,7 +280,7 @@ class MRPLavoration(orm.Model):
 
             # Load quats materials:
             quant_pool.create(cr, uid, {
-                'in_date': cl_date, # TODO document date??
+                'in_date': cl_date,  # TODO document date??
                 'cost': 0.0, # TODO
                 'location_id': stock_location,
                 'product_id': product.id,
@@ -290,8 +290,8 @@ class MRPLavoration(orm.Model):
 
             for component in product.half_bom_ids:
                 if load.remove_obtainable and component.obtainable_component:
-                    _logger.warning('Remove obtainable stock move: %s' % \
-                        component.product_id.default_code)
+                    _logger.warning('Remove obtainable stock move: %s' %
+                                    component.product_id.default_code)
                     continue
 
                 product = component.product_id

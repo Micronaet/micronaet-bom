@@ -332,7 +332,7 @@ class MRPLavoration(orm.Model):
                     }, context=context)
 
         # ---------------------------------------------------------------------
-        # Udate CL move status:
+        # Update CL move status:
         # ---------------------------------------------------------------------
         move_ids = move_pool.search(cr, uid, [
             ('picking_id', '=', ids[0])], context=None)
@@ -350,7 +350,7 @@ class MRPLavoration(orm.Model):
             }, context=context)
 
     def force_draft(self, cr, uid, ids, context=None):
-        """ Confirm lavoration
+        """ Confirm Job
         """
         pick_proxy = self.browse(cr, uid, ids, context=context)[0]
         # Delete load movements:

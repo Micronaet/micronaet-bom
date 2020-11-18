@@ -223,7 +223,7 @@ class MRPLavoration(orm.Model):
 
         pick_proxy = self.browse(cr, uid, ids, context=context)[0]
 
-        # Read paremeters:
+        # Read parameters:
         company_proxy = self.pool.get('res.company')._get_company_browse(
             cr, uid, context=context)
 
@@ -236,7 +236,6 @@ class MRPLavoration(orm.Model):
         origin = 'CL-LAV-%s' % pick_proxy.name
 
         cl_date = pick_proxy.date  # XXX use CL date for all!
-        # datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
 
         # TODO better MRP, now is procurements type?
 
@@ -298,7 +297,7 @@ class MRPLavoration(orm.Model):
                 product = component.product_id
                 unload_qty = component.product_qty * load_fail_qty
                 if unload_qty <= 0.0:
-                    continue # jump line
+                    continue  # jump line
 
                 # Unload with stock move:
                 move_pool.create(cr, uid, {
@@ -310,8 +309,8 @@ class MRPLavoration(orm.Model):
                     'product_id': product.id,
                     'product_uom_qty': unload_qty,
                     'product_uom': product.uom_id.id,
-                    'state': 'done', # confirmed, available
-                    'origin': origin, # CL lavoration
+                    'state': 'done',  # confirmed, available
+                    'origin': origin,  # CL lavoration
                     'date': cl_date,
                     'date_expected': cl_date,
                     'name': _('SL-LAV-%s') % pick_proxy.name,
@@ -325,7 +324,7 @@ class MRPLavoration(orm.Model):
                 # Unload quats materials:
                 quant_pool.create(cr, uid, {
                     'in_date': cl_date,
-                    'cost': 0.0, # TODO
+                    'cost': 0.0,  # TODO
                     'location_id': stock_location,
                     'product_id': product.id,
                     'qty': - unload_qty,
@@ -418,7 +417,7 @@ class MRPLavoration(orm.Model):
         'total_prepare': fields.float('Tot. prepare H.', digits=(16, 3)),
         'total_stop': fields.float('Tot. stop H.', digits=(16, 3)),
         'workers': fields.char('Workers', size=64),
-        'is_mrp_lavoration': fields.boolean('Is Lavoration'), # TODO remove!!!!
+        'is_mrp_lavoration': fields.boolean('Is Lavoration'),  # TODO remove!!!
         'device_id': fields.many2one('stock.picking.device', 'Device'),
 
         # Override:

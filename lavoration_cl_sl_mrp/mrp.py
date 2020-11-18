@@ -30,25 +30,26 @@ from openerp import SUPERUSER_ID, api
 from openerp import tools
 from openerp.tools.translate import _
 from openerp.tools.float_utils import float_round as round
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
-    DEFAULT_SERVER_DATETIME_FORMAT, 
-    DATETIME_FORMATS_MAP, 
+from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DATETIME_FORMATS_MAP,
     float_compare)
 
 
 _logger = logging.getLogger(__name__)
 
+
 class StockPicking(orm.Model):
     """ Model name: Stock Picking extra link to MRP
-    """    
+    """
     _inherit = 'stock.picking'
-    
+
     def get_material_info_from_mrp(self, cr, uid, ids, context=None):
-        ''' Extract info from MRP linked
-        ''' 
+        """ Extract info from MRP linked
+        """
         info = ''
         current_proxy = self.browse(cr, uid, ids, context=context)[0]
-        
+
         res = {}
         for line in current_proxy.linked_mrp_id.order_line_ids:
             product = line.product_id
@@ -67,7 +68,7 @@ class StockPicking(orm.Model):
                             <td>%s</td>
                             <td>%s</td>
                         </tr>
-                        ''' % (    
+                        ''' % (
                             product.default_code,
                             qty,
                             hw.category_id.name,
@@ -114,13 +115,13 @@ class StockPicking(orm.Model):
 class MrpProduction(orm.Model):
     """ Model name: Mrp Production
     """
-    
+
     _inherit = 'mrp.production'
-    
+
     _columns = {
         'cl_sl_ids': fields.one2many(
-            'stock.picking', 'linked_mrp_id', 
-            'Linked lavoration'),        
+            'stock.picking', 'linked_mrp_id',
+            'Linked lavoration'),
         }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

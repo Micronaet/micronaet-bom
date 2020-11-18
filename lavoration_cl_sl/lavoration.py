@@ -35,7 +35,6 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
     DATETIME_FORMATS_MAP,
     float_compare)
 
-
 _logger = logging.getLogger(__name__)
 
 
@@ -110,7 +109,7 @@ class StockMove(orm.Model):
 
         for item in self.browse(cr, uid, ids, context=context):
             res[item.id] = ''
-            if item.picking_id.state == 'done': # SL movement:
+            if item.picking_id.state == 'done':  # SL movement:
                 for sl in item.linked_sl_stock_move_id_ids:
                     res[item.id] += '%s: %s\n' % (
                         sl.product_id.default_code or '??',

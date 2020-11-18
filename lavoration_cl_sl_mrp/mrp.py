@@ -112,6 +112,7 @@ class StockPicking(orm.Model):
         'mrp_material_info': fields.text('MRP material info', readonly=True),
         }
 
+
 class MrpProduction(orm.Model):
     """ Model name: Mrp Production
     """
@@ -123,5 +124,3 @@ class MrpProduction(orm.Model):
             'stock.picking', 'linked_mrp_id',
             'Linked lavoration'),
         }
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

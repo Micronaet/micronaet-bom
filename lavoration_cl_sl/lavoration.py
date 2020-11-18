@@ -129,7 +129,8 @@ class StockMove(orm.Model):
         return res
 
     _columns = {
-        'product_fail_qty': fields.float('Damaged',
+        'product_fail_qty': fields.float(
+            'Damaged',
             digits_compute=dp.get_precision('Product Unit of Measure')),
 
         'linked_sl_stock_move_id_ids': fields.one2many(
@@ -139,7 +140,8 @@ class StockMove(orm.Model):
             _get_linked_sl_status, method=True,
             type='text', string='SL movement',
             store=False),
-        'remove_obtainable': fields.boolean('No ricavabili',
+        'remove_obtainable': fields.boolean(
+            'No ricavabili',
             help='Rimuove dalla distinta i componenti ricavabili'),
         }
 
@@ -233,7 +235,7 @@ class MRPLavoration(orm.Model):
 
         origin = 'CL-LAV-%s' % pick_proxy.name
 
-        cl_date = pick_proxy.date # XXX use CL date for all!
+        cl_date = pick_proxy.date  # XXX use CL date for all!
         # datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
 
         # TODO better MRP, now is procurements type?

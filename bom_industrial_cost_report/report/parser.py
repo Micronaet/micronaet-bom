@@ -539,7 +539,8 @@ class ProductProduct(orm.Model):
                     hw_total = 0.0
                     for cmpt in half_bom_ids:
                         #last_date = False # TODO last price?
-                        cmpt_q = item.product_qty * cmpt.product_qty # XXX                        
+                        cmpt_q = item.product_qty * cmpt.product_qty # XXX    
+                        # TODO Simulation:                    
                         min_value, max_value, price_ids = get_pricelist(
                             cmpt.product_id, from_date, to_date, history_db)                        
                         price_detail = get_price_detail(price_ids)
@@ -557,6 +558,7 @@ class ProductProduct(orm.Model):
                         # Pipe element:    
                         if cmpt.product_id.is_pipe:
                             # Calc with weight and price kg not cost manag.:
+                            # TODO Simulation:
                             pipe_price = \
                                 cmpt.product_id.pipe_material_id.last_price
                             min_value = max_value = \
@@ -610,6 +612,7 @@ class ProductProduct(orm.Model):
                 else: 
                     # Raw material (level 1)                    
                     cmpt_q = item.product_qty
+                    # TODO Simulation:
                     min_value, max_value, price_ids = get_pricelist(
                         item.product_id, from_date, to_date, history_db)
                     price_detail = get_price_detail(price_ids)

@@ -238,7 +238,6 @@ class MRPLavoration(orm.Model):
         cl_date = pick_proxy.date  # XXX use CL date for all!
 
         # TODO better MRP, now is procurements type?
-
         if not(mrp_location and stock_location):
             raise osv.except_osv(
                 _('Error'),

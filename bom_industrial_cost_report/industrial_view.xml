@@ -1,6 +1,29 @@
 <?xml version="1.0"?>
 <openerp>
     <data>         
+         <!--mrp.bom.industrial.simulation-->
+         <record model="ir.ui.view" id="view_mrp_bom_industrial_simulation_tree">
+             <field name="name">mrp.bom.industrial.simulation.tree</field>
+             <field name="model">mrp.bom.industrial.simulation</field>
+             <field name="arch" type="xml">
+                 <tree string="Simulazione" editable="bottom">        
+                     <field name="name" />
+                     <field name="value" />
+                     <field name="mode" />                     
+                 </tree>
+             </field>
+         </record>
+         <record model="ir.actions.act_window" id="action_mrp_bom_industrial_simulation">
+             <field name="name">Simulazione</field>
+             <field name="res_model">mrp.bom.industrial.simulation</field>
+             <field name="view_type">form</field>
+             <field name="view_mode">tree</field>
+             <field name="view_id" ref="view_mrp_bom_industrial_simulation_tree"/>
+             <field name="context">{}</field>
+             <field name="domain">[]</field>
+         </record>
+
+
          <!--mrp.bom.industrial.history-->
          <record model="ir.ui.view" id="view_mrp_bom_industrial_history_tree">
              <field name="name">mrp.bom.industrial.history.tree</field>
@@ -329,6 +352,13 @@
                  action="action_company_parameter_form"
                  sequence="90"
                  />
+             <menuitem 
+                 parent="menu_product_bom_selection_root" 
+                 id="menu_mrp_bom_industrial_cost_simulation"
+                 action="action_mrp_bom_industrial_simulation"
+                 sequence="100"
+                 />
+                 
              <menuitem 
                  parent="menu_product_bom_selection_root" 
                  id="menu_mrp_bom_industrial_history_root"

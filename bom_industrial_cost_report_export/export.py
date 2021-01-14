@@ -158,7 +158,8 @@ class ProductProduct(orm.Model):
         header = u'Componente|Q.|UM|Prezzo|Totale\n'
         for item in res:
             (min, max, error, components, extra1, extra2, index, total, 
-                product, parameter, total_text, pipe_total_weight) = item
+                product, parameter, total_text, pipe_total_weight, 
+                simulated_price) = item
             f_bom.write(u'%s|%s' % (
                 product.default_code, 
                 product.name,

@@ -57,6 +57,30 @@ class ResCompany(orm.Model):
         'industrial_margin_extra': lambda *x: 0.1,
         }    
 
+
+class MrpBomIndustrialSimulation(orm.Model):
+    """ Model name: Industrial simulation
+    """
+    
+    _name = 'mrp.bom.industrial.simulation'
+    _description = 'Industrial simulation'
+    _order = 'name'
+    
+    _columns = {
+        'name': fields.char('Inizio', size=20, required=True),
+        'value': fields.float('Valore', digits=(16, 5), required=True),
+        'mode': fields.selection([
+            ('value', 'Valore'),
+            ('rate', 'Percentuale'),
+            ], 'Modalità'),
+        }
+        
+    _defaults = {
+        # Default value:
+        'mode': lambda *x: 'value',
+        }
+        
+
 class MrpBomIndustrialCost(orm.Model):
     """ Model name: Industrial cost
     """

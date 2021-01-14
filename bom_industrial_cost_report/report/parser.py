@@ -589,15 +589,18 @@ class ProductProduct(orm.Model):
                             # TODO Simulation:
                             pipe_price = \
                                 cmpt.product_id.pipe_material_id.last_price
+                                
                             min_value = max_value = \
                                 pipe_price * cmpt.product_id.weight
-                            simulated_cost = cmpt_q * get_simulated(
-                                max_value, cmpt.product_id, simulation_db)
                             # Total pipe weight:    
                             q_pipe = item.product_qty * cmpt.product_qty *\
                                 cmpt.product_id.weight
+
+                            simulated_cost = q_pipe * get_simulated(
+                                    pipe_price, cmpt.product_id, simulation_db)
+
                             data[11][0] += q_pipe
-                            data[11][1] += cmpt_q * pipe_price
+                            data[11][1] += q_pipe * pipe_price
 
                         # TODO manage as pipe?
                         red_price = \

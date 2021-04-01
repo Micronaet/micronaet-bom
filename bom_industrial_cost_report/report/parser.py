@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# ODOO (ex OpenERP) 
+# ODOO (ex OpenERP)
 # Open Source Management Solution
 # Copyright (C) 2001-2015 Micronaet S.r.l. (<http://www.micronaet.it>)
 # Developer: Nicola Riolini @thebrush (<https://it.linkedin.com/in/thebrush>)
@@ -12,7 +12,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
@@ -33,9 +33,9 @@ from openerp.report.report_sxw import rml_parse
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from openerp.osv import fields, osv, expression, orm
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
-    DEFAULT_SERVER_DATETIME_FORMAT, 
-    DATETIME_FORMATS_MAP, 
+from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DATETIME_FORMATS_MAP,
     float_compare)
 
 
@@ -44,71 +44,71 @@ _logger = logging.getLogger(__name__)
 type_i18n = {
     'industrial': 'COSTI INDUSTRIALI',
     'work': 'MANODOPERA',
-    }    
+    }
 
 # -----------------------------------------------------------------------------
 #                      UTILITY (TODO move in a module or class?):
 # -----------------------------------------------------------------------------
 def industrial_index_get_text(index):
-    ''' Convert all index value in string format
-    '''
+    """ Convert all index value in string format
+    """
     index_total = sum(index.values())
     res = ''
     for key, value in index.iteritems():
-        if key not in type_i18n: 
+        if key not in type_i18n:
             continue # jump key not used
         res += '%s: %6.3f su %6.3f = %s%%\r\n' % (
-            type_i18n[key], 
+            type_i18n[key],
             value, index_total,
             ('%6.3f' % (100.0 * value / index_total, )) if \
                 index_total else 'ERRORE!',
             )
     return res
-    
+
 def get_pricelist(product, min_date, max_date=False, history_db=False):
-    ''' Return:
-        min price, max price, all pricelist for this product active price, 
+    """ Return:
+        min price, max price, all pricelist for this product active price,
         min_date: min quotation date (mandatory)
         max_date: max date (for evaluation in old period), not mandatory
         history_db: product last history price (maybe max date evaluation)
             key: default_code, value: (seller name, price, date quotation)
-    '''
+    """
     # -------------------------------------------------------------------------
     # History database (price overrided but save in database):
     # -------------------------------------------------------------------------
     default_code = product.default_code
-    
-    # If there's an history value price use that for start value:        
+
+    # If there's an history value price use that for start value:
     if history_db and default_code in history_db:
-        record = history_db[default_code] 
+        record = history_db[default_code]
         last_price = [
             record[1], # price
             record[2], # date
-            ]            
+            ]
         res = [
             record[1], # Min (not False)
             record[1], # Max
             [record], # Price list
             ]
-            
+
     else: # Empty data record:
-        last_price = [False, False] # Price, Date 
+        last_price = [False, False] # Price, Date
         res = [
             0.0, # Min (not False)
             0.0, # Max
             [], # Price list
             ]
-                
+
     for seller in product.seller_ids:
         for pricelist in seller.pricelist_ids:
             # no inactive price XXX remove this filter?
             if not pricelist.is_active: # no inactive
-                continue   
-             
+                continue
+
             # Take only period date:
             price = pricelist.price
             date_quotation = pricelist.date_quotation
-    
+
             # XXX If max range test here:
             if max_date and date_quotation and date_quotation >= max_date:
                 continue # over maximum limit
@@ -122,19 +122,19 @@ def get_pricelist(product, min_date, max_date=False, history_db=False):
                 last_price[1] = date_quotation or False
 
             # -----------------------------------------------------------------
-            # Range evaluation:        
+            # Range evaluation:
             # -----------------------------------------------------------------
-            # XXX Keep here for analyse only one price:             
+            # XXX Keep here for analyse only one price:
             if date_quotation and date_quotation <= min_date:
                 continue # over minimum limit
-                                              
+
             res[2].append((
                 seller.name, # Supplier browse
                 price, # Unit price
                 date_quotation, # Date
                 ))
 
-            # Save min or max price:    
+            # Save min or max price:
             if not res[0] or price < res[0]: # 0 price will be replaced
                 res[0] = price
             if price > res[1]:
@@ -144,24 +144,24 @@ def get_pricelist(product, min_date, max_date=False, history_db=False):
         # Keep the same:
         res[0] = last_price[0]
         res[1] = last_price[0]
-    return res             
+    return res
 
 def is_fabric_product(product):
-    ''' Is fabric test
-        return dimension        
-    '''
+    """ Is fabric test
+        return dimension
+    """
     # Start with T
     default_code = product.default_code
     if not default_code or len(default_code) < 6:
         return False
-        
+
     if not default_code.startswith('T'):
         return False
-        
-    # UOM is meter:    
-    if product.uom_id.name != 'm': 
+
+    # UOM is meter:
+    if product.uom_id.name != 'm':
         return False
-    
+
     # Has TEX001 format:
     for (from_c, to_c) in [(3, 6), (6, 9)]:
         h = product.default_code[from_c:to_c]
@@ -169,18 +169,18 @@ def is_fabric_product(product):
         for c in h:
             if not c.isdigit():
                 is_fabric = False
-                
+
         if is_fabric:
             try:
                 return float(h) / 100.0 # meter
             except:
                 _logger.error('Error convert %s to float' % h)
-                return 0.0    
-    return False         
+                return 0.0
+    return False
 
 def get_price_detail(price_ids):
-    ''' With detail
-    '''
+    """ With detail
+    """
     res = ''
     # If not detail:
     return res # XXX no detail mode
@@ -190,14 +190,14 @@ def get_price_detail(price_ids):
             date_quotation,
             seller.name, # Supplier browse
             )
-    return res        
+    return res
 
 class ProductProduct(orm.Model):
     """ Model name: ProductProduct add utility for report
     """
-    
+
     _inherit = 'product.product'
-    
+
     # -------------------------------------------------------------------------
     # Button event:
     # -------------------------------------------------------------------------
@@ -205,40 +205,40 @@ class ProductProduct(orm.Model):
         return ''
 
     def open_single_report(self, cr, uid, ids, context=None):
-        ''' Return single report
-        '''
+        """ Return single report
+        """
         datas = {}
         datas['wizard'] = True # started from wizard
         datas['active_ids'] = ids
         return {
             'type': 'ir.actions.report.xml',
-            'report_name': 'industrial_cost_bom_report', 
+            'report_name': 'industrial_cost_bom_report',
             'datas': datas,
             #'context': context,
             }
 
     def open_multi_report(self, cr, uid, ids, context=None):
-        ''' Return multi report
-        '''
+        """ Return multi report
+        """
         datas = {}
         datas['wizard'] = True # started from wizard
         datas['active_ids'] = False
         return {
             'type': 'ir.actions.report.xml',
-            'report_name': 'industrial_cost_bom_report', 
+            'report_name': 'industrial_cost_bom_report',
             'datas': datas,
-            #'context': context,
+            # 'context': context,
             }
 
     def open_xls_report(self, cr, uid, ids, context=None):
-        ''' Return xls report extracted from get_object method
-        '''
+        """ Return xls report extracted from get_object method
+        """
         # ---------------------------------------------------------------------
         # Utility:
         # ---------------------------------------------------------------------
         def xls_write_row(WS, row, row_data, format_cell):
-            ''' Print line in XLS file            
-            '''
+            """ Print line in XLS file
+            """
             ''' Write line in excel file
             '''
             col = 0
@@ -246,21 +246,21 @@ class ProductProduct(orm.Model):
                 WS.write(row, col, item, format_cell)
                 col += 1
             return True
-            
+
         datas = {}
         datas['wizard'] = True # started from wizard
         datas['active_ids'] = False
-        
+
         xls_filename = '/tmp/bom_report.xlsx'
         _logger.info('Start export BOM cost on %s' % xls_filename)
-        
+
         # Open file and write header
         WB = xlsxwriter.Workbook(xls_filename)
         WS = WB.add_worksheet('Product')
 
         # Format:
         format_title = WB.add_format({
-            'bold': True, 
+            'bold': True,
             'font_color': 'black',
             'font_name': 'Arial',
             'font_size': 10,
@@ -285,68 +285,68 @@ class ProductProduct(orm.Model):
             'bg_color': 'white',
             'border': 1,
             'num_format': '0.00',
-            })        
-        
+            })
+
         # ---------------------------------------------------------------------
         # Get database of industrial cost:
         # ---------------------------------------------------------------------
-        cost_db = {}        
+        cost_db = {}
         cost_pool = self.pool.get('mrp.bom.industrial.cost')
         cost_ids = cost_pool.search(cr, uid, [], order='name', context=context)
         i = 0
         for cost in cost_pool.browse(cr, uid, cost_ids, context=context):
             cost_db[cost.name] = i # position in Excel file
             i += 1
-  
+
         # ---------------------------------------------------------------------
         # Setup excel layout and columns:
         # ---------------------------------------------------------------------
         WS.set_column('A:A', 10)
         WS.set_column('B:B', 35)
         WS.set_column('C:AX', 10)
-        
+
         header = [
-            _('Codice'), 
-            _('Descrizione'), 
-            _('Min'), 
-            _('Max'), 
-            _('Simul.'), 
+            _('Codice'),
+            _('Descrizione'),
+            _('Min'),
+            _('Max'),
+            _('Simul.'),
             _('Prezzo non presente'),
             ]
         header.extend(sorted(cost_db, key=lambda x: cost_db[x]))
         xls_write_row(WS, 0, header, format_title)
-        
+
         # ---------------------------------------------------------------------
         # Get product cost information
         # ---------------------------------------------------------------------
         # Extract data from ODT master function:
         row = 0
-        for (r_min, r_max, r_error, r_components, r_extra1, r_extra2, r_index, 
-             r_total, product, r_parameter, r_total_text, pipe_data, 
+        for (r_min, r_max, r_error, r_components, r_extra1, r_extra2, r_index,
+             r_total, product, r_parameter, r_total_text, pipe_data,
              simulated_cost) in self.report_get_objects_bom_industrial_cost(
                     cr, uid, datas=datas, context=context):
-            row += 1       
-                 
+            row += 1
+
             # Detault data:
             row_data = [
-                product.default_code, 
-                product.name, 
-                r_min, 
+                product.default_code,
+                product.name,
+                r_min,
                 r_max,
                 simulated_cost,
                 'X' if r_error else '',
                 ]
-            
+
             # Extra column for costs:
-            industrial_cost = [0.0 for col in range(0, len(cost_db))]            
-            
+            industrial_cost = [0.0 for col in range(0, len(cost_db))]
+
             # Loop on 2 cost table (industrial cost):
-            for table in (r_extra1, r_extra2): 
+            for table in (r_extra1, r_extra2):
                 for item, details, time_qty in table:
-                    if time_qty:                    
+                    if time_qty:
                         industrial_cost[cost_db[item.cost_id.name]] = \
                             '%s (T. %s)' % (details, time_qty)
-                    else:        
+                    else:
                         industrial_cost[cost_db[item.cost_id.name]] = details
 
             # -----------------------------------------------------------------
@@ -368,67 +368,67 @@ class ProductProduct(orm.Model):
             'res_model':'res.partner',
             'res_id': 1,
             }, context=context)
-        
+
         return {
             'type' : 'ir.actions.act_url',
             'url': '/web/binary/saveas?model=ir.attachment&field=datas&'
                 'filename_field=datas_fname&id=%s' % attachment_id,
             'target': 'self',
-            }   
-            
+            }
+
     # -------------------------------------------------------------------------
     # Report utility:
     # -------------------------------------------------------------------------
     def _report_industrial_get_objects(self, cr, uid, data=None, context=None):
-        ''' Return single report or list of selected bom 
+        """ Return single report or list of selected bom
             Used in report and in XLSX extract files
-        '''        
+        """
         # Readability:
         if data is None:
             data = {}
 
         if not data.get('wizard', False):
             raise osv.except_osv(
-                _('Access error'), 
+                _('Access error'),
                 _('No right to print BOM'),
                 )
-                
-        # Pool used:    
+
+        # Pool used:
         product_pool = self.pool.get('product.product')
-        
-        active_ids = data.get('active_ids', False)            
+
+        active_ids = data.get('active_ids', False)
         if not active_ids:
             active_ids = self.search(cr, uid, [
                 ('bom_selection', '=', True),
                 ], context=context)
         objects = self.browse(cr, uid, active_ids, context=context)
-           
+
         return sorted(objects, key=lambda o: o.default_code)
 
-    def report_get_objects_bom_industrial_cost(self, cr, uid, datas=None, 
+    def report_get_objects_bom_industrial_cost(self, cr, uid, datas=None,
             context=None):
-        ''' Report action for generate database used (both ODT and XLSX export)
-        '''        
+        """ Report action for generate database used (both ODT and XLSX export)
+        """
         def get_simulated(value, product, simulation_db):
             """ Simulation price
             """
             default_code = product.default_code or ''
             for start in simulation_db:
                 if default_code.startswith(start):
-                    param = simulation_db[start]                    
+                    param = simulation_db[start]
                     if param.mode == 'rate':
                         value *= (100.0 + param.value) / 100.0
                     else:
                         value += param.value
                     break
-                    
+
             return value
-            
+
         if datas is None:
             datas = {}
-        
+
         # ---------------------------------------------------------------------
-        # Parameters in datas dictionary:    
+        # Parameters in datas dictionary:
         # ---------------------------------------------------------------------
         simulation_db = {}
         simulation_pool = self.pool.get('mrp.bom.industrial.simulation')
@@ -436,25 +436,25 @@ class ProductProduct(orm.Model):
         for simulation in simulation_pool.browse(
                 cr, uid, simulation_ids, context=context):
             simulation_db[simulation.name] = simulation
-        
+
         # Need update record price:
         update_record = datas.get('update_record', False)
         if update_record:
             _logger.warning('Product price will save in history!')
-        else:    
+        else:
             _logger.warning('No product price updated!')
 
         update_current_industrial = datas.get(
             'update_current_industrial', False)
         if update_current_industrial:
             _logger.warning('Product price current will be updated!')
-        else:    
+        else:
             _logger.warning('No current product price updated!')
-        
+
         # Range date:
         from_date = datas.get('from_date', False)
         to_date = datas.get('to_date', False)
-        
+
         # ---------------------------------------------------------------------
         # Load history database if to_date range is setup:
         # ---------------------------------------------------------------------
@@ -468,12 +468,12 @@ class ProductProduct(orm.Model):
             history_ids = history_pool.search(cr, uid, [
                 #('date_quotation', '>=', from_date),
                 #('date_quotation', '<=', to_date),
-                ('price', '>', 0),                
+                ('price', '>', 0),
                 ], context=context)
-                
+
             for history in sorted(history_pool.browse(
-                    cr, uid, history_ids, context=context), 
-                    key=lambda x: x.date_quotation or x.write_date, 
+                    cr, uid, history_ids, context=context),
+                    key=lambda x: x.date_quotation or x.write_date,
                     reverse=True):
                 date_quotation = history.date_quotation or \
                     history.write_date[:10]
@@ -481,7 +481,7 @@ class ProductProduct(orm.Model):
                         date_quotation < from_date  or \
                         date_quotation > to_date:
                     continue # Esternal date or not present
-                    
+
                 default_code = history.pricelist_id.product_id.default_code
                 if default_code in history_db:
                     continue # old price
@@ -493,7 +493,7 @@ class ProductProduct(orm.Model):
                     )
         else:
             _logger.warning('No max date limit!')
-        
+
         res = []
         selected_product = self._report_industrial_get_objects(
             cr, uid, data=datas, context=context)
@@ -502,7 +502,7 @@ class ProductProduct(orm.Model):
                 selected_product[0].company_id.industrial_margin_a
             margin_b = \
                 selected_product[0].company_id.industrial_margin_b
-            # TODO manage extra:    
+            # TODO manage extra:
             margin_extra = \
                 selected_product[0].company_id.industrial_margin_extra
 
@@ -510,17 +510,17 @@ class ProductProduct(orm.Model):
             if from_date:
                 _logger.warning(
                     'Min date limit from wizard: %s!' % from_date)
-                
-            else:    
+
+            else:
                 days = selected_product[0].company_id.industrial_days or 500
                 from_date = (datetime.now() - timedelta(days=days)).strftime(
-                    DEFAULT_SERVER_DATE_FORMAT)                    
+                    DEFAULT_SERVER_DATE_FORMAT)
                 _logger.warning(
                     'Min date limit from parameter [%s]: %s!' % (
                         days,
                         from_date,
                         ))
-        
+
             parameter = _('Parametri: Margine A: %s%% - Margine B: %s%% - '
                 'Margine extra: %s%% Giorni min rif. prezzi %s') % (
                     margin_a,
@@ -528,12 +528,12 @@ class ProductProduct(orm.Model):
                     margin_extra,
                     from_date,
                     )
-        else:        
+        else:
             return res # No selection return empty records
-                
+
         component_f = open(os.path.expanduser('~/component.txt'), 'w')
         component_saved = []
-        for product in selected_product:                    
+        for product in selected_product:
             data = [
                 0.0, # 0. Min
                 0.0, # 1. Max
@@ -553,24 +553,24 @@ class ProductProduct(orm.Model):
             # -----------------------------------------------------------------
             # Load component list (and subcomponent for HW):
             # -----------------------------------------------------------------
-            for item in product.dynamic_bom_line_ids:                
+            for item in product.dynamic_bom_line_ids:
                 component = item.product_id
                 if component.bom_placeholder or component.bom_alternative:
                     _logger.warning('Jump placeholder elements')
                     continue # jump component
-                    
+
                 half_bom_ids = component.half_bom_ids # if half component
-                if half_bom_ids:                     
-                    # HW component (level 2)                    
+                if half_bom_ids:
+                    # HW component (level 2)
                     hw_total = 0.0
                     for cmpt in half_bom_ids:
                         #last_date = False # TODO last price?
-                        cmpt_q = item.product_qty * cmpt.product_qty # XXX    
-                        # TODO Simulation:                    
+                        cmpt_q = item.product_qty * cmpt.product_qty # XXX
+                        # TODO Simulation:
                         min_value, max_value, price_ids = get_pricelist(
-                            cmpt.product_id, from_date, to_date, history_db)  
+                            cmpt.product_id, from_date, to_date, history_db)
                         simulated_cost = cmpt_q * get_simulated(
-                            max_value, cmpt.product_id, simulation_db)                          
+                            max_value, cmpt.product_id, simulation_db)
                         price_detail = get_price_detail(price_ids)
 
                         # Fabric element:
@@ -582,17 +582,17 @@ class ProductProduct(orm.Model):
                                 cmpt_q * is_fabric,
                                 max_value / is_fabric,
                                 )
-                            
-                        # Pipe element:    
+
+                        # Pipe element:
                         if cmpt.product_id.is_pipe:
                             # Calc with weight and price kg not cost manag.:
                             # TODO Simulation:
                             pipe_price = \
                                 cmpt.product_id.pipe_material_id.last_price
-                                
+
                             min_value = max_value = \
                                 pipe_price * cmpt.product_id.weight
-                            # Total pipe weight:    
+                            # Total pipe weight:
                             q_pipe = item.product_qty * cmpt.product_qty *\
                                 cmpt.product_id.weight
 
@@ -608,7 +608,7 @@ class ProductProduct(orm.Model):
                                 not max_value
                         if cmpt.product_id.bom_industrial_no_price:
                             min_value = max_value = 0.0 # no price in BOM
-                            
+
                         record = [
                             '%s - %s' % (
                                 cmpt.product_id.default_code or '',
@@ -628,29 +628,29 @@ class ProductProduct(orm.Model):
 
                         if red_price:
                             data[2] = True # This product now is in error!
-                                     
-                        # Update min and max value:             
+
+                        # Update min and max value:
                         data[0] += min_value * cmpt_q
                         data[1] += max_value * cmpt_q
                         data[12] += simulated_cost
-                        
+
                         if component.default_code not in component_saved:
                             hw_total += max_value * cmpt_q
                             component_f.write('%-30s|%25.5f\r\n' % (
                                 component.default_code,
                                 hw_total,
                                 ))
-                            component_saved.append(component.default_code)    
-                        
+                            component_saved.append(component.default_code)
+
                         data[3].append(record) # Populate product database
-                else: 
-                    # Raw material (level 1)                    
+                else:
+                    # Raw material (level 1)
                     cmpt_q = item.product_qty
                     # TODO Simulation:
                     min_value, max_value, price_ids = get_pricelist(
                         item.product_id, from_date, to_date, history_db)
                     simulated_cost = cmpt_q * get_simulated(
-                        max_value, item.product_id, simulation_db)                        
+                        max_value, item.product_id, simulation_db)
                     price_detail = get_price_detail(price_ids)
 
                     red_price = \
@@ -666,17 +666,17 @@ class ProductProduct(orm.Model):
                         component.uom_id.name, # UOM
                         max_value, # unit price (max not the last!)
                         max_value * cmpt_q, # subtotal
-                        price_detail, # list of price (used for detail), 
+                        price_detail, # list of price (used for detail),
                         False, # HW product (not here)
                         component, # Product for extra data
                         red_price, # Prod with no price
                         '', # fabric text for price
                         simulated_cost,  # Simulated price
                         ]) # Populate product database
-                        
+
                     if red_price:
                         data[2] = True # This product now is in error!
-                        
+
                     data[0] += min_value * cmpt_q
                     data[1] += max_value * cmpt_q
                     data[12] += simulated_cost
@@ -686,33 +686,33 @@ class ProductProduct(orm.Model):
             margin_extra_value = data[1] * margin_extra / 100.0
 
             data[12] += data[12] * margin_extra / 100.0
-            
+
             # Update total text:
             data[10] += '%10.5f +%10.5f'  % (
                 data[1],
                 margin_extra_value,
                 )
-            
+
             data[1] += margin_extra_value
-            
+
             # -----------------------------------------------------------------
             # Extra data end report:
             # -----------------------------------------------------------------
             data[6] = { # Index
                 _('component'): data[1], # used max:
-                }            
+                }
             for cost, item in self.get_cost_industrial_for_product(
                     cr, uid, [product.id], context=context).iteritems():
-                # Index total:    
-                if cost.type not in data[6]: 
+                # Index total:
+                if cost.type not in data[6]:
                     data[6][cost.type] = 0.0
-                    
-                # 2 case: with product or use unit_cost    
+
+                # 2 case: with product or use unit_cost
                 if item.product_id: # use item price
-                    value = item.qty * item.last_cost                
+                    value = item.qty * item.last_cost
                     time_qty = False
                 else:
-                    value = item.qty * cost.unit_cost                     
+                    value = item.qty * cost.unit_cost
                     time_qty = item.qty
 
                 if item.cost_id.name == 'Manodopera MEDEA':
@@ -724,10 +724,10 @@ class ProductProduct(orm.Model):
                     data[4].append(cost_item)
                 else:
                     raise osv.except_osv(
-                        _('Tipo errato'), 
+                        _('Tipo errato'),
                         _('Tipo di costo non presente'),
                         )
-                
+
                 data[0] += value # min
                 data[1] += value # max
                 data[6][cost.type] += value # Index total
@@ -736,11 +736,11 @@ class ProductProduct(orm.Model):
             # Save margin parameters:
             data[7]['margin_a'] = data[1] * margin_a / 100.0
             data[7]['margin_b'] = data[1] * margin_b / 100.0
-            
-                
-            # Write status in row:    
+
+
+            # Write status in row:
             data[7]['index'] = industrial_index_get_text(data[6])
-            
+
             # -----------------------------------------------------------------
             # Update product industrial price:
             # -----------------------------------------------------------------
@@ -750,7 +750,7 @@ class ProductProduct(orm.Model):
                     'to_industrial': data[1],
                     'industrial_missed': data[2],
                     'industrial_index': data[7]['index'],
-                    }, context=context)  
+                    }, context=context)
 
             # -----------------------------------------------------------------
             # Update product current industrial price:
@@ -759,9 +759,9 @@ class ProductProduct(orm.Model):
                 self.write(cr, uid, product.id, {
                     'current_from_industrial': data[0],
                     'current_to_industrial': data[1],
-                    }, context=context)  
-                
-            # Total text:      
+                    }, context=context)
+
+            # Total text:
             # Mat + Extra + Cost1 + Cost2
             for t in type_i18n:
                 if t in data[6]:
@@ -772,8 +772,8 @@ class ProductProduct(orm.Model):
             data[4].sort(key=lambda x: x[0].cost_id.name) # Table 1
             data[5].sort(key=lambda x: x[0].cost_id.name) # Table 2
             res.append(data)
-        
-        # Update parameters:    
+
+        # Update parameters:
         res[0][9] = parameter
         return res
 
@@ -784,7 +784,7 @@ class Parser(report_sxw.rml_parse):
             'get_objects': self.get_objects,
             'get_date': self.get_date,
             })
-        
+
     def get_date(self, ):
         """ Return date
         """
@@ -794,16 +794,16 @@ class Parser(report_sxw.rml_parse):
             date[5:7],
             date[:4],
             )
-    
+
     def get_objects(self, datas=None):
-        ''' Return single report or list of selected bom 
-        '''        
+        """ Return single report or list of selected bom
+        """
         # Readability:
         cr = self.cr
         uid = self.uid
         context = {}
         product_pool = self.pool.get('product.product')
-        
+
         return product_pool.report_get_objects_bom_industrial_cost(
             cr, uid, datas=datas, context=context)
 

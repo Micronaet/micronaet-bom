@@ -312,7 +312,11 @@ class ProductProduct(orm.Model):
             _('Max'),
             _('Simul.'),
             _('Costo (anag.)'),
+
+            _('Marg. A'),
+            _('Marg B.'),
             _('P.d.V. (anag.)'),
+
             _('Prezzo non presente'),
             ]
         header.extend(sorted(cost_db, key=lambda x: cost_db[x]))
@@ -333,11 +337,18 @@ class ProductProduct(orm.Model):
             row_data = [
                 product.default_code,
                 product.name,
+
+                # Cost:
                 r_min,
                 r_max,
                 simulated_cost,
                 product.standard_price,
+
+                # Revenue:
+                r_total['margin_a'],
+                r_total['margin_b'],
                 product.lst_price,
+
                 'X' if r_error else '',
                 ]
 

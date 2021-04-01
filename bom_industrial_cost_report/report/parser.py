@@ -273,7 +273,7 @@ class ProductProduct(orm.Model):
 
         format_text = WB.add_format({
             'font_name': 'Arial',
-            #'align': 'left',
+            # 'align': 'left',
             'font_size': 9,
             'border': 1,
             })
@@ -295,7 +295,7 @@ class ProductProduct(orm.Model):
         cost_ids = cost_pool.search(cr, uid, [], order='name', context=context)
         i = 0
         for cost in cost_pool.browse(cr, uid, cost_ids, context=context):
-            cost_db[cost.name] = i # position in Excel file
+            cost_db[cost.name] = i  # position in Excel file
             i += 1
 
         # ---------------------------------------------------------------------
@@ -311,6 +311,8 @@ class ProductProduct(orm.Model):
             _('Min'),
             _('Max'),
             _('Simul.'),
+            _('Costo (anag.)'),
+            _('P.d.V. (anag.)'),
             _('Prezzo non presente'),
             ]
         header.extend(sorted(cost_db, key=lambda x: cost_db[x]))
@@ -327,13 +329,15 @@ class ProductProduct(orm.Model):
                     cr, uid, datas=datas, context=context):
             row += 1
 
-            # Detault data:
+            # Default data:
             row_data = [
                 product.default_code,
                 product.name,
                 r_min,
                 r_max,
                 simulated_cost,
+                product.standard_price,
+                product.lst_price,
                 'X' if r_error else '',
                 ]
 
@@ -365,14 +369,14 @@ class ProductProduct(orm.Model):
             'type': 'binary',
             'datas': b64,
             'partner_id': 1,
-            'res_model':'res.partner',
+            'res_model': 'res.partner',
             'res_id': 1,
             }, context=context)
 
         return {
-            'type' : 'ir.actions.act_url',
+            'type': 'ir.actions.act_url',
             'url': '/web/binary/saveas?model=ir.attachment&field=datas&'
-                'filename_field=datas_fname&id=%s' % attachment_id,
+                   'filename_field=datas_fname&id=%s' % attachment_id,
             'target': 'self',
             }
 

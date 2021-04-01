@@ -409,8 +409,8 @@ class ProductProduct(orm.Model):
 
         return sorted(objects, key=lambda o: o.default_code)
 
-    def report_get_objects_bom_industrial_cost(self, cr, uid, datas=None,
-            context=None):
+    def report_get_objects_bom_industrial_cost(
+            self, cr, uid, datas=None, context=None):
         """ Report action for generate database used (both ODT and XLSX export)
         """
         def get_simulated(value, product, simulation_db):
@@ -470,8 +470,8 @@ class ProductProduct(orm.Model):
             # Load history database not empty with range passed:
             history_pool = self.pool.get('pricelist.partnerinfo.history')
             history_ids = history_pool.search(cr, uid, [
-                #('date_quotation', '>=', from_date),
-                #('date_quotation', '<=', to_date),
+                # ('date_quotation', '>=', from_date),
+                # ('date_quotation', '<=', to_date),
                 ('price', '>', 0),
                 ], context=context)
 
@@ -482,18 +482,18 @@ class ProductProduct(orm.Model):
                 date_quotation = history.date_quotation or \
                     history.write_date[:10]
                 if not date_quotation or \
-                        date_quotation < from_date  or \
+                        date_quotation < from_date or \
                         date_quotation > to_date:
-                    continue # Esternal date or not present
+                    continue  # External date or not present
 
                 default_code = history.pricelist_id.product_id.default_code
                 if default_code in history_db:
-                    continue # old price
+                    continue  # old price
 
                 history_db[default_code] = (
-                    history.pricelist_id.supplier_id.name, # Seller name
-                    history.price, # Price
-                    date_quotation, # Date
+                    history.pricelist_id.supplier_id.name,  # Seller name
+                    history.price,  # Price
+                    date_quotation,  # Date
                     )
         else:
             _logger.warning('No max date limit!')
@@ -525,7 +525,8 @@ class ProductProduct(orm.Model):
                         from_date,
                         ))
 
-            parameter = _('Parametri: Margine A: %s%% - Margine B: %s%% - '
+            parameter = _(
+                'Parametri: Margine A: %s%% - Margine B: %s%% - '
                 'Margine extra: %s%% Giorni min rif. prezzi %s') % (
                     margin_a,
                     margin_b,
@@ -533,25 +534,25 @@ class ProductProduct(orm.Model):
                     from_date,
                     )
         else:
-            return res # No selection return empty records
+            return res  # No selection return empty records
 
         component_f = open(os.path.expanduser('~/component.txt'), 'w')
         component_saved = []
         for product in selected_product:
             data = [
-                0.0, # 0. Min
-                0.0, # 1. Max
-                False, # 2. Error
-                [], # 3. Component data
-                [], # 4. Extra cost (1) industrial
-                [], # 5. Extra cost (2) work
-                {}, # 6. Index (total for calculate index)
-                {}, # 7. Total (margin element)
-                product, # 8. Product browse
-                '', # 9. Parameter of report
-                '', # 10. Total text
-                [0.0, 0.0], # 11. Pipe weight total (q, total)
-                0.0, # 12. Simulated price
+                0.0,  # 0. Min
+                0.0,  # 1. Max
+                False,  # 2. Error
+                [],  # 3. Component data
+                [],  # 4. Extra cost (1) industrial
+                [],  # 5. Extra cost (2) work
+                {},  # 6. Index (total for calculate index)
+                {},  # 7. Total (margin element)
+                product,  # 8. Product browse
+                '',   # 9. Parameter of report
+                '',  # 10. Total text
+                [0.0, 0.0],  # 11. Pipe weight total (q, total)
+                0.0,  # 12. Simulated price
                 ]
 
             # -----------------------------------------------------------------
@@ -568,8 +569,8 @@ class ProductProduct(orm.Model):
                     # HW component (level 2)
                     hw_total = 0.0
                     for cmpt in half_bom_ids:
-                        #last_date = False # TODO last price?
-                        cmpt_q = item.product_qty * cmpt.product_qty # XXX
+                        # last_date = False # TODO last price?
+                        cmpt_q = item.product_qty * cmpt.product_qty  # XXX
                         # TODO Simulation:
                         min_value, max_value, price_ids = get_pricelist(
                             cmpt.product_id, from_date, to_date, history_db)
@@ -609,7 +610,7 @@ class ProductProduct(orm.Model):
                         # TODO manage as pipe?
                         red_price = \
                             not cmpt.product_id.bom_industrial_no_price and \
-                                not max_value
+                            not max_value
                         if cmpt.product_id.bom_industrial_no_price:
                             min_value = max_value = 0.0 # no price in BOM
 
@@ -618,20 +619,20 @@ class ProductProduct(orm.Model):
                                 cmpt.product_id.default_code or '',
                                 cmpt.product_id.name or '',
                                 ),
-                            cmpt_q, # q. total
-                            uom_name, # UOM
-                            max_value, # unit price (max not the last!)
-                            max_value * cmpt_q, # subtotal (last = unit x q)
-                            price_detail, # list of price (used for detail)
-                            component, # HW product
-                            cmpt.product_id, # Product for extra data
-                            red_price, # no price
-                            fabric_text, # fabric text for price
+                            cmpt_q,  # q. total
+                            uom_name,  # UOM
+                            max_value,  # unit price (max not the last!)
+                            max_value * cmpt_q,  # subtotal (last = unit x q)
+                            price_detail,  # list of price (used for detail)
+                            component,  # HW product
+                            cmpt.product_id,  # Product for extra data
+                            red_price,  # no price
+                            fabric_text,  # fabric text for price
                             simulated_cost,
                             ]
 
                         if red_price:
-                            data[2] = True # This product now is in error!
+                            data[2] = True  # This product now is in error!
 
                         # Update min and max value:
                         data[0] += min_value * cmpt_q
@@ -646,7 +647,7 @@ class ProductProduct(orm.Model):
                                 ))
                             component_saved.append(component.default_code)
 
-                        data[3].append(record) # Populate product database
+                        data[3].append(record)  # Populate product database
                 else:
                     # Raw material (level 1)
                     cmpt_q = item.product_qty
@@ -666,20 +667,20 @@ class ProductProduct(orm.Model):
                             component.default_code or '',
                             component.name or '',
                             ),
-                        cmpt_q, # q. total
-                        component.uom_id.name, # UOM
-                        max_value, # unit price (max not the last!)
-                        max_value * cmpt_q, # subtotal
-                        price_detail, # list of price (used for detail),
-                        False, # HW product (not here)
-                        component, # Product for extra data
-                        red_price, # Prod with no price
-                        '', # fabric text for price
+                        cmpt_q,  # q. total
+                        component.uom_id.name,  # UOM
+                        max_value,  # unit price (max not the last!)
+                        max_value * cmpt_q,  # subtotal
+                        price_detail,  # list of price (used for detail),
+                        False,  # HW product (not here)
+                        component,  # Product for extra data
+                        red_price,  # Prod with no price
+                        '',  # fabric text for price
                         simulated_cost,  # Simulated price
-                        ]) # Populate product database
+                        ])  # Populate product database
 
                     if red_price:
-                        data[2] = True # This product now is in error!
+                        data[2] = True  # This product now is in error!
 
                     data[0] += min_value * cmpt_q
                     data[1] += max_value * cmpt_q
@@ -692,7 +693,7 @@ class ProductProduct(orm.Model):
             data[12] += data[12] * margin_extra / 100.0
 
             # Update total text:
-            data[10] += '%10.5f +%10.5f'  % (
+            data[10] += '%10.5f +%10.5f' % (
                 data[1],
                 margin_extra_value,
                 )
@@ -702,8 +703,8 @@ class ProductProduct(orm.Model):
             # -----------------------------------------------------------------
             # Extra data end report:
             # -----------------------------------------------------------------
-            data[6] = { # Index
-                _('component'): data[1], # used max:
+            data[6] = {  # Index
+                _('component'): data[1],  # used max:
                 }
             for cost, item in self.get_cost_industrial_for_product(
                     cr, uid, [product.id], context=context).iteritems():
@@ -712,7 +713,7 @@ class ProductProduct(orm.Model):
                     data[6][cost.type] = 0.0
 
                 # 2 case: with product or use unit_cost
-                if item.product_id: # use item price
+                if item.product_id:  # use item price
                     value = item.qty * item.last_cost
                     time_qty = False
                 else:
@@ -732,10 +733,10 @@ class ProductProduct(orm.Model):
                         _('Tipo di costo non presente'),
                         )
 
-                data[0] += value # min
-                data[1] += value # max
-                data[6][cost.type] += value # Index total
-                data[12] += value # simulated
+                data[0] += value  # min
+                data[1] += value  # max
+                data[6][cost.type] += value  # Index total
+                data[12] += value  # simulated
 
             # Save margin parameters:
             data[7]['margin_a'] = data[1] * margin_a / 100.0

@@ -473,6 +473,7 @@ class ProductProduct(orm.Model):
         for simulation in simulation_pool.browse(
                 cr, uid, simulation_ids, context=context):
             simulation_db.append(simulation)
+        import pdb; pdb.set_trace()
 
         # Need update record price:
         update_record = datas.get('update_record', False)

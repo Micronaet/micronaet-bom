@@ -331,6 +331,7 @@ class ProductProduct(orm.Model):
             _('Min'),
             _('Max'),
             _('Simul.'),
+            _('Simul. %'),
             _('Costo (anag.)'),
 
             _('Marg. A'),
@@ -353,6 +354,11 @@ class ProductProduct(orm.Model):
                     cr, uid, datas=datas, context=context):
             row += 1
 
+            if r_max:
+                simulated_rate = 100 * (simulated_cost - r_max) / r_max
+            else:
+                simulated_rate = '/'
+
             # Default data:
             row_data = [
                 product.default_code,
@@ -362,6 +368,7 @@ class ProductProduct(orm.Model):
                 r_min,
                 r_max,
                 simulated_cost,
+                simulated_rate,
                 product.standard_price,
 
                 # Revenue:
@@ -448,7 +455,6 @@ class ProductProduct(orm.Model):
             """ Simulation price for now use max value)
             """
             default_code = product.default_code or ''
-            pdb.set_trace()
             for param in simulation_db:
                 rule_supplier = param.supplier_id
                 start = param.name
@@ -459,7 +465,7 @@ class ProductProduct(orm.Model):
                         value *= (100.0 + param.value) / 100.0
                     else:
                         value += param.value
-                        break
+                    break
             return value
 
         if datas is None:
@@ -602,7 +608,7 @@ class ProductProduct(orm.Model):
                 component = item.product_id
                 if component.bom_placeholder or component.bom_alternative:
                     _logger.warning('Jump placeholder elements')
-                    continue # jump component
+                    continue  # jump component
 
                 half_bom_ids = component.half_bom_ids # if half component
                 if half_bom_ids:
@@ -787,7 +793,6 @@ class ProductProduct(orm.Model):
             data[7]['margin_a'] = data[1] * margin_a / 100.0
             data[7]['margin_b'] = data[1] * margin_b / 100.0
 
-
             # Write status in row:
             data[7]['index'] = industrial_index_get_text(data[6])
 
@@ -826,6 +831,7 @@ class ProductProduct(orm.Model):
         # Update parameters:
         res[0][9] = parameter
         return res
+
 
 class Parser(report_sxw.rml_parse):
     def __init__(self, cr, uid, name, context):

@@ -37,7 +37,7 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
     DEFAULT_SERVER_DATETIME_FORMAT,
     DATETIME_FORMATS_MAP,
     float_compare)
-
+import pdb
 
 _logger = logging.getLogger(__name__)
 
@@ -448,6 +448,7 @@ class ProductProduct(orm.Model):
             """ Simulation price for now use max value)
             """
             default_code = product.default_code or ''
+            pdb.set_trace()
             for param in simulation_db:
                 rule_supplier = param.supplier_id
                 start = param.name
@@ -473,7 +474,6 @@ class ProductProduct(orm.Model):
         for simulation in simulation_pool.browse(
                 cr, uid, simulation_ids, context=context):
             simulation_db.append(simulation)
-        import pdb; pdb.set_trace()
 
         # Need update record price:
         update_record = datas.get('update_record', False)

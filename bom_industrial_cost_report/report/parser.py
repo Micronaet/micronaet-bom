@@ -513,13 +513,19 @@ class ProductProduct(orm.Model):
                         date_quotation > to_date:
                     continue  # External date or not present
 
-                default_code = history.pricelist_id.product_id.default_code
+                product = history.pricelist_id.product_id
+
+                default_code = product.default_code
                 if default_code in history_db:
                     continue  # old price
 
+                if product.bom_industrial_no_price:
+                    price = 0.0
+                else:
+                    price = history.price
                 history_db[default_code] = (
                     history.pricelist_id.supplier_id,  # Seller name
-                    history.price,  # Price
+                    price,  # Price
                     date_quotation,  # Date
                     )
         else:

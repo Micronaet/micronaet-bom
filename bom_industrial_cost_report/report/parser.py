@@ -74,7 +74,7 @@ def get_pricelist(product, min_date, max_date=False, history_db=False):
             key: default_code, value: (seller name, price, date quotation)
     """
     # -------------------------------------------------------------------------
-    # History database (price overrided but save in database):
+    # History database (price overridden but save in database):
     # -------------------------------------------------------------------------
     default_code = product.default_code
 
@@ -82,27 +82,27 @@ def get_pricelist(product, min_date, max_date=False, history_db=False):
     if history_db and default_code in history_db:
         record = history_db[default_code]
         last_price = [
-            record[1], # price
-            record[2], # date
+            record[1],  # price
+            record[2],  # date
             ]
         res = [
-            record[1], # Min (not False)
-            record[1], # Max
-            [record], # Price list
+            record[1],  # Min (not False)
+            record[1],  # Max
+            [record],  # Price list
             ]
 
-    else: # Empty data record:
-        last_price = [False, False] # Price, Date
+    else:  # Empty data record:
+        last_price = [False, False]  # Price, Date
         res = [
-            0.0, # Min (not False)
-            0.0, # Max
-            [], # Price list
+            0.0,  # Min (not False)
+            0.0,  # Max
+            [],  # Price list
             ]
 
     for seller in product.seller_ids:
         for pricelist in seller.pricelist_ids:
             # no inactive price XXX remove this filter?
-            if not pricelist.is_active: # no inactive
+            if not pricelist.is_active:  # no inactive
                 continue
 
             # Take only period date:
@@ -111,7 +111,7 @@ def get_pricelist(product, min_date, max_date=False, history_db=False):
 
             # XXX If max range test here:
             if max_date and date_quotation and date_quotation >= max_date:
-                continue # over maximum limit
+                continue  # over maximum limit
 
             # -----------------------------------------------------------------
             # Max date for price (if no date or >):
@@ -126,25 +126,26 @@ def get_pricelist(product, min_date, max_date=False, history_db=False):
             # -----------------------------------------------------------------
             # XXX Keep here for analyse only one price:
             if date_quotation and date_quotation <= min_date:
-                continue # over minimum limit
+                continue  # over minimum limit
 
             res[2].append((
-                seller.name, # Supplier browse
-                price, # Unit price
-                date_quotation, # Date
+                seller.name,  # Supplier browse
+                price,  # Unit price
+                date_quotation,  # Date
                 ))
 
             # Save min or max price:
-            if not res[0] or price < res[0]: # 0 price will be replaced
+            if not res[0] or price < res[0]:  # 0 price will be replaced
                 res[0] = price
             if price > res[1]:
                 res[1] = price
 
-    if not res[0] and last_price[0]: # if not price but there's last
+    if not res[0] and last_price[0]:  # if not price but there's last
         # Keep the same:
         res[0] = last_price[0]
         res[1] = last_price[0]
     return res
+
 
 def is_fabric_product(product):
     """ Is fabric test
@@ -436,7 +437,6 @@ class ProductProduct(orm.Model):
                     else:
                         value += param.value
                     break
-
             return value
 
         if datas is None:

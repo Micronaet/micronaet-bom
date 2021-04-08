@@ -64,12 +64,15 @@ class MrpBomIndustrialSimulation(orm.Model):
 
     _name = 'mrp.bom.industrial.simulation'
     _description = 'Industrial simulation'
-    _order = 'name'
+    _order = 'sequence, name'
+    _rec_name = 'supplier_id'
 
     _columns = {
-        'name': fields.char('Inizio', size=20, required=True),
+        'sequence': fields.integer('Seq.'),
+        'name': fields.char('Inizio', size=20),
         'value': fields.float('Valore', digits=(16, 5), required=True),
-        # 'supplier_id': fields.many2one('res.partner', 'Fornitore'),
+        'supplier_id': fields.many2one('res.partner', 'Fornitore'),
+        'from': fields.date('Dalla data'),
         'mode': fields.selection([
             ('value', 'Valore'),
             ('rate', 'Percentuale'),

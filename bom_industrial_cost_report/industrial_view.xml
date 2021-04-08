@@ -1,15 +1,17 @@
 <?xml version="1.0"?>
 <openerp>
-    <data>         
+    <data>
          <!--mrp.bom.industrial.simulation-->
          <record model="ir.ui.view" id="view_mrp_bom_industrial_simulation_tree">
              <field name="name">mrp.bom.industrial.simulation.tree</field>
              <field name="model">mrp.bom.industrial.simulation</field>
              <field name="arch" type="xml">
-                 <tree string="Simulazione" editable="bottom">        
+                 <tree string="Simulazione" editable="bottom">
+                     <field name="sequence" widget="handle"/>
                      <field name="name" />
+                     <field name="supplier_id" />
                      <field name="value" />
-                     <field name="mode" />                     
+                     <field name="mode" />
                  </tree>
              </field>
          </record>
@@ -29,11 +31,11 @@
              <field name="name">mrp.bom.industrial.history.tree</field>
              <field name="model">mrp.bom.industrial.history</field>
              <field name="arch" type="xml">
-                 <tree string="Storico">        
+                 <tree string="Storico">
                      <field name="name" />
                      <field name="filename" />
                      <field name="create_date" />
-                     <field name="create_uid" />                     
+                     <field name="create_uid" />
                  </tree>
              </field>
          </record>
@@ -41,30 +43,30 @@
              <field name="name">mrp.bom.industrial.history.form</field>
              <field name="model">mrp.bom.industrial.history</field>
              <field name="arch" type="xml">
-                 <form string="Storico">        
+                 <form string="Storico">
                      <header>
                          <button name="button_history_now" string="Storicizza" type="object" />
                      </header>
-                     <sheet>    
+                     <sheet>
                          <group colspan="4" col="4" attrs="{'invisible': [('name', '!=', False)]}">
                              <field name="note" colspan="4" nolabel="1" widget="html" />
-                         </group>    
+                         </group>
                          <group colspan="4" col="4" attrs="{'invisible': [('name', '=', False)]}">
                              <field name="name" readonly="1" />
                              <field name="filename" readonly="1" />
                              <field name="create_date" readonly="1" />
                              <field name="create_uid" readonly="1" />
-                         </group>    
+                         </group>
                          <group colspan="4" col="4">
                              <separator string="Precedente:" colspan="2"/>
                              <separator string="Successivo:" colspan="2"/>
                              <field name="previous_text" colspan="2" nolabel="1" />
                              <field name="post_text" colspan="2" nolabel="1" />
-                         </group>    
-                     </sheet>                     
+                         </group>
+                     </sheet>
                  </form>
              </field>
-         </record>         
+         </record>
          <record model="ir.actions.act_window" id="action_mrp_bom_industrial_history">
              <field name="name">Storico DB</field>
              <field name="res_model">mrp.bom.industrial.history</field>
@@ -83,7 +85,7 @@
              <field name="context">{}</field>
              <field name="domain">[]</field>
          </record>
-         
+
 
          <!--mrp.bom.industrial.cost.line-->
          <record model="ir.ui.view" id="view_mrp_bom_industrial_cost_line_tree">
@@ -98,10 +100,10 @@
                      <field name="last_date" />
                      <field name="qty" />
                      <field name="uom_id" />
-                     <!--<field name="cost" />-->                     
+                     <!--<field name="cost" />-->
                  </tree>
              </field>
-         </record>         
+         </record>
          <record model="ir.ui.view" id="view_mrp_bom_industrial_cost_line_form">
              <field name="name">mrp.bom.industrial.cost.line.form</field>
              <field name="model">mrp.bom.industrial.cost.line</field>
@@ -114,7 +116,7 @@
                      <field name="last_date" />
                      <field name="qty" />
                      <field name="uom_id" />
-                     <!--<field name="cost" />-->                     
+                     <!--<field name="cost" />-->
                  </form>
              </field>
          </record>
@@ -122,7 +124,7 @@
              <field name="name">mrp.bom.industrial.cost.line.search</field>
              <field name="model">mrp.bom.industrial.cost.line</field>
              <field name="arch" type="xml">
-                 <search string="Cost line" version="7.0">        
+                 <search string="Cost line" version="7.0">
                      <field name="name" />
                      <field name="cost_id" />
                      <field name="product_id" string="Codice prodotto" filter_domain="[('product_id.default_code','ilike',self)]"/>
@@ -130,11 +132,11 @@
                      <group expand="0" string="Group By...">
                          <filter name="group_cost" string="Cost" context="{'group_by': 'cost_id'}"/>
                          <filter name="group_product" string="Prodotto" context="{'group_by': 'product_id'}"/>
-                     </group>                
+                     </group>
                  </search>
              </field>
          </record>
-         
+
          <record model="ir.actions.act_window" id="action_mrp_bom_industrial_cost_line">
              <field name="name">Cost detail</field>
              <field name="res_model">mrp.bom.industrial.cost.line</field>
@@ -171,7 +173,7 @@
                          <!--<button name="load_detail_from_BOM" string="Load BOM selected" type="object" colspan="1" icon="gtk-refresh"/>-->
                          <button name="open_load_detail_list" string="Detail list" type="object" colspan="1" icon="gtk-goto-last"/>
                          <field name="line_ids" colspan="4" col="4" nolabel="1" context="{'is_embedded': True}"/>
-                     </group>    
+                     </group>
                  </form>
              </field>
          </record>
@@ -184,13 +186,13 @@
              <field name="context">{}</field>
              <field name="domain">[]</field>
          </record>
-         
+
          <record model="ir.ui.view" id="view_product_bom_selection_search">
              <field name="name">product.product.search</field>
              <field name="model">product.product</field>
              <field name="priority" eval="50" />
              <field name="arch" type="xml">
-                 <search string="Product" version="7.0">        
+                 <search string="Product" version="7.0">
                      <field name="default_code" />
                      <field name="name" />
                      <filter name="bom_selection_on" string="Selected" domain="[('bom_selection','=',True)]"/>
@@ -199,7 +201,7 @@
                      <filter name="bom_industrial_no_price_off" string="BOM prezzo indicato" domain="[('bom_industrial_no_price','=',False)]"/>
                      <group expand="0" string="Group By...">
                          <filter name="group_bom_selection" string="BOM" context="{'group_by': 'bom_selection'}"/>
-                     </group>                
+                     </group>
                  </search>
              </field>
          </record>
@@ -216,18 +218,18 @@
                      <field name="default_code" />
                      <field name="name" />
                      <button name="open_current_dynamic_bom" string="Manage dynamic lines" type="object" icon="gtk-justify-fill"/>
-                     
+
                      <field name="from_industrial" />
                      <field name="to_industrial" />
 
                      <field name="current_from_industrial" />
                      <field name="current_to_industrial" />
-                     
+
                      <field name="industrial_sale_a" />
                      <field name="industrial_sale_b" />
                      <field name="state" invisible="1" />
                      <button name="bom_selection_on" string="Set BOM on" type="object" icon="star-off" attrs="{'invisible': [('bom_selection','=',True)]}"/>
-                     <button name="bom_selection_off" string="Set BOM off" type="object" icon="star-on" attrs="{'invisible': [('bom_selection','=',False)]}"/> 
+                     <button name="bom_selection_off" string="Set BOM off" type="object" icon="star-on" attrs="{'invisible': [('bom_selection','=',False)]}"/>
                      <button name="open_single_report" string="Print single" type="object" icon="gtk-print" attrs="{'invisible': [('bom_selection','=',False)]}"/>
                      <button name="open_multi_report" string="Print all" type="object" icon="gtk-dnd-multiple" attrs="{'invisible': [('bom_selection','=',False)]}" help="Nota: Durante la stampa vengono aggiornate le informazioni di prezzo minimo e massimo nei prodotti"/>
                      <button name="open_xls_report" string="Export XLSX" type="object" icon="terp-go-month" attrs="{'invisible': [('bom_selection','=',False)]}"/>
@@ -268,14 +270,14 @@
              <field name="context">{'search_default_bom_industrial_no_price_on': True,}</field>
              <field name="domain">[]</field>
          </record>
-         
+
          <!--res.company-->
          <record model="ir.ui.view" id="view_res_company_parameter_tree">
              <field name="name">res.company.tree</field>
              <field name="model">res.company</field>
              <field name="priority" eval="40" />
              <field name="arch" type="xml">
-                 <tree string="Parametri" editable="bottom">        
+                 <tree string="Parametri" editable="bottom">
                      <field name="name" readonly="1"/>
                      <field name="industrial_margin_a" />
                      <field name="industrial_margin_b" />
@@ -298,86 +300,86 @@
              <field name="model">res.company</field>
              <field name="priority" eval="40" />
              <field name="arch" type="xml">
-                 <form string="Parametri" version="7.0">        
+                 <form string="Parametri" version="7.0">
                      <sheet>
                          <group col="4" colspan="4">
                              <field name="name" />
                              <newline/>
-                             
+
                              <field name="industrial_margin_a" />
                              <field name="industrial_margin_b" />
                          </group>
-                     </sheet>        
+                     </sheet>
                  </form>
              </field>
          </record>-->
 
-         <menuitem 
-             parent="mrp.menu_mrp_bom" 
-             id="menu_product_bom_selection_root" 
+         <menuitem
+             parent="mrp.menu_mrp_bom"
+             id="menu_product_bom_selection_root"
              name="Product cost from BOM"
              string="Prova"
              sequence="50"
              groups="bom_industrial_cost_report.group_bom_cost_manager"
              />
-             <menuitem 
-                 parent="menu_product_bom_selection_root" 
-                 id="menu_product_bom_selection_tree" 
+             <menuitem
+                 parent="menu_product_bom_selection_root"
+                 id="menu_product_bom_selection_tree"
                  action="action_product_bom_selection_tree"
                  sequence="10"
                  />
-             <menuitem 
-                 parent="menu_product_bom_selection_root" 
-                 id="menu_mrp_bom_industrial_cost" 
+             <menuitem
+                 parent="menu_product_bom_selection_root"
+                 id="menu_mrp_bom_industrial_cost"
                  action="action_mrp_bom_industrial_cost"
                  sequence="20"
                  />
-             <menuitem 
-                 parent="menu_product_bom_selection_root" 
-                 id="menu_mrp_bom_industrial_cost_line" 
+             <menuitem
+                 parent="menu_product_bom_selection_root"
+                 id="menu_mrp_bom_industrial_cost_line"
                  action="action_mrp_bom_industrial_cost_line"
                  sequence="30"
                  />
 
-             <menuitem 
-                 parent="menu_product_bom_selection_root" 
+             <menuitem
+                 parent="menu_product_bom_selection_root"
                  id="menu_product_bom_no_price"
                  action="action_product_bom_no_price_tree"
                  sequence="80"
                  />
-                 
-             <menuitem 
-                 parent="menu_product_bom_selection_root" 
+
+             <menuitem
+                 parent="menu_product_bom_selection_root"
                  id="menu_mrp_bom_industrial_cost_parameter"
                  action="action_company_parameter_form"
                  sequence="90"
                  />
-             <menuitem 
-                 parent="menu_product_bom_selection_root" 
+             <menuitem
+                 parent="menu_product_bom_selection_root"
                  id="menu_mrp_bom_industrial_cost_simulation"
                  action="action_mrp_bom_industrial_simulation"
                  sequence="100"
                  />
-                 
-             <menuitem 
-                 parent="menu_product_bom_selection_root" 
+
+             <menuitem
+                 parent="menu_product_bom_selection_root"
                  id="menu_mrp_bom_industrial_history_root"
                  sequence="99"
                  name="Storico"
                  />
-                 <menuitem 
-                     parent="menu_mrp_bom_industrial_history_root" 
+                 <menuitem
+                     parent="menu_mrp_bom_industrial_history_root"
                      id="menu_mrp_bom_industrial_history_new"
                      action="action_mrp_bom_industrial_history_new"
                      sequence="10"
                      />
-                 <menuitem 
-                     parent="menu_mrp_bom_industrial_history_root" 
+                 <menuitem
+                     parent="menu_mrp_bom_industrial_history_root"
                      id="menu_mrp_bom_industrial_history"
                      action="action_mrp_bom_industrial_history"
                      sequence="20"
                      />
-                 
+
     </data>
 </openerp>
 

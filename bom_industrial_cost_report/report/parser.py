@@ -65,13 +65,14 @@ def industrial_index_get_text(index):
             )
     return res
 
+
 def get_pricelist(product, min_date, max_date=False, history_db=False):
     """ Return:
         min price, max price, all pricelist for this product active price,
         min_date: min quotation date (mandatory)
         max_date: max date (for evaluation in old period), not mandatory
         history_db: product last history price (maybe max date evaluation)
-            key: default_code, value: (seller name, price, date quotation)
+            key: default_code, value: (seller, price, date quotation)
     """
     # -------------------------------------------------------------------------
     # History database (price overridden but save in database):
@@ -82,24 +83,31 @@ def get_pricelist(product, min_date, max_date=False, history_db=False):
     if history_db and default_code in history_db:
         record = history_db[default_code]
         last_price = [
-            record[1],  # price
-            record[2],  # date
+            # 0. supplier
+            record[1],  # 0. price
+            record[2],  # 1. date
+            record[0],  # 2. supplier
             ]
         res = [
-            record[1],  # Min (not False)
-            record[1],  # Max
-            [record],  # Price list
+            record[1],  # 0. Min (not False)
+            record[1],  # 1. Max
+            [record],  # 2. Price list
+            record[0],  # 3. Supplier min
+            record[0],  # 4. Supplier max
             ]
 
     else:  # Empty data record:
-        last_price = [False, False]  # Price, Date
+        last_price = [False, False, False]  # Price, Date, Supplier
         res = [
-            0.0,  # Min (not False)
-            0.0,  # Max
-            [],  # Price list
+            0.0,  # 0. Min (not False)
+            0.0,  # 1. Max
+            [],  # 2. Price list
+            False,  # 3. Supplier Min
+            False,  # 4. Supplier Max
             ]
 
     for seller in product.seller_ids:
+        supplier = seller.name
         for pricelist in seller.pricelist_ids:
             # no inactive price XXX remove this filter?
             if not pricelist.is_active:  # no inactive
@@ -116,10 +124,11 @@ def get_pricelist(product, min_date, max_date=False, history_db=False):
             # -----------------------------------------------------------------
             # Max date for price (if no date or >):
             # -----------------------------------------------------------------
-            if not last_price[1] or ( # no date or this is the last
+            if not last_price[1] or (  # no date or this is the last
                     date_quotation and date_quotation > last_price[1]):
                 last_price[0] = price
                 last_price[1] = date_quotation or False
+                last_price[2] = supplier
 
             # -----------------------------------------------------------------
             # Range evaluation:
@@ -128,8 +137,9 @@ def get_pricelist(product, min_date, max_date=False, history_db=False):
             if date_quotation and date_quotation <= min_date:
                 continue  # over minimum limit
 
+            # Data for detail box:
             res[2].append((
-                seller.name,  # Supplier browse
+                supplier,
                 price,  # Unit price
                 date_quotation,  # Date
                 ))
@@ -137,13 +147,17 @@ def get_pricelist(product, min_date, max_date=False, history_db=False):
             # Save min or max price:
             if not res[0] or price < res[0]:  # 0 price will be replaced
                 res[0] = price
+                res[3] = supplier  # Min supplier
             if price > res[1]:
                 res[1] = price
+                res[4] = supplier
 
     if not res[0] and last_price[0]:  # if not price but there's last
         # Keep the same:
         res[0] = last_price[0]
         res[1] = last_price[0]
+        res[3] = supplier
+        res[4] = supplier
     return res
 
 
@@ -425,18 +439,20 @@ class ProductProduct(orm.Model):
             self, cr, uid, datas=None, context=None):
         """ Report action for generate database used (both ODT and XLSX export)
         """
-        def get_simulated(value, product, simulation_db):
-            """ Simulation price
+        def get_simulated(value, supplier, product, simulation_db):
+            """ Simulation price for now use max value)
             """
             default_code = product.default_code or ''
-            for start in simulation_db:
-                if default_code.startswith(start):
-                    param = simulation_db[start]
+            for param in simulation_db:
+                rule_supplier = param.supplier_id
+                start = param.name
+
+                if rule_supplier == supplier or default_code.startswith(start):
                     if param.mode == 'rate':
                         value *= (100.0 + param.value) / 100.0
                     else:
                         value += param.value
-                    break
+                        break
             return value
 
         if datas is None:
@@ -445,12 +461,12 @@ class ProductProduct(orm.Model):
         # ---------------------------------------------------------------------
         # Parameters in datas dictionary:
         # ---------------------------------------------------------------------
-        simulation_db = {}
+        simulation_db = []
         simulation_pool = self.pool.get('mrp.bom.industrial.simulation')
         simulation_ids = simulation_pool.search(cr, uid, [], context=context)
         for simulation in simulation_pool.browse(
                 cr, uid, simulation_ids, context=context):
-            simulation_db[simulation.name] = simulation
+            simulation_db.append(simulation)
 
         # Need update record price:
         update_record = datas.get('update_record', False)
@@ -502,7 +518,7 @@ class ProductProduct(orm.Model):
                     continue  # old price
 
                 history_db[default_code] = (
-                    history.pricelist_id.supplier_id.name,  # Seller name
+                    history.pricelist_id.supplier_id,  # Seller name
                     history.price,  # Price
                     date_quotation,  # Date
                     )
@@ -583,10 +599,12 @@ class ProductProduct(orm.Model):
                         # last_date = False # TODO last price?
                         cmpt_q = item.product_qty * cmpt.product_qty  # XXX
                         # TODO Simulation:
-                        min_value, max_value, price_ids = get_pricelist(
+                        (min_value, max_value, price_ids, supplier_min,
+                         supplier_max) = get_pricelist(
                             cmpt.product_id, from_date, to_date, history_db)
                         simulated_cost = cmpt_q * get_simulated(
-                            max_value, cmpt.product_id, simulation_db)
+                            max_value, supplier_max, cmpt.product_id,
+                            simulation_db)
                         price_detail = get_price_detail(price_ids)
 
                         # Fabric element:
@@ -613,7 +631,8 @@ class ProductProduct(orm.Model):
                                 cmpt.product_id.weight
 
                             simulated_cost = q_pipe * get_simulated(
-                                    pipe_price, cmpt.product_id, simulation_db)
+                                pipe_price, supplier_max, cmpt.product_id,
+                                simulation_db)
 
                             data[11][0] += q_pipe
                             data[11][1] += q_pipe * pipe_price
@@ -663,10 +682,12 @@ class ProductProduct(orm.Model):
                     # Raw material (level 1)
                     cmpt_q = item.product_qty
                     # TODO Simulation:
-                    min_value, max_value, price_ids = get_pricelist(
+                    (min_value, max_value, price_ids, supplier_min,
+                     supplier_max) = get_pricelist(
                         item.product_id, from_date, to_date, history_db)
                     simulated_cost = cmpt_q * get_simulated(
-                        max_value, item.product_id, simulation_db)
+                        max_value, supplier_max, item.product_id,
+                        simulation_db)
                     price_detail = get_price_detail(price_ids)
 
                     red_price = \

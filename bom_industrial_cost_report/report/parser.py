@@ -114,7 +114,10 @@ def get_pricelist(product, min_date, max_date=False, history_db=False):
                 continue
 
             # Take only period date:
-            price = pricelist.price
+            if product.bom_industrial_no_price:
+                price = 0
+            else:
+                price = pricelist.price
             date_quotation = pricelist.date_quotation
 
             # XXX If max range test here:
@@ -193,6 +196,7 @@ def is_fabric_product(product):
                 return 0.0
     return False
 
+
 def get_price_detail(price_ids):
     """ With detail
     """
@@ -203,9 +207,10 @@ def get_price_detail(price_ids):
         res += '%s EUR (%s) %s \n' % (
             price, # Unit price
             date_quotation,
-            seller.name, # Supplier browse
+            seller.name,  # Supplier browse
             )
     return res
+
 
 class ProductProduct(orm.Model):
     """ Model name: ProductProduct add utility for report
@@ -447,7 +452,8 @@ class ProductProduct(orm.Model):
                 rule_supplier = param.supplier_id
                 start = param.name
 
-                if rule_supplier == supplier or default_code.startswith(start):
+                if rule_supplier == supplier or (
+                        start and default_code.startswith(start)):
                     if param.mode == 'rate':
                         value *= (100.0 + param.value) / 100.0
                     else:
@@ -519,7 +525,7 @@ class ProductProduct(orm.Model):
                 if default_code in history_db:
                     continue  # old price
 
-                if product.bom_industrial_no_price:
+                if product.bom_industrial_no_price:  # TODO remove? dont' work
                     price = 0.0
                 else:
                     price = history.price

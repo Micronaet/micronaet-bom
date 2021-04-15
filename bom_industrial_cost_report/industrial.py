@@ -74,8 +74,9 @@ class MrpBomIndustrialSimulation(orm.Model):
         'supplier_id': fields.many2one('res.partner', 'Fornitore'),
         'from': fields.date('Dalla data'),
         'mode': fields.selection([
-            ('value', 'Valore'),
-            ('rate', 'Percentuale'),
+            ('fixed', 'Fisso'),
+            ('value', 'Aumento a valore'),
+            ('rate', 'Aumento a percentuale'),
             ], 'Modalità'),
         }
 

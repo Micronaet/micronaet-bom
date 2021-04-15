@@ -463,6 +463,8 @@ class ProductProduct(orm.Model):
                         start and default_code.startswith(start)):
                     if param.mode == 'rate':
                         value *= (100.0 + param.value) / 100.0
+                    elif param.mode == 'fixed':
+                        value = param.value
                     else:
                         value += param.value
                     break

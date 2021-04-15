@@ -319,7 +319,7 @@ class MrpBomIndustrialHistory(orm.Model):
                 cr, uid, product_ids, context=context):
             history = product.from_industrial
             if not history:
-                continue # jump no price
+                continue  # jump no price
             current = product.current_from_industrial
 
             difference = history - current
@@ -355,7 +355,8 @@ class MrpBomIndustrialHistory(orm.Model):
                         ], default_format=number_format)
 
         if always_report or gap_total > 0:
-            return excel_pool.send_mail_to_group(cr, uid,
+            return excel_pool.send_mail_to_group(
+                cr, uid,
                 'bom_industrial_cost_report.group_bom_cost_manager',
                 'Confronto prezzi DB modello %s' % (
                     ('[PRESENTI GAP: %s!]' % gap_total) if gap_total > 0 \
@@ -366,13 +367,15 @@ class MrpBomIndustrialHistory(orm.Model):
                 context=context)
         else:
             _logger.warning('Current industrial cost are all right < %s' % gap)
-            excel_pool.close_workbook() # remove file
+            excel_pool.close_workbook()  # remove file
             return True
 
     def button_history_now(self, cr, uid, ids, context=None):
         """ History button
         """
         _logger.info('Run report background')
+        history_id = ids[0]
+        line_pool = self.pool.get('mrp.bom.industrial.history.line')
 
         # Parameters (folder):
         path = '~/.local/share/Odoo/history/%s' % cr.dbname
@@ -393,10 +396,10 @@ class MrpBomIndustrialHistory(orm.Model):
             ('bom_selection', '=', True)], context=context)
 
         # History line management (use only max price industrial):
-        previous_price = {}
+        history_price = {}
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
-            previous_price[product.default_code] = product.to_industrial
+            history_price[product] = product.to_industrial
 
         # ---------------------------------------------------------------------
         # Setup call of report:
@@ -454,13 +457,18 @@ class MrpBomIndustrialHistory(orm.Model):
         # ---------------------------------------------------------------------
         # Bom after cost:
         # ---------------------------------------------------------------------
+        # History line management (use only max price industrial):
+        # Reload for sure:
         product_ids = product_pool.search(cr, uid, [
             ('bom_selection', '=', True)], context=context)
-        post_list = [
-            u'%s: %s€' % (p.default_code, p.from_industrial)
-            for p in product_pool.browse(
-                cr, uid, product_ids, context=context)]
-        # TODO post_text = u'\n'.join(sorted(post_list))
+        for product in product_pool.browse(
+                cr, uid, product_ids, context=context):
+            line_pool.create(cr, uid, {
+                'history_id': history_id,
+                'product_id': product.id,
+                'previous': history_price.get(product),
+                'current': product.to_industrial,
+            }, context=context)
 
         # ---------------------------------------------------------------------
         # Save history record data:

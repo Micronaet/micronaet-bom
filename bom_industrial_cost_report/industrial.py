@@ -98,8 +98,8 @@ class MrpBomIndustrialCost(orm.Model):
     # Button event:
     # -------------------------------------------------------------------------
     def open_load_detail_list(self, cr, uid, ids, context=None):
-        ''' Open list in tree view
-        '''
+        """ Open list in tree view
+        """
         line_pool = self.pool.get('mrp.bom.industrial.cost.line')
         line_ids = line_pool.search(cr, uid, [
             ('cost_id', '=', ids[0]),
@@ -120,8 +120,8 @@ class MrpBomIndustrialCost(orm.Model):
             }
 
     def load_detail_from_BOM(self, cr, uid, ids, context=None):
-        ''' Load all mask list from bom selected
-        '''
+        """ Load all mask list from bom selected
+        """
         product_pool = self.pool.get('product.product')
         line_pool = self.pool.get('mrp.bom.industrial.cost.line')
 
@@ -180,8 +180,8 @@ class MrpBomIndustrialCostLine(orm.Model):
     _order = 'name'
 
     def _get_last_cost_info(self, cr, uid, ids, fields, args, context=None):
-        ''' Fields function for calculate
-        '''
+        """ Fields function for calculate
+        """
         res = {}
         for line in self.browse(cr, uid, ids, context=context):
             product = line.product_id
@@ -248,8 +248,8 @@ class MrpBomIndustrialHistory(orm.Model):
 
     def scheduled_update_current_price(
             self, cr, uid, always_report=False, gap=5.0, context=None):
-        ''' Scheduled update of current price
-        '''
+        """ Scheduled update of current price
+        """
         product_pool = self.pool.get('product.product')
         excel_pool = self.pool.get('excel.writer')
 
@@ -370,12 +370,12 @@ class MrpBomIndustrialHistory(orm.Model):
             return True
 
     def button_history_now(self, cr, uid, ids, context=None):
-        ''' History button
-        '''
+        """ History button
+        """
         _logger.info('Run report backgroud')
 
         # Parameters:
-        path = '~/.local/share/Odoo/history/%s' % cr.dbname# XXX
+        path = '~/.local/share/Odoo/history/%s' % cr.dbname  # XXX
         path = os.path.expanduser(path)
         os.system('mkdir -p %s' % path) # Create if not present
 
@@ -391,7 +391,7 @@ class MrpBomIndustrialHistory(orm.Model):
         product_pool = self.pool.get('product.product')
         product_ids = product_pool.search(cr, uid, [
             ('bom_selection', '=', True)], context=context)
-        previous_list = [u'%s: %s€' % (p.default_code, p.from_industrial)\
+        previous_list = [u'%s: %s€' % (p.default_code, p.from_industrial) \
              for p in product_pool.browse(
                 cr, uid, product_ids, context=context)]
         previous_text = u'\n'.join(sorted(previous_list))
@@ -404,13 +404,12 @@ class MrpBomIndustrialHistory(orm.Model):
             update_current_industrial = False
             update_record = True
 
-
         # Datas for report
         datas = {
             # Report setup:
             'model': 'product.product',
             'active_id': False,
-            'active_ids': [], # no active_ids means all template BOM!
+            'active_ids': [],  # no active_ids means all template BOM!
             'context': context,
 
             # Datas setup:
@@ -423,11 +422,11 @@ class MrpBomIndustrialHistory(orm.Model):
         # Call report:
         # -----------------------------------------------------------------
         # Procedure for problem in setup language in ODT report
-        #product_pool = self.pool.get('product.product')
-        #product_ids = product_pool.search(cr, uid, [], context=context)
-        #if product_ids:
+        # product_pool = self.pool.get('product.product')
+        # product_ids = product_pool.search(cr, uid, [], context=context)
+        # if product_ids:
         #    product_id = product_ids[0]
-        #else:
+        # else:
         #    product_id = False
 
         try:
@@ -518,8 +517,8 @@ class ProductProduct(orm.Model):
     # -------------------------------------------------------------------------
     def get_cost_industrial_for_product_xmlrpc(self, cr, uid, ids,
             context=None):
-        ''' Procedure for return via XMLRLC call
-        '''
+        """ Procedure for return via XMLRLC call
+        """
         res = {}
         cost_db = self.get_cost_industrial_for_product(
                 cr, uid, ids, context=context)
@@ -534,9 +533,9 @@ class ProductProduct(orm.Model):
         return res
 
     def get_cost_industrial_for_product(self, cr, uid, ids, context=None):
-        ''' Return all list of industrial cost for product passed
+        """ Return all list of industrial cost for product passed
             ids: product ids XXX now is one!
-        '''
+        """
         # Pool used:
         line_pool = self.pool.get('mrp.bom.industrial.cost.line')
 
@@ -566,22 +565,22 @@ class ProductProduct(orm.Model):
     # Button for select
     # -------------------------------------------------------------------------
     def bom_selection_on(self, cr, uid, ids, context=None):
-        '''
-        '''
+        """
+        """
         return self.write(cr, uid, ids, {
             'bom_selection': True,
             }, context=context)
 
     def bom_selection_off(self, cr, uid, ids, context=None):
-        '''
-        '''
+        """
+        """
         return self.write(cr, uid, ids, {
             'bom_selection': False,
             }, context=context)
 
     def _get_industrial_sale_ab(self, cr, uid, ids, fields, args, context=None):
-        ''' Fields function for calculate
-        '''
+        """ Fields function for calculate
+        """
         res = {}
         for product in self.browse(cr, uid, ids, context=context):
             cost = product.to_industrial

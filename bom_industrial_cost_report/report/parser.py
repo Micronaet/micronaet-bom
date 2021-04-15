@@ -268,15 +268,16 @@ class ProductProduct(orm.Model):
             return True
 
         datas = {}
-        datas['wizard'] = True # started from wizard
+        datas['wizard'] = True  # started from wizard
         datas['active_ids'] = False
 
         xls_filename = '/tmp/bom_report.xlsx'
         _logger.info('Start export BOM cost on %s' % xls_filename)
 
         # Open file and write header
+        ws_name = ('Prezzi DB %s' % datetime.now())[:10]
         WB = xlsxwriter.Workbook(xls_filename)
-        WS = WB.add_worksheet('Product')
+        WS = WB.add_worksheet(ws_name)
 
         # Format:
         format_title = WB.add_format({
@@ -619,7 +620,8 @@ class ProductProduct(orm.Model):
                     for cmpt in half_bom_ids:
                         # last_date = False # TODO last price?
                         cmpt_q = item.product_qty * cmpt.product_qty  # XXX
-                        # TODO Simulation:
+
+                        # Simulation:
                         (min_value, max_value, price_ids, supplier_min,
                          supplier_max) = get_pricelist(
                             cmpt.product_id, from_date, to_date, history_db)
@@ -702,7 +704,7 @@ class ProductProduct(orm.Model):
                 else:
                     # Raw material (level 1)
                     cmpt_q = item.product_qty
-                    # TODO Simulation:
+                    # Simulation:
                     (min_value, max_value, price_ids, supplier_min,
                      supplier_max) = get_pricelist(
                         item.product_id, from_date, to_date, history_db)
@@ -825,9 +827,9 @@ class ProductProduct(orm.Model):
                     data[10] += ' +%8.5f' % data[6][t]
 
             # Sort data:
-            data[3].sort(key=lambda x: x[0]) # XXX raise error without key
-            data[4].sort(key=lambda x: x[0].cost_id.name) # Table 1
-            data[5].sort(key=lambda x: x[0].cost_id.name) # Table 2
+            data[3].sort(key=lambda x: x[0])  # XXX raise error without key
+            data[4].sort(key=lambda x: x[0].cost_id.name)  # Table 1
+            data[5].sort(key=lambda x: x[0].cost_id.name)  # Table 2
             res.append(data)
 
         # Update parameters:

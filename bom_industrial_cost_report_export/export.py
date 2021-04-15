@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# ODOO (ex OpenERP) 
+# ODOO (ex OpenERP)
 # Open Source Management Solution
 # Copyright (C) 2001-2015 Micronaet S.r.l. (<https://micronaet.com>)
 # Developer: Nicola Riolini @thebrush (<https://it.linkedin.com/in/thebrush>)
@@ -13,7 +13,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
@@ -34,29 +34,30 @@ from openerp import SUPERUSER_ID, api
 from openerp import tools
 from openerp.tools.translate import _
 from openerp.tools.float_utils import float_round as round
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
-    DEFAULT_SERVER_DATETIME_FORMAT, 
-    DATETIME_FORMATS_MAP, 
+from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DATETIME_FORMATS_MAP,
     float_compare)
 
 
 _logger = logging.getLogger(__name__)
 
+
 class ProductProduct(orm.Model):
     """ Model name: ProductProduct add utility for report
-    """    
+    """
     _inherit = 'product.product'
 
     def get_medea_data(self, value):
-        medea_cost = { #packaging:
+        medea_cost = {  # packaging:
             '005': 1.37,
             '014': 3.23,
             '021': 5.14,
             '022': 1.32,
             '023': 1.74,
-            '024': 3.23, 
-            '025': 3.23, 
-            '026': 1.9, 
+            '024': 3.23,
+            '025': 3.23,
+            '026': 1.9,
             '027': 1.9,
             '028': 1.48,
             '029': 6.42,
@@ -66,9 +67,9 @@ class ProductProduct(orm.Model):
             '034': 3.76,
             '035': 3.02,
             '035TX': 3.02,
-            '036': 3.02, 
+            '036': 3.02,
             '037': 6.42,
-            '038': 6.42, 
+            '038': 6.42,
             '039': 3.76,
             '041': 1.9,
             '045': 2.6,
@@ -88,59 +89,59 @@ class ProductProduct(orm.Model):
             '128': 1.48,
             '129': 6.42,
             '130': 6.42,
-            '131': 1.73, 
+            '131': 1.73,
             '132': 3.02,
             '135': 3.02,
             '145': 2.6,
-            '147': 2.6, 
-            '148': 2.6, 
+            '147': 2.6,
+            '148': 2.6,
             '149': 2.6,
             '150': 1.3,
-            '161': 1.48, 
-            '162': 1.48, 
-            '163': 1.48, 
+            '161': 1.48,
+            '162': 1.48,
+            '163': 1.48,
             '165': 1.48,
             '190': 5.5,
             '205': 1.37,
             '223': 2.5,
-            '300': 2.2, 
-            '301': 2.2, 
+            '300': 2.2,
+            '301': 2.2,
             '322': 1.42,
-            '330': 1.42, 
-            '331': 1.42, 
-            '332': 1.42, 
+            '330': 1.42,
+            '331': 1.42,
+            '332': 1.42,
             '334': 5.5,
             '334HP': 5.5,
-            '335': 5.5, 
+            '335': 5.5,
             '336': 5.5,
-            '337': 5.5, 
-            '375': 8.0, 
-            '375HP': 8.0, 
+            '337': 5.5,
+            '375': 8.0,
+            '375HP': 8.0,
             '376': 8.0,
             '550': 2.39,
             '552': 0.81,
-            '600': 0.74, 
+            '600': 0.74,
             '601': 0.74,
-            '800': 3.02, 
+            '800': 3.02,
             '831': 6.6,
-            'G420': 3.02, 
+            'G420': 3.02,
             'G421': 3.76,
             }
-        medea_code = value.strip('%')    
+        medea_code = value.strip('%')
         res = medea_cost.get(medea_code, 0.0)
         if not res:
             _logger.error('Empty code: %s' % value)
         return res
 
-    def report_get_objects_bom_industrial_cost(self, cr, uid, datas=None, 
-            context=None):
-        ''' Integration report
-        '''
+    def report_get_objects_bom_industrial_cost(
+            self, cr, uid, datas=None, context=None):
+        """ Integration report
+        """
         _logger.info('Start extracting...')
         # TODO reactivate
-        #data =  {
+        # data =  {
         #    'active_ids': False, # Load all template
-        #    'model': 'product.product', 
+        #    'model': 'product.product',
         #    'wizard': True,
         #   }
         res = super(
@@ -149,7 +150,7 @@ class ProductProduct(orm.Model):
         _logger.info('Start reporting...')
         # removed
         return res
-        
+
         # ---------------------------------------------------------------------
         # NEW VERSIONE:
         # ---------------------------------------------------------------------
@@ -157,38 +158,38 @@ class ProductProduct(orm.Model):
 
         header = u'Componente|Q.|UM|Prezzo|Totale\n'
         for item in res:
-            (min, max, error, components, extra1, extra2, index, total, 
-                product, parameter, total_text, pipe_total_weight, 
+            (min, max, error, components, extra1, extra2, index, total,
+                product, parameter, total_text, pipe_total_weight,
                 simulated_price) = item
             f_bom.write(u'%s|%s' % (
-                product.default_code, 
+                product.default_code,
                 product.name,
                 ))
-            
+
             # -----------------------------------------------------------------
             # Component line:
             # -----------------------------------------------------------------
             f_bom.write(header)
             for line in components:
-                (name, q, um, price, total, list_detail, hw, element, 
+                (name, q, um, price, total, list_detail, hw, element,
                     red_price, fabric_text) = line
                 if hw:
                     block1 = u'%s %s' % (
                         name,
-                        #list_ids,
-                        hw.default_code,                
-                        )  
+                        # list_ids,
+                        hw.default_code,
+                        )
                 else:
-                    block1 = name              
-                    
+                    block1 = name
+
                 f_bom.write(u'%s|%s|%s|%s|%s\n' % (
                     block1,
                     q,
                     um,
                     price,
-                    total,            
+                    total,
                     ))
-                
+
             # -----------------------------------------------------------------
             # Work
             # -----------------------------------------------------------------
@@ -198,7 +199,7 @@ class ProductProduct(orm.Model):
                     item.cost_id.name,
                     item.cost_id.unit_cost,
                     item.product_id.default_code or '/',
-                    details,            
+                    details,
                     ))
 
             # -----------------------------------------------------------------
@@ -210,7 +211,7 @@ class ProductProduct(orm.Model):
                     item.cost_id.name,
                     item.cost_id.unit_cost,
                     item.product_id.default_code or '/',
-                    details,            
+                    details,
                     ))
 
             # -----------------------------------------------------------------
@@ -219,12 +220,10 @@ class ProductProduct(orm.Model):
             f_bom.write(u'Subtotali|%s|Costo|%s-%s\n' % (
                 total_text, min, max
                 ))
-            #f_bom.write('Indici|%s|Vendita|%s-%s\n' % (
+            # f_bom.write('Indici|%s|Vendita|%s-%s\n' % (
             #    total['index'],
             #    total['margin']
             #    ))
-            
+
         f_bom.close()
         return res
-            
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

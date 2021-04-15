@@ -82,7 +82,7 @@ class MrpBomIndustrialSimulation(orm.Model):
 
     _defaults = {
         # Default value:
-        'mode': lambda *x: 'value',
+        'mode': lambda *x: 'rate',
         }
 
 

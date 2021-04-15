@@ -324,11 +324,12 @@ class ProductProduct(orm.Model):
         # ---------------------------------------------------------------------
         WS.set_column('A:A', 10)
         WS.set_column('B:B', 35)
-        WS.set_column('C:AX', 10)
+        WS.set_column('C:AY', 10)
 
         header = [
             _('Codice'),
             _('Descrizione'),
+            _('Costo anag.'),
             _('Min'),
             _('Max'),
             _('Simul.'),
@@ -366,6 +367,7 @@ class ProductProduct(orm.Model):
                 product.name,
 
                 # Cost:
+                product.standard_price,
                 r_min,
                 r_max,
                 simulated_cost,

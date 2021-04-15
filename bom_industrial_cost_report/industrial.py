@@ -238,12 +238,12 @@ class MrpBomIndustrialCost(orm.Model):
             'mrp.bom.industrial.cost.line', 'cost_id', 'Line'),
         }
 
+
 class MrpBomIndustrialHistory(orm.Model):
     """ Model name: Mrp Bom IndustrialHistory
     """
     _name = 'mrp.bom.industrial.history'
     _description = 'BOM Industrial history'
-    _rec_name = 'name'
     _order = 'name'
 
     def scheduled_update_current_price(
@@ -372,12 +372,12 @@ class MrpBomIndustrialHistory(orm.Model):
     def button_history_now(self, cr, uid, ids, context=None):
         """ History button
         """
-        _logger.info('Run report backgroud')
+        _logger.info('Run report background')
 
-        # Parameters:
-        path = '~/.local/share/Odoo/history/%s' % cr.dbname  # XXX
+        # Parameters (folder):
+        path = '~/.local/share/Odoo/history/%s' % cr.dbname
         path = os.path.expanduser(path)
-        os.system('mkdir -p %s' % path) # Create if not present
+        os.system('mkdir -p %s' % path)  # Create if not present
 
         # Context:
         if context is None:
@@ -391,12 +391,17 @@ class MrpBomIndustrialHistory(orm.Model):
         product_pool = self.pool.get('product.product')
         product_ids = product_pool.search(cr, uid, [
             ('bom_selection', '=', True)], context=context)
-        previous_list = [u'%s: %s€' % (p.default_code, p.from_industrial) \
-             for p in product_pool.browse(
-                cr, uid, product_ids, context=context)]
-        previous_text = u'\n'.join(sorted(previous_list))
 
-        # 2 mode of update: current value, history value:
+        # History line management (use only max price industrial):
+        previous_price = {}
+        for product in product_pool.browse(
+                cr, uid, product_ids, context=context):
+            previous_price[product.default_code] = product.to_industrial
+
+        # ---------------------------------------------------------------------
+        # Setup call of report:
+        # ---------------------------------------------------------------------
+        # 2 mode of update : current value, history value:
         if context.get('update_current_industrial'):
             update_current_industrial = True
             update_record = False
@@ -404,7 +409,6 @@ class MrpBomIndustrialHistory(orm.Model):
             update_current_industrial = False
             update_record = True
 
-        # Datas for report
         datas = {
             # Report setup:
             'model': 'product.product',
@@ -418,17 +422,9 @@ class MrpBomIndustrialHistory(orm.Model):
             'wizard': True,
             }
 
-        # -----------------------------------------------------------------
+        # ---------------------------------------------------------------------
         # Call report:
-        # -----------------------------------------------------------------
-        # Procedure for problem in setup language in ODT report
-        # product_pool = self.pool.get('product.product')
-        # product_ids = product_pool.search(cr, uid, [], context=context)
-        # if product_ids:
-        #    product_id = product_ids[0]
-        # else:
-        #    product_id = False
-
+        # ---------------------------------------------------------------------
         try:
             result, extension = openerp.report.render_report(
                 cr, uid, [], 'industrial_cost_bom_report',
@@ -460,20 +456,22 @@ class MrpBomIndustrialHistory(orm.Model):
         # ---------------------------------------------------------------------
         product_ids = product_pool.search(cr, uid, [
             ('bom_selection', '=', True)], context=context)
-        post_list = [u'%s: %s€' % (p.default_code, p.from_industrial)\
-             for p in product_pool.browse(
+        post_list = [
+            u'%s: %s€' % (p.default_code, p.from_industrial)
+            for p in product_pool.browse(
                 cr, uid, product_ids, context=context)]
-        post_text = u'\n'.join(sorted(post_list))
+        # TODO post_text = u'\n'.join(sorted(post_list))
 
         # ---------------------------------------------------------------------
         # Save history record data:
         # ---------------------------------------------------------------------
-        self.write(cr, uid, ids, {
+        # TODO save in lines:
+        """self.write(cr, uid, ids, {
             'name': 'Storico %s' % now,
             'filename': filename,
             'previous_text': previous_text,
             'post_text': post_text,
-            }, context=context)
+            }, context=context)"""
         return True
 
     _columns = {
@@ -481,8 +479,6 @@ class MrpBomIndustrialHistory(orm.Model):
         'filename': fields.char('Filename.', size=80),
         'create_uid': fields.many2one('res.users', 'Utente', readonly=True),
         'create_date': fields.date('Data', readonly=True),
-        'previous_text': fields.text('Precedente', readonly=True),
-        'post_text': fields.text('Successivo', readonly=True),
         'note': fields.text('Note', readonly=True),
         }
 
@@ -505,6 +501,36 @@ class MrpBomIndustrialHistory(orm.Model):
                qualche minuto...</p>   
             ''',
         }
+
+
+class MrpBomIndustrialHistoryLine(orm.Model):
+    """ Model name: Mrp Bom IndustrialHistoryLine
+    """
+    _name = 'mrp.bom.industrial.history.line'
+    _rec_name = 'product_id'
+
+    _columns = {
+        'history_id': fields.many2one(
+            'mrp.bom.industrial.history', 'Storico'),
+        'product_id': fields.many2one(
+            'product.product', 'DB', required=True),
+        'previous': fields.float(
+            'Precedente', digits=(16, 2)),
+        'current': fields.float(
+            'Corrente', digits=(16, 2), required=True),
+    }
+
+
+class MrpBomIndustrialHistoryRelation(orm.Model):
+    """ Model name: Mrp Bom IndustrialHistory
+    """
+    _inherit = 'mrp.bom.industrial.history'
+
+    _columns = {
+        'line_ids': fields.one2many(
+            'mrp.bom.industrial.history.line', 'history_id', 'Dettaglio'),
+        }
+
 
 class ProductProduct(orm.Model):
     """ Model name: ProductProduct

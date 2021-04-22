@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# ODOO (ex OpenERP) 
+# ODOO (ex OpenERP)
 # Open Source Management Solution
 # Copyright (C) 2001-2015 Micronaet S.r.l. (<http://www.micronaet.it>)
 # Developer: Nicola Riolini @thebrush (<https://it.linkedin.com/in/thebrush>)
@@ -12,7 +12,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
@@ -32,55 +32,55 @@ from dateutil.relativedelta import relativedelta
 from openerp import SUPERUSER_ID
 from openerp import tools
 from openerp.tools.translate import _
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
-    DEFAULT_SERVER_DATETIME_FORMAT, 
-    DATETIME_FORMATS_MAP, 
+from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DATETIME_FORMATS_MAP,
     float_compare)
 
 _logger = logging.getLogger(__name__)
 
+
 class CreateNewMrpLineDayWizard(orm.TransientModel):
-    ''' Wizard for new line day
-    '''
+    """ Wizard for new line day
+    """
     _name = 'mrp.production.new.line.day.wizard'
 
     # --------------------
     # Wizard button event:
     # --------------------
     def action_done(self, cr, uid, ids, context=None):
-        ''' Event for button done
-        '''
-        if context is None: 
-            context = {}        
-        
+        """ Event for button done
+        """
+        if context is None:
+            context = {}
+
         # Pool used:
         stats_pool = self.pool.get('mrp.production.stats')
         sol_pool = self.pool.get('sale.order.line')
-            
+
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
-        
-        
-        # Create the statistic event mrp.production.stats                
+
+        # Create the statistic event mrp.production.stats
         stats_id = stats_pool.create(cr, uid, {
             'date': wiz_proxy.date,
             'mrp_id': wiz_proxy.mrp_id.id,
             'workcenter_id': wiz_proxy.line_id.id,
             'total': 0,
-            #'working_done': False,
+            # 'working_done': False,
             }, context=context)
 
         # ---------------------------------------------------------------------
         # Migrate sale order line in this production day:
         # ---------------------------------------------------------------------
         sol_update = []
-        
+
         for sol in wiz_proxy.mrp_id.order_line_ids:
             if sol.delivered_qty > sol.product_uom_maked_sync_qty:
-                remain = sol.product_uom_qty - sol.delivered_qty 
-            else:    
+                remain = sol.product_uom_qty - sol.delivered_qty
+            else:
                 remain = sol.product_uom_qty - sol.product_uom_maked_sync_qty
             if remain <= 0:
-                continue # no production
+                continue  # no production
             sol_update.append((sol.id, remain))
         if sol_update:
             for item_id, remain in sol_update:
@@ -89,19 +89,19 @@ class CreateNewMrpLineDayWizard(orm.TransientModel):
                     'working_qty': remain,
                     'working_ready': False, # reset every time
                     }, context=context)
-                    
+
         # Create first status point for pallet management:
         stats_pool.generate_material_planned_bom(
             cr, uid, [stats_id], context=context)
         stats_pool.working_new_pallet(cr, uid, [stats_id], context=context)
-        
+
         # Save total at start up:
         working_start_total = stats_pool.get_current_production_number(
-            cr, uid, [stats_id], context=context)        
+            cr, uid, [stats_id], context=context)
         stats_pool.write(cr, uid, [stats_id], {
             'working_start_total': working_start_total,
             }, context=context)
-            
+
         # ---------------------------------------------------------------------
         # Return in production management for this day:
         # ---------------------------------------------------------------------
@@ -112,7 +112,7 @@ class CreateNewMrpLineDayWizard(orm.TransientModel):
             'view_mode': 'form',
             'res_id': stats_id,
             'res_model': 'mrp.production.stats',
-            #'view_id': view_id, # False
+            # 'view_id': view_id, # False
             'views': [(False, 'form')],
             'domain': [],
             'context': context,
@@ -127,8 +127,7 @@ class CreateNewMrpLineDayWizard(orm.TransientModel):
         'mrp_id': fields.many2one(
             'mrp.production', 'Production', required=True),
         }
-        
+
     _defaults = {
         'date': lambda *x: datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT),
         }
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

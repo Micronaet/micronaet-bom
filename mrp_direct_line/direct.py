@@ -51,6 +51,26 @@ class SaleOrderLine(orm.Model):
     # -------------------------------------------------------------------------
     # Button event:
     # -------------------------------------------------------------------------
+    def unplug_from_this_job(self, cr, uid, ids, context=None):
+        """ Unplug line from job
+        """
+        line = self.browse(cr, uid, ids, context=context)[0]
+        if line.working_qty_is_done == line.product_uom_maked_sync_qty:
+            # Unplug
+            return self.write(cr, uid, ids, {
+                'working_line_id': False,
+                'working_qty': 0.0,
+                'working_ready': False,
+            }, context=context)
+        else:
+            # Not unpluggable (TODO needed?)
+            raise osv.except_osv(
+                _('Errore'),
+                _('Riga non scollegabile ha caricato il magazzino, '),
+                )
+
+        return True
+
     def working_qty_is_done(self, cr, uid, ids, context=None):
         """ Set as done this line for the job
         """

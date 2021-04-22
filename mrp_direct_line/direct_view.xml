@@ -100,6 +100,7 @@
                                         <!--Button for unlink-->
                                         <!--<field name="working_sequence" widget="handle"/>-->
                                         <!--<field name="working_sequence" />-->
+                                        <button name="unplug_from_this_job" string="Scollega dal job" type="object" class="oe_highlight" attrs="{'invisible': [('working_done','=',True)]}"/>
                                         <field name="mrp_sequence" invisible="1"/>
                                         <field name="partner_id" readonly="1"/>
                                         <field name="default_code" readonly="1" />

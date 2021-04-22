@@ -681,8 +681,7 @@ class MrpProductionStat(orm.Model):
                     redirect_url, context=context)
 
             # mode = line
-            for line in sorted(stats.working_ids,
-                    key=lambda x: (x.working_sequence, x.mrp_sequence)):
+            for line in sorted(stats.working_ids, key=lambda x: x.mrp_sequence):
 
                 # -------------------------------------------------------------
                 # Jump record not used:
@@ -792,8 +791,7 @@ class MrpProductionStat(orm.Model):
                         </tr>''') % (
                             'bg_green' if material_ready else 'bg_red',
                             line.partner_id.name,
-                            line.order_id.destination_partner_id.name or \
-                                '&nbsp;',
+                            line.order_id.destination_partner_id.name or '&nbsp;',
                             line.order_id.name,
                             line.default_code, line.working_qty,
                             q_x_pack, item_per_pallet,
@@ -820,13 +818,12 @@ class MrpProductionStat(orm.Model):
                         </tr>
                         </table>''') % (
                             line.product_id.product_image_context,
-                            _('<p class="fg_red">ETICHETTA PERSONALIZZATA</p>'
-                                ) if line.partner_id.has_custom_label else \
-                                    _('<p>ETICHETTA MAGAZZINO</p>'),
+                            _('<p class="fg_red">ETICHETTA PERSONALIZZATA</p>')
+                            if line.partner_id.has_custom_label else _('<p>ETICHETTA MAGAZZINO</p>'),
                             note_text,
                             )
 
-                    #line.order_id.company_id.logo or ''
+                    # line.order_id.company_id.logo or ''
                     # ---------------------------------------------------------
                     # Next element from here:
                     # ---------------------------------------------------------

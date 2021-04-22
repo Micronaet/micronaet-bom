@@ -8,14 +8,14 @@
     // ------------------------------------------------------------------------
     $user = 'admin';
     $password = 'cgp.fmsp6';
-    $dbname = 'Fiam2018finale';
+    $dbname = 'Fiam';
     $server = 'localhost';
     $port = '18069';
     $type_connection = 'http';
     $server_url = "http://$server:$port/xmlrpc";
 
     // ----------------------------------------------------------------------------
-    // LOGIN 
+    // LOGIN
     // ----------------------------------------------------------------------------
     $sock = new xmlrpc_client("$server_url/common");
     $msg = new xmlrpcmsg("login");
@@ -24,7 +24,7 @@
     $msg->addParam(new xmlrpcval($password, "string"));
     $resp = $sock->send($msg);
     $val = $resp->value();
-    $uid = $val->scalarval(); 
+    $uid = $val->scalarval();
 
     // ----------------------------------------------------------------------------
     // CONFIRM PRODUCTION:
@@ -32,12 +32,12 @@
     $sol_id = $_GET['sol_id'];
     $redirect_url = $_GET['redirect_url'];
     if (isset($_GET['mode'])){
-        $mode = $_GET['mode'];        
+        $mode = $_GET['mode'];
         }
     else {
         $mode = 'line'; // else 'pre'
-        }    
-    
+        }
+
     //$args_read = array(new xmlrpcval("html", "string"),);
     $sock = new xmlrpc_client("$server_url/object");
     $msg = new xmlrpcmsg('execute');
@@ -58,12 +58,12 @@
         header('Location: '.$redirect_url);
         exit();
        }
-    ?> 
+    ?>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
         <link type="text/css" rel="stylesheet" href="/styles/linea.css" />
     </head>
-    <body>    
+    <body>
     </body>
 </html>

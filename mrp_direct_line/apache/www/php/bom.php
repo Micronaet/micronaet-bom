@@ -5,20 +5,20 @@
 
     // Show error:
     ini_set('display_errors', 'On');
-    
+
     // ------------------------------------------------------------------------
     // XMLRPC CONNECT PARAMETER:
     // ------------------------------------------------------------------------
     $user = 'admin';
     $password = 'cgp.fmsp6';
-    $dbname = 'Fiam2018finale';
+    $dbname = 'Fiam';
     $server = 'localhost';
     $port = '18069';
     $type_connection = 'http';
     $server_url = "http://$server:$port/xmlrpc";
 
     // ------------------------------------------------------------------------
-    // LOGIN 
+    // LOGIN
     // ------------------------------------------------------------------------
     $sock = new xmlrpc_client("$server_url/common");
     $msg = new xmlrpcmsg("login");
@@ -27,7 +27,7 @@
     $msg->addParam(new xmlrpcval($password, "string"));
     $resp = $sock->send($msg);
     $val = $resp->value();
-    $uid = $val->scalarval(); 
+    $uid = $val->scalarval();
 
     // ------------------------------------------------------------------------
     // READ:
@@ -49,10 +49,10 @@
     $html = "";
     if ($resp->faultCode()) {
         echo 'Errore: '.$resp->faultString()."\n";
-        } 
+        }
     else {
         $val = $resp->value();
-        $html = $val->scalarval(); 
+        $html = $val->scalarval();
        }
 ?>
 <html>

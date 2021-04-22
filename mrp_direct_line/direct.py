@@ -891,7 +891,7 @@ class MrpProductionStat(orm.Model):
             for material in line.product_id.dynamic_bom_line_ids:
                 product = material.product_id
                 if not material.category_id.show_ready:
-                    continue # jump category not in show ready status
+                    continue  # jump category not in show ready status
 
                 product_qty = material.product_qty * line.working_qty
                 if not product_qty:

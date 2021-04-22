@@ -107,7 +107,7 @@
                                         <field name="material_max" readonly="1" />
                                         <field name="material_ready" readonly="1" />
                                         <field name="delivered_qty" readonly="1" />
-                                        <field name="working_qty" sum="total"/>
+                                        <field name="working_qty" sum="total" readonly="1"/>
                                         <button name="working_qty_is_done" string=">>" type="object" />
                                         <field name="product_uom_maked_sync_qty" sum="total"/>
                                         <field name="production_note" />

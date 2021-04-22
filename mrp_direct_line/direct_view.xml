@@ -96,11 +96,11 @@
 
                                 <newline/>
                                 <field name="working_ids" colspan="4" nolabel="1" >
-                                    <tree colors="green:working_qty==0" editable="bottom">
+                                    <tree colors="green:working_qty==0" editable="bottom" default_order="mrp_sequence">
                                         <!--Button for unlink-->
-                                        <field name="working_sequence" widget="handle"/>
-                                        <!--<field name="working_sequence" />
-                                        <field name="mrp_sequence" />-->
+                                        <!--<field name="working_sequence" widget="handle"/>-->
+                                        <!--<field name="working_sequence" />-->
+                                        <field name="mrp_sequence" invisible="1"/>
                                         <field name="partner_id" readonly="1"/>
                                         <field name="default_code" readonly="1" />
                                         <field name="product_uom_qty" readonly="1" sum="total"/>

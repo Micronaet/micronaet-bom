@@ -250,8 +250,7 @@ class MrpProductionStat(orm.Model):
         update_db = {}
         for material in sorted(
                 material_pool.browse(cr, uid, material_ids, context=context),
-                key=lambda x: (
-                    x.sol_id.working_sequence, x.sol_id.mrp_sequence)):
+                key=lambda x: x.sol_id.mrp_sequence):
             product_qty = material.product_qty
             if all_qty:
                 update_db[material.id] = product_qty  # all is ready
@@ -687,7 +686,7 @@ class MrpProductionStat(orm.Model):
                 # Jump record not used:
                 # -------------------------------------------------------------
                 if not line.working_qty:
-                    continue # line and production done
+                    continue  # line and production done
 
                 product = line.product_id
                 q_x_pack = int(product.q_x_pack) # item_per_box
@@ -1042,11 +1041,11 @@ class MrpProductionStat(orm.Model):
             first = False
             second = 0
             for line in sorted(stats.working_ids,
-                    key=lambda x: (x.working_sequence, x.mrp_sequence)):
+                    key=lambda x: x.mrp_sequence):
                 # Check if is done:
                 if not line.working_qty:
                     continue
-                #if line.product_uom_qty <= line.product_uom_maked_sync_qty:
+                # if line.product_uom_qty <= line.product_uom_maked_sync_qty:
                 #    continue
                 if not first:
                     first = True

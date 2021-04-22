@@ -57,9 +57,9 @@ class SaleOrderLine(orm.Model):
         current_proxy = self.browse(cr, uid, ids, context=context)[0]
         return self.write(cr, uid, ids, {
             'working_qty': 0,
+            'sync_state': 'sync',
             'product_uom_maked_sync_qty':
-                current_proxy.product_uom_maked_sync_qty + \
-                current_proxy.working_qty,
+                current_proxy.product_uom_maked_sync_qty + current_proxy.working_qty,
             }, context=context)
 
     def working_mpr_is_ready(self, cr, uid, ids, context=None):
@@ -226,8 +226,8 @@ class MrpProductionStat(orm.Model):
     # -------------------------------------------------------------------------
     # XMLRPC Function PHP calls:
     # -------------------------------------------------------------------------
-    def set_product_ready_xmlrpc(self, cr, uid, stats_id, product_id, qty,
-            context=None):
+    def set_product_ready_xmlrpc(
+            self, cr, uid, stats_id, product_id, qty, context=None):
         """ Set product_id ready for production (0 all instead write correct
             ready product
         """
@@ -254,12 +254,12 @@ class MrpProductionStat(orm.Model):
                     x.sol_id.working_sequence, x.sol_id.mrp_sequence)):
             product_qty = material.product_qty
             if all_qty:
-                update_db[material.id] = product_qty # all is ready
+                update_db[material.id] = product_qty  # all is ready
             else:
-                if qty > product_qty: # covered all
+                if qty > product_qty:  # covered all
                     update_db[material.id] = product_qty
                     qty -= product_qty
-                else: # partial covered (or not covered)
+                else:  # partial covered (or not covered)
                     update_db[material.id] = qty
                     qty = 0
 

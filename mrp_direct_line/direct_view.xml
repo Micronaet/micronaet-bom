@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <openerp>
-    <data>        
+    <data>
         <!--mrp.bom.structure.category-->
         <record model="ir.ui.view" id="view_mrp_bom_structure_category_show_form">
             <field name="name">mrp.bom.structure.category.showready</field>
@@ -22,7 +22,25 @@
                 </field>
             </field>
         </record>
-        
+
+        <!--mrp.production.stats-->
+        <record model="ir.ui.view" id="view_mrp_production_stats_line_search">
+            <field name="name">mrp.production.stats.search</field>
+            <field name="model">mrp.production.stats</field>
+            <field name="arch" type="xml">
+                <search string="MRP Job" version="7.0">
+                    <field name="workcenter_id" />
+                    <field name="mrp_id" />
+                    <filter name="state_working_done" string="Fatti" domain="[('working_done','=',True)]"/>
+                    <group expand="0" string="Group By...">
+                        <filter name="group_workcenter" string="Linea" context="{'group_by': 'workcenter_id'}"/>
+                        <filter name="group_mrp" string="Produzione" context="{'group_by': 'mrp_id'}"/>
+                        <filter name="group_workers" string="Lavoratori" context="{'group_by': 'workers'}"/>
+                        <filter string="Status" context="{'group_by': 'state'}" />
+                    </group>
+                </search>
+            </field>
+        </record>
         <record model="ir.ui.view" id="view_mrp_production_stats_line_tree">
             <field name="name">MRP Stats for line</field>
             <field name="model">mrp.production.stats</field>
@@ -31,17 +49,16 @@
                 <tree string="MRP stats">
 	                <field name="workcenter_id"/>
 	                <field name="date" />
+	                <field name="mrp_id" />
 	                <field name="workers" />
-	                <field name="startup" widget="float_time" />
-	                <field name="hour" widget="float_time" />
-	                <field name="total" />
+	                <field name="startup" widget="float_time" sum="total"/>
+	                <field name="hour" widget="float_time" sum="total"/>
+	                <field name="total" sum="total"/>
                     <field name="working_done" invisible="1"/>
                     <button name="working_mark_as_done" string="Close Day" type="object" class="oe_highlight" attrs="{'invisible': [('working_done','=',True)]}"/>
                 </tree>
             </field>
         </record>
-
-        <!--mrp.production.stats-->
         <record model="ir.ui.view" id="view_mrp_production_stats_line_form">
             <field name="name">MRP Stats for line</field>
             <field name="model">mrp.production.stats</field>
@@ -50,12 +67,12 @@
                 <sheet position="before">
                     <header>
                         <button name="working_print_all_label" string="Print all label" type="object" icon="STOCK_PRINT"/>
-                                                
+
                         <button name="working_crono_start" string="Start Day" type="object" class="oe_highlight" attrs="{'invisible': [('working_done','=',True)]}" help="Start time for automated hour calc when close the day" />
                         <button name="working_mark_as_done" string="Close Day" type="object" class="oe_highlight" attrs="{'invisible': [('working_done','=',True)]}" help="Stop time, calc total product and mark as close"/>
-                        
+
                         <field name="working_done"  invisible="1"/>
-                    </header>                    
+                    </header>
                 </sheet>
                 <field name="date" position="after">
                     <field name="crono_start" />
@@ -68,34 +85,34 @@
                         <page string="Production">
                             <group colspan="4" col="4">
                                 <separator string="Production" colspan="4"/>
-                                
+
                                 <field name="mrp_id" readonly="1" />
                                 <newline/>
-                                
+
                                 <button name="working_new_pallet" string="New pallet" type="object" colspan="1" />
                                 <button name="working_end_pallet" string="End pallet" type="object" colspan="1" attrs="{'invisible': [('working_pallet','=',False)]}"/>
                                 <button name="nothing" string="Pallet created" type="object" icon="gtk-fullscreen" attrs="{'invisible': [('working_pallet','=',False)]}"/>
                                 <field name="working_pallet" invisible="1" />
-                                
+
                                 <newline/>
                                 <field name="working_ids" colspan="4" nolabel="1" >
                                     <tree colors="green:working_qty==0" editable="bottom">
                                         <!--Button for unlink-->
                                         <field name="working_sequence" widget="handle"/>
-                                        <field name="working_sequence" />
-                                        <field name="mrp_sequence" />
+                                        <!--<field name="working_sequence" />
+                                        <field name="mrp_sequence" />-->
                                         <field name="partner_id" readonly="1"/>
                                         <field name="default_code" readonly="1" />
-                                        <field name="product_uom_qty" readonly="1" />
+                                        <field name="product_uom_qty" readonly="1" sum="total"/>
                                         <field name="material_max" readonly="1" />
                                         <field name="material_ready" readonly="1" />
                                         <field name="delivered_qty" readonly="1" />
-                                        <field name="working_qty" />
+                                        <field name="working_qty" sum="total"/>
                                         <button name="working_qty_is_done" string=">>" type="object" />
-                                        <field name="product_uom_maked_sync_qty" />
+                                        <field name="product_uom_maked_sync_qty" sum="total"/>
                                         <field name="production_note" />
                                         <button name="working_print_single_label" string="Print label" type="object" icon="STOCK_PRINT"/>
-                                    </tree>    
+                                    </tree>
                                 </field>
                             </group>
                         </page>
@@ -103,9 +120,9 @@
                             <group colspan="4" col="4">
                                 <separator string="Material" colspan="4"/>
                                     <group colspan="4" col="4">
-                                        <button name="generate_material_planned_bom" 
-                                                string="Generate material" type="object" 
-                                                confirm="Regenerate operation will delete all marked ready q., confirm?" 
+                                        <button name="generate_material_planned_bom"
+                                                string="Generate material" type="object"
+                                                confirm="Regenerate operation will delete all marked ready q., confirm?"
                                                 icon="gtk-refresh" />
                                         <field name="material_ids" colspan="4" nolabel="1">
                                             <tree string="Material" editable="bottom" colors="red:ready_qty&lt;product_qty;green:ready_qty&gt;=product_qty">
@@ -113,18 +130,18 @@
                                                 <field name="sol_id" invisible="1"/>
                                                 <field name="product_id" readonly="1"/>
                                                 <field name="bom_qty" readonly="1"/>
-                                                <field name="product_qty" readonly="1"/>                                        
+                                                <field name="product_qty" readonly="1"/>
                                                 <field name="ready_qty" />
                                             </tree>
                                         </field>
                                     </group>
-                            </group>                                   
+                            </group>
                         </page>
                         <page string="Pallet">
                             <group colspan="4" col="4">
                                 <separator string="Pallet" colspan="4"/>
                                 <field name="pallet_ids" colspan="4" nolabel="1" />
-                            </group>                                                    
+                            </group>
                         </page>
                     </notebook>
                 </field>
@@ -134,17 +151,18 @@
            <field name="name">MRP Stats for line</field>
             <field name="model">mrp.production.stats</field>
             <field name="arch" type="xml">
-                <form string="String" version="7.0">        
+                <form string="String" version="7.0">
                     <sheet>
                         <group col="4" colspan="4">
-                            <field name="workcenter_id" />                            
+                            <field name="workcenter_id" />
+                            <field name="mrp_id" />
                             <field name="date" />
                             <separator string="Current:" colspan="4"/>
                             <field name="working_line_current" widget="html" nolabel="1" readonly="1" colspan="4"/>
                             <separator string="Next:" colspan="4"/>
                             <field name="working_line_next" widget="html" nolabel="1" readonly="1" colspan="4"/>
                         </group>
-                    </sheet>        
+                    </sheet>
                 </form>
             </field>
         </record>
@@ -165,8 +183,8 @@
             <field name="arch" type="xml">
                 <tree string="Pallet">
                     <field name="sequence" />
-                    <field name="create_date" />    
-                    <field name="qrcode" />                                    
+                    <field name="create_date" />
+                    <field name="qrcode" />
                 </tree>
             </field>
         </record>
@@ -175,15 +193,15 @@
             <field name="model">mrp.production.stats.pallet</field>
             <field name="arch" type="xml">
                 <form string="Pallet" version="7.0">
-                    <group colspan="4" col="4">                                        
+                    <group colspan="4" col="4">
                         <group colspan="2" col="2">
                             <field name="sequence" />
                             <field name="create_date" />
                             <field name="qrcode" colpan="4"/>
-                        </group>    
+                        </group>
                         <group colspan="2" col="2">
                             <field name="qrcode_image" widget="image" nolabel="1"/>
-                        </group>    
+                        </group>
                         <group colspan="4" col="4">
                             <separator string="Content" colspan="4"/>
                             <field name="content_ids" editable="bottom" nolabel="1">
@@ -195,8 +213,8 @@
                                     <field name="order_id" />
                                </tree>
                             </field>
-                        </group>                                                                                                                                
-                    </group>                                                                                
+                        </group>
+                    </group>
                 </form>
             </field>
         </record>
@@ -204,7 +222,7 @@
             <field name="name">mrp.production.stats.pallet.form</field>
             <field name="model">mrp.production.stats.pallet</field>
             <field name="arch" type="xml">
-                <search string="Pallet" version="7.0">        
+                <search string="Pallet" version="7.0">
                     <field name="id" filter_domain="[('id','=',self)]"/>
                     <!--<filter name="state_draft" string="Draft state" domain="[('state','=','draft')]"/>
                     <group expand="0" string="Group By...">
@@ -244,7 +262,7 @@
                     <hpaned>
                         <child1>
                             <action colspan="4"  height="100" name="%(action_day_open_working_for_line)d" string="Line status"/>
-                       </child1>                       
+                       </child1>
                    </hpaned>
                 </form>
             </field>
@@ -255,49 +273,49 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="auto_refresh">4</field>
-            <field name="usage">menu</field>            
+            <field name="usage">menu</field>
             <field name="view_id" ref="board_your_object_auto_refresh_form"/>
             <field name="context">{}</field>
             <field name="domain">[]</field>
-        </record>        
-    
-        <menuitem 
+        </record>
+
+        <menuitem
             parent="mrp.menu_mrp_manufacturing"
-            id="menu_mrp_manufacturing_line_root" 
+            id="menu_mrp_manufacturing_line_root"
             sequence="40"
             name="Line management"
-            />        
-            <menuitem 
+            />
+            <menuitem
                 parent="menu_mrp_manufacturing_line_root"
-                id="menu_mrp_manufacturing_line_days" 
+                id="menu_mrp_manufacturing_line_days"
                 sequence="20"
                 action="action_day_open_working_manager"
                 name="Working days"
-                />        
-            
-            <!--<menuitem 
+                />
+
+            <!--<menuitem
                 parent="menu_mrp_manufacturing_line_root"
-                id="menu_mrp_manufacturing_line_for_line_days" 
-                sequence="30"
+                id="menu_mrp_manufacturing_line_for_line_dash_days"
+                sequence="25"
                 action="action_board_your_object_auto_refresh_form"
                 name="Working days for line"
                 />-->
-            <menuitem 
+            <menuitem
                 parent="menu_mrp_manufacturing_line_root"
-                id="menu_mrp_manufacturing_line_for_line_days" 
+                id="menu_mrp_manufacturing_line_for_line_days"
                 sequence="30"
                 action="action_day_open_working_for_line"
                 name="Working days for line"
                 />
-            <menuitem 
+            <menuitem
                 parent="menu_mrp_manufacturing_line_root"
-                id="menu_mrp_manufacturing_pallet" 
+                id="menu_mrp_manufacturing_pallet"
                 sequence="40"
                 action="action_stats_pallet"
                 name="Pallet"
                 />
 
-            
+
     </data>
 </openerp>
 

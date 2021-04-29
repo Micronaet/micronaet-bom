@@ -12,12 +12,43 @@
                 name="Linea"
                 sequence="10"
                 />
+
             <menuitem
                 parent="menu_mrp_direct_line_root"
                 id="menu_mrp_direct_line_configuration"
                 name="Configurazione"
                 sequence="99"
                 />
+                <menuitem
+                    parent="menu_mrp_direct_line_configuration"
+                    id="menu_mrp_manufacturing_line_root_master"
+                    sequence="40"
+                    name="Line management"
+                    />
+                    <menuitem
+                        parent="menu_mrp_manufacturing_line_root_master"
+                        id="menu_mrp_manufacturing_line_days_master"
+                        sequence="20"
+                        action="action_day_open_working_manager"
+                        name="Working days"
+                        />
+
+                    <menuitem
+                        parent="menu_mrp_manufacturing_line_root_master"
+                        id="menu_mrp_manufacturing_line_for_line_days_master"
+                        sequence="30"
+                        action="action_day_open_working_for_line"
+                        name="Working days for line"
+                        />
+                    <menuitem
+                        parent="menu_mrp_manufacturing_line_root_master"
+                        id="menu_mrp_manufacturing_pallet_master"
+                        sequence="40"
+                        action="action_stats_pallet"
+                        name="Pallet"
+                        />
+
+
     </data>
 </openerp>
 

@@ -326,7 +326,7 @@ class MrpProductionStat(orm.Model):
     def open_preline_url(self, cr, uid, ids, context=None):
         """ Open preline
         """
-        res = self.open_line_url(self, cr, uid, ids, context=context)
+        res = self.open_line_url(cr, uid, ids, context=context)
         res['url'] += '&mode=pre'
         return res
 

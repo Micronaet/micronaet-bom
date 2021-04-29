@@ -125,10 +125,10 @@
                         <page string="Production">
                             <group colspan="4" col="4">
                                 <separator string="Dettaglio:" colspan="2"/>
-                                <button name="row_in_tree_view" string="Ordina righe produzione" type="object" colspan="1" icon="gtk-sort-descending"/>
-                                <button name="pring_job_wizard" string="Stampa produzione" type="object" colspan="1" icon="gtk-print" />
+                                <button name="row_in_tree_view" string="Ordina righe produzione" type="object" colspan="1" icon="gtk-sort-descending" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
+                                <button name="pring_job_wizard" string="Stampa produzione" type="object" colspan="1" icon="gtk-print" groups="mrp_direct_line.show_menuitem_mrp_mananger_line" />
 
-                                <field name="mrp_id" readonly="1" />
+                                <field name="mrp_id" readonly="1" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
                                 <newline/>
 
                                 <button name="working_new_pallet" string="Pallet nuovo" type="object" colspan="1" attrs="{'invisible': [('working_pallet','=',True)]}"/>
@@ -147,19 +147,19 @@
                                         <field name="partner_id" readonly="1"/>
                                         <field name="default_code" readonly="1" />
                                         <field name="product_uom_qty" readonly="1" sum="total"/>
-                                        <field name="material_max" readonly="1" />
-                                        <field name="material_ready" readonly="1" />
-                                        <field name="delivered_qty" readonly="1" />
+                                        <field name="material_max" readonly="1" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
+                                        <field name="material_ready" readonly="1" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
+                                        <field name="delivered_qty" readonly="1" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
                                         <field name="working_qty" sum="total" readonly="1"/>
                                         <button name="working_qty_is_done" string=">>" type="object" />
                                         <field name="product_uom_maked_sync_qty" sum="total"/>
                                         <field name="production_note" />
-                                        <button name="working_print_single_label" string="Print label" type="object" icon="STOCK_PRINT"/>
+                                        <button name="working_print_single_label" string="Print label" type="object" icon="STOCK_PRINT" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
                                     </tree>
                                 </field>
                             </group>
                         </page>
-                        <page string="Material">
+                        <page string="Material" groups="mrp_direct_line.show_menuitem_mrp_mananger_line">
                             <group colspan="4" col="4">
                                 <separator string="Material" colspan="4"/>
                                     <group colspan="4" col="4">
@@ -180,7 +180,7 @@
                                     </group>
                             </group>
                         </page>
-                        <page string="Pallet">
+                        <page string="Pallet" groups="mrp_direct_line.show_menuitem_mrp_mananger_line">
                             <group colspan="4" col="4">
                                 <separator string="Pallet" colspan="4"/>
                                 <field name="pallet_ids" colspan="4" nolabel="1" />

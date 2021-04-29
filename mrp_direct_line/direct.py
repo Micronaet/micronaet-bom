@@ -678,6 +678,23 @@ class MrpProductionStat(orm.Model):
         # ---------------------------------------------------------------------
         # UTILITY:
         # ---------------------------------------------------------------------
+        def clean_note(note):
+            """ Remove if present ex production
+                Bloc: "Ex.: MO02610"
+            """
+            if not note:
+                return ''
+            remove = 'Ex.: MO'
+            code_len = 5
+
+            if remove in note:
+                note_list = note.split('Ex.: MO')
+                res = '%s%s' % (
+                    note_list[0],
+                    note_list[-1][code_len:]  # remove code
+                )
+                return res.strip()
+
         # TODO move in note system:
         def get_notesystem_for_line(self, cr, uid, line, context=None):
             """ Note system for line
@@ -719,7 +736,23 @@ class MrpProductionStat(orm.Model):
             # TODO add only category for production in filter!
 
             # Product note:
-            mask = '<b class="category_note">NOTE %s: </b><br/>%s'
+            mask = '<b class="category_note">NOTE %s: </b><br/>%s<br/>'
+
+            # Riferimento ordine cliente:
+            if line.order_id.client_order_ref:
+                note_text += mask % (
+                    'ORDINE',
+                    line.order_id.client_order_ref.split('|')[-1])
+
+            # Note di linea produzione:
+            res = ''
+            if (line.product_id.default_code or '')[5:6].upper() == 'I':
+                res += 'IGNIFUGO '
+            if line.production_note:
+                res += clean_note(line.production_note)
+            if res:
+                note_text += mask % ('DIRETTE', res)
+
             res = add_domain_note(
                 self, cr, uid, line, block='pr', context=context)
             if res:
@@ -764,8 +797,15 @@ class MrpProductionStat(orm.Model):
 
         # Pool used:
         product_pool = self.pool.get('product.product')
+        user_pool = self.pool.get('res.users')
         note_pool = self.pool.get('note.note')
         line_pool = self.pool.get('mrp.workcenter')
+        user = user_pool.browse(cr, uid, uid, context=context)
+        company = user.company_id
+
+        # Image parameters:
+        image_path = os.path.expanduser(company.direct_image_path)
+        image_extension = company.direct_image_extension
 
         if context is None:
             context = {}
@@ -794,7 +834,7 @@ class MrpProductionStat(orm.Model):
         res = ''
         max_queue = 10
 
-        for stats in self.browse(cr, uid, stats_ids, context=context)[0]: # XXX only first?
+        for stats in self.browse(cr, uid, stats_ids, context=context)[0]:  # XXX only first?
             res = '''
                 <table>
                     <tr>
@@ -947,7 +987,20 @@ class MrpProductionStat(orm.Model):
                     # image_base64 = line.product_id.product_image_context
                     # TODO load directly form file:
                     import base64
-                    with open('/home/thebrush/logo.png', 'rb') as image_file:
+                    image_fullname = os.path.join(
+                        image_path,
+                        '%s.%s' % (
+                            (product.default_code or '').replace(' ', '_'),
+                            image_extension,
+                        ),
+                    )
+                    if not os.path.isfile(image_fullname):
+                        image_fullname = os.path.join(
+                            image_path,
+                            'vuota.%s' % image_extension,
+                        )
+
+                    with open(image_fullname, 'rb') as image_file:
                         image_base64 = base64.b64encode(image_file.read())
                     res += _('''
                         <tr>

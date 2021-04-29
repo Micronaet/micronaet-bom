@@ -68,7 +68,7 @@
                     <header>
                         <button name="working_print_all_label" string="Print all label" type="object" icon="STOCK_PRINT"/>
 
-                        <button name="working_crono_start" string="Inizia il job" type="object" class="oe_highlight" attrs="{'invisible': [('working_done','=',True)]}" help="Start time for automated hour calc when close the day" />
+                        <button name="working_crono_start" string="Inizia il job" type="object" class="oe_highlight" attrs="{'invisible': [('crono_start', '!=', False)]}" help="Start time for automated hour calc when close the day" />
                         <button name="working_mark_as_done" string="Chiudi il job" type="object" class="oe_highlight" attrs="{'invisible': [('working_done','=',True)]}" help="Stop time, calc total product and mark as close"/>
                         <button name="working_reschedule_remain" string="Rischedula" type="object" class="oe_highlight" attrs="{'invisible': [('working_done','=',False)]}" help="Permette di rischedulare i residui di produzione per in altro giorno"/>
 

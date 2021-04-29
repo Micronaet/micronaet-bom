@@ -1015,6 +1015,7 @@ class MrpProductionStat(orm.Model):
     def working_reschedule_remain(self, cr, uid, ids, context=None):
         """" Open wizard for reassign to another day
         """
+
         job = self.browse(cr, uid, ids, context=context)[0]
         model_pool = self.pool.get('ir.model.data')
         form_view_id = model_pool.get_object_reference(
@@ -1022,22 +1023,23 @@ class MrpProductionStat(orm.Model):
             'mrp_direct_line', 'mrp_production_new_line_day_wizard_view')[1]
 
         ctx = context.copy()
+        tomorrow = str(datetime.now() + relativedelta(days=1))[:10]
         ctx.update({
-            'default_date': datetime.now() + timedelta.days(days=1),
+            'default_date': tomorrow,
             'default_line_id': job.workcenter_id.id,
-            'default_mrp_id': job.mpr_id.id,
+            'default_mrp_id': job.mrp_id.id,
         })
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Result for view_name'),
+            'name': _('Rischedulazione produzione'),
             'view_type': 'form',
-            'view_mode': 'tree,form',
+            'view_mode': 'form',
             'res_id': False,
             'res_model': 'mrp.production.new.line.day.wizard',
             'view_id': form_view_id,
             'views': [(form_view_id, 'form')],
             'domain': [],
-            'context': context,
+            'context': ctx,
             'target': 'new',
             'nodestroy': False,
             }

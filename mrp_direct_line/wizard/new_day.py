@@ -75,11 +75,17 @@ class CreateNewMrpLineDayWizard(orm.TransientModel):
         sol_update = []
 
         for sol in wiz_proxy.mrp_id.order_line_ids:
-            # TODO qty assigned?
+            # Check if delivered qty
             if sol.delivered_qty > sol.product_uom_maked_sync_qty:
                 remain = sol.product_uom_qty - sol.delivered_qty
             else:
                 remain = sol.product_uom_qty - sol.product_uom_maked_sync_qty
+
+            # Check if assigned qty:
+            assigned_qty = sol.assigned_qty
+            if assigned_qty:
+                remain = remain - assigned_qty
+
             if remain <= 0:
                 continue  # no production
             sol_update.append((sol.id, remain))

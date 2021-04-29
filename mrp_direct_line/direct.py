@@ -286,6 +286,16 @@ class MrpProductionStat(orm.Model):
             total += line.product_uom_maked_sync_qty
         return total
 
+    def row_in_tree_view(self, cr, uid, ids, context=None):
+        """ Call MRP function for sort lines
+        """
+        mrp_pool = self.pool.get('mrp.production')
+        job_id = ids[0]
+        job = self.browse(cr, uid, job_id, context=context)
+        mrp_id = job.mrp_id.id
+
+        return mrp_pool.row_in_tree_view(cr, uid, [mrp_id], context=context)
+
     def pring_job_wizard(self, cr, uid, ids, context=None):
         """ Call original report item from job to production
         """

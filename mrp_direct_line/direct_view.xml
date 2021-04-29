@@ -95,8 +95,9 @@
                     <notebook colspan="4">
                         <page string="Production">
                             <group colspan="4" col="4">
-                                <separator string="Dettaglio:" colspan="3"/>
-                                <button name="pring_job_wizard" string="Stampa produzione" type="object" colspan="1" />
+                                <separator string="Dettaglio:" colspan="2"/>
+                                <button name="row_in_tree_view" string="Ordina righe produzione" type="object" colspan="1" icon="gtk-sort-descending"/>
+                                <button name="pring_job_wizard" string="Stampa produzione" type="object" colspan="1" icon="gtk-print" />
 
                                 <field name="mrp_id" readonly="1" />
                                 <newline/>

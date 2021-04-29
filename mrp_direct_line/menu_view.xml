@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <menuitem
+            id="menu_mrp_direct_line_root"
+            name="Linea di prod."
+            sequence="10"
+            />
+            <menuitem
+                parent="menu_mrp_direct_line_root"
+                id="menu_mrp_direct_line_line"
+                name="Linea"
+                sequence="10"
+                />
+            <menuitem
+                parent="menu_mrp_direct_line_root"
+                id="menu_mrp_direct_line_configuration"
+                name="Configurazione"
+                sequence="99"
+                />
+    </data>
+</openerp>
+

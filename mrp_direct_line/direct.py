@@ -18,6 +18,7 @@
 #
 ###############################################################################
 import os
+import pdb
 import sys
 import logging
 import openerp
@@ -55,7 +56,8 @@ class SaleOrderLine(orm.Model):
         """ Unplug line from job
         """
         line = self.browse(cr, uid, ids, context=context)[0]
-        if line.working_qty_is_done == line.product_uom_maked_sync_qty:
+        if not line.working_qty or \
+                line.working_qty == line.product_uom_maked_sync_qty:
             # Unplug
             return self.write(cr, uid, ids, {
                 'working_line_id': False,
@@ -66,10 +68,11 @@ class SaleOrderLine(orm.Model):
             # Not unpluggable (TODO needed?)
             raise osv.except_osv(
                 _('Errore'),
-                _('Riga non scollegabile ha caricato il magazzino, '),
+                _('Riga non scollegabile ha caricato il magazzino, '
+                  'Se è stato fatto per sbaglio ripristinare il corretto'
+                  'carico di produzione come quello iniziale!'),
                 )
-
-        return True
+            return True
 
     def working_qty_is_done(self, cr, uid, ids, context=None):
         """ Set as done this line for the job
@@ -152,7 +155,7 @@ class MrpProductionStatsPallet(orm.Model):
             readonly=True, multi=True,
             ),
         'qrcode_image': fields.function(
-            _create_qr_code_package, string='QR Code image',method=True,
+            _create_qr_code_package, string='QR Code image', method=True,
             type='binary', store=False, readonly=True, multi=True
             ),
         # TODO total pieces
@@ -825,6 +828,11 @@ class MrpProductionStat(orm.Model):
                     # ---------------------------------------------------------
                     # Extra info for current record:
                     # ---------------------------------------------------------
+                    # image_base64 = line.product_id.product_image_context
+                    # TODO load directly form file:
+                    import base64
+                    with open('/home/thebrush/logo.png', 'rb') as image_file:
+                        image_base64 = base64.b64encode(image_file.read())
                     res += _('''
                         <tr>
                             <td>
@@ -836,7 +844,7 @@ class MrpProductionStat(orm.Model):
                             </td>
                         </tr>
                         </table>''') % (
-                            line.product_id.product_image_context,
+                            image_base64,
                             _('<p class="fg_red">ETICHETTA PERSONALIZZATA</p>')
                             if line.partner_id.has_custom_label else _('<p>ETICHETTA MAGAZZINO</p>'),
                             note_text,
@@ -1003,6 +1011,36 @@ class MrpProductionStat(orm.Model):
             'hour': hour,
             'working_done': True,
             }, context=context)
+
+    def working_reschedule_remain(self, cr, uid, ids, context=None):
+        """" Open wizard for reassign to another day
+        """
+        job = self.browse(cr, uid, ids, context=context)[0]
+        model_pool = self.pool.get('ir.model.data')
+        form_view_id = model_pool.get_object_reference(
+            cr, uid,
+            'mrp_direct_line', 'mrp_production_new_line_day_wizard_view')[1]
+
+        ctx = context.copy()
+        ctx.update({
+            'default_date': datetime.now() + timedelta.days(days=1)
+            'default_line_id': job.workcenter_id.id,
+            'default_mrp_id': job.mpr_id.id,
+        })
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Result for view_name'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_id': False,
+            'res_model': 'mrp.production.new.line.day.wizard',
+            'view_id': form_view_id,
+            'views': [(form_view_id, 'form')],
+            'domain': [],
+            'context': context,
+            'target': 'new',
+            'nodestroy': False,
+            }
 
     def working_print_all_label(self, cr, uid, ids, context=None):
         """ Print single label

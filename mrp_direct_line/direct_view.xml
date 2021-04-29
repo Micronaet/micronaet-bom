@@ -1,6 +1,16 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+        <record model="ir.ui.view" id="view_model_name_form">
+            <field name="name">mrp.production.new.job.form</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="/form/header/field[@name='state']" position="before" >
+                    <button name="create_new_job" type="object" string="Nuovo job" class="oe_highlight"/>
+                </xpath>
+            </field>
+        </record>
         <!--mrp.bom.structure.category-->
         <record model="ir.ui.view" id="view_mrp_bom_structure_category_show_form">
             <field name="name">mrp.bom.structure.category.showready</field>

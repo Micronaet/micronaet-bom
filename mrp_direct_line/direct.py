@@ -43,6 +43,46 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+class MrpProduction(orm.Model):
+    """ Add button
+    """
+    _inherit = 'mrp.production'
+
+    def create_new_job(self, cr, uid, ids, context=None):
+        """" Open wizard for assign job
+        """
+        mrp_id = ids[0]
+        mrp = self.browse(cr, uid, mrp_id, context=context)
+        model_pool = self.pool.get('ir.model.data')
+        form_view_id = model_pool.get_object_reference(
+            cr, uid,
+            'mrp_direct_line', 'mrp_production_new_line_day_wizard_view')[1]
+
+        try:
+            line_id = mrp.bom_id.lavoration_ids[0].workcenter_id.id
+        except:
+            line_id = False
+
+        ctx = context.copy()
+        ctx.update({
+            'default_line_id': line_id,
+            'default_mrp_id': mrp_id,
+        })
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Rischedulazione produzione'),
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_id': False,
+            'res_model': 'mrp.production.new.line.day.wizard',
+            'view_id': form_view_id,
+            'views': [(form_view_id, 'form')],
+            'domain': [],
+            'context': ctx,
+            'target': 'new',
+            'nodestroy': False,
+        }
+
 
 class SaleOrderLine(orm.Model):
     """ Link line for stats

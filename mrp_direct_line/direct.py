@@ -56,12 +56,16 @@ class ResCompany(orm.Model):
         'direct_image_path': fields.char(
             'URL linea', size=80,
             help='Area per le immagini da utilizzare sulla pagina web'),
+        'direct_empty_image': fields.char(
+            'Immagine vuota', size=30,
+            help='Nome immagine vuota senza estensione (prelevata da path)'),
         'direct_image_extension': fields.char(
             'URL linea', size=5,
             help='Estensione per le immagini da utilizzare sulla pagina web'),
     }
     _defaults = {
         'direct_image_extension': lambda *x: 'jpg',
+        'direct_empty_image': lambda *x: 'vuota',
     }
 
 
@@ -806,6 +810,7 @@ class MrpProductionStat(orm.Model):
         # Image parameters:
         image_path = os.path.expanduser(company.direct_image_path)
         image_extension = company.direct_image_extension
+        direct_empty_image = company.direct_empty_image
 
         if context is None:
             context = {}
@@ -997,16 +1002,22 @@ class MrpProductionStat(orm.Model):
                     if not os.path.isfile(image_fullname):
                         image_fullname = os.path.join(
                             image_path,
-                            'vuota.%s' % image_extension,
+                            '%s.%s' % (direct_empty_image, image_extension),
                         )
 
-                    with open(image_fullname, 'rb') as image_file:
-                        image_base64 = base64.b64encode(image_file.read())
+                    if os.path.isfile(image_fullname):
+                        with open(image_fullname, 'rb') as image_file:
+                            image_base64 = base64.b64encode(image_file.read())
+                    else:
+                        image_base64 = ''
+
                     res += _('''
                         <tr>
                             <td>
                                 <img alt="Immagine non trovata" 
-                                    src="data:image/png;base64,%s" />
+                                    src="data:image/png;base64,%s"
+                                    style="max-height:350px;max-width:350px;height:auto;width:auto;" 
+                                    />
                             </td>
                             <td colspan="8" class="text_note">
                                 %s<p>%s</p>

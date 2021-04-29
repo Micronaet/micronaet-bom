@@ -12,6 +12,7 @@
                         <newline />
                         <field name="direct_line_url" />
                         <field name="direct_image_path" />
+                        <field name="direct_empty_image" />
                         <field name="direct_image_extension" />
                     </group>
                 </form>

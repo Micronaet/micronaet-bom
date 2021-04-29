@@ -25,6 +25,7 @@
                 id="menu_mrp_direct_line_configuration"
                 name="Configurazione"
                 sequence="99"
+                groups="mrp_direct_line.show_menuitem_mrp_mananger_line"
                 />
                 <menuitem
                     parent="menu_mrp_direct_line_configuration"

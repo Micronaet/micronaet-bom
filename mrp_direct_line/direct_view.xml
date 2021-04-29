@@ -83,6 +83,9 @@
             <field name="priority" eval="40"/>
             <field name="arch" type="xml">
                 <tree string="MRP stats">
+                    <button name="open_preline_url" string="Apri stato web pre-linea" type="object" class="oe_highlight" icon="STOCK_FULLSCREEN"/>
+                    <button name="open_line_url" string="Apri stato web linea" type="object" class="oe_highlight" icon="STOCK_FULLSCREEN" />
+
 	                <field name="workcenter_id"/>
 	                <field name="date" />
 	                <field name="mrp_id" />

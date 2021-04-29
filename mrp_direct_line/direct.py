@@ -301,6 +301,35 @@ class MrpProductionStat(orm.Model):
             <image src="/images/back.jpg" height="32px" /></a>
         '''
 
+    def open_line_url(self, cr, uid, ids, context=None):
+        """ Open Line
+        """
+        user_pool = self.pool.get('res.users')
+
+        # Image parameters:
+        user = user_pool.browse(cr, uid, uid, context=context)
+        company = user.company_id
+        direct_line_url = os.path.expanduser(company.direct_line_url)
+
+        job_id = ids[0]
+        job = self.browse(cr, uid, job_id, context=context)
+        url = '%s/?linea=%s' % (
+            direct_line_url,
+            job.workcenter_id.code,
+        )
+        return {
+            'type': 'ir.actions.act_url',
+            'url': url,
+            'target': '_blank',
+        }
+
+    def open_preline_url(self, cr, uid, ids, context=None):
+        """ Open preline
+        """
+        res = self.open_line_url(self, cr, uid, ids, context=context)
+        res['url'] += '&mode=pre'
+        return res
+
     # -------------------------------------------------------------------------
     # Utility:
     # -------------------------------------------------------------------------
@@ -804,10 +833,10 @@ class MrpProductionStat(orm.Model):
         user_pool = self.pool.get('res.users')
         note_pool = self.pool.get('note.note')
         line_pool = self.pool.get('mrp.workcenter')
-        user = user_pool.browse(cr, uid, uid, context=context)
-        company = user.company_id
 
         # Image parameters:
+        user = user_pool.browse(cr, uid, uid, context=context)
+        company = user.company_id
         image_path = os.path.expanduser(company.direct_image_path)
         image_extension = company.direct_image_extension
         direct_empty_image = company.direct_empty_image

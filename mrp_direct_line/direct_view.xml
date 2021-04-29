@@ -105,7 +105,7 @@
             <field name="arch" type="xml">
                 <sheet position="before">
                     <header>
-                        <button name="working_print_all_label" string="Print all label" type="object" icon="STOCK_PRINT"/>
+                        <button name="working_print_all_label" string="Print all label" type="object" icon="STOCK_PRINT" groups="mrp_direct_line.show_menuitem_mrp_manager_print"/>
 
                         <button name="working_crono_start" string="Inizia il job" type="object" class="oe_highlight" attrs="{'invisible': [('crono_start', '!=', False)]}" help="Start time for automated hour calc when close the day" />
                         <button name="working_mark_as_done" string="Chiudi il job" type="object" class="oe_highlight" attrs="{'invisible': [('working_done','=',True)]}" help="Stop time, calc total product and mark as close"/>
@@ -142,11 +142,11 @@
                                         <!--Button for unlink-->
                                         <!--<field name="working_sequence" widget="handle"/>-->
                                         <!--<field name="working_sequence" />-->
-                                        <button name="unplug_from_this_job" string="Scollega dal job" type="object" class="oe_highlight" icon="gtk-disconnect"/>
+                                        <button name="unplug_from_this_job" string="Scollega dal job" type="object" class="oe_highlight" icon="gtk-disconnect" attrs="{'invisible': [('working_qty', '=', 0)]}"/>
                                         <field name="mrp_sequence" invisible="1"/>
                                         <field name="partner_id" readonly="1"/>
                                         <field name="default_code" readonly="1" />
-                                        <field name="product_uom_qty" readonly="1" sum="total"/>
+                                        <field name="product_uom_qty" readonly="1" sum="total" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
                                         <field name="material_max" readonly="1" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
                                         <field name="material_ready" readonly="1" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
                                         <field name="delivered_qty" readonly="1" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
@@ -154,7 +154,7 @@
                                         <button name="working_qty_is_done" string=">>" type="object" />
                                         <field name="product_uom_maked_sync_qty" sum="total"/>
                                         <field name="production_note" />
-                                        <button name="working_print_single_label" string="Print label" type="object" icon="STOCK_PRINT" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
+                                        <button name="working_print_single_label" string="Print label" type="object" icon="STOCK_PRINT" groups="mrp_direct_line.show_menuitem_mrp_manager_print"/>
                                     </tree>
                                 </field>
                             </group>

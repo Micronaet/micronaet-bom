@@ -122,14 +122,15 @@ class SaleOrderLine(orm.Model):
         """ Unplug line from job
         """
         line = self.browse(cr, uid, ids, context=context)[0]
-        if not line.working_qty or \
-                line.working_qty == line.product_uom_maked_sync_qty:
-            # Unplug
-            return self.write(cr, uid, ids, {
-                'working_line_id': False,
-                'working_qty': 0.0,
-                'working_ready': False,
-            }, context=context)
+        """if not line.working_qty or \
+            line.working_qty == line.product_uom_maked_sync_qty:"""
+        # Unplug
+        return self.write(cr, uid, ids, {
+            'working_line_id': False,
+            'working_qty': 0.0,
+            'working_ready': False,
+        }, context=context)
+        """
         else:
             # Not unpluggable (TODO needed?)
             raise osv.except_osv(
@@ -138,8 +139,7 @@ class SaleOrderLine(orm.Model):
                   'Se è stato fatto per sbaglio ripristinare il corretto'
                   'carico di produzione come quello iniziale!'),
                 )
-            return True
-
+        """
     def working_qty_is_done(self, cr, uid, ids, context=None):
         """ Set as done this line for the job
         """

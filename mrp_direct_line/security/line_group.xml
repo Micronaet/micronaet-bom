@@ -12,5 +12,10 @@
             <field name="category_id" ref="menuitem_base.show_menuitem_category" />
             <field name="comment">Show MRP line mananger</field>
         </record>
+        <record id="show_menuitem_mrp_manager_print" model="res.groups">
+            <field name="name">Show MRP print manager</field>
+            <field name="category_id" ref="menuitem_base.show_menuitem_category" />
+            <field name="comment">Show MRP print manager</field>
+        </record>
    </data>
 </openerp>

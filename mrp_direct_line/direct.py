@@ -1023,7 +1023,7 @@ class MrpProductionStat(orm.Model):
 
         ctx = context.copy()
         ctx.update({
-            'default_date': datetime.now() + timedelta.days(days=1)
+            'default_date': datetime.now() + timedelta.days(days=1),
             'default_line_id': job.workcenter_id.id,
             'default_mrp_id': job.mpr_id.id,
         })

@@ -43,6 +43,28 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+
+class ResCompany(orm.Model):
+    """ Parameters
+    """
+    _inherit = 'res.company'
+
+    _columns = {
+        'direct_line_url': fields.char(
+            'URL linea', size=80,
+            help='Indirizzo base per le chiamate di pagina online'),
+        'direct_image_path': fields.char(
+            'URL linea', size=80,
+            help='Area per le immagini da utilizzare sulla pagina web'),
+        'direct_image_extension': fields.char(
+            'URL linea', size=5,
+            help='Estensione per le immagini da utilizzare sulla pagina web'),
+    }
+    _defaults = {
+        'direct_image_extension': lambda *x: 'jpg',
+    }
+
+
 class MrpProduction(orm.Model):
     """ Add button
     """

@@ -1,6 +1,31 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+        <record model="ir.ui.view" id="view_res_company_parameter_form">
+            <field name="name">Parametri di linea</field>
+            <field name="priority" eval="40" />
+            <field name="model">res.company</field>
+            <field name="arch" type="xml">
+                <form string="Parametri" version="7.0">
+                    <group colspan="4" col="4">
+                        <field name="name" readonly="1" />
+                        <newline />
+                        <field name="direct_line_url" />
+                        <field name="direct_image_path" />
+                        <field name="direct_image_extension" />
+                    </group>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_res_company_parameter">
+            <field name="name">Parameretri di linea</field>
+            <field name="res_model">res.company</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="base.view_company_tree"/>
+            <field name="context">{'form_view_ref': 'mrp_direct_line.view_res_company_parameter_form'}</field>
+        </record>
+
         <record model="ir.ui.view" id="view_model_name_form">
             <field name="name">mrp.production.new.job.form</field>
             <field name="model">mrp.production</field>
@@ -256,6 +281,17 @@
             <field name="domain">[]</field>
         </record>
 
+        <record model="ir.actions.act_window" id="action_day_open_working_for_line_today">
+            <field name="name">Job aperti di oggi</field>
+            <field name="res_model">mrp.production.stats</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_mrp_production_stats_line_tree"/>
+            <field name="context">{}</field>
+            <field name="domain">[('date', '=', datetime.date.today().strftime('%Y-%m-%d')), ('working_done', '=', False)]</field>
+            <!--<field name="auto_refresh">10</field>-->
+        </record>
+
         <!--Auto refresh board:-->
         <record model="ir.actions.act_window" id="action_day_open_working_for_line">
             <field name="name">Work days for line</field>
@@ -327,6 +363,14 @@
                 sequence="40"
                 action="action_stats_pallet"
                 name="Pallet"
+                />
+
+            <menuitem
+                parent="menu_mrp_manufacturing_line_root"
+                id="menu_mrp_manufacturing_line_parameter"
+                sequence="50"
+                action="action_res_company_parameter"
+                name="Parametri"
                 />
 
 

@@ -12,6 +12,13 @@
                 name="Linea"
                 sequence="10"
                 />
+                <menuitem
+                    parent="menu_mrp_direct_line_line"
+                    id="menu_open_working_for_line_today_master"
+                    sequence="10"
+                    name="Job aperti oggi"
+                    action="action_day_open_working_for_line_today"
+                    />
 
             <menuitem
                 parent="menu_mrp_direct_line_root"
@@ -30,15 +37,15 @@
                         id="menu_mrp_manufacturing_line_days_master"
                         sequence="20"
                         action="action_day_open_working_manager"
-                        name="Working days"
+                        name="Elenco Job"
                         />
 
-                    <menuitem
+                        <menuitem
                         parent="menu_mrp_manufacturing_line_root_master"
                         id="menu_mrp_manufacturing_line_for_line_days_master"
                         sequence="30"
                         action="action_day_open_working_for_line"
-                        name="Working days for line"
+                        name="Dettaglio job"
                         />
                     <menuitem
                         parent="menu_mrp_manufacturing_line_root_master"
@@ -47,7 +54,13 @@
                         action="action_stats_pallet"
                         name="Pallet"
                         />
-
+                    <menuitem
+                        parent="menu_mrp_manufacturing_line_root_master"
+                        id="menu_mrp_manufacturing_line_parameter_master"
+                        sequence="50"
+                        action="action_res_company_parameter"
+                        name="Parametri"
+                        />
 
     </data>
 </openerp>

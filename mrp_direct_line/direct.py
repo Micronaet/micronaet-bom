@@ -143,7 +143,7 @@ class SaleOrderLine(orm.Model):
             'mrp.production.stats', 'Working on'),
         'working_sequence': fields.integer('Working seq.'),
         'working_qty': fields.integer('Working q.'),
-        'working_done': fields.boolean('Done'), #TODO remove > test working_qty
+        'working_done': fields.boolean('Done'),  # TODO remove > test working_qty
         'working_ready': fields.boolean('Ready for input',
             help='Line component are ready in line position'),
         }
@@ -285,6 +285,50 @@ class MrpProductionStat(orm.Model):
         for line in self.browse(cr, uid, ids, context=context)[0].working_ids:
             total += line.product_uom_maked_sync_qty
         return total
+
+    def pring_job_wizard(self, cr, uid, ids, context=None):
+        """ Call original report item from job to production
+        """
+        model_pool = self.pool.get('ir.model.data')
+
+        job_id = ids[0]
+        job = self.browse(cr, uid, job_id, context=context)
+        mrp_id = job.mrp_id.id
+
+        if context is None:
+            context = {}
+        ctx = context.copy()
+        ctx.update({
+            'lang': u'it_IT',
+            'tz': u'Europe/Rome',
+            'uid': uid,
+            u'active_model': u'mrp.production',
+            'params': {},  # u'action': 710
+            'search_disable_custom_filters': True,
+            'default_job_id': job.id,
+            'active_ids': [mrp_id],
+            'active_id': mrp_id
+        })
+
+        form_view_id = model_pool.get_object_reference(
+            cr, uid,
+            'production_accounting_external',
+            'view_mrp_production_report_wizard_form')[1]
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Stampa Job'),
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_id': False,
+            'res_model': 'mrp.production.report.wizard',
+            'view_id': form_view_id,
+            'views': [(form_view_id, 'form')],
+            'domain': [],
+            'context': ctx,
+            'target': 'new',
+            'nodestroy': False,
+            }
 
     # -------------------------------------------------------------------------
     # XMLRPC Function PHP calls:
@@ -1055,7 +1099,6 @@ class MrpProductionStat(orm.Model):
     def working_reschedule_remain(self, cr, uid, ids, context=None):
         """" Open wizard for reassign to another day
         """
-
         job = self.browse(cr, uid, ids, context=context)[0]
         model_pool = self.pool.get('ir.model.data')
         form_view_id = model_pool.get_object_reference(
@@ -1223,6 +1266,11 @@ class MrpProductionStat(orm.Model):
             'Working pallet situation',
             help='Not visible: store the data for new pallet situation'),
         }
+
+    _defaults = {
+        'working_pallet': lambda *x: False,
+        }
+
 
 class MrpBomStructureCategory(orm.Model):
     """ Model name: Manage structure for show bom

@@ -82,7 +82,7 @@ class CreateNewMrpLineDayWizard(orm.TransientModel):
                 remain = sol.product_uom_qty - sol.product_uom_maked_sync_qty
 
             # Check if assigned qty:
-            assigned_qty = sol.assigned_qty
+            assigned_qty = sol.mx_assigned_qty
             if assigned_qty:
                 remain = remain - assigned_qty
 

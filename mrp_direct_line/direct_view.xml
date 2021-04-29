@@ -95,14 +95,15 @@
                     <notebook colspan="4">
                         <page string="Production">
                             <group colspan="4" col="4">
-                                <separator string="Production" colspan="4"/>
+                                <separator string="Dettaglio:" colspan="3"/>
+                                <button name="pring_job_wizard" string="Stampa produzione" type="object" colspan="1" />
 
                                 <field name="mrp_id" readonly="1" />
                                 <newline/>
 
-                                <button name="working_new_pallet" string="New pallet" type="object" colspan="1" />
-                                <button name="working_end_pallet" string="End pallet" type="object" colspan="1" attrs="{'invisible': [('working_pallet','=',False)]}"/>
-                                <button name="nothing" string="Pallet created" type="object" icon="gtk-fullscreen" attrs="{'invisible': [('working_pallet','=',False)]}"/>
+                                <button name="working_new_pallet" string="Pallet nuovo" type="object" colspan="1" attrs="{'invisible': [('working_pallet','=',True)]}"/>
+                                <button name="working_end_pallet" string="Pallet completato" type="object" colspan="1" attrs="{'invisible': [('working_pallet','=',False)]}"/>
+                                <!--<button name="nothing" string="Pallet in caricamento" type="object" icon="gtk-fullscreen" attrs="{'invisible': [('working_pallet','=',False)]}" help="Indica che è stato creato un pallet si sta caricando"/>-->
                                 <field name="working_pallet" invisible="1" />
 
                                 <newline/>

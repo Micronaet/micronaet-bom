@@ -3,3 +3,4 @@ access_mrp_bom_industrial_cost_user,mrp.bom.industrial.cost,model_mrp_bom_indust
 access_mrp_bom_industrial_cost_line_user,mrp.bom.industrial.cost.line,model_mrp_bom_industrial_cost_line,base.group_user,1,1,1,1
 access_mrp_bom_industrial_history_user,mrp.bom.industrial.history,model_mrp_bom_industrial_history,base.group_user,1,1,1,1
 access_mrp_bom_industrial_simulation_user,mrp.bom.industrial.simulation,model_mrp_bom_industrial_simulation,base.group_user,1,1,1,1
+access_mrp_bom_industrial_history_line_user,mrp.bom.industrial.history.line,model_mrp_bom_industrial_history_line,base.group_user,1,1,1,1

@@ -1,9 +1,9 @@
 <?php
 /*
 $user      = 'admin';
-$password  = 'password';
-$dbname    = 'database';
-$server_url = 'http://192.168.1.1:8069/xmlrpc/';
+$password  = 'cgp.fmsp6';
+$dbname    = 'Fiam';
+$server_url = 'http://192.168.1.181:8069/xmlrpc/';
 $userId    = -1;
 */
 
@@ -32,7 +32,7 @@ class OpenErpConnection
                 $msg->addParam(new xmlrpcval($this->password, "string"));
 		$resp = $sock->send($msg);
 		$val = $resp->value();
-		$this->userId = $val->scalarval(); 
+		$this->userId = $val->scalarval();
 
             if($this->userId > 0) {
                return $this->userId;
@@ -51,7 +51,7 @@ class OpenErpConnection
                 $msg->addParam(new xmlrpcval("search", "string"));
                 $msg->addParam(php_xmlrpc_encode($domain));
             $val = $this->_cache_request($this->url.'object',$msg);
-            
+
                 return php_xmlrpc_decode($val);
         }
 
@@ -68,7 +68,7 @@ class OpenErpConnection
                 $resp = $sock->send($msg);
 		if ($resp->faultCode()) {
 		  echo 'Errore: '.$resp->faultString()."<br>";
-		} 
+		}
                 else {
  		   $val=$resp->value();
  		   $res_ids=$val->scalarval();
@@ -91,7 +91,7 @@ class OpenErpConnection
                 $resp = $sock->send($msg);
 		if ($resp->faultCode()) {
 		  echo 'Errore: '.$resp->faultString()."<br>";
-		} 
+		}
                 else {
  		   $val=$resp->value();
  		   $res_ids=$val->scalarval();
@@ -108,7 +108,7 @@ function dump_array($arr){
    foreach ($arr as $c) {
       $i=0;
       $cols=10;
-      foreach($c as $property => $value)  { 
+      foreach($c as $property => $value)  {
          $col = $i%$cols;
          if($col==0 && $i>0) echo "</tr>";
          if($col==0 ) echo "<tr>";

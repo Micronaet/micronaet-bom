@@ -1,8 +1,8 @@
 <?php
 $user       = 'admin';
 $password    = 'cgp.fmsp6';
-$dbname    = 'Fiam2017S';
-$server_url = 'http://192.168.100.166:18069/xmlrpc/';
+$dbname    = 'Fiam';
+$server_url = 'http://192.168.1.181:8069/xmlrpc/';
 $userId    = -1;
 
 class OpenErpConnection
@@ -28,7 +28,7 @@ class OpenErpConnection
                 $msg->addParam(new xmlrpcval($this->user   , "string"));
                 $msg->addParam(new xmlrpcval($this->password, "string"));
             $val = $this->_cache_request($this->url.'common',$msg);
-            
+
                 $this->userId = $val->scalarVal();
 
             if($this->userId > 0) {
@@ -48,7 +48,7 @@ class OpenErpConnection
                 $msg->addParam(new xmlrpcval("search"      , "string"));
                 $msg->addParam(php_xmlrpc_encode($domain));
             $val = $this->_cache_request($this->url.'object',$msg);
-            
+
                 return php_xmlrpc_decode($val);
         }
 
@@ -62,7 +62,7 @@ class OpenErpConnection
                 $msg->addParam(php_xmlrpc_encode($ids));
                 $msg->addParam(php_xmlrpc_encode($fields));
             $val = $this->_cache_request($this->url.'object',$msg);
-            
+
                 return php_xmlrpc_decode($val);
         }
 
@@ -78,10 +78,10 @@ class OpenErpConnection
              $resp = $connection->send($msg);
             $ret = $resp->value();
              apc_add($key,$ret,2);
-            return $ret;         
+            return $ret;
          }
-         
-         
+
+
 
       }
 }
@@ -91,7 +91,7 @@ function dump_array($arr){
    foreach ($arr as $c) {
       $i=0;
       $cols=10;
-      foreach($c as $property => $value)  { 
+      foreach($c as $property => $value)  {
          $col = $i%$cols;
          if($col==0 && $i>0) echo "</tr>";
          if($col==0 ) echo "<tr>";

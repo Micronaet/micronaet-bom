@@ -16,8 +16,8 @@
     $user = 'admin';
     $password = 'cgp.fmsp6';
     $dbname = 'Fiam';
-    $server = 'localhost';
-    $port = '18069';
+    $server = '192.168.1.181';
+    $port = '8069';
     $type_connection = 'http';
     $server_url = "http://$server:$port/xmlrpc";
 

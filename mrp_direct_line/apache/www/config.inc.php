@@ -3,9 +3,9 @@
 // ----------------------------------------------------------------------------
 #$config
 $user = 'admin';
-$password = 'cgp.fmsp6';
-$dbname = 'Fiam';
-$server = '192.168.1.181';
+$password = 'password';
+$dbname = 'Database';
+$server = 'localhost';
 $port = '8069';
 $type_connection = 'http';
 $server_url = "http://$server:$port/xmlrpc";

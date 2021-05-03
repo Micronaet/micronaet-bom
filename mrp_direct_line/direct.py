@@ -1230,7 +1230,7 @@ class MrpProductionStat(orm.Model):
         if job.workers:
             ctx['default_workers'] = job.workers
         if job.startup:
-            ctx['default_workers'] = job.startup
+            ctx['default_startup'] = job.startup
         return res
 
         """

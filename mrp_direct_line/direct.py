@@ -337,6 +337,7 @@ class MrpProductionStat(orm.Model):
         """ Calculate current production data sync
         """
         total = 0
+        # Loop on sale order line:
         for line in self.browse(cr, uid, ids, context=context)[0].working_ids:
             total += line.product_uom_maked_sync_qty
         return total
@@ -1188,22 +1189,33 @@ class MrpProductionStat(orm.Model):
     def working_crono_start(self, cr, uid, ids, context=None):
         """ Start event:
         """
-        return self.write(cr, uid, ids, {
+        mrp_pool = self.pool.get('mrp.production')
+        job = self.browse(cr, uid, ids[0], context=context)
+
+        self.write(cr, uid, ids, {
             'crono_start': datetime.now().strftime(
                 DEFAULT_SERVER_DATETIME_FORMAT),
             }, context=context)
 
+        return mrp_pool.start_blocking_stats(
+            cr, uid, [job.mrp_id.id], context=context)
+
     def working_mark_as_done(self, cr, uid, ids, context=None):
         """ Print single label
         """
-        current_proxy = self.browse(cr, uid, ids, context=context)[0]
+        mrp_pool = self.pool.get('mrp.production')
+        job = self.browse(cr, uid, ids[0], context=context)
+        return mrp_pool.stop_blocking_stats(
+            cr, uid, [job.mrp_id.id], context=context)
+
+        """current_proxy = self.browse(cr, uid, ids, context=context)[0]
         crono_stop = datetime.now()
         if current_proxy.crono_start:
             duration = crono_stop - datetime.strptime(
                 current_proxy.crono_start,
                 DEFAULT_SERVER_DATETIME_FORMAT,
                 )
-            hour = (duration.seconds / 3600.0 )  + (duration.days * 24.0)
+            hour = (duration.seconds / 3600.0) + (duration.days * 24.0)
         else:
             hour = 0.0
 
@@ -1219,7 +1231,7 @@ class MrpProductionStat(orm.Model):
             'crono_stop': crono_stop.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
             'hour': hour,
             'working_done': True,
-            }, context=context)
+            }, context=context)"""
 
     def working_reschedule_remain(self, cr, uid, ids, context=None):
         """" Open wizard for reassign to another day

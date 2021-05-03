@@ -1,7 +1,6 @@
 <?php
 // XMLRPC CONNECT PARAMETER:
 include_once($_SERVER['DOCUMENT_ROOT'] . '/config.inc.php');
-// XMLRPC Module:
 
 class OpenErpConnection
 {

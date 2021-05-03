@@ -1234,12 +1234,6 @@ class MrpProductionStat(orm.Model):
         if job.startup:
             ctx['default_startup'] = job.startup
 
-        # Pre update job:
-        return self.write(cr, uid, ids, {
-            'crono_stop': crono_stop.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-            'working_done': True,
-            }, context=context)
-
         # Return original wizard:
         return res
 

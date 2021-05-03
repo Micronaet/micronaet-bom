@@ -313,7 +313,7 @@ class MrpProductionStat(orm.Model):
 
         job_id = ids[0]
         job = self.browse(cr, uid, job_id, context=context)
-        url = '%s/?linea=%s' % (
+        url = '%s/linea.php?linea=%s' % (
             direct_line_url,
             job.workcenter_id.code,
         )
@@ -506,7 +506,7 @@ class MrpProductionStat(orm.Model):
                 > 'noheader': hide header
                 > 'show_ready': show only show ready category
                 > 'expand': expand halfwork
-                > 'qty': calculate total for qty producey
+                > 'qty': calculate total for qty produced
         """
         # Read parameters:
         if context is None:

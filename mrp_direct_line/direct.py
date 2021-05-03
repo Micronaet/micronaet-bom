@@ -1203,22 +1203,36 @@ class MrpProductionStat(orm.Model):
     def working_mark_as_done(self, cr, uid, ids, context=None):
         """ Print single label
         """
+        if context is None:
+            context = {}
         mrp_pool = self.pool.get('mrp.production')
         job = self.browse(cr, uid, ids[0], context=context)
-        return mrp_pool.stop_blocking_stats(
-            cr, uid, [job.mrp_id.id], context=context)
 
-        """current_proxy = self.browse(cr, uid, ids, context=context)[0]
+        # Change context parameters for new management:
         crono_stop = datetime.now()
-        if current_proxy.crono_start:
+        if job.crono_start:
             duration = crono_stop - datetime.strptime(
-                current_proxy.crono_start,
+                job.crono_start,
                 DEFAULT_SERVER_DATETIME_FORMAT,
                 )
             hour = (duration.seconds / 3600.0) + (duration.days * 24.0)
         else:
             hour = 0.0
 
+        ctx = context.copy()
+        ctx.update({
+            'default_workcenter_id': job.workcenter_id.id,
+            'default_hour': hour,
+            })
+        if job.workers:
+            ctx['default_workers'] = job.workers
+        if job.startup:
+            ctx['default_workers'] = job.startup
+
+        return mrp_pool.stop_blocking_stats(
+            cr, uid, [job.mrp_id.id], context=ctx)
+
+        """
         # Auto total count:
         working_end_total = self.get_current_production_number(
             cr, uid, ids, context=context)

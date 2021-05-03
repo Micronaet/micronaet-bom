@@ -1219,7 +1219,10 @@ class MrpProductionStat(orm.Model):
         else:
             hour = 0.0
 
-        ctx = context.copy()
+        # Call original action to get view dict:
+        res = mrp_pool.stop_blocking_stats(
+            cr, uid, [job.mrp_id.id], context=context)
+        ctx = res['context']
         ctx.update({
             'default_workcenter_id': job.workcenter_id.id,
             'default_hour': hour,
@@ -1228,9 +1231,7 @@ class MrpProductionStat(orm.Model):
             ctx['default_workers'] = job.workers
         if job.startup:
             ctx['default_workers'] = job.startup
-
-        return mrp_pool.stop_blocking_stats(
-            cr, uid, [job.mrp_id.id], context=ctx)
+        return res
 
         """
         # Auto total count:

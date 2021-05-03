@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <?php
-    //include_once('config.inc.php');
+    include_once('config.inc.php');
     include('xmlrpc/xmlrpc.inc');
 
     // Show error:
@@ -9,13 +9,13 @@
     // ------------------------------------------------------------------------
     // XMLRPC CONNECT PARAMETER:
     // ------------------------------------------------------------------------
-    $user = 'admin';
-    $password = 'cgp.fmsp6';
-    $dbname = 'Fiam';
-    $server = 'localhost';
-    $port = '18069';
-    $type_connection = 'http';
-    $server_url = "http://$server:$port/xmlrpc";
+    //$user = 'admin';
+    //$password = 'cgp.fmsp6';
+    //$dbname = 'Fiam';
+    //$server = 'localhost';
+    //$port = '18069';
+    //$type_connection = 'http';
+    //$server_url = "http://$server:$port/xmlrpc";
 
     // ------------------------------------------------------------------------
     // LOGIN

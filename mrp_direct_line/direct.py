@@ -1206,7 +1206,8 @@ class MrpProductionStat(orm.Model):
         if context is None:
             context = {}
         mrp_pool = self.pool.get('mrp.production')
-        job = self.browse(cr, uid, ids[0], context=context)
+        job_id = ids[0]
+        job = self.browse(cr, uid, job_id, context=context)
 
         # Change context parameters for new management:
         crono_stop = datetime.now()
@@ -1224,6 +1225,7 @@ class MrpProductionStat(orm.Model):
             cr, uid, [job.mrp_id.id], context=context)
         ctx = res['context']
         ctx.update({
+            'update_mode_id': job_id,  # Update mode
             'default_workcenter_id': job.workcenter_id.id,
             'default_hour': hour,
             })
@@ -1231,6 +1233,14 @@ class MrpProductionStat(orm.Model):
             ctx['default_workers'] = job.workers
         if job.startup:
             ctx['default_startup'] = job.startup
+
+        # Pre update job:
+        return self.write(cr, uid, ids, {
+            'crono_stop': crono_stop.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            'working_done': True,
+            }, context=context)
+
+        # Return original wizard:
         return res
 
         """

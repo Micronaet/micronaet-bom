@@ -861,7 +861,7 @@ class MrpProductionStat(orm.Model):
             ('date', '=', now[:10]),
             ], context=context)
         if not stats_ids:
-            return _('<p>Nothing to work in line %s today!</p>') % line_code
+            return _('<p>Nessuna lavorazione per oggi sulla linea: %s!</p>') % line_code
 
         # ---------------------------------------------------------------------
         # Header:

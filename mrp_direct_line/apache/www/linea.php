@@ -1,25 +1,16 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <?php
-    //include_once('config.inc.php');
+    // XMLRPC CONNECT PARAMETER:
+    include_once($_SERVER['DOCUMENT_ROOT'] . '/config.inc.php');
+    // XMLRPC Module:
     include('xmlrpc/xmlrpc.inc');
 
     // Show error:
     ini_set('display_errors', 'On');
 
     // Autorefresh parameters:
-    $page = "";//$_SERVER['PHP_SELF'];
+    $page = "";  //$_SERVER['PHP_SELF'];
     $sec = "20";
-
-    // ------------------------------------------------------------------------
-    // XMLRPC CONNECT PARAMETER:
-    // ------------------------------------------------------------------------
-    $user = 'admin';
-    $password = 'cgp.fmsp6';
-    $dbname = 'Fiam';
-    $server = 'localhost';
-    $port = '18069';
-    $type_connection = 'http';
-    $server_url = "http://$server:$port/xmlrpc";
 
     // ------------------------------------------------------------------------
     // LOGIN

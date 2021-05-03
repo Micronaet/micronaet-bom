@@ -904,7 +904,7 @@ class MrpProductionStat(orm.Model):
 
                 product = line.product_id
                 q_x_pack = int(product.q_x_pack)  # item_per_box
-                item_per_pallet = int((product.item_per_pallet or '').replace('.0', ''))
+                item_per_pallet = int((product.item_per_pallet or '0').replace('.0', ''))
 
                 # if line.product_uom_qty <= line.product_uom_maked_sync_qty:
                 #    continue

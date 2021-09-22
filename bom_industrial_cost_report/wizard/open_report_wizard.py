@@ -66,19 +66,20 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
         master_date = {}
         from_date = '1975-01-01'
-        references = []
-        for reference in wiz_proxy.extra_period.split(';')
+        references = ['']
+        pdb.set_trace()
+        for reference in wiz_proxy.extra_period.split(';'):
             reference = reference.strip()
             to_date = '%s-%s-%s' % (
                 reference[-4:],
                 reference[3:5],
                 reference[:2],
             )
-        references = [False].extend(sorted(references))
+            references.append(references)
+        references.sort()
         _logger.warning('Multi report for date: %s' % (references, ))
 
         pdb.set_trace()
-        references.extend(sorted())
         # First reference normal report!
         for reference in wiz_proxy.extra_period.split(';'):
             if reference:

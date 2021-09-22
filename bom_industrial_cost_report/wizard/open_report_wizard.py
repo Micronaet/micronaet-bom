@@ -80,7 +80,6 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
         # First reference normal report!
         for reference in references:
-            pdb.set_trace()
             if reference:
                 datas = {
                     'wizard': True,

@@ -6,7 +6,7 @@
             <field name="name">product.pipe.material.tree</field>
             <field name="model">product.pipe.material</field>
             <field name="arch" type="xml">
-                <tree string="Pipe material">        
+                <tree string="Pipe material">
                     <field name="code" />
                     <field name="name" />
                     <field name="first_supplier_id" />
@@ -40,11 +40,17 @@
                                     <field name="diameter" />
                                     <field name="order_lot" />
                                 </tree>
-                            </field>                    
+                            </field>
+                            <field name="history_ids" colspan="4" nolabel="1" >
+                                <tree string="Storico prezzi" editable="bottom">
+                                    <field name="year" />
+                                    <field name="last_price" />
+                                </tree>
+                            </field>
                             <separator string="Note" colspan="4"/>
                             <field name="note" colspan="4" nolabel="1"/>
-                        </group>   
-                    </sheet>    
+                        </group>
+                    </sheet>
                 </form>
             </field>
         </record>
@@ -57,7 +63,7 @@
             <field name="context">{}</field>
             <field name="domain">[]</field>
         </record>
-        
+
         <record model="ir.ui.view" id="view_add_pipe_product_variant_form">
             <field name="name">product.product.form</field>
             <field name="model">product.product</field>
@@ -88,7 +94,7 @@
             <field name="model">product.product</field>
             <field name="priority" eval="50" />
             <field name="arch" type="xml">
-                <form string="Pipes" version="7.0">        
+                <form string="Pipes" version="7.0">
                     <header>
                         <button name="calculate_pipe_price_from_dimension" string="Refresh current price" type="object" icon="gtk-refresh"/>
                     </header>
@@ -107,14 +113,14 @@
                             <field name="pipe_length" />
                             <field name="pipe_resistence" />
                             <field name="weight" string="Weight Kg." />
-                            
+
                             <separator string="Price" colspan="4"/>
                             <field name="standard_price" />
                             <field name="lst_price" />
                             <field name="first_supplier_id" />
                             <field name="pipe_min_order" />
                         </group>
-                    </sheet>        
+                    </sheet>
                 </form>
             </field>
         </record>
@@ -146,7 +152,7 @@
             <field name="model">product.product</field>
             <field name="priority" eval="50" />
             <field name="arch" type="xml">
-                <search string="Pipes" version="7.0">        
+                <search string="Pipes" version="7.0">
                     <field name="name" />
                     <field name="default_code" />
                     <field name="first_supplier_id" filter_domain="[('first_supplier_id.name','=',self)]"/>
@@ -158,7 +164,7 @@
                         <filter name="group_thick" string="Pipe thick" context="{'group_by': 'pipe_thick'}"/>
                         <filter name="group_length" string="Pipe length" context="{'group_by': 'pipe_length'}"/>
                         <filter name="group_order" string="Pipe order" context="{'group_by': 'pipe_min_order'}"/>
-                    </group>                
+                    </group>
                 </search>
             </field>
         </record>
@@ -172,15 +178,15 @@
             <field name="context">{'form_view_ref':'product_pipes.view_product_product_pipes_form', 'default_is_pipe':True}</field>
             <field name="domain">[('is_pipe','=',True)]</field>
         </record>
-        <menuitem 
-            parent="base.menu_product" 
-            id="menu_action_product_product_pipes_tree" 
+        <menuitem
+            parent="base.menu_product"
+            id="menu_action_product_product_pipes_tree"
             action="action_product_product_pipes"
             sequence="30"
             />
-            <menuitem 
-                parent="menu_action_product_product_pipes_tree" 
-                id="menu_action_product_product_pipes_material_tree" 
+            <menuitem
+                parent="menu_action_product_product_pipes_tree"
+                id="menu_action_product_product_pipes_material_tree"
                 action="action_product_pipe_material_form"
                 sequence="10"
                 />

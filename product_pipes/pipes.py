@@ -31,9 +31,9 @@ from openerp import SUPERUSER_ID, api
 from openerp import tools
 from openerp.tools.translate import _
 from openerp.tools.float_utils import float_round as round
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
-    DEFAULT_SERVER_DATETIME_FORMAT, 
-    DATETIME_FORMATS_MAP, 
+from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DATETIME_FORMATS_MAP,
     float_compare)
 
 
@@ -41,32 +41,32 @@ _logger = logging.getLogger(__name__)
 
 class MRPBomLine(orm.Model):
     """ Model name: Bom line
-    """    
+    """
     _inherit = 'mrp.bom.line'
-     
+
     _columns = {
-        'length_cut': fields.float('Length cut', digits=(16, 2), 
-            help='Part for cut pipe that will be wasted'), 
-        'waste_cut': fields.float('Waste cut', digits=(16, 2), 
+        'length_cut': fields.float('Length cut', digits=(16, 2),
+            help='Part for cut pipe that will be wasted'),
+        'waste_cut': fields.float('Waste cut', digits=(16, 2),
             help='Part for cut pipe that will be wasted'), # not used for now
         'part_x_pipe': fields.integer('Part per pipe',
-            help='Number of parts for create component in a bar'), 
-        'pipe_total': fields.integer('Total pipes', 
+            help='Number of parts for create component in a bar'),
+        'pipe_total': fields.integer('Total pipes',
             help='Total pipes for create the part')
         }
 
 class ProductPipeMaterial(orm.Model):
     """ Model name: Product
-    """    
+    """
     _name = 'product.pipe.material'
     _description = 'Pipe description'
-    
+
     def realculate_all_price(self, cr, uid, ids, context=None):
         ''' Manually launch schedule operation
         '''
         self.pool.get('product.product').schedule_pipe_price_calculation(
             cr, uid, context=context)
-            
+
     _columns = {
         'code': fields.char('Code', size=10),
         'name': fields.char('Pipe material', size=32),
@@ -81,38 +81,57 @@ class ProductPipeMaterial(orm.Model):
 
 class ProductPipeMaterialLot(orm.Model):
     """ Model name: Product
-    """    
+    """
     _name = 'product.pipe.material.lot'
     _description = 'Pipe order lot'
     _rec_name = 'material_id'
-    
+
     _columns = {
         'material_id': fields.many2one(
             'product.pipe.material', 'Material'),
         'diameter': fields.float('Diameter mm.', digits=(16, 2)),
         'order_lot': fields.integer('Min. lot', required=True),
         }
-    
+
     _defaults = {
         'order_lot': lambda *x: 1,
-        }    
+        }
+
+
+class ProductPipeMaterialHistory(orm.Model):
+    """ Model name: Product
+    """
+    _name = 'product.pipe.material.history'
+    _description = 'Pipe order history'
+    _rec_name = 'material_id'
+
+    _columns = {
+        'material_id': fields.many2one(
+            'product.pipe.material', 'Material'),
+        'last_price': fields.float('Prezzo', digits=(16, 2)),
+        'year': fields.char('Anno', size=4),
+    }
+
 
 class ProductPipeMaterial(orm.Model):
     """ Model name: Product
-    """    
+    """
     _inherit = 'product.pipe.material'
-    
+
     _columns = {
         'lot_ids': fields.one2many(
-            'product.pipe.material.lot', 'material_id', 
+            'product.pipe.material.lot', 'material_id',
             'Order lot'),
+        'history_ids': fields.one2many(
+            'product.pipe.material.history', 'material_id',
+            'Storico prezzi'),
         }
 
 class ProductProduct(orm.Model):
     """ Model name: Product
-    """    
+    """
     _inherit = 'product.product'
-    
+
     # Scheduled operations:
     def schedule_pipe_price_calculation(self, cr, uid, context=None):
         ''' Calculate all pipe value if weight / volume is present
@@ -124,7 +143,7 @@ class ProductProduct(orm.Model):
             ], context=context)
         return self.calculate_pipe_price_from_dimension(
             cr, uid, pipe_ids, context=context)
-            
+
     def calculate_pipe_price_from_dimension(self, cr, uid, ids, context=None):
         ''' Calculate volume depend on dimension of pipe and weight / volume
             remove auto weight, use context parameter
@@ -133,45 +152,45 @@ class ProductProduct(orm.Model):
         if context is None:
             context = {}
         auto_weight = context.get('auto_weight', False)
-            
+
         # Used from button but also for scheduled operation
-        for product in self.browse(cr, uid, ids, context=context):            
-            data = {}            
+        for product in self.browse(cr, uid, ids, context=context):
+            data = {}
             if auto_weight:
                 _logger.warning('Auto calculation weight mode')
                 thick = product.pipe_thick
-                
+
                 # Area:
                 ray1 = product.pipe_diameter / 2
                 if product.pipe_diameter2:
                     ray2 = product.pipe_diameter2 / 2
-                else:    
+                else:
                     ray2 = ray1
-                    
+
                 plain_area = ray1 * ray2 * math.pi
                 empty_area = (ray1 - thick) * (ray2 - thick) * math.pi
-                
-                # Volume:    
+
+                # Volume:
                 plain_volume = plain_area * product.pipe_length
                 empty_volume = empty_area * product.pipe_length
                 volume = (plain_volume - empty_volume) / 1000000 # m3
-                
+
                 # Weight:
                 weight = volume * product.pipe_material_id.weight_specific
                 data['weight'] = weight
             else:
                 _logger.warning('No auto calculation weight mode')
-                weight = product.weight    
+                weight = product.weight
 
-            # Price: 
+            # Price:
             data['standard_price'] = \
                 weight * product.pipe_material_id.last_price
             self.write(cr, uid, product.id, data, context=context)
-        
+
     _columns = {
         'is_pipe': fields.boolean('Is Pipe'),
         'pipe_diameter': fields.float('Pipe diameter mm.', digits=(16, 2)),
-        'pipe_diameter2': fields.float('Pipe diameter 2 mm.', 
+        'pipe_diameter2': fields.float('Pipe diameter 2 mm.',
             digits=(16, 2), help='For elliptic pipes'),
         'pipe_thick': fields.float('Pipe thick mm.', digits=(16, 2)),
         'pipe_length': fields.float('Pipe length mm.', digits=(16, 2)),
@@ -184,6 +203,6 @@ class ProductProduct(orm.Model):
             ], 'Pipe material'),
         # Override pipe_material:
         'pipe_material_id': fields.many2one(
-            'product.pipe.material', 'Material'),     
+            'product.pipe.material', 'Material'),
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

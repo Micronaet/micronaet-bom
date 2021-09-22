@@ -67,7 +67,6 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         master_data = {}
         from_date = '1975-01-01'
         references = ['']
-        pdb.set_trace()
         for reference in wiz_proxy.extra_period.split(';'):
             reference = reference.strip()
             to_date = '%s-%s-%s' % (
@@ -81,6 +80,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
         # First reference normal report!
         for reference in references:
+            pdb.set_trace()
             if reference:
                 datas = {
                     'wizard': True,

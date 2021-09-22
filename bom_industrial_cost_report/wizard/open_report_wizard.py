@@ -119,6 +119,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         ]
         width = [
             20, 40, 15,
+            15, 10,
         ]
         for reference in references[1:]:
             header.append('Al %s' % reference)
@@ -167,6 +168,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 u'%s' % product.name,
                 (current_price, f_number),
                 (simulated_price, f_number),
+                '',  # todo difference %
             ]
 
             # Append other record data
@@ -181,7 +183,6 @@ class ProductBomReportLimitWizard(orm.TransientModel):
     def action_print(self, cr, uid, ids, context=None):
         """ Event for print report
         """
-        pdb.set_trace()
         if context is None:
             context = {}
 

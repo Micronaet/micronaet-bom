@@ -468,6 +468,16 @@ class ProductProduct(orm.Model):
                     break
             return value
 
+        def get_pipe_material_price(material_price_db, cmpt, reference_year):
+            """ Extract pipe price also in previous period
+            """
+            material = cmpt.product_id.pipe_material_id
+            if reference_year:  # History price:
+                return material_price_db.get(
+                    material.id, {}).get(reference_year)
+            else:  # reference price
+                return material.last_price
+
         if datas is None:
             datas = {}
 
@@ -488,11 +498,13 @@ class ProductProduct(orm.Model):
             cr, uid, [], context=context)
         for material_price in material_price_pool.browse(
                 cr, uid, material_price_ids, context=context):
-            material_id = material_price.material_id.id
+            material = material_price.material_id.id
+            material_id = material.id
             if material_id not in material_price_db:
                 material_price_db[material_id] = {}
             material_price_db[material_id][material_price.year] = \
                 material_price.last_price
+
         print(material_price_db)
         pdb.set_trace()
 
@@ -511,8 +523,10 @@ class ProductProduct(orm.Model):
             _logger.warning('No current product price updated!')
 
         # Range date:
-        from_date = datas.get('from_date', False)
-        to_date = datas.get('to_date', False)
+        from_date = datas.get('from_date', '')
+        to_date = datas.get('to_date', '')
+        reference_year = to_date[:4]
+        _logger.warning('Reference year for pipe price: %s' % reference_year)
 
         # ---------------------------------------------------------------------
         # Load history database if to_date range is setup:
@@ -656,9 +670,8 @@ class ProductProduct(orm.Model):
                         if cmpt.product_id.is_pipe:
                             # Calc with weight and price kg not cost manag.:
                             # TODO Simulation:
-
-                            pipe_price = \
-                                cmpt.product_id.pipe_material_id.last_price
+                            pipe_price = get_pipe_material_price(
+                                material_price_db, cmpt, reference_year)
 
                             min_value = max_value = \
                                 pipe_price * cmpt.product_id.weight

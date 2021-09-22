@@ -299,8 +299,8 @@ class MrpBomIndustrialHistory(orm.Model):
             10, 10,
             ])
 
-        #`Title line:
-        row = 0 # Start line
+        # Title line:
+        row = 0  # Start line
         excel_pool.write_xls_line(
             WS_name, row, [
                 'Variazione costi industriali prodotti (modello):'

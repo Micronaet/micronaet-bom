@@ -498,7 +498,7 @@ class ProductProduct(orm.Model):
             cr, uid, [], context=context)
         for material_price in material_price_pool.browse(
                 cr, uid, material_price_ids, context=context):
-            material = material_price.material_id.id
+            material = material_price.material_id
             material_id = material.id
             if material_id not in material_price_db:
                 material_price_db[material_id] = {}

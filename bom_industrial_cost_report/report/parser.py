@@ -481,6 +481,21 @@ class ProductProduct(orm.Model):
                 cr, uid, simulation_ids, context=context):
             simulation_db.append(simulation)
 
+        # Material history price if needed:
+        material_price_db = {}
+        material_price_pool = self.pool.get('product.pipe.material.history')
+        material_price_ids = material_price_pool.search(
+            cr, uid, [], context=context)
+        for material_price in material_price_pool.browse(
+                cr, uid, material_price_ids, context=context):
+            material_id = material_price.material_id.id
+            if material_id not in material_price_db:
+                material_price_db[material_id] = {}
+            material_price_db[material_id][material_price.year] = \
+                material_price.last_price
+        print(material_price_db)
+        pdb.set_trace()
+
         # Need update record price:
         update_record = datas.get('update_record', False)
         if update_record:
@@ -641,6 +656,7 @@ class ProductProduct(orm.Model):
                         if cmpt.product_id.is_pipe:
                             # Calc with weight and price kg not cost manag.:
                             # TODO Simulation:
+
                             pipe_price = \
                                 cmpt.product_id.pipe_material_id.last_price
 

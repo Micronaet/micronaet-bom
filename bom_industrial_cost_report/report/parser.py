@@ -471,12 +471,9 @@ class ProductProduct(orm.Model):
         def get_pipe_material_price(material_price_db, cmpt, reference_year):
             """ Extract pipe price also in previous period
             """
-            material = cmpt.product_id.pipe_material_id
-            if reference_year:  # History price:
-                return material_price_db.get(
-                    material.id, {}).get(reference_year)
-            else:  # reference price
-                return material.last_price
+            material_id = cmpt.product_id.pipe_material_id.id
+            return material_price_db.get(
+                material_id, {}).get(reference_year) or 0.0
 
         if datas is None:
             datas = {}
@@ -667,8 +664,12 @@ class ProductProduct(orm.Model):
                         if cmpt.product_id.is_pipe:
                             # Calc with weight and price kg not cost manag.:
                             # TODO Simulation:
-                            pipe_price = get_pipe_material_price(
-                                material_price_db, cmpt, reference_year)
+                            if reference_year:
+                                pipe_price = get_pipe_material_price(
+                                    material_price_db, cmpt, reference_year)
+                            else:
+                                pipe_price = \
+                                    cmpt.product_id.pipe_material_id.last_price
 
                             min_value = max_value = \
                                 pipe_price * cmpt.product_id.weight

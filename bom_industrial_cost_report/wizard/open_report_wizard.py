@@ -74,8 +74,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             if reference:
                 reference = reference.strip()
                 to_date = '%s-%s-%s' % (
-                    reference[7:11],
-                    reference[4:6],
+                    reference[-4:],
+                    reference[3:5],
                     reference[:2],
                 )
                 datas = {

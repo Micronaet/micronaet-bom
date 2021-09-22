@@ -164,8 +164,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             default_code = product.default_code or ''
             current_price = prices['']
             if current_price:
-                simulated_rate = 100.0 * (
-                    simulated_price - current_price) / current_price
+                simulated_rate = \
+                    (simulated_price - current_price) / current_price * 100.0
             else:
                 simulated_rate = '/'
             line = [
@@ -173,7 +173,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 u'%s' % product.name,
                 (current_price, f_number),
                 (simulated_price, f_number),
-                simulated_rate,
+                (simulated_rate, f_number),
             ]
 
             # Append other record data
@@ -181,8 +181,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 this_price = prices.get(reference, 0.0)
                 line.append(this_price)
                 if current_price:
-                    this_rate = 100.0 * (
-                        this_price - current_price) / current_price
+                    this_rate = \
+                        (this_price - current_price) / current_price * 100.0
                 else:
                     this_rate = 0.0
                 # Calc rate difference

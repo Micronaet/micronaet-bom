@@ -103,7 +103,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 # todo manage error field?
                 if product not in master_data:
                         master_data[product] = ({}, simulated_price)
-                master_data[product][0][reference] = max_price  # Save this
+                if reference:  # Write only if are old year, not reference
+                    master_data[product][0][reference] = max_price  # Save this
 
         # ---------------------------------------------------------------------
         #                          Excel export:

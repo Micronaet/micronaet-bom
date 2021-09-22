@@ -101,14 +101,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
                 # Write all price present (False = reference for 100%)
                 # todo manage error field?
-                try:
-                    if product not in master_data:
-                        try:
-                            master_data[product] = ({}, simulated_price)
-                        except:
-                            pdb.set_trace()
-                except:
-                    pdb.set_trace()
+                if product not in master_data:
+                        master_data[product] = ({}, simulated_price)
                 master_data[product][0][reference] = max_price  # Save this
 
         # ---------------------------------------------------------------------
@@ -165,9 +159,9 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         for product in sorted(master_data, key=lambda x: x.default_code):
             row += 1
-            record, simulated_price = master_data[product]
+            prices, simulated_price = master_data[product]
             default_code = product.default_code or ''
-            current_price = record[0]['']
+            current_price = prices['']
             line = [
                 default_code or '',
                 u'%s' % product.name,

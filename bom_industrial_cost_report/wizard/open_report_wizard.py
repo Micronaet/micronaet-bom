@@ -64,7 +64,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             context = {}
 
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
-        master_date = {}
+        master_data = {}
         from_date = '1975-01-01'
         references = ['']
         pdb.set_trace()
@@ -79,9 +79,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         references.sort()
         _logger.warning('Multi report for date: %s' % (references, ))
 
-        pdb.set_trace()
         # First reference normal report!
-        for reference in wiz_proxy.extra_period.split(';'):
+        for reference in references:
             if reference:
                 datas = {
                     'wizard': True,
@@ -93,7 +92,6 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             records = product_pool.report_get_objects_bom_industrial_cost(
                     cr, uid, datas=datas, context=context)
 
-            pdb.set_trace()
             for record in records:
                 # Explode record:
                 (min_price, max_price, error, components, extra1, extra2,
@@ -101,10 +99,10 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                  pipe_total_weight, simulated_price) = record
 
                 # Write all price present (False = reference for 100%)
-                if product not in master_date:
-                    master_date[product] = ({}, simulated_price)
-                master_date[product][0][reference] = max_price
-        pdb.set_trace()
+                # todo manage error field?
+                if product not in master_data:
+                    master_data[product] = ({}, simulated_price)
+                master_data[product][0][reference] = max_price
 
         # ---------------------------------------------------------------------
         #                          Excel export:
@@ -117,18 +115,15 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
             'Prezzo simulato',
             'Variaz. %',
-
-            'Prezzo 2020',
-            'Variaz. %',
         ]
-
         width = [
             20, 40, 15,
-            15, 10,
-            15, 10,
-            15, 10,
-            # 15, 10, 15, 10, 15, 10, 15, 10,
         ]
+        for reference in references[1:]:
+            header.append('Al %s' % reference)
+            header.append('Diff. %')
+            width.append(15)
+            width.append(10)
 
         # ---------------------------------------------------------------------
         # Create WS:
@@ -161,19 +156,25 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Product selection:
         # ---------------------------------------------------------------------
-        product_data = {}
-        for product in sorted(product_data, key=lambda x: x.default_code):
+        for product in sorted(master_data, key=lambda x: x.default_code):
+            row += 1
+            record, simulated_price = master_data[product]
             default_code = product.default_code or ''
-
+            current_price = record[0]['']
             line = [
                 default_code or '',
-                product.name or '',
-                # (product.lst_price or 0.0, f_number),
+                u'%s' % product.name,
+                (current_price, f_number),
+                (simulated_price, f_number),
             ]
+
+            # Append other record data
+            for reference in references:
+                line.append(record.get(reference, 0.0))
+                # Calc rate difference
+                line.append('')  # todo calc rate
             excel_pool.write_xls_line(
                 ws_name, row, line, default_format=f_text)
-            row += 1
-
         return excel_pool.return_attachment(cr, uid, 'Distinte base')
 
     def action_print(self, cr, uid, ids, context=None):

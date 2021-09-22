@@ -103,13 +103,14 @@ class ProductPipeMaterialHistory(orm.Model):
     """
     _name = 'product.pipe.material.history'
     _description = 'Pipe order history'
-    _rec_name = 'material_id'
+    _rec_name = 'year'
+    _order = 'year'
 
     _columns = {
+        'year': fields.char('Anno', size=4),
+        'last_price': fields.float('Prezzo', digits=(16, 2)),
         'material_id': fields.many2one(
             'product.pipe.material', 'Material'),
-        'last_price': fields.float('Prezzo', digits=(16, 2)),
-        'year': fields.char('Anno', size=4),
     }
 
 

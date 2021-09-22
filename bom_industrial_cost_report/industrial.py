@@ -111,7 +111,7 @@ class MrpBomIndustrialCost(orm.Model):
             'view_type': 'form',
             'view_mode': 'tree,form',
             'res_model': 'mrp.bom.industrial.cost.line',
-            #'view_id': view_id, # False
+            # 'view_id': view_id, # False
             'views': [(False, 'tree'), (False, 'form')],
             'domain': [('id', 'in', line_ids)],
             'context': context,
@@ -171,6 +171,7 @@ class MrpBomIndustrialCost(orm.Model):
         'type': lambda *x: 'industrial',
         }
 
+
 class MrpBomIndustrialCostLine(orm.Model):
     """ Model name: Cost line
     """
@@ -199,7 +200,7 @@ class MrpBomIndustrialCostLine(orm.Model):
 
                      date_quotation = pricelist.date_quotation or False
                      if not res[line.id]['last_cost'] or \
-                            date_quotation > res[line.id]['last_date']:
+                             date_quotation > res[line.id]['last_date']:
                          res[line.id]['last_cost'] = pricelist.price
                          res[line.id]['last_date'] = date_quotation
         return res
@@ -226,6 +227,7 @@ class MrpBomIndustrialCostLine(orm.Model):
             type='char', string='Data ultimo',
             store=False, multi=True, readonly=True),
         }
+
 
 class MrpBomIndustrialCost(orm.Model):
     """ Model name: Industrial cost
@@ -654,4 +656,3 @@ class ProductProduct(orm.Model):
             type='float', string='Vend. B%', multi=True,
             store=False),
         }
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

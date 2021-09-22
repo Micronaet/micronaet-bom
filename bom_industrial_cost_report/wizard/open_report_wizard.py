@@ -23,6 +23,7 @@
 
 
 import os
+import pdb
 import sys
 import logging
 import openerp
@@ -50,6 +51,113 @@ class ProductBomReportLimitWizard(orm.TransientModel):
     # --------------------
     # Wizard button event:
     # --------------------
+    def action_print_extra_period(self, cr, uid, ids, context=None):
+        """ Compare price with extra period
+        """
+        product_pool = self.pool.get('product.product')
+        excel_pool = self.pool.get('excel.writer')
+
+        # ---------------------------------------------------------------------
+        #                          Generate data:
+        # ---------------------------------------------------------------------
+        if context is None:
+            context = {}
+
+        wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
+        master_date = {}
+        from_date = '1975-01-01'
+        pdb.set_trace()
+        references = wiz_proxy.extra_period.split(';')
+        references.append(False)  # Normal period
+        for reference in wiz_proxy.extra_period.split(';'):
+            if reference:
+                reference = reference.strip()
+                to_date = '%s-%s-%s' % (
+                    reference[7:11],
+                    reference[4:6],
+                    reference[:2],
+                )
+                datas = {
+                    'wizard': True,
+                    'from_date': from_date,
+                    'to_date': to_date,
+                }
+            else:
+                datas = {}
+            master_date[reference] = \
+                product_pool.report_get_objects_bom_industrial_cost(
+                    cr, uid, datas=datas, context=context)
+
+        # ---------------------------------------------------------------------
+        #                          Excel export:
+        # ---------------------------------------------------------------------
+        ws_name = 'Distinte'
+        header = [
+            'Codice',
+            'Descrizione',
+            'Prezzo riferimento',
+
+            'Prezzo simulato',
+            'Variaz. %',
+
+            'Prezzo 2020',
+            'Variaz. %',
+        ]
+
+        width = [
+            20, 40, 15,
+            15, 10,
+            15, 10,
+            15, 10,
+            # 15, 10, 15, 10, 15, 10, 15, 10,
+        ]
+
+        # ---------------------------------------------------------------------
+        # Create WS:
+        # ---------------------------------------------------------------------
+        excel_pool.create_worksheet(name=ws_name)
+        excel_pool.column_width(ws_name, width)
+        # excel_pool.row_height(ws_name, row_list, height=10)
+        title = ('Confronto distinte base',)
+
+        # ---------------------------------------------------------------------
+        # Generate format used:
+        # ---------------------------------------------------------------------
+        excel_pool.set_format()
+        f_title = excel_pool.get_format(key='title')
+        f_header = excel_pool.get_format(key='header')
+        f_text = excel_pool.get_format(key='text')
+        f_number = excel_pool.get_format(key='number')
+
+        # ---------------------------------------------------------------------
+        # Write title / header
+        # ---------------------------------------------------------------------
+        row = 0
+        excel_pool.write_xls_line(
+            ws_name, row, [title], default_format=f_title)
+
+        row += 1
+        excel_pool.write_xls_line(
+            ws_name, row, header, default_format=f_header)
+
+        # ---------------------------------------------------------------------
+        # Product selection:
+        # ---------------------------------------------------------------------
+        product_data = {}
+        for product in sorted(product_data, key=lambda x: x.default_code):
+            default_code = product.default_code or ''
+
+            line = [
+                default_code or '',
+                product.name or '',
+                # (product.lst_price or 0.0, f_number),
+            ]
+            excel_pool.write_xls_line(
+                ws_name, row, line, default_format=f_text)
+            row += 1
+
+        return excel_pool.return_attachment(cr, uid, 'Distinte base')
+
     def action_print(self, cr, uid, ids, context=None):
         """ Event for print report
         """
@@ -72,4 +180,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
     _columns = {
         'from_date': fields.date('From date', required=True),
         'to_date': fields.date('To date', required=True),
+        'extra_period': fields.char(
+            'Date valutazione',
+            help='Periodi extra l\'attuale, es. per avere gli ultrimi 3 anni:'
+                 '01/09/2020;01/09/2019;01/09/2018'),
         }

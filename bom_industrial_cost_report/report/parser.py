@@ -202,10 +202,10 @@ def get_price_detail(price_ids):
     """
     res = ''
     # If not detail:
-    return res # XXX no detail mode
+    return res  # XXX no detail mode
     for seller, price, date_quotation in price_ids:
         res += '%s EUR (%s) %s \n' % (
-            price, # Unit price
+            price,  # Unit price
             date_quotation,
             seller.name,  # Supplier browse
             )
@@ -234,7 +234,7 @@ class ProductProduct(orm.Model):
             'type': 'ir.actions.report.xml',
             'report_name': 'industrial_cost_bom_report',
             'datas': datas,
-            #'context': context,
+            # 'context': context,
             }
 
     def open_multi_report(self, cr, uid, ids, context=None):

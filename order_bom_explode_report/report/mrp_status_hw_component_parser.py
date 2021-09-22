@@ -228,7 +228,7 @@ class Parser(report_sxw.rml_parse):
             reference_date = '%s-09-01 00:00:00' % (now_year - 1)
         
         # TODO remove after inventory:
-        # reference_date = '2019-09-01 00:00:00'
+        # reference_date = '2020-09-01 00:00:00'
             
         _logger.warning('Reference date for HW: %s' % reference_date)
         

@@ -66,9 +66,10 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
         master_date = {}
         from_date = '1975-01-01'
+        references = [False]
+        references.extend(sorted(wiz_proxy.extra_period.split(';')))
+        # First reference normale report!
         pdb.set_trace()
-        references = wiz_proxy.extra_period.split(';')
-        references.append(False)  # Normal period
         for reference in wiz_proxy.extra_period.split(';'):
             if reference:
                 reference = reference.strip()
@@ -84,9 +85,22 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 }
             else:
                 datas = {}
-            master_date[reference] = \
+            records = \
                 product_pool.report_get_objects_bom_industrial_cost(
                     cr, uid, datas=datas, context=context)
+
+            pdb.set_trace()
+            for record in records:
+                # Explode record:
+                (min_price, max_price, error, components, extra1, extra2,
+                 index, total, product, parameter, total_text,
+                 pipe_total_weight, simulated_price) = record
+
+                # Write all price present (False = reference for 100%)
+                if product not in master_date:
+                    master_date[product] = ({}, simulated_price)
+                master_date[product][0][reference] = max_price
+        pdb.set_trace()
 
         # ---------------------------------------------------------------------
         #                          Excel export:

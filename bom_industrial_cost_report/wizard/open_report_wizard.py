@@ -54,6 +54,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
     def action_print_extra_period(self, cr, uid, ids, context=None):
         """ Compare price with extra period
         """
+        pdb.set_trace()
         product_pool = self.pool.get('product.product')
         excel_pool = self.pool.get('excel.writer')
 
@@ -68,8 +69,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         from_date = '1975-01-01'
         references = [False]
         references.extend(sorted(wiz_proxy.extra_period.split(';')))
-        # First reference normale report!
-        pdb.set_trace()
+        # First reference normal report!
         for reference in wiz_proxy.extra_period.split(';'):
             if reference:
                 reference = reference.strip()
@@ -175,6 +175,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
     def action_print(self, cr, uid, ids, context=None):
         """ Event for print report
         """
+        pdb.set_trace()
         if context is None:
             context = {}
 

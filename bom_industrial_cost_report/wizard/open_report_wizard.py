@@ -88,7 +88,9 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                     'to_date': reference,
                 }
             else:
-                datas = {}
+                datas = {
+                    'wizard': True,
+                }
             records = product_pool.report_get_objects_bom_industrial_cost(
                     cr, uid, datas=datas, context=context)
 

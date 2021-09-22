@@ -164,7 +164,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             default_code = product.default_code or ''
             current_price = prices['']
             if current_price:
-                simulated_rate = 100.0 (
+                simulated_rate = 100.0 * (
                     simulated_price - current_price) / current_price
             else:
                 simulated_rate = '/'

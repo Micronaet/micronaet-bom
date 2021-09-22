@@ -163,7 +163,11 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             prices, simulated_price = master_data[product]
             default_code = product.default_code or ''
             current_price = prices['']
-            simulated_rate = (simulated_price - current_price) / 100.0
+            if current_price:
+                simulated_rate = 100.0 (
+                    simulated_price - current_price) / current_price
+            else:
+                simulated_rate = '/'
             line = [
                 default_code or '',
                 u'%s' % product.name,
@@ -176,7 +180,11 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             for reference in references[1:]:
                 this_price = prices.get(reference, 0.0)
                 line.append(this_price)
-                this_rate = (this_price - current_price) / 100.0
+                if current_price:
+                    this_rate = 100.0 * (
+                        this_price - current_price) / current_price
+                else:
+                    this_rate = 0.0
                 # Calc rate difference
                 line.append(this_rate)
             excel_pool.write_xls_line(

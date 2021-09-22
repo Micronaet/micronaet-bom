@@ -505,9 +505,6 @@ class ProductProduct(orm.Model):
             material_price_db[material_id][material_price.year] = \
                 material_price.last_price
 
-        print(material_price_db)
-        pdb.set_trace()
-
         # Need update record price:
         update_record = datas.get('update_record', False)
         if update_record:

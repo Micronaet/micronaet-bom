@@ -103,8 +103,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 # todo manage error field?
                 if product not in master_data:
                         master_data[product] = ({}, simulated_price)
-                if reference:  # Write only if are old year, not reference
-                    master_data[product][0][reference] = max_price  # Save this
+                master_data[product][0][reference] = max_price  # Save this
 
         # ---------------------------------------------------------------------
         #                          Excel export:
@@ -164,19 +163,22 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             prices, simulated_price = master_data[product]
             default_code = product.default_code or ''
             current_price = prices['']
+            simulated_rate = (simulated_price - current_price) / 100.0
             line = [
                 default_code or '',
                 u'%s' % product.name,
                 (current_price, f_number),
                 (simulated_price, f_number),
-                '',  # todo difference %
+                simulated_rate,
             ]
 
             # Append other record data
-            for reference in references:
-                line.append(prices.get(reference, 0.0))
+            for reference in references[1:]:
+                this_price = prices.get(reference, 0.0)
+                line.append(this_price)
+                this_rate = (this_price - current_price) / 100.0
                 # Calc rate difference
-                line.append('')  # todo calc rate here
+                line.append(this_rate)
             excel_pool.write_xls_line(
                 ws_name, row, line, default_format=f_text)
         return excel_pool.return_attachment(cr, uid, 'Distinte base')

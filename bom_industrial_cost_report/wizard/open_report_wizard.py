@@ -190,10 +190,17 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             context = {}
 
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
+        from_date = wiz_proxy.from_date or False
+        to_date = wiz_proxy.to_date or False
+        if not to_date or not from_date:
+            raise osv.except_osv(
+                _('Errore report'),
+                _('Il range di date è obbligatorio'),
+                )
         datas = {
             'wizard': True,
-            'from_date': wiz_proxy.from_date or False,
-            'to_date': wiz_proxy.to_date or False,
+            'from_date': from_date,
+            'to_date': to_date,
             }
 
         return {

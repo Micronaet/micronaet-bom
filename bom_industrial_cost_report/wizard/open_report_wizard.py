@@ -75,7 +75,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 reference[3:5],
                 reference[:2],
             )
-            references.append(references)
+            references.append(reference)
         references.sort()
         _logger.warning('Multi report for date: %s' % (references, ))
 
@@ -86,12 +86,11 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 datas = {
                     'wizard': True,
                     'from_date': from_date,
-                    'to_date': to_date,
+                    'to_date': reference,
                 }
             else:
                 datas = {}
-            records = \
-                product_pool.report_get_objects_bom_industrial_cost(
+            records = product_pool.report_get_objects_bom_industrial_cost(
                     cr, uid, datas=datas, context=context)
 
             pdb.set_trace()

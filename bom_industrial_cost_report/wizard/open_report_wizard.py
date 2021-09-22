@@ -75,7 +75,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 reference[3:5],
                 reference[:2],
             )
-            references.append(reference)
+            references.append(to_date)
         references.sort()
         _logger.warning('Multi report for date: %s' % (references, ))
 

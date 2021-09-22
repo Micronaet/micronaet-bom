@@ -434,10 +434,7 @@ class ProductProduct(orm.Model):
             raise osv.except_osv(
                 _('Access error'),
                 _('No right to print BOM'),
-                )report_get_objects_bom_industrial_cost
-
-        # Pool used:
-        product_pool = self.pool.get('product.product')
+                )
 
         active_ids = data.get('active_ids', False)
         if not active_ids:

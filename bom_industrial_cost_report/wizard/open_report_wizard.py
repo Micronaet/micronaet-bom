@@ -171,9 +171,9 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
             # Append other record data
             for reference in references:
-                line.append(record.get(reference, 0.0))
+                line.append(prices.get(reference, 0.0))
                 # Calc rate difference
-                line.append('')  # todo calc rate
+                line.append('')  # todo calc rate here
             excel_pool.write_xls_line(
                 ws_name, row, line, default_format=f_text)
         return excel_pool.return_attachment(cr, uid, 'Distinte base')

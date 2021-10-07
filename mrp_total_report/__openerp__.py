@@ -38,6 +38,8 @@
         'product',
         'mrp',
         'purchase',
+        'mx_close_order',
+        'bom_dynamic_structured',
         ],
     'init_xml': [],
     'demo': [],

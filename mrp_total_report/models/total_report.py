@@ -59,13 +59,13 @@ class ResCompany(orm.Model):
             """ Get product touched in OC and MRP items
             """
             product_touched = {}
-            sale_line_pool = self.pool.get('product.product')
+            sale_line_pool = self.pool.get('sale.order.line')
             sale_line_ids = sale_line_pool.search(cr, uid, [
                 ('order_id.state', 'not in', ('draft', 'cancel', 'sent')),
                 ('product_id.not_in_report', '=', False),
                 # ('product_id.bom_placeholder', '=', False),
                 # ('product_id.bom_alternative', '=', False),
-                ], context=context)
+                ], context=context)[:10]
 
             for line in sale_line_pool.browse(cr, uid, sale_line_ids,
                     context=context):
@@ -156,6 +156,7 @@ class ResCompany(orm.Model):
                 'prodotto',
                 product.family_id.name,
                 product.default_code,
+                product.name,
             ]
 
             excel_pool.write_xls_line(

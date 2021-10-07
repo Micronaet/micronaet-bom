@@ -149,4 +149,7 @@ class ResCompany(orm.Model):
         return excel_pool.return_attachment(
             cr, uid, 'Total report', context=context)
 
-
+    _columns = {
+        'total_report_week': fields.integer(
+            'Totale finestra report (settimane)'),
+    }

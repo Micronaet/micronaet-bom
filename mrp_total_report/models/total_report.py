@@ -120,12 +120,12 @@ class ResCompany(orm.Model):
             for week in range(weeks):
                 isocalendar = day.isocalendar()
 
-                week_index = isocalendar[1]
+                week_of_year = isocalendar[1]
                 from_date = str(day)[:10]
                 header.append('Y%s-W%s\n%s' % (
-                    isocalendar[0], week_pos, from_date))
+                    isocalendar[0], week_of_year, from_date))
                 columns.append(10)
-                week_pos[week_index] = pos + fixed_col
+                week_pos[week_of_year] = pos + fixed_col
                 day += timedelta(days=7)
                 pos += 1
             return header, week_pos, columns, fixed_col

@@ -166,7 +166,7 @@ class ResCompany(orm.Model):
                               key=lambda p: (p.family_id.name, p.default_code)
                               ):
             row += 1
-            available_stock = product.mx_net_mrp_qty - product.mx_mr_b_locked
+            available_stock = product.mx_net_mrp_qty - product.mx_mrp_b_locked
             row_data = [
                 'prodotto',
                 product.family_id.name,

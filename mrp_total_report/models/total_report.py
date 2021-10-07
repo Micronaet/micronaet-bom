@@ -86,15 +86,20 @@ class ResCompany(orm.Model):
             header = [
                 'Livello', 'Famiglia', 'Prodotto', 'Nome',
             ]
+            header_comment = []
             columns = [7, 20, 20, 35]
             fixed_col = len(columns)
             day = datetime.now()
+            # go sunday before:
+            day = day - timedelta(days=day.isocalendar[2])
             for week in range(weeks):
                 isocalendar = day.isocalendar()
+
                 header.append('Y%s-W%s' % isocalendar[:2])
                 columns.append(10)
+                header_comment.append('Dalla data %s' % day)
                 day += timedelta(days=7)
-            return header, columns, fixed_col
+            return header, header_comment, columns, fixed_col
 
         # ---------------------------------------------------------------------
         # Start procedure:
@@ -112,7 +117,8 @@ class ResCompany(orm.Model):
         total_week = company.total_report_week
 
         # Generate datasheet structure:
-        header, columns, fixed_col = generate_header(total_week)
+        header, header_comment, columns, fixed_col = \
+            generate_header(total_week)
         total_col = fixed_col + total_week - 1
 
         # ---------------------------------------------------------------------
@@ -148,6 +154,9 @@ class ResCompany(orm.Model):
         excel_pool.write_xls_line(
             ws_name, row, header, default_format=xls_format['header'])
         excel_pool.autofilter(ws_name, row, 0, row, total_col)
+        # Comment:
+        excel_pool.write_comment_line(
+            ws_name, row, header_comment, col=fixed_col)
 
         for product in sorted(total_report,
                               key=lambda p: (p.family_id.name, p.default_code)

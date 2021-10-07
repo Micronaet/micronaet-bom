@@ -167,7 +167,7 @@ class ResCompany(orm.Model):
                               ):
             week_data = total_report[product]
             if not any(week_data):
-                _logger.warning('Rmoved empty line: %s' % product.default.code)
+                _logger.warning('Rmoved empty line: %s' % product.default_code)
                 continue
             row += 1
             available_stock = product.mx_net_mrp_qty - product.mx_mrp_b_locked

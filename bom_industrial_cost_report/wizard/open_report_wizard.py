@@ -200,7 +200,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
         from_date = wiz_proxy.from_date or False
         to_date = wiz_proxy.to_date or False
-        report_name = wiz_proxy.report_name or False
+        report_name = wiz_proxy.report_name
         if not to_date or not from_date:
             raise osv.except_osv(
                 _('Errore report'),
@@ -224,7 +224,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         'report_name': fields.selection([
             ('industrial_cost_bom_report', 'Con costi'),
             ('industrial_cost_bom_no_price_report', 'Senza costi'),
-        ], 'Tipo report'),
+        ], 'Tipo report', required=True),
         'extra_period': fields.char(
             'Date valutazione',
             help='Periodi extra l\'attuale, es. per avere gli ultrimi 3 anni:'

@@ -200,7 +200,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
         from_date = wiz_proxy.from_date or False
         to_date = wiz_proxy.to_date or False
-        report_name = wiz_proxy.mode or False
+        report_name = wiz_proxy.report_name or False
         if not to_date or not from_date:
             raise osv.except_osv(
                 _('Errore report'),

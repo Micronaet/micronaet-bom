@@ -84,7 +84,7 @@ class ResCompany(orm.Model):
             """ Generate header for total report
             """
             header = [
-                'Livello', 'Famiglia', 'Prodotto', 'Nome',
+                'Livello', 'Famiglia', 'Prodotto', 'Nome', 'Mag.',
             ]
             header_comment = []
             columns = [7, 20, 20, 35]
@@ -161,15 +161,18 @@ class ResCompany(orm.Model):
         # excel_pool.write_comment_line(
         #    ws_name, row, header_comment, col=fixed_col)
 
+        stock_status = {}
         for product in sorted(total_report,
                               key=lambda p: (p.family_id.name, p.default_code)
                               ):
             row += 1
+            available_stock = product.mx_net_mrp_qty - product.mx_mr_b_locked
             row_data = [
                 'prodotto',
                 product.family_id.name,
                 product.default_code,
                 product.name,
+                (available_stock, xls_format['white']['number']),
             ]
 
             excel_pool.write_xls_line(

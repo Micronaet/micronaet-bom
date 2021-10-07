@@ -77,7 +77,7 @@ class ResCompany(orm.Model):
 
             day = datetime.now()
             for week in range(weeks):
-                isocalendar =  day.isocalendar()[1]
+                isocalendar = day.isocalendar()
                 header.append('Y%s-W%s' % isocalendar[:2])
                 columns.append(10)
                 day += timedelta(days=7)
@@ -151,5 +151,9 @@ class ResCompany(orm.Model):
 
     _columns = {
         'total_report_week': fields.integer(
-            'Totale finestra report (settimane)'),
+            'Totale finestra report (settimane)', required=True),
+    }
+
+    _defaults = {
+        'total_report_week': lambda *x: 30,
     }

@@ -10,6 +10,7 @@
                     <page name="page_total_report" string="Report MRP">
                         <group>
                             <field name="total_report_week"/>
+                            <button name="mrp_total_report" type="object" string="Genera report"/>
                         </group>
                     </page>
                 </xpath>

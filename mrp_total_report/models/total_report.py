@@ -55,7 +55,7 @@ class ResCompany(orm.Model):
         # Utility:
         # ---------------------------------------------------------------------
         def get_product_touched(
-                self, cr, uid, empty, context=None):
+                self, cr, uid, empty, week_pos, context=None):
             """ Get product touched in OC and MRP items
             """
             product_touched = {}
@@ -63,15 +63,28 @@ class ResCompany(orm.Model):
             sale_line_ids = sale_line_pool.search(cr, uid, [
                 ('order_id.state', 'not in', ('draft', 'cancel', 'sent')),
                 ('product_id.not_in_report', '=', False),
+                ('mx_closed', '=', False),
+                ('order_id.mx_closed', '=', False),
                 # ('product_id.bom_placeholder', '=', False),
                 # ('product_id.bom_alternative', '=', False),
                 ], context=context)[:10]
 
-            for line in sale_line_pool.browse(cr, uid, sale_line_ids,
-                    context=context):
+            for line in sale_line_pool.browse(
+                    cr, uid, sale_line_ids, context=context):
                 product = line.product_id
                 if product not in product_touched:
                     product_touched[product] = empty
+
+                # Find position in record:
+                deadline = line.date_deadline
+                pos = get_week_cell(deadline, week_pos)
+                if pos < 0:
+                    continue  # Extra range
+
+                # Find quantity needed:
+                quantity = line.product_uom_qty  # todo clean qty!
+                product_touched[product][pos] += quantity
+
             return product_touched
 
         def get_purchased_material(self, cr, uid, context=None):
@@ -80,28 +93,42 @@ class ResCompany(orm.Model):
             # todo
             return []
 
+        def get_week_cell(date, week_pos):
+            """ Get position cell
+            """
+            date = date[:10]
+            date_dt = datetime.strptime(date, DEFAULT_SERVER_DATE_FORMAT)
+            week = date_dt.isocalendar()[1]
+            try:
+                return week_pos[week]
+            except:
+                return -1
+
         def generate_header(weeks):
             """ Generate header for total report
             """
             header = [
                 'Livello', 'Famiglia', 'Prodotto', 'Nome', 'Mag.',
             ]
-            header_comment = []
+            week_pos = {}
             columns = [7, 20, 20, 35, 10]
             fixed_col = len(header)
             day = datetime.now()
             # go sunday before:
             day = day - timedelta(days=day.isocalendar()[2])
+            pos = 0
             for week in range(weeks):
                 isocalendar = day.isocalendar()
 
+                week_index = isocalendar[1]
                 from_date = str(day)[:10]
                 header.append('Y%s-W%s\n%s' % (
-                    isocalendar[0], isocalendar[1], from_date))
+                    isocalendar[0], week_pos, from_date))
                 columns.append(10)
-                header_comment.append('Dalla data %s' % from_date)
+                week_pos[week_index] = pos + fixed_col
                 day += timedelta(days=7)
-            return header, header_comment, columns, fixed_col
+                pos += 1
+            return header, week_pos, columns, fixed_col
 
         # ---------------------------------------------------------------------
         # Start procedure:
@@ -119,7 +146,7 @@ class ResCompany(orm.Model):
         total_week = company.total_report_week
 
         # Generate datasheet structure:
-        header, header_comment, columns, fixed_col = \
+        header, week_pos, columns, fixed_col = \
             generate_header(total_week)
         total_col = fixed_col + total_week - 1
 
@@ -128,7 +155,7 @@ class ResCompany(orm.Model):
         # ---------------------------------------------------------------------
         empty_record = [0.0 for item in range(total_week)]
         total_report = get_product_touched(
-            self, cr, uid, empty_record, context=context)
+            self, cr, uid, empty_record, week_pos, context=context)
         purchase_material = get_purchased_material(
             self, cr, uid, context=context)
 

@@ -175,6 +175,11 @@ class ResCompany(orm.Model):
             excel_pool.write_xls_line(
                 ws_name, row, row_data,
                 default_format=xls_format['white']['text'])
+            week_data = total_report[product]
+            excel_pool.write_xls_line(
+                ws_name, row, week_data,
+                default_format=xls_format['white']['text'],
+                col=fixed_col)
 
         # Restore previous state:
         user_pool.set_no_inventory_status(

@@ -91,13 +91,14 @@ class ResCompany(orm.Model):
             fixed_col = len(columns)
             day = datetime.now()
             # go sunday before:
-            day = day - timedelta(days=day.isocalendar[2])
+            day = day - timedelta(days=day.isocalendar()[2])
             for week in range(weeks):
                 isocalendar = day.isocalendar()
 
-                header.append('Y%s-W%s' % isocalendar[:2])
+                from_date = str(day)[:10]
+                header.append('Y%s-W%s\n%s' % (isocalendar[:2], from_date))
                 columns.append(10)
-                header_comment.append('Dalla data %s' % day)
+                header_comment.append('Dalla data %s' % from_date)
                 day += timedelta(days=7)
             return header, header_comment, columns, fixed_col
 
@@ -154,9 +155,10 @@ class ResCompany(orm.Model):
         excel_pool.write_xls_line(
             ws_name, row, header, default_format=xls_format['header'])
         excel_pool.autofilter(ws_name, row, 0, row, total_col)
+        excel_pool.row_height(ws_name, [row], height=15)
         # Comment:
-        excel_pool.write_comment_line(
-            ws_name, row, header_comment, col=fixed_col)
+        # excel_pool.write_comment_line(
+        #    ws_name, row, header_comment, col=fixed_col)
 
         for product in sorted(total_report,
                               key=lambda p: (p.family_id.name, p.default_code)

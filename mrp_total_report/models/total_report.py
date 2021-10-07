@@ -73,7 +73,7 @@ class ResCompany(orm.Model):
                     cr, uid, sale_line_ids, context=context):
                 product = line.product_id
                 if product not in product_touched:
-                    product_touched[product] = empty
+                    product_touched[product] = empty[:]
 
                 # Find position in record:
                 deadline = line.date_deadline

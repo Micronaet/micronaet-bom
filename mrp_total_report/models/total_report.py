@@ -87,8 +87,8 @@ class ResCompany(orm.Model):
                 'Livello', 'Famiglia', 'Prodotto', 'Nome', 'Mag.',
             ]
             header_comment = []
-            columns = [7, 20, 20, 35]
-            fixed_col = len(columns)
+            columns = [7, 20, 20, 35, 10]
+            fixed_col = len(header)
             day = datetime.now()
             # go sunday before:
             day = day - timedelta(days=day.isocalendar()[2])

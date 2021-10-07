@@ -96,7 +96,8 @@ class ResCompany(orm.Model):
                 isocalendar = day.isocalendar()
 
                 from_date = str(day)[:10]
-                header.append('Y%s-W%s\n%s' % (isocalendar[:2], from_date))
+                header.append('Y%s-W%s\n%s' % (
+                    isocalendar[0], isocalendar[1], from_date))
                 columns.append(10)
                 header_comment.append('Dalla data %s' % from_date)
                 day += timedelta(days=7)

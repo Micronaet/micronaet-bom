@@ -34,11 +34,15 @@
     'depends': [
         'base',
         'inventory_status',
+        'excel_export',
+        'product',
+        'mrp',
+        'purchase',
         ],
     'init_xml': [],
     'demo': [],
     'data': [
-        'views/total_report__view.xml',
+        'views/total_report_view.xml',
         ],
     'active': False,
     'installable': True,

@@ -156,7 +156,7 @@ class ResCompany(orm.Model):
         excel_pool.write_xls_line(
             ws_name, row, header, default_format=xls_format['header'])
         excel_pool.autofilter(ws_name, row, 0, row, total_col)
-        excel_pool.row_height(ws_name, [row], height=15)
+        excel_pool.row_height(ws_name, [row], height=25)
         # Comment:
         # excel_pool.write_comment_line(
         #    ws_name, row, header_comment, col=fixed_col)

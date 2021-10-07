@@ -165,6 +165,10 @@ class ResCompany(orm.Model):
         for product in sorted(total_report,
                               key=lambda p: (p.family_id.name, p.default_code)
                               ):
+            week_data = total_report[product]
+            if not any(week_data):
+                _logger.warning('Rmoved empty line: %s' % product.default.code)
+                continue
             row += 1
             available_stock = product.mx_net_mrp_qty - product.mx_mrp_b_locked
             row_data = [
@@ -179,7 +183,6 @@ class ResCompany(orm.Model):
                 ws_name, row, row_data,
                 default_format=xls_format['white']['text'])
             # week_data = [int(item) for item in total_report[product]]
-            week_data = total_report[product]
             excel_pool.write_xls_line(
                 ws_name, row, week_data,
                 default_format=xls_format['white']['number'],

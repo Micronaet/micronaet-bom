@@ -58,13 +58,13 @@ class ResCompany(orm.Model):
             """ Get product touched in OC and MRP items
             """
             # todo
-            return True
+            return []
 
         def get_purchased_material(self, cr, uid, context=None):
             """ Get list of purchase materia avaiting delivery
             """
             # todo
-            return True
+            return []
 
         def generate_header(weeks):
             """ Generate header for total report
@@ -72,7 +72,7 @@ class ResCompany(orm.Model):
             header = [
                 'Livello', 'Prodotto', 'Nome',
             ]
-            columns = [5, 20, 35]
+            columns = [7, 20, 35]
             fixed_col = len(columns)
 
             day = datetime.now()

@@ -155,7 +155,7 @@ class ResCompany(orm.Model):
         row = 0
         excel_pool.write_xls_line(
             ws_name, row, header, default_format=xls_format['header'])
-        excel_pool.autofilter(ws_name, row, 0, row, total_col)
+        excel_pool.autofilter(ws_name, row, 0, row, fixed_col)
         excel_pool.row_height(ws_name, [row], height=25)
         # Comment:
         # excel_pool.write_comment_line(

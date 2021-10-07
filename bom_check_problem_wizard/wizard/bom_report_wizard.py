@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# ODOO (ex OpenERP) 
+# ODOO (ex OpenERP)
 # Open Source Management Solution
 # Copyright (C) 2001-2015 Micronaet S.r.l. (<http://www.micronaet.it>)
 # Developer: Nicola Riolini @thebrush (<https://it.linkedin.com/in/thebrush>)
@@ -12,7 +12,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
@@ -32,9 +32,9 @@ from dateutil.relativedelta import relativedelta
 from openerp import SUPERUSER_ID
 from openerp import tools
 from openerp.tools.translate import _
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
-    DEFAULT_SERVER_DATETIME_FORMAT, 
-    DATETIME_FORMATS_MAP, 
+from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DATETIME_FORMATS_MAP,
     float_compare)
 
 
@@ -43,9 +43,9 @@ _logger = logging.getLogger(__name__)
 class ProductProduct(orm.Model):
     """ Model name: ProductProduct
     """
-    
+
     _inherit = 'product.product'
-    
+
     _columns = {
         'dynamic_bom_checked': fields.boolean('Bom checked'),
         }
@@ -61,14 +61,14 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
     def action_show_line_list(self, cr, uid, ids, context=None):
         ''' Show list in tree view (product in bom)
         '''
-        # TODO 
+        # TODO
         return True
-        
+
     def action_show_list(self, cr, uid, ids, context=None):
         ''' Show list in tree view
         '''
         product_pool = self.pool.get('product.product')
-        
+
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
         start_code = wiz_proxy.start_code or ''
         component = wiz_proxy.component or False
@@ -77,13 +77,13 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ('default_code', '=ilike', '%s%%' % start_code),
             ('relative_type', '=', 'half'),
             ], context=context)
-        
+
         res_ids = []
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
             if not component or len(product.half_bom_ids) >= component:
                 res_ids.append(product.id)
-        
+
         return {
             'type': 'ir.actions.act_window',
             'name': _('Product list'),
@@ -99,15 +99,15 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             'nodestroy': False,
             }
 
-        
-    def excel_extract_bom_check(self, cr, uid, wizard, only_hw=False, 
+
+    def excel_extract_bom_check(self, cr, uid, wizard, only_hw=False,
             context=None):
         ''' Report for excel
         '''
         # ---------------------------------------------------------------------
         # Parameters
         # ---------------------------------------------------------------------
-        check_order = True 
+        check_order = True
         demo = False
         with_hw = True
 
@@ -116,11 +116,11 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         now_year = int(now[:4])
         if now[5:7] >= '09':
             reference_date = '%s-09-01' % (now_year - 2)
-        else:    
+        else:
             reference_date = '%s-09-01' % (now_year - 1)
-        if demo:  
+        if demo:
             reference_date = '2019-09-01'
-            
+
         # ---------------------------------------------------------------------
         # Utility:
         # ---------------------------------------------------------------------
@@ -137,48 +137,48 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         mrp_line_pool = self.pool.get('mrp.bom.line')
         excel_pool = self.pool.get('excel.writer')
         sale_line_pool = self.pool.get('sale.order.line')
-        
+
         # ---------------------------------------------------------------------
         # Collect data::
         # ---------------------------------------------------------------------
         domain = [
             ('parent_bom_id', '!=', False),
             ]
-            
+
         if only_hw:
             domain.extend([
-            '|', #'|',
+            '|',  # '|',
             ('default_code', '=ilike', 'MT%'),
             ('default_code', '=ilike', 'TL%'),
-            #('default_code', '=ilike', 'PO%'),
-            #('default_code', '=ilike', 'MS%'),
-            #('default_code', '=ilike', 'TS%'),
+            # ('default_code', '=ilike', 'PO%'),
+            # ('default_code', '=ilike', 'MS%'),
+            # ('default_code', '=ilike', 'TS%'),
             ])
 
         # Product and bom data:
         product_ids = product_pool.search(cr, uid, domain, context=context)
-            
+
         if demo:
             product_ids = product_ids[:30]
         parents = {}
-        hw = [] # HW BOM
-        
+        hw = []  # HW BOM
+
         for product in product_pool.browse(
                 cr, uid, product_ids, context=context):
             parent_bom = product.parent_bom_id
             if parent_bom not in parents:
                 parents[parent_bom] = []
             parents[parent_bom].append(product)
-        
+
         # Sale order product:
-        _logger.info('Read order from reference date: %s' % reference_date)  
+        _logger.info('Read order from reference date: %s' % reference_date)
         ordered_product = []
         if check_order:
             sale_line_ids = sale_line_pool.search(cr, uid, [
                 ('order_id.state', 'not in', ('draft', 'cancel', 'sent')),
                 ('order_id.date_order', '>=', reference_date)
                 ], context=context)
-            for line in sale_line_pool.browse(cr, uid, sale_line_ids, 
+            for line in sale_line_pool.browse(cr, uid, sale_line_ids,
                     context=context):
                 product = line.product_id
                 if product not in ordered_product:
@@ -186,7 +186,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
 
         # ---------------------------------------------------------------------
         # Excel file:
-        # ---------------------------------------------------------------------        
+        # ---------------------------------------------------------------------
         ws_note_name = u'Note'
         excel_pool.create_worksheet(ws_note_name)
 
@@ -196,7 +196,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             'header': excel_pool.get_format('header'),
             'text': excel_pool.get_format('text'),
             'number': excel_pool.get_format('number'),
-            
+
             'bg': {
                 'red': excel_pool.get_format('bg_red'),
                 'blue': excel_pool.get_format('bg_blue'),
@@ -211,28 +211,28 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ])
 
         # ---------------------------------------------------------------------
-        # Title:    
+        # Title:
         # ---------------------------------------------------------------------
         note_row = 0
         excel_pool.write_xls_line(ws_note_name, note_row, [
-            u'Elenco annotazioni generiche di controllo:', 
+            u'Elenco annotazioni generiche di controllo:',
             ], default_format=cell_format['title'])
         note_row += 1
 
         # ---------------------------------------------------------------------
-        # Header:    
+        # Header:
         # ---------------------------------------------------------------------
         excel_pool.write_xls_line(ws_note_name, note_row, [
             u'Note',
             ], default_format=cell_format['header'])
-        header_row = note_row    
+        header_row = note_row
 
         # TODO needed?
         page_error = []
-        for parent in sorted(parents, 
+        for parent in sorted(parents,
                 key=lambda x: x.product_id.default_code):
             parent_product = parent.product_id
-            
+
             # -----------------------------------------------------------------
             # Create sheet:
             # -----------------------------------------------------------------
@@ -241,11 +241,11 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             _logger.warning(u'New page: %s' % ws_name)
             try:
                 excel_pool.create_worksheet(ws_name)
-            except: 
+            except:
                 _logger.error(u'Cannot create %s sheet' % ws_name)
                 page_error.append(ws_name)
                 continue
-            
+
             header = [
                 u'OK', 'Venduto', u'Prodotto', u'Nome', u'Pz',
                 ]
@@ -253,7 +253,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             width = [
                 3, 6, 12, 40, 4,
                 ]
-            
+
             extra_col = len(header)
 
             # -----------------------------------------------------------------
@@ -263,15 +263,15 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             categories = [] # temp list
             for line in parent.bom_line_ids:
                 category = line.category_id
-                product = line.product_id    
+                product = line.product_id
                 categories.append((
-                    category, 
+                    category,
                     is_placeholder(product),
                     # Compare with lines:
                     product,
                     line.product_qty,
                     ))
-                    
+
             pos = 0
             for category, placeholder, product, qty in sorted(
                     categories, key=lambda x: x[0].name):
@@ -281,8 +281,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     product,
                     qty,
                     )
-      
-                # 2 Header column (2nd empty will be merged)              
+
+                # 2 Header column (2nd empty will be merged)
                 header.append(u'%s%s%s' % (
                     u'[' if placeholder else u'',
                     category.name,
@@ -290,48 +290,48 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     ))
                 header.append(u'')
                 footer.append(u'')
-                    
+
                 width.append(16)
                 width.append(3)
-                
+
                 excel_pool.merge_cell(ws_name, [
-                    header_row, (2 * pos) + extra_col, 
+                    header_row, (2 * pos) + extra_col,
                     header_row, (2 * pos) + extra_col + 1])
                 pos += 1
 
-            # Note:    
+            # Note:
             header.append(u'Note')
             width.append(40)
 
             last = len(header) - 1
-                
+
             # -----------------------------------------------------------------
             # Title:
             # -----------------------------------------------------------------
             excel_pool.column_width(ws_name, width)
             row = 0
             excel_pool.write_xls_line(ws_name, row, [
-                u'Elenco DB con padre: %s' % ws_name, 
+                u'Elenco DB con padre: %s' % ws_name,
                 ], default_format=cell_format['title'])
 
             # -----------------------------------------------------------------
-            # Header:    
+            # Header:
             # -----------------------------------------------------------------
             row += 1
-            excel_pool.write_xls_line(ws_name, row, header, 
+            excel_pool.write_xls_line(ws_name, row, header,
                 default_format=cell_format['header'])
             excel_pool.row_height(ws_name, [row], height=30)
-            
+
             # -----------------------------------------------------------------
-            # Create page with parent bom:        
+            # Create page with parent bom:
             # -----------------------------------------------------------------
-            for product in sorted(parents[parent], 
+            for product in sorted(parents[parent],
                     key=lambda x: x.default_code):
                 if product == parent.product_id:
                     format_mode = cell_format['bg']['yellow']
                 elif product in ordered_product:
                     format_mode = cell_format['bg']['green']
-                else:    
+                else:
                     format_mode = cell_format['text']
 
                 record = [
@@ -341,9 +341,9 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     (u'%s' % product.name, format_mode),
                     (u'%s' % product.q_x_pack, format_mode),
                     ]
-                record.extend(['' for i in range(0, 2 * pos)])    
+                record.extend(['' for i in range(0, 2 * pos)])
                 record.append('') # Note
-                    
+
                 for line in product.dynamic_bom_line_ids:
                     product = line.product_id
                     category = line.category_id.name
@@ -368,7 +368,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     else:
                         record[col + 1] = (
                             qty, cell_format['bg']['blue'])
-                    
+
                     # ---------------------------------------------------------
                     # HW part:
                     # ---------------------------------------------------------
@@ -382,7 +382,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
 
         if page_error:
             excel_pool.write_xls_line(ws_note_name, note_row, [
-                u'Errori pagine non create: %s' % (page_error, ), 
+                u'Errori pagine non create: %s' % (page_error, ),
                 ], default_format=cell_format['title'])
             note_row += 1
 
@@ -393,14 +393,14 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             # Title:
             ws_name = 'Semilavorati'
             excel_pool.create_worksheet(ws_name)
-            
+
             excel_pool.column_width(ws_name, [
-                15, 35, 
-                12, 4, 12, 4, 12, 4, 12, 4, 12, 4, 12, 4, 12, 4, 12, 4, 12, 4, 
+                15, 35,
+                12, 4, 12, 4, 12, 4, 12, 4, 12, 4, 12, 4, 12, 4, 12, 4, 12, 4,
                 ])
             row = 0
             excel_pool.write_xls_line(ws_name, row, [
-                u'Distinte base: %s' % ws_name, 
+                u'Distinte base: %s' % ws_name,
                 ], default_format=cell_format['title'])
 
             # Header:
@@ -408,41 +408,41 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             excel_pool.write_xls_line(ws_name, row, [
                 'Semilavorato', 'Codice', 'Componente', 'Q.',
                 ], default_format=cell_format['header'])
-            
+
             # -----------------------------------------------------------------
-            # Create page with parent bom:        
+            # Create page with parent bom:
             # -----------------------------------------------------------------
-            for product in sorted(hw, 
-                    key=lambda x: x.default_code):                
+            for product in sorted(hw,
+                    key=lambda x: x.default_code):
                 row += 1
                 excel_pool.write_xls_line(ws_name, row, [
                     product.default_code,
-                    product.name, 
+                    product.name,
                     ], default_format=cell_format['text'])
 
                 # Expand component
-                col = 0                    
+                col = 0
                 for component in sorted(product.half_bom_ids,
-                        key=lambda x: x.product_id.default_code):                
+                        key=lambda x: x.product_id.default_code):
                     col += 2
                     product_cmpt = component.product_id
                     excel_pool.write_xls_line(ws_name, row, [
                         product_cmpt.default_code,
                         component.product_qty,
                         ], default_format=cell_format['text'], col=col)
-                    
-            
+
+
         return excel_pool.return_attachment(
             cr, uid, 'BOM check', context=context)
 
     def action_print(self, cr, uid, ids, context=None):
         ''' Event for button print
         '''
-        if context is None: 
-            context = {}        
-        
+        if context is None:
+            context = {}
+
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
-        
+
         datas = {
             'from_wizard': True,
             'from_date': wiz_proxy.from_date or False,
@@ -454,9 +454,9 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             'component': wiz_proxy.component,
             'no_bom_product': wiz_proxy.no_bom_product,
             }
-        
+
         if wiz_proxy.mode == 'order':
-            report_name = 'order_bom_component_check_report'        
+            report_name = 'order_bom_component_check_report'
         elif wiz_proxy.mode == 'parent':
             report_name = 'aeroo_parent_final_component_check_report'
         elif wiz_proxy.mode == 'product':
@@ -489,36 +489,36 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ('order', 'Product BOM from order'),
             ('parent', 'Parent BOM'),
             ('product', 'Product result BOM'),
-            ('half', 'Halfworked BOM'),            
+            ('half', 'Halfworked BOM'),
             ('pipe', 'Pipe in Halfworked'),
             ('line', 'Product presence bom'),
             ('not_product', 'Excluded product'),
             ('excel', 'Excel check'),
             ('excel_hw', 'Excel semilavorati'),
-            ], 'Report mode', required=True),            
-            
-        'from_order': fields.boolean('From order'),    
-        
+            ], 'Report mode', required=True),
+
+        'from_order': fields.boolean('From order'),
+
         'modal': fields.selection([
-            ('pipe', 'Pipe layout'),   
+            ('pipe', 'Pipe layout'),
             ], 'Report mode', required=False),
 
         'from_date': fields.date('From', help='Date >='),
-        'to_date': fields.date('To', help='Date <'),        
-        
+        'to_date': fields.date('To', help='Date <'),
+
         'start_code': fields.char('Start code', size=20),
         'component': fields.integer('> # component'),
-        
+
         'only': fields.selection([
             ('all', 'All'),
             ('error', 'Only error'),
             ('override', 'Only error and overrided'),
-            ], 'Only line', required=True),                
-        'no_bom_product': fields.boolean('No BOM product'),    
+            ], 'Only line', required=True),
+        'no_bom_product': fields.boolean('No BOM product'),
         }
 
     _defaults = {
         'mode': lambda *x: 'order',
         'only': lambda *x: 'all',
-        }    
+        }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

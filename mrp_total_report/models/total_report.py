@@ -54,11 +54,25 @@ class ResCompany(orm.Model):
         # ---------------------------------------------------------------------
         # Utility:
         # ---------------------------------------------------------------------
-        def get_product_touched(self, cr, uid, context=None):
+        def get_product_touched(
+                self, cr, uid, empty, context=None):
             """ Get product touched in OC and MRP items
             """
-            # todo
-            return []
+            product_touched = {}
+            sale_line_pool = self.pool.get('product.product')
+            sale_line_ids = sale_line_pool.search(cr, uid, [
+                ('order_id.state', 'not in', ('draft', 'cancel', 'sent')),
+                ('product_id.not_in_report', '=', False),
+                # ('product_id.bom_placeholder', '=', False),
+                # ('product_id.bom_alternative', '=', False),
+                ], context=context)
+
+            for line in sale_line_pool.browse(cr, uid, sale_line_ids,
+                    context=context):
+                product = line.product_id
+                if product not in product_touched:
+                    product_touched[product] = empty
+            return product_touched
 
         def get_purchased_material(self, cr, uid, context=None):
             """ Get list of purchase materia avaiting delivery
@@ -70,9 +84,9 @@ class ResCompany(orm.Model):
             """ Generate header for total report
             """
             header = [
-                'Livello', 'Prodotto', 'Nome',
+                'Livello', 'Famiglia', 'Prodotto', 'Nome',
             ]
-            columns = [7, 20, 35]
+            columns = [7, 20, 20, 35]
             fixed_col = len(columns)
 
             day = datetime.now()
@@ -89,7 +103,7 @@ class ResCompany(orm.Model):
         if context is None:
             context = {}
 
-        # Add status for calc. HW only (filter)?
+        # Add status status ON
         user_pool = self.pool.get('res.users')
         previous_status = user_pool.set_no_inventory_status(
             cr, uid, value=False, context=context)
@@ -104,10 +118,9 @@ class ResCompany(orm.Model):
         # ---------------------------------------------------------------------
         # Collect data:
         # ---------------------------------------------------------------------
-        total_report = {}
-
-        products = get_product_touched(
-            self, cr, uid, context=context)
+        empty_record = [0.0 for item in range(total_week)]
+        total_report = get_product_touched(
+            self, cr, uid, empty_record, context=context)
         purchase_material = get_purchased_material(
             self, cr, uid, context=context)
 
@@ -121,9 +134,9 @@ class ResCompany(orm.Model):
         # Format:
         excel_pool.set_format()
         xls_format = {
+            'title': excel_pool.get_format('title'),
+            'header': excel_pool.get_format('header'),
             'white': {  # normal white background
-                'title': excel_pool.get_format('title'),
-                'header': excel_pool.get_format('header'),
                 'text': excel_pool.get_format('text'),
                 'number': excel_pool.get_format('number'),
             },
@@ -133,14 +146,21 @@ class ResCompany(orm.Model):
         excel_pool.column_width(ws_name, columns)
         row = 0
         excel_pool.write_xls_line(
-            ws_name, row, header, default_format=xls_format['white']['header'])
+            ws_name, row, header, default_format=xls_format['header'])
 
-        for product in products:
+        for product in sorted(total_report,
+                              key=lambda p: (p.family_id.name, p.default_code)
+                              ):
             row += 1
-            row_data = []
+            row_data = [
+                'prodotto',
+                product.family_id.name,
+                product.default_code,
+            ]
+
             excel_pool.write_xls_line(
                 ws_name, row, row_data,
-                default_format=xls_format['white']['header'])
+                default_format=xls_format['white']['text'])
 
         # Restore previous state:
         user_pool.set_no_inventory_status(

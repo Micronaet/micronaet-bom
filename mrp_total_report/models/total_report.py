@@ -113,7 +113,7 @@ class ResCompany(orm.Model):
 
         # Generate datasheet structure:
         header, columns, fixed_col = generate_header(total_week)
-        total_col = fixed_col + total_week
+        total_col = fixed_col + total_week - 1
 
         # ---------------------------------------------------------------------
         # Collect data:
@@ -147,7 +147,7 @@ class ResCompany(orm.Model):
         row = 0
         excel_pool.write_xls_line(
             ws_name, row, header, default_format=xls_format['header'])
-        excel_pool = excel_pool.autofilter(ws_name, row, 0, row, total_col)
+        excel_pool.autofilter(ws_name, row, 0, row, total_col)
 
         for product in sorted(total_report,
                               key=lambda p: (p.family_id.name, p.default_code)

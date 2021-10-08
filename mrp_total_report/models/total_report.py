@@ -59,6 +59,7 @@ class ResCompany(orm.Model):
             """ Get product touched in OC and MRP items
             """
             product_touched = {}
+            product_comment = {}
             sale_line_pool = self.pool.get('sale.order.line')
             sale_line_ids = sale_line_pool.search(cr, uid, [
                 ('order_id.state', 'not in', ('draft', 'cancel', 'sent')),
@@ -74,15 +75,18 @@ class ResCompany(orm.Model):
                 product = line.product_id
                 if product not in product_touched:
                     product_touched[product] = empty[:]
+                    product_comment[product] = empty[:]
 
                 # Find position in record:
                 has_mrp = line.mrp_id
                 if has_mrp:
                     deadline = line.mrp_id.date_planned  # todo check unlinked
+                    comment = 'MRP: %s [%s]' % (line.mrp_id.name, deadline)
                 else:
                     deadline = line.date_deadline
+                    comment = 'OC: %s [%s]' % (line.order_id.name, deadline)
                 pos = get_week_cell(deadline, week_pos)
-                if pos < 0 or pos > len(empty):
+                if pos < 0 or pos > len(empty) - 1:
                     continue  # Extra range
 
                 # Find quantity needed:
@@ -96,10 +100,11 @@ class ResCompany(orm.Model):
                     maked_qty = line.product_uom_maked_sync_qty
                     if delivered_qty < maked_qty:
                         ready_qty = maked_qty - delivered_qty  # to deliver
-                product_touched[product][pos] += undelivered_qty - ready_qty
+                todo_qty = undelivered_qty - ready_qty
+                product_touched[product][pos] += todo_qty
                 # todo add comment?
-
-            return product_touched
+                comment += ' q. %s\n' % todo_qty
+            return product_touched, product_comment
 
         def get_purchased_material(self, cr, uid, context=None):
             """ Get list of purchase materia avaiting delivery
@@ -168,7 +173,7 @@ class ResCompany(orm.Model):
         # Collect data:
         # ---------------------------------------------------------------------
         empty_record = [0.0 for item in range(total_week)]
-        total_report = get_product_touched(
+        total_report, product_comment = get_product_touched(
             self, cr, uid, empty_record, week_pos, context=context)
         purchase_material = get_purchased_material(
             self, cr, uid, context=context)
@@ -198,17 +203,16 @@ class ResCompany(orm.Model):
             ws_name, row, header, default_format=xls_format['header'])
         excel_pool.autofilter(ws_name, row, 0, row, fixed_col - 1)
         excel_pool.row_height(ws_name, [row], height=25)
-        # Comment:
-        # excel_pool.write_comment_line(
-        #    ws_name, row, header_comment, col=fixed_col)
 
         stock_status = {}
         for product in sorted(total_report,
                               key=lambda p: (p.family_id.name, p.default_code)
                               ):
             week_data = total_report[product]
+            comment_data = product_comment[product]
             if not any(week_data):
-                _logger.warning('Rmoved empty line: %s' % product.default_code)
+                _logger.warning(
+                    'Removed empty line: %s' % product.default_code)
                 continue
             row += 1
             available_stock = product.mx_net_mrp_qty - product.mx_mrp_b_locked
@@ -228,6 +232,9 @@ class ResCompany(orm.Model):
                 ws_name, row, week_data,
                 default_format=xls_format['white']['number'],
                 col=fixed_col)
+            # Comment:
+            excel_pool.write_comment_line(
+                ws_name, row, comment_data, col=fixed_col)
 
         # Restore previous state:
         user_pool.set_no_inventory_status(

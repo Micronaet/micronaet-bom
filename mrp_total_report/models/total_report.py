@@ -163,7 +163,7 @@ class ResCompany(orm.Model):
                 header.append('Y%s-W%s\n%s' % (
                     isocalendar[0], week_of_year, from_date))
                 columns.append(10)
-                week_pos[week_of_year] = pos # + fixed_col
+                week_pos[week_of_year] = pos - 1  # 0 is first
                 day += timedelta(days=7)
                 pos += 1
             range_date.append(str(day)[:10])

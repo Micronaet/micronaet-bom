@@ -371,10 +371,7 @@ class ResCompany(orm.Model):
                     # ---------------------------------------------------------
                     # Week dynamic row part:
                     # ---------------------------------------------------------
-                    if multi != 1:
-                        sw_week_data = [item * multi for item in week_data]
-                    else:
-                        sw_week_data = week_data
+                    sw_week_data = [item * multi for item in week_data]
                     # Cover with stock (all week range block):
                     cover_position = 0
                     while stock_status[semiworked] > 0.0 and \
@@ -396,7 +393,7 @@ class ResCompany(orm.Model):
                             stock_status[semiworked] = 0.0  # used all av.!
                             sw_comment_text = 'Coperta da mag.: %s\n' % \
                                 stock_qty
-                        excel_pool.write_comment_line(
+                        excel_pool.write_comment(
                             ws_name, row, cover_position + fixed_col,
                             sw_comment_text,
                             parameters=parameters)

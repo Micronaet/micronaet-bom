@@ -440,7 +440,7 @@ class ResCompany(orm.Model):
                                 default_format=xls_format['white']['text'])
 
                             excel_pool.write_comment(
-                                ws_name, row, 2, 'Categoria %s' %
+                                ws_name, row, 2, 'Categoria inv. %s' %
                                                  inventory_category.name,
                                 parameters=parameters)
                             excel_pool.write_comment(

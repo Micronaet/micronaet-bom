@@ -360,6 +360,10 @@ class ResCompany(orm.Model):
                     excel_pool.write_xls_line(
                         ws_name, row, row_data,
                         default_format=xls_format['white']['text'])
+
+                    excel_pool.write_comment(
+                        ws_name, row, 2, 'Categoria %s' %
+                        line.category_id.name, parameters=parameters)
                     excel_pool.write_comment(
                         ws_name, row, fixed_col - 1, 'Netto %s' %
                         semiworked.mx_net_mrp_qty, parameters=parameters)

@@ -94,8 +94,8 @@ class ResCompany(orm.Model):
                     continue
 
                 comment = '%s [%s]' % (comment, deadline)
-                pos = get_week_cell(deadline, week_pos)
-                if pos < 0 or pos > len(empty) - 1:
+                relative_pos = get_week_cell(deadline, week_pos)
+                if relative_pos < 0 or relative_pos > len(empty) - 1:
                     pdb.set_trace()
                     continue  # Extra range  # todo remove not necessary
 
@@ -111,13 +111,13 @@ class ResCompany(orm.Model):
                     if delivered_qty < maked_qty:
                         ready_qty = maked_qty - delivered_qty  # to deliver
                 todo_qty = undelivered_qty - ready_qty
-                product_touched[product][pos] += todo_qty
+                product_touched[product][relative_pos] += todo_qty
                 # todo add comment?
                 comment += ' q. %s\n' % todo_qty
-                if product_comment[product][pos]:
-                    product_comment[product][pos] += comment
+                if product_comment[product][relative_pos]:
+                    product_comment[product][relative_pos] += comment
                 else:
-                    product_comment[product][pos] = comment
+                    product_comment[product][relative_pos] = comment
             return product_touched, product_comment
 
         def get_purchased_material(self, cr, uid, context=None):
@@ -135,9 +135,9 @@ class ResCompany(orm.Model):
                 return extra_range
             date = date[:10]
             date_dt = datetime.strptime(date, DEFAULT_SERVER_DATE_FORMAT)
-            week = date_dt.isocalendar()[1]
+            year_week = date_dt.isocalendar()[1]
             try:
-                return week_pos[week]
+                return week_pos[year_week]
             except:
                 return extra_range
 
@@ -163,7 +163,7 @@ class ResCompany(orm.Model):
                 header.append('Y%s-W%s\n%s' % (
                     isocalendar[0], week_of_year, from_date))
                 columns.append(10)
-                week_pos[week_of_year] = pos + fixed_col
+                week_pos[week_of_year] = pos # + fixed_col
                 day += timedelta(days=7)
                 pos += 1
             range_date.append(str(day)[:10])

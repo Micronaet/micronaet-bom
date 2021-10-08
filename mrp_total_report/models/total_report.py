@@ -148,7 +148,7 @@ class ResCompany(orm.Model):
             # go sunday before:
             day = day - timedelta(days=day.isocalendar()[2])
             pos = 0
-            range_date = [day]
+            range_date = [str(day)[:10]]
             for week in range(weeks):
                 isocalendar = day.isocalendar()
 
@@ -160,7 +160,7 @@ class ResCompany(orm.Model):
                 week_pos[week_of_year] = pos + fixed_col
                 day += timedelta(days=7)
                 pos += 1
-            range_date.append(day)
+            range_date.append(str(day)[:10])
             return header, week_pos, columns, fixed_col, range_date
 
         # ---------------------------------------------------------------------

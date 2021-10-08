@@ -281,12 +281,15 @@ class ResCompany(orm.Model):
                     # Comment
                     comment_data[cover_position] += \
                         'Coperta da mag.: %s\n' % needed_qty
-                else:  # not enought used all remain stock:
+                elif stock_qty < needed_qty:
+                    # not enough used all remain stock:
                     week_data[cover_position] -= stock_qty
                     stock_status[product] = 0.0  # used all available!
                     # Comment
                     comment_data[cover_position] += \
                         'Coperta da mag.: %s\n' % stock_qty
+                else:  # empty
+                    break
                 cover_position += 1
             # -----------------------------------------------------------------
             # Write data:

@@ -65,14 +65,14 @@ class ResCompany(orm.Model):
             sale_line_pool = self.pool.get('sale.order.line')
             sale_line_ids = sale_line_pool.search(cr, uid, [
                 ('order_id.state', 'not in', ('draft', 'cancel', 'sent')),
-                ('order_id.name', '=', 'OC/1/2020/07703'),
                 ('mx_closed', '=', False),
                 ('order_id.mx_closed', '=', False),
+                ('order_id.name', '=', 'OC/1/2020/07703'),  # todo demo
 
                 # # ('product_id.not_in_report', '=', False),
                 # # ('product_id.bom_placeholder', '=', False),
                 # # ('product_id.bom_alternative', '=', False),
-                ], context=context)  # todo demo: [:10]
+                ], context=context)
             _logger.warning('Total lines found: %s' % len(sale_line_ids))
             for line in sale_line_pool.browse(
                     cr, uid, sale_line_ids, context=context):
@@ -234,6 +234,8 @@ class ResCompany(orm.Model):
         excel_pool.row_height(ws_name, [row], height=25)
 
         stock_status = {}
+        print(total_report)
+        pdb.set_trace()
         for product in sorted(total_report,
                               key=lambda p: (p.family_id.name, p.default_code)
                               ):

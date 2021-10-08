@@ -22,6 +22,7 @@
 ###############################################################################
 
 import os
+import pdb
 import sys
 import logging
 import xlsxwriter
@@ -85,11 +86,18 @@ class ResCompany(orm.Model):
                 else:
                     deadline = line.date_deadline
                     comment = 'OC: %s' % line.order_id.name
+                deadline = (deadline or '/')[:10]
+                if not deadline or deadline < range_date[0] or \
+                        deadline > range_date[1]:
+                    _logger.warning('Date extra range period: %s' % deadline)
+                    # todo manage order deadlined!
+                    continue
 
-                comment = '%s [%s]' % (comment, (deadline or '/')[:10])
-                pos = get_week_cell(deadline, week_pos, range_date)
+                comment = '%s [%s]' % (comment, deadline)
+                pos = get_week_cell(deadline, week_pos)
                 if pos < 0 or pos > len(empty) - 1:
-                    continue  # Extra range
+                    pdb.set_trace()
+                    continue  # Extra range  # todo remove not necessary
 
                 # Find quantity needed:
                 product_uom_qty = line.product_uom_qty
@@ -118,7 +126,7 @@ class ResCompany(orm.Model):
             # todo
             return []
 
-        def get_week_cell(date, week_pos, range_date):
+        def get_week_cell(date, week_pos):
             """ Get position cell
             """
             extra_range = -1  # common value
@@ -126,8 +134,6 @@ class ResCompany(orm.Model):
                 _logger.error('No date for OC on MRP!')
                 return extra_range
             date = date[:10]
-            if date < range_date[0] or date > range_date[1]:
-                return extra_range
             date_dt = datetime.strptime(date, DEFAULT_SERVER_DATE_FORMAT)
             week = date_dt.isocalendar()[1]
             try:
@@ -181,6 +187,7 @@ class ResCompany(orm.Model):
         # Generate datasheet structure:
         header, week_pos, columns, fixed_col, range_date = \
             generate_header(total_week)
+        _logger.info('Start report for range: [%s %s]' % tuple(range_date))
         total_col = fixed_col + total_week - 1
 
         # ---------------------------------------------------------------------

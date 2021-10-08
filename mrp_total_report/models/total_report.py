@@ -272,6 +272,7 @@ class ResCompany(orm.Model):
             # -----------------------------------------------------------------
             # Cover with stock (all week range block):
             cover_position = 0
+            """
             while stock_status[product] > 0.0 and cover_position < total_week:
                 stock_qty = stock_status[product]
                 needed_qty = week_data[cover_position]
@@ -291,6 +292,7 @@ class ResCompany(orm.Model):
                 else:  # empty
                     break
                 cover_position += 1
+            """
             # -----------------------------------------------------------------
             # Write data:
             excel_pool.write_xls_line(

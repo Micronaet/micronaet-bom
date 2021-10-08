@@ -81,10 +81,12 @@ class ResCompany(orm.Model):
                 has_mrp = line.mrp_id
                 if has_mrp:
                     deadline = line.mrp_id.date_planned  # todo check unlinked
-                    comment = 'MRP: %s [%s]' % (line.mrp_id.name, deadline)
+                    comment = 'MRP: %s' % line.mrp_id.name
                 else:
                     deadline = line.date_deadline
-                    comment = 'OC: %s [%s]' % (line.order_id.name, deadline)
+                    comment = 'OC: %s' % line.order_id.name
+
+                comment = '%s [%s]' % (comment, (deadline or '/')[:10])
                 pos = get_week_cell(deadline, week_pos)
                 if pos < 0 or pos > len(empty) - 1:
                     continue  # Extra range

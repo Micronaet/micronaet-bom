@@ -74,6 +74,8 @@ class ResCompany(orm.Model):
             for line in sale_line_pool.browse(
                     cr, uid, sale_line_ids, context=context):
                 product = line.product_id
+                if line.order_id.name == 'OC/1/2021/07725':
+                    pdb.set_trace()
                 if product not in product_touched:
                     product_touched[product] = empty[:]
                     product_comment[product] = empty[:]

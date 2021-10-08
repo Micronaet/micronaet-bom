@@ -82,7 +82,7 @@ class ResCompany(orm.Model):
                 else:
                     deadline = line.date_deadline
                 pos = get_week_cell(deadline, week_pos)
-                if pos < 0:
+                if pos < 0 or pos > len(empty):
                     continue  # Extra range
 
                 # Find quantity needed:

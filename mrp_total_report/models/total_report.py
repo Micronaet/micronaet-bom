@@ -246,6 +246,26 @@ class ResCompany(orm.Model):
                 'text': excel_pool.get_format('text'),
                 'number': excel_pool.get_format('number'),
             },
+            'grey': {  # normal grey background
+                'text': excel_pool.get_format('bg_grey'),
+                'number': excel_pool.get_format('bg_grey_number'),
+            },
+            'blue': {  # normal grey background
+                'text': excel_pool.get_format('bg_blue'),
+                'number': excel_pool.get_format('bg_blue_number'),
+            },
+            'green': {  # normal grey background
+                'text': excel_pool.get_format('bg_green'),
+                'number': excel_pool.get_format('bg_green_number'),
+            },
+            'yellow': {  # normal grey background
+                'text': excel_pool.get_format('bg_yellow'),
+                'number': excel_pool.get_format('bg_yellow_number'),
+            },
+            'orange': {  # normal grey background
+                'text': excel_pool.get_format('bg_orange'),
+                'number': excel_pool.get_format('bg_orange_number'),
+            },
         }
         parameters = {'width': 300, }
 
@@ -285,7 +305,7 @@ class ResCompany(orm.Model):
             ]
             excel_pool.write_xls_line(
                 ws_name, row, row_data,
-                default_format=xls_format['white']['text'])
+                default_format=xls_format['blue']['text'])
             excel_pool.write_comment(
                 ws_name, row, fixed_col - 1, 'Netto %s - Bloccato %s' % (
                     product.mx_net_mrp_qty, product.mx_mrp_b_locked
@@ -360,7 +380,7 @@ class ResCompany(orm.Model):
                     ]
                     excel_pool.write_xls_line(
                         ws_name, row, row_data,
-                        default_format=xls_format['white']['text'])
+                        default_format=xls_format['yellow']['text'])
 
                     excel_pool.write_comment(
                         ws_name, row, 2, 'Categoria %s' %
@@ -440,7 +460,7 @@ class ResCompany(orm.Model):
                         ]
                         excel_pool.write_xls_line(
                             ws_name, row, row_data,
-                            default_format=xls_format['white']['text'])
+                            default_format=xls_format['orange']['text'])
 
                         # Comment:
                         excel_pool.write_comment(

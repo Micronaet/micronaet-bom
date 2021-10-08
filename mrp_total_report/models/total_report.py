@@ -373,7 +373,7 @@ class ResCompany(orm.Model):
                         sw_week_data = week_data
                     # Cover with stock (all week range block):
                     cover_position = 0
-                    sw_comment_data = []
+                    # sw_comment_data = []
                     while stock_status[semiworked] > 0.0 and \
                             cover_position < total_week:
                         needed_qty = sw_week_data[cover_position]
@@ -385,14 +385,14 @@ class ResCompany(orm.Model):
                         if stock_qty > needed_qty:
                             sw_week_data[cover_position] = 0.0
                             stock_status[semiworked] -= needed_qty
-                            sw_comment_data.append(
-                                'Coperta da mag.: %s\n' % needed_qty)
+                            # sw_comment_data.append(
+                            #    'Coperta da mag.: %s\n' % needed_qty)
                         elif stock_qty < needed_qty:
                             # not enough used all remain stock:
                             sw_week_data[cover_position] -= stock_qty
                             stock_status[semiworked] = 0.0  # used all av.!
-                            sw_comment_data.append(
-                                'Coperta da mag.: %s\n' % stock_qty)
+                            # sw_comment_data.append(
+                            #    'Coperta da mag.: %s\n' % stock_qty)
                         cover_position += 1
 
                     # ---------------------------------------------------------
@@ -401,9 +401,9 @@ class ResCompany(orm.Model):
                         ws_name, row, sw_week_data,
                         default_format=xls_format['white']['number'],
                         col=fixed_col)
-                    excel_pool.write_comment_line(
-                        ws_name, row, sw_comment_data, col=fixed_col,
-                        parameters=parameters)
+                    # excel_pool.write_comment_line(
+                    #    ws_name, row, sw_comment_data, col=fixed_col,
+                    #    parameters=parameters)
 
         # Restore previous state:
         user_pool.set_no_inventory_status(

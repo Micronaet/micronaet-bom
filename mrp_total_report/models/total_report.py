@@ -97,6 +97,7 @@ class ResCompany(orm.Model):
                     continue
 
                 comment = '%s [%s]' % (comment, deadline)
+                pdb.set_trace()
                 relative_pos = get_week_cell(deadline, week_pos)
                 if relative_pos < 0 or relative_pos > len(empty_number) - 1:
                     continue  # Extra range  # todo remove not necessary
@@ -139,7 +140,7 @@ class ResCompany(orm.Model):
             date_dt = datetime.strptime(date, DEFAULT_SERVER_DATE_FORMAT)
             year_week = date_dt.isocalendar()[1]
             try:
-                return week_pos[year_week]
+                return week_pos[year_week - 1]
             except:
                 return extra_range
 

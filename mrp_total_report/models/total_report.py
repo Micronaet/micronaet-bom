@@ -297,7 +297,7 @@ class ResCompany(orm.Model):
             # Fixed row part:
             # -----------------------------------------------------------------
             row_data = [
-                'prodotto',
+                'L1. prodotto',
                 product.family_id.name,
                 product.default_code,
                 product.name,
@@ -370,7 +370,7 @@ class ResCompany(orm.Model):
                     row += 1
                     multi = line.product_qty
                     row_data = [
-                        'semilavorati',
+                        'L2. semilavorati',
                         semiworked.family_id.name,
                         '%s (x %s)' % (
                             semiworked.default_code, multi),
@@ -450,7 +450,7 @@ class ResCompany(orm.Model):
                         row += 1
                         multi = raw_line.product_qty
                         row_data = [
-                            'materie prime',
+                            'L3. materie prime',
                             raw_material.family_id.name,
                             '%s (x %s)' % (
                                 raw_material.default_code, multi),

@@ -199,6 +199,13 @@ class ResCompany(orm.Model):
                 'number': excel_pool.get_format('number'),
             },
         }
+        parameters = {
+            # author, visible, x_scale,
+            'width': 300,
+            # y_scale, height, color
+            # font_name, font_size, start_cell, start_row, start_col
+            # x_offset, y_offset
+            }
 
         # Column setup:
         excel_pool.column_width(ws_name, columns)
@@ -236,10 +243,11 @@ class ResCompany(orm.Model):
                 ws_name, row, week_data,
                 default_format=xls_format['white']['number'],
                 col=fixed_col)
+
             # Comment:
-            print(comment_data)
             excel_pool.write_comment_line(
-                ws_name, row, comment_data, col=fixed_col)
+                ws_name, row, comment_data, col=fixed_col,
+                parameters=parameters)
 
         # Restore previous state:
         user_pool.set_no_inventory_status(

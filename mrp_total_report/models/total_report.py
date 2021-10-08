@@ -301,7 +301,7 @@ class ResCompany(orm.Model):
                 product.family_id.name,
                 product.default_code,
                 product.name,
-                (available_stock, xls_format['white']['number']),
+                (available_stock, xls_format['blue']['number']),
             ]
             excel_pool.write_xls_line(
                 ws_name, row, row_data,
@@ -375,7 +375,7 @@ class ResCompany(orm.Model):
                         '%s (x %s)' % (
                             semiworked.default_code, multi),
                         semiworked.name,
-                        (available_stock, xls_format['white']['number']),
+                        (available_stock, xls_format['yellow']['number']),
                         # No locked part
                     ]
                     excel_pool.write_xls_line(
@@ -455,7 +455,7 @@ class ResCompany(orm.Model):
                             '%s (x %s)' % (
                                 raw_material.default_code, multi),
                             raw_material.name,
-                            (available_stock, xls_format['white']['number']),
+                            (available_stock, xls_format['orange']['number']),
                             # No locked part
                         ]
                         excel_pool.write_xls_line(

@@ -399,6 +399,86 @@ class ResCompany(orm.Model):
                             parameters=parameters)
                         cover_position += 1
 
+                        # =====================================================
+                        # Sviluppo materie prime se presenti:
+                        # =====================================================
+                        for raw_line in semiworked.jalf_bom_ids:
+                            raw_material = raw_line.product_id
+                            inventory_category = \
+                                raw_material.inventory_category_id
+                            if inventory_category.mrp_total_report:
+                                available_stock = \
+                                    raw_material.mx_net_mrp_qty
+
+                                if raw_material not in stock_status:
+                                    stock_status[raw_material] = \
+                                        available_stock
+
+                                # ---------------------------------------------
+                                # Fixed row part:
+                                # ---------------------------------------------
+                                row += 1
+                                multi = raw_line.product_qty
+                                row_data = [
+                                    'materie prime',
+                                    raw_material.family_id.name,
+                                    raw_material.default_code,
+                                    raw_material.name,
+                                    (available_stock,
+                                     xls_format['white']['number']),
+                                    # No locked part
+                                ]
+                                excel_pool.write_xls_line(
+                                    ws_name, row, row_data,
+                                    default_format=xls_format['white']['text'])
+
+                                excel_pool.write_comment(
+                                    ws_name, row, 2, 'Categoria %s' %
+                                                     inventory_category.name,
+                                    parameters=parameters)
+                                excel_pool.write_comment(
+                                    ws_name, row, fixed_col - 1, 'Netto %s' %
+                                    raw_material.mx_net_mrp_qty,
+                                    parameters=parameters)
+
+                                # ---------------------------------------------
+                                # Week dynamic row part:
+                                # ---------------------------------------------
+                                rm_week_data = [
+                                    item * multi for item in sw_week_data]
+                                # Cover with stock (all week range block):
+                                cover_position = 0
+                                while stock_status[raw_material] > 0.0 and \
+                                        cover_position < total_week:
+                                    needed_qty = rm_week_data[cover_position]
+                                    if not needed_qty:
+                                        cover_position += 1
+                                        continue
+                                    stock_qty = stock_status[raw_material]
+
+                                    if stock_qty > needed_qty:
+                                        rm_week_data[cover_position] = 0.0
+                                        stock_status[raw_material] -= \
+                                            needed_qty
+                                        rm_comment_text = \
+                                            'Coperta da mag.: %s\n' % \
+                                            needed_qty
+                                    elif stock_qty < needed_qty:
+                                        # not enough used all remain stock:
+                                        rm_week_data[cover_position] -= \
+                                            stock_qty
+                                        stock_status[
+                                            raw_material] = 0.0  # used all av.
+                                        rm_comment_text = \
+                                            'Coperta da mag.: %s\n' % \
+                                                stock_qty
+                                    excel_pool.write_comment(
+                                        ws_name, row,
+                                        cover_position + fixed_col,
+                                        rm_comment_text,
+                                        parameters=parameters)
+                                    cover_position += 1
+
                     # ---------------------------------------------------------
                     # Write data:
                     excel_pool.write_xls_line(

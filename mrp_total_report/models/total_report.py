@@ -64,14 +64,15 @@ class ResCompany(orm.Model):
             sale_line_pool = self.pool.get('sale.order.line')
             sale_line_ids = sale_line_pool.search(cr, uid, [
                 ('order_id.state', 'not in', ('draft', 'cancel', 'sent')),
-                # ('product_id.not_in_report', '=', False),
                 ('order_id.name', '=', 'OC/1/2020/07703'),
                 ('mx_closed', '=', False),
                 ('order_id.mx_closed', '=', False),
-                # ('product_id.bom_placeholder', '=', False),
-                # ('product_id.bom_alternative', '=', False),
-                ], context=context)  # todo demo: [:10]
 
+                # # ('product_id.not_in_report', '=', False),
+                # # ('product_id.bom_placeholder', '=', False),
+                # # ('product_id.bom_alternative', '=', False),
+                ], context=context)  # todo demo: [:10]
+            _logger.warning('Total lines found: %s' % len(sale_line_ids))
             for line in sale_line_pool.browse(
                     cr, uid, sale_line_ids, context=context):
                 product = line.product_id
@@ -235,7 +236,7 @@ class ResCompany(orm.Model):
             if not any(week_data):
                 _logger.warning(
                     'Removed empty line: %s' % product.default_code)
-                continue
+                # todo continue
             row += 1
             available_stock = product.mx_net_mrp_qty - product.mx_mrp_b_locked
 

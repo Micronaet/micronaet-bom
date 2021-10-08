@@ -91,7 +91,7 @@ class ResCompany(orm.Model):
                 ('order_id.state', 'not in', ('draft', 'cancel', 'sent')),
                 ('mx_closed', '=', False),
                 ('order_id.mx_closed', '=', False),
-                ('order_id.name', '=', 'OC/1/2020/07703'),  # todo demo
+                ('order_id.name', '=', 'OC/1/2020/07666'),  # todo demo
 
                 # # ('product_id.not_in_report', '=', False),
                 # # ('product_id.bom_placeholder', '=', False),

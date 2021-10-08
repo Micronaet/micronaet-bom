@@ -352,7 +352,8 @@ class ResCompany(orm.Model):
                     row_data = [
                         'semilavorati',
                         semiworked.family_id.name,
-                        semiworked.default_code,
+                        '%s (x %s)' % (
+                            semiworked.default_code, multi),
                         semiworked.name,
                         (available_stock, xls_format['white']['number']),
                         # No locked part
@@ -383,7 +384,7 @@ class ResCompany(orm.Model):
                         stock_qty = stock_status[semiworked]
 
                         sw_comment_text = \
-                            'Nr. %s x %s\n' % (needed_qty, multi)
+                            'Nr. %s x %s\n' % (int(needed_qty), multi)
                         if stock_qty > needed_qty:
                             sw_week_data[cover_position] = 0.0
                             stock_status[semiworked] -= needed_qty
@@ -431,7 +432,8 @@ class ResCompany(orm.Model):
                         row_data = [
                             'materie prime',
                             raw_material.family_id.name,
-                            raw_material.default_code,
+                            '%s (x %s)' % (
+                                raw_material.default_code, multi),
                             raw_material.name,
                             (available_stock, xls_format['white']['number']),
                             # No locked part
@@ -466,7 +468,7 @@ class ResCompany(orm.Model):
                             stock_qty = stock_status[raw_material]
 
                             rm_comment_text = \
-                                'Nr. %s x %s\n' % (needed_qty, multi)
+                                'Nr. %s x %s\n' % (int(needed_qty), multi)
                             if stock_qty > needed_qty:
                                 rm_week_data[cover_position] = 0.0
                                 stock_status[raw_material] -= \

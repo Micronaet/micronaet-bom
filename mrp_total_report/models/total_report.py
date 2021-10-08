@@ -245,6 +245,11 @@ class ResCompany(orm.Model):
                 product.name,
                 (available_stock, xls_format['white']['number']),
             ]
+            excel_pool.write_comment_line(
+                ws_name, row, 4, 'Netto %s - Bloccato %s' % (
+                    product.mx_net_mrp_qty, product.mx_mrp_b_locked
+                ), parameters=parameters)
+
 
             excel_pool.write_xls_line(
                 ws_name, row, row_data,

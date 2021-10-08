@@ -270,11 +270,11 @@ class ResCompany(orm.Model):
                 if stock_qty > needed_qty:
                     week_data[cover_position] = 0.0
                     stock_status[product] -= needed_qty
-                    comment_data += 'Coperta da mag.: %s\n' % needed_qty
+                    comment_data[product] += 'Coperta da mag.: %s\n' % needed_qty
                 else:  # not enought used all remain stock:
                     week_data[cover_position] -= stock_qty
                     stock_status[product] = 0.0  # used all available!
-                    comment_data += 'Coperta da mag.: %s\n' % stock_qty
+                    comment_data[product] += 'Coperta da mag.: %s\n' % stock_qty
                 cover_position += 1
             # -----------------------------------------------------------------
             # Write data:

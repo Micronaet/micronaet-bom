@@ -367,7 +367,8 @@ class ResCompany(orm.Model):
                     # ---------------------------------------------------------
                     if multi != 1:
                         sw_week_data = [item * multi for item in week_data]
-
+                    else:
+                        sw_week_data = week_data
                     # Cover with stock (all week range block):
                     cover_position = 0
                     while stock_status[semiworked] > 0.0 and \

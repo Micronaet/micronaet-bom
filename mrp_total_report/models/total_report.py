@@ -278,6 +278,7 @@ class ResCompany(orm.Model):
         excel_pool.row_height(ws_name, [row], height=25)
 
         stock_status = {}
+        pdb.set_trace()
         for product in sorted(total_report,
                               key=lambda p: (p.family_id.name, p.default_code)
                               ):

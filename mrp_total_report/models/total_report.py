@@ -104,6 +104,7 @@ class ResCompany(orm.Model):
                 product_touched[product][pos] += todo_qty
                 # todo add comment?
                 comment += ' q. %s\n' % todo_qty
+                product_touched[product][pos] += comment
             return product_touched, product_comment
 
         def get_purchased_material(self, cr, uid, context=None):
@@ -233,6 +234,7 @@ class ResCompany(orm.Model):
                 default_format=xls_format['white']['number'],
                 col=fixed_col)
             # Comment:
+            print(comment_data)
             excel_pool.write_comment_line(
                 ws_name, row, comment_data, col=fixed_col)
 

@@ -402,11 +402,12 @@ class ResCompany(orm.Model):
                         # =====================================================
                         # Sviluppo materie prime se presenti:
                         # =====================================================
-                        for raw_line in semiworked.jalf_bom_ids:
+                        for raw_line in semiworked.half_bom_ids:
                             raw_material = raw_line.product_id
                             inventory_category = \
                                 raw_material.inventory_category_id
                             if inventory_category.mrp_total_report:
+                                row += 1
                                 available_stock = \
                                     raw_material.mx_net_mrp_qty
 

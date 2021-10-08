@@ -91,18 +91,12 @@ class ResCompany(orm.Model):
                 # todo assigned_qty = line.assigned_qty
 
                 undelivered_qty = product_uom_qty - delivered_qty
-
+                ready_qty = 0.0
                 if has_mrp:
                     maked_qty = line.product_uom_maked_sync_qty
-                    if delivered_qty > maked_qty:
-                        ready_qty = 0.0
-                    else:
+                    if delivered_qty < maked_qty:
                         ready_qty = maked_qty - delivered_qty  # to deliver
-                else:
-                    maked_qty = 0.0
-                remain_qty = undelivered_qty - maked_qty
-
-                product_touched[product][pos] += remain_qty
+                product_touched[product][pos] += undelivered_qty - ready_qty
                 # todo add comment?
 
             return product_touched

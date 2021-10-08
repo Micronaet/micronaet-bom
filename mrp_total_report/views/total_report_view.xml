@@ -23,7 +23,7 @@
             <field name="model">mrp.bom.structure.category</field>
             <field name="inherit_id" ref="bom_dynamic_structured.view_mrp_bom_structure_category_tree"/>
             <field name="arch" type="xml">
-                <field name="department">
+                <field name="department" position="after">
                     <field name="mrp_total_report"/>
                 </field>
             </field>
@@ -33,12 +33,33 @@
             <field name="model">mrp.bom.structure.category</field>
             <field name="inherit_id" ref="bom_dynamic_structured.view_mrp_bom_structure_category_form"/>
             <field name="arch" type="xml">
-                    <field name="department">
+                    <field name="department" position="after">
                         <field name="mrp_total_report"/>
                     </field>
             </field>
         </record>
 
+        <!--product.product.inventory.category-->
+        <record model="ir.ui.view" id="view_product_product_inventory_category_form">
+            <field name="name">product.product.inventory.category.report.form</field>
+            <field name="model">product.product.inventory.category</field>
+            <field name="inherit_id" ref="inventory_field.view_product_product_inventory_category_form"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="mrp_total_report"/>
+                </field>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_product_product_inventory_category_tree">
+            <field name="name">product.product.inventory.category.report.tree</field>
+            <field name="model">product.product.inventory.category</field>
+            <field name="inherit_id" ref="inventory_field.view_product_product_inventory_category_tree"/>
+            <field name="arch" type="xml">
+                <field name="name" position="before">
+                    <field name="mrp_total_report"/>
+                </field>
+            </field>
+        </record>
     </data>
 </openerp>
 

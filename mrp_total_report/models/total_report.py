@@ -56,7 +56,8 @@ class ResCompany(orm.Model):
         # Utility:
         # ---------------------------------------------------------------------
         def get_product_touched(
-                self, cr, uid, empty, week_pos, range_date, context=None):
+                self, cr, uid, empty_number, empty_text, week_pos, range_date,
+                context=None):
             """ Get product touched in OC and MRP items
             """
             product_touched = {}
@@ -77,8 +78,8 @@ class ResCompany(orm.Model):
                     cr, uid, sale_line_ids, context=context):
                 product = line.product_id
                 if product not in product_touched:
-                    product_touched[product] = empty[:]
-                    product_comment[product] = empty[:]
+                    product_touched[product] = empty_number[:]
+                    product_comment[product] = empty_text[:]
 
                 # Find position in record:
                 has_mrp = line.mrp_id
@@ -194,9 +195,11 @@ class ResCompany(orm.Model):
         # ---------------------------------------------------------------------
         # Collect data:
         # ---------------------------------------------------------------------
-        empty_record = [0.0 for item in range(total_week)]
+        empty_number = [0.0 for item in range(total_week)]
+        empty_text = ['' for item in range(total_week)]
         total_report, product_comment = get_product_touched(
-            self, cr, uid, empty_record, week_pos, range_date, context=context)
+            self, cr, uid, empty_number, empty_text, week_pos, range_date,
+            context=context)
         purchase_material = get_purchased_material(
             self, cr, uid, context=context)
 

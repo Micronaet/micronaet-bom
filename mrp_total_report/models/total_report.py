@@ -65,6 +65,7 @@ class ResCompany(orm.Model):
             sale_line_ids = sale_line_pool.search(cr, uid, [
                 ('order_id.state', 'not in', ('draft', 'cancel', 'sent')),
                 # ('product_id.not_in_report', '=', False),
+                ('order_id.name', '=', 'OC/1/2020/07703'),
                 ('mx_closed', '=', False),
                 ('order_id.mx_closed', '=', False),
                 # ('product_id.bom_placeholder', '=', False),

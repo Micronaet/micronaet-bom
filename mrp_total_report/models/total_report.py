@@ -262,21 +262,22 @@ class ResCompany(orm.Model):
             # -----------------------------------------------------------------
             # Week dynamic row part:
             # -----------------------------------------------------------------
+            # Cover with stock:
             cover_position = 0
-            while stock_status[product] > 0:
+            while stock_status[product] > 0.0:
                 covered_qty = stock_status[product]
                 to_be_covered = week_data[covered_qty]
                 if cover_position > to_be_covered:
-                    week_data[covered_qty] = 0
+                    week_data[covered_qty] = 0.0
                     stock_status[product] -= to_be_covered
                     comment_data += 'Coperta da mag.: %s\n' % to_be_covered
                 else:  # not enought
                     week_data[covered_qty] -= cover_position
-                    stock_status[product] = 0  # used all available!
+                    stock_status[product] = 0.0  # used all available!
                     comment_data += 'Coperta da mag.: %s\n' % cover_position
                 cover_position += 1
-
-            # week_data = [int(item) for item in total_report[product]]
+            # -----------------------------------------------------------------
+            # Write data:
             excel_pool.write_xls_line(
                 ws_name, row, week_data,
                 default_format=xls_format['white']['number'],

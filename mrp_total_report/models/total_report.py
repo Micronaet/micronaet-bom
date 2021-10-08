@@ -98,7 +98,7 @@ class ResCompany(orm.Model):
 
                 comment = '%s [%s]' % (comment, deadline)
                 relative_pos = get_week_cell(deadline, week_pos)
-                if relative_pos < 0 or relative_pos > len(empty) - 1:
+                if relative_pos < 0 or relative_pos > len(empty_number) - 1:
                     continue  # Extra range  # todo remove not necessary
 
                 # Find quantity needed:
@@ -165,7 +165,7 @@ class ResCompany(orm.Model):
                 header.append('Y%s-W%s\n%s' % (
                     isocalendar[0], week_of_year, from_date))
                 columns.append(10)
-                week_pos[week_of_year] = pos - 1  # 0 is first
+                week_pos[week_of_year] = pos
                 day += timedelta(days=7)
                 pos += 1
             range_date.append(str(day)[:10])
@@ -234,8 +234,6 @@ class ResCompany(orm.Model):
         excel_pool.row_height(ws_name, [row], height=25)
 
         stock_status = {}
-        print(total_report)
-        pdb.set_trace()
         for product in sorted(total_report,
                               key=lambda p: (p.family_id.name, p.default_code)
                               ):

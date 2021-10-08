@@ -96,7 +96,6 @@ class ResCompany(orm.Model):
                 comment = '%s [%s]' % (comment, deadline)
                 relative_pos = get_week_cell(deadline, week_pos)
                 if relative_pos < 0 or relative_pos > len(empty) - 1:
-                    pdb.set_trace()
                     continue  # Extra range  # todo remove not necessary
 
                 # Find quantity needed:

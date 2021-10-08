@@ -237,6 +237,13 @@ class ResCompany(orm.Model):
                 continue
             row += 1
             available_stock = product.mx_net_mrp_qty - product.mx_mrp_b_locked
+
+            if product not in stock_status:
+                stock_status[product] = available_stock
+
+            # -----------------------------------------------------------------
+            # Fixed row part:
+            # -----------------------------------------------------------------
             row_data = [
                 'prodotto',
                 product.family_id.name,
@@ -244,21 +251,36 @@ class ResCompany(orm.Model):
                 product.name,
                 (available_stock, xls_format['white']['number']),
             ]
+            excel_pool.write_xls_line(
+                ws_name, row, row_data,
+                default_format=xls_format['white']['text'])
             excel_pool.write_comment(
                 ws_name, row, fixed_col - 1, 'Netto %s - Bloccato %s' % (
                     product.mx_net_mrp_qty, product.mx_mrp_b_locked
                 ), parameters=parameters)
 
+            # -----------------------------------------------------------------
+            # Week dynamic row part:
+            # -----------------------------------------------------------------
+            cover_position = 0
+            while stock_status[product] > 0:
+                covered_qty = stock_status[product]
+                to_be_covered = week_data[covered_qty]
+                if cover_position > to_be_covered:
+                    week_data[covered_qty] = 0
+                    stock_status[product] -= to_be_covered
+                    comment_data += 'Coperta da mag.: %s\n' % to_be_covered
+                else:  # not enought
+                    week_data[covered_qty] -= cover_position
+                    stock_status[product] = 0  # used all available!
+                    comment_data += 'Coperta da mag.: %s\n' % cover_position
+                cover_position += 1
 
-            excel_pool.write_xls_line(
-                ws_name, row, row_data,
-                default_format=xls_format['white']['text'])
             # week_data = [int(item) for item in total_report[product]]
             excel_pool.write_xls_line(
                 ws_name, row, week_data,
                 default_format=xls_format['white']['number'],
                 col=fixed_col)
-
             # Comment:
             excel_pool.write_comment_line(
                 ws_name, row, comment_data, col=fixed_col,

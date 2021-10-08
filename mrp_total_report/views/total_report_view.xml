@@ -16,6 +16,29 @@
                 </xpath>
             </field>
         </record>
+
+        <!--mrp.bom.structure.category-->
+        <record model="ir.ui.view" id="view_mrp_bom_structure_category_report_tree">
+            <field name="name">mrp.bom.structure.category.report.tree</field>
+            <field name="model">mrp.bom.structure.category</field>
+            <field name="inherit_id" ref="bom_dynamic_structured.view_mrp_bom_structure_category_tree"/>
+            <field name="arch" type="xml">
+                <field name="department">
+                    <field name="mrp_total_report"/>
+                </field>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_mrp_bom_structure_category_report_form">
+            <field name="name">mrp.bom.structure.category.report.tree</field>
+            <field name="model">mrp.bom.structure.category</field>
+            <field name="inherit_id" ref="bom_dynamic_structured.view_mrp_bom_structure_category_form"/>
+            <field name="arch" type="xml">
+                    <field name="department">
+                        <field name="mrp_total_report"/>
+                    </field>
+            </field>
+        </record>
+
     </data>
 </openerp>
 

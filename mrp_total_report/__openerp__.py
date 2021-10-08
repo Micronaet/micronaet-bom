@@ -39,7 +39,8 @@
         'mrp',
         'purchase',
         'mx_close_order',
-        'bom_dynamic_structured',
+        'bom_dynamic_structured',  # BOM category
+        'inventory_field',  # Inventory category
         ],
     'init_xml': [],
     'demo': [],

@@ -44,6 +44,30 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 _logger = logging.getLogger(__name__)
 
 
+class ProductProductInventoryCategory(orm.Model):
+    """ Model name: Inventory category
+    """
+    _inherit = 'product.product.inventory.category'
+
+    _columns = {
+        'mrp_total_report': fields.boolean(
+            'Report MRP totale',
+            help='Presente nel report di approvvigiomento e produzione totale')
+    }
+
+
+class MrpBomStructureCategory(orm.Model):
+    """ Model name: Inventory category
+    """
+    _inherit = 'mrp.bom.structure.category'
+
+    _columns = {
+        'mrp_total_report': fields.boolean(
+            'Report MRP totale',
+            help='Presente nel report di approvvigiomento e produzione totale')
+    }
+
+
 class ResCompany(orm.Model):
     """ Model name: Company report
     """
@@ -272,10 +296,10 @@ class ResCompany(orm.Model):
             # -----------------------------------------------------------------
             # Cover with stock (all week range block):
             cover_position = 0
-            pdb.set_trace()
             while stock_status[product] > 0.0 and cover_position < total_week:
                 needed_qty = week_data[cover_position]
                 if not needed_qty:
+                    cover_position += 1
                     continue
                 stock_qty = stock_status[product]
 
@@ -304,6 +328,11 @@ class ResCompany(orm.Model):
             excel_pool.write_comment_line(
                 ws_name, row, comment_data, col=fixed_col,
                 parameters=parameters)
+
+            # =================================================================
+            # Sviluppo semilavorati se presenti:
+            # ================================================================
+
 
         # Restore previous state:
         user_pool.set_no_inventory_status(

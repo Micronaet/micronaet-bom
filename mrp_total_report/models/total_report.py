@@ -64,7 +64,7 @@ class ResCompany(orm.Model):
             sale_line_pool = self.pool.get('sale.order.line')
             sale_line_ids = sale_line_pool.search(cr, uid, [
                 ('order_id.state', 'not in', ('draft', 'cancel', 'sent')),
-                ('product_id.not_in_report', '=', False),
+                # ('product_id.not_in_report', '=', False),
                 ('mx_closed', '=', False),
                 ('order_id.mx_closed', '=', False),
                 # ('product_id.bom_placeholder', '=', False),
@@ -74,8 +74,6 @@ class ResCompany(orm.Model):
             for line in sale_line_pool.browse(
                     cr, uid, sale_line_ids, context=context):
                 product = line.product_id
-                if line.order_id.name == 'OC/1/2021/07725':
-                    pdb.set_trace()
                 if product not in product_touched:
                     product_touched[product] = empty[:]
                     product_comment[product] = empty[:]

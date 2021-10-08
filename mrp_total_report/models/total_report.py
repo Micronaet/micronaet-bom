@@ -407,7 +407,6 @@ class ResCompany(orm.Model):
                             inventory_category = \
                                 raw_material.inventory_category_id
                             if inventory_category.mrp_total_report:
-                                row += 1
                                 available_stock = \
                                     raw_material.mx_net_mrp_qty
 

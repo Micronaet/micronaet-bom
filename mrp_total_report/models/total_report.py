@@ -331,8 +331,78 @@ class ResCompany(orm.Model):
 
             # =================================================================
             # Sviluppo semilavorati se presenti:
-            # ================================================================
+            # =================================================================
+            semi_worked = []
+            for line in product.dynamic_bom_line_ids:
+                if line.category_id.mrp_total_report:
+                    semiworked = line.product_id
+                    available_stock = \
+                        semiworked.mx_net_mrp_qty  # semiworked.mx_mrp_b_locked
 
+                    if semiworked not in stock_status:
+                        stock_status[semiworked] = available_stock
+
+                    # ---------------------------------------------------------
+                    # Fixed row part:
+                    # ---------------------------------------------------------
+                    row += 1
+                    multi = line.product_qty
+                    row_data = [
+                        'semilavorati',
+                        semiworked.family_id.name,
+                        semiworked.default_code,
+                        semiworked.name,
+                        (available_stock, xls_format['white']['number']),
+                        # No locked part
+                    ]
+                    excel_pool.write_xls_line(
+                        ws_name, row, row_data,
+                        default_format=xls_format['white']['text'])
+                    excel_pool.write_comment(
+                        ws_name, row, fixed_col - 1, 'Netto %s' %
+                        semiworked.mx_net_mrp_qty, parameters=parameters)
+
+                    # ---------------------------------------------------------
+                    # Week dynamic row part:
+                    # ---------------------------------------------------------
+                    if multi != 1:
+                        sw_week_data = [item * multi for item in week_data]
+
+                    # Cover with stock (all week range block):
+                    cover_position = 0
+                    while stock_status[semiworked] > 0.0 and \
+                            cover_position < total_week:
+                        needed_qty = sw_week_data[cover_position]
+                        if not needed_qty:
+                            cover_position += 1
+                            continue
+                        stock_qty = stock_status[semiworked]
+
+                        if stock_qty > needed_qty:
+                            sw_week_data[cover_position] = 0.0
+                            stock_status[semiworked] -= needed_qty
+                            # todo Comment
+                            #comment_data[cover_position] += \
+                            #    'Coperta da mag.: %s\n' % needed_qty
+                        elif stock_qty < needed_qty:
+                            # not enough used all remain stock:
+                            sw_week_data[cover_position] -= stock_qty
+                            stock_status[semiworked] = 0.0  # used all av.!
+                            # todo Comment
+                            #comment_data[cover_position] += \
+                            #    'Coperta da mag.: %s\n' % stock_qty
+                        cover_position += 1
+
+                    # ---------------------------------------------------------
+                    # Write data:
+                    excel_pool.write_xls_line(
+                        ws_name, row, sw_week_data,
+                        default_format=xls_format['white']['number'],
+                        col=fixed_col)
+                    # todo Comment:
+                    # excel_pool.write_comment_line(
+                    #    ws_name, row, comment_data, col=fixed_col,
+                    #    parameters=parameters)
 
         # Restore previous state:
         user_pool.set_no_inventory_status(

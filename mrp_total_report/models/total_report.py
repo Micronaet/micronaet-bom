@@ -274,8 +274,11 @@ class ResCompany(orm.Model):
             cover_position = 0
             pdb.set_trace()
             while stock_status[product] > 0.0 and cover_position < total_week:
-                stock_qty = stock_status[product]
                 needed_qty = week_data[cover_position]
+                if not needed_qty:
+                    continue
+                stock_qty = stock_status[product]
+
                 if stock_qty > needed_qty:
                     week_data[cover_position] = 0.0
                     stock_status[product] -= needed_qty
@@ -289,9 +292,8 @@ class ResCompany(orm.Model):
                     # Comment
                     comment_data[cover_position] += \
                         'Coperta da mag.: %s\n' % stock_qty
-                else:  # empty
-                    break
                 cover_position += 1
+
             # -----------------------------------------------------------------
             # Write data:
             excel_pool.write_xls_line(

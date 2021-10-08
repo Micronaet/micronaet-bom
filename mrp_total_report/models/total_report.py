@@ -97,7 +97,6 @@ class ResCompany(orm.Model):
                     continue
 
                 comment = '%s [%s]' % (comment, deadline)
-                pdb.set_trace()
                 relative_pos = get_week_cell(deadline, week_pos)
                 if relative_pos < 0 or relative_pos > len(empty_number) - 1:
                     continue  # Extra range  # todo remove not necessary
@@ -273,7 +272,7 @@ class ResCompany(orm.Model):
             # -----------------------------------------------------------------
             # Cover with stock (all week range block):
             cover_position = 0
-            """
+            pdb.set_trace()
             while stock_status[product] > 0.0 and cover_position < total_week:
                 stock_qty = stock_status[product]
                 needed_qty = week_data[cover_position]
@@ -293,7 +292,6 @@ class ResCompany(orm.Model):
                 else:  # empty
                     break
                 cover_position += 1
-            """
             # -----------------------------------------------------------------
             # Write data:
             excel_pool.write_xls_line(

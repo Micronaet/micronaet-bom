@@ -177,6 +177,9 @@ class ResCompany(orm.Model):
         if context is None:
             context = {}
 
+        setup = {
+            'only_data': False,  # Show lines that have data
+        }
         # Add status status ON
         user_pool = self.pool.get('res.users')
         previous_status = user_pool.set_no_inventory_status(
@@ -236,10 +239,10 @@ class ResCompany(orm.Model):
                               ):
             week_data = total_report[product]
             comment_data = product_comment[product]
-            if not any(week_data):
+            if setup['only_data'] and not any(week_data):
                 _logger.warning(
                     'Removed empty line: %s' % product.default_code)
-                # todo continue
+                continue
             row += 1
             available_stock = product.mx_net_mrp_qty - product.mx_mrp_b_locked
 
@@ -267,9 +270,9 @@ class ResCompany(orm.Model):
             # -----------------------------------------------------------------
             # Week dynamic row part:
             # -----------------------------------------------------------------
-            # Cover with stock:
+            # Cover with stock (all week range block):
             cover_position = 0
-            while stock_status[product] > 0.0:
+            while stock_status[product] > 0.0 and cover_position < total_week:
                 stock_qty = stock_status[product]
                 needed_qty = week_data[cover_position]
                 if stock_qty > needed_qty:

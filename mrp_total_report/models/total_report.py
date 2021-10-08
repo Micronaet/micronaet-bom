@@ -55,7 +55,7 @@ class ResCompany(orm.Model):
         # Utility:
         # ---------------------------------------------------------------------
         def get_product_touched(
-                self, cr, uid, empty, week_pos, context=None):
+                self, cr, uid, empty, week_pos, range_date, context=None):
             """ Get product touched in OC and MRP items
             """
             product_touched = {}
@@ -87,7 +87,7 @@ class ResCompany(orm.Model):
                     comment = 'OC: %s' % line.order_id.name
 
                 comment = '%s [%s]' % (comment, (deadline or '/')[:10])
-                pos = get_week_cell(deadline, week_pos)
+                pos = get_week_cell(deadline, week_pos, range_date)
                 if pos < 0 or pos > len(empty) - 1:
                     continue  # Extra range
 
@@ -118,19 +118,22 @@ class ResCompany(orm.Model):
             # todo
             return []
 
-        def get_week_cell(date, week_pos):
+        def get_week_cell(date, week_pos, range_date):
             """ Get position cell
             """
+            extra_range = -1  # common value
             if not date:
                 _logger.error('No date for OC on MRP!')
-                return -1
+                return extra_range
             date = date[:10]
+            if date < range_date[0] or date > range_date[1]:
+                return extra_range
             date_dt = datetime.strptime(date, DEFAULT_SERVER_DATE_FORMAT)
             week = date_dt.isocalendar()[1]
             try:
                 return week_pos[week]
             except:
-                return -1
+                return extra_range
 
         def generate_header(weeks):
             """ Generate header for total report
@@ -145,6 +148,7 @@ class ResCompany(orm.Model):
             # go sunday before:
             day = day - timedelta(days=day.isocalendar()[2])
             pos = 0
+            range_date = [day]
             for week in range(weeks):
                 isocalendar = day.isocalendar()
 
@@ -156,7 +160,8 @@ class ResCompany(orm.Model):
                 week_pos[week_of_year] = pos + fixed_col
                 day += timedelta(days=7)
                 pos += 1
-            return header, week_pos, columns, fixed_col
+            range_date.append(day)
+            return header, week_pos, columns, fixed_col, range_date
 
         # ---------------------------------------------------------------------
         # Start procedure:
@@ -174,7 +179,7 @@ class ResCompany(orm.Model):
         total_week = company.total_report_week
 
         # Generate datasheet structure:
-        header, week_pos, columns, fixed_col = \
+        header, week_pos, columns, fixed_col, range_date = \
             generate_header(total_week)
         total_col = fixed_col + total_week - 1
 
@@ -183,7 +188,7 @@ class ResCompany(orm.Model):
         # ---------------------------------------------------------------------
         empty_record = [0.0 for item in range(total_week)]
         total_report, product_comment = get_product_touched(
-            self, cr, uid, empty_record, week_pos, context=context)
+            self, cr, uid, empty_record, week_pos, range_date, context=context)
         purchase_material = get_purchased_material(
             self, cr, uid, context=context)
 
@@ -204,13 +209,7 @@ class ResCompany(orm.Model):
                 'number': excel_pool.get_format('number'),
             },
         }
-        parameters = {
-            # author, visible, x_scale,
-            'width': 300,
-            # y_scale, height, color
-            # font_name, font_size, start_cell, start_row, start_col
-            # x_offset, y_offset
-            }
+        parameters = {'width': 300, }
 
         # Column setup:
         excel_pool.column_width(ws_name, columns)

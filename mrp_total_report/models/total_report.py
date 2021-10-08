@@ -76,14 +76,34 @@ class ResCompany(orm.Model):
                     product_touched[product] = empty[:]
 
                 # Find position in record:
-                deadline = line.date_deadline
+                has_mrp = line.mrp_id
+                if has_mrp:
+                    deadline = line.mrp_id.date_planned  # todo check unlinked
+                else:
+                    deadline = line.date_deadline
                 pos = get_week_cell(deadline, week_pos)
                 if pos < 0:
                     continue  # Extra range
 
                 # Find quantity needed:
-                quantity = line.product_uom_qty  # todo clean qty!
-                product_touched[product][pos] += quantity
+                product_uom_qty = line.product_uom_qty
+                delivered_qty = line.delivered_qty
+                # todo assigned_qty = line.assigned_qty
+
+                undelivered_qty = product_uom_qty - delivered_qty
+
+                if has_mrp:
+                    maked_qty = line.product_uom_maked_sync_qty
+                    if delivered_qty > maked_qty:
+                        ready_qty = 0.0
+                    else:
+                        ready_qty = maked_qty - delivered_qty  # to deliver
+                else:
+                    maked_qty = 0.0
+                remain_qty = undelivered_qty - maked_qty
+
+                product_touched[product][pos] += remain_qty
+                # todo add comment?
 
             return product_touched
 

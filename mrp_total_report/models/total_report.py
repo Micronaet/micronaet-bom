@@ -119,6 +119,9 @@ class ResCompany(orm.Model):
         def get_week_cell(date, week_pos):
             """ Get position cell
             """
+            if not date:
+                _logger.error('No date for OC on MRP!')
+                return -1
             date = date[:10]
             date_dt = datetime.strptime(date, DEFAULT_SERVER_DATE_FORMAT)
             week = date_dt.isocalendar()[1]

@@ -382,16 +382,18 @@ class ResCompany(orm.Model):
                             continue
                         stock_qty = stock_status[semiworked]
 
+                        sw_comment_text = \
+                            'Nr. %s x %s\n' % (needed_qty, multi)
                         if stock_qty > needed_qty:
                             sw_week_data[cover_position] = 0.0
                             stock_status[semiworked] -= needed_qty
-                            sw_comment_text = \
+                            sw_comment_text += \
                                 'Coperta da mag.: %s\n' % needed_qty
                         elif stock_qty < needed_qty:
                             # not enough used all remain stock:
                             sw_week_data[cover_position] -= stock_qty
                             stock_status[semiworked] = 0.0  # used all av.!
-                            sw_comment_text = 'Coperta da mag.: %s\n' % \
+                            sw_comment_text += 'Coperta da mag.: %s\n' % \
                                 stock_qty
                         excel_pool.write_comment(
                             ws_name, row, cover_position + fixed_col,
@@ -463,18 +465,20 @@ class ResCompany(orm.Model):
                                 continue
                             stock_qty = stock_status[raw_material]
 
+                            rm_comment_text = \
+                                'Nr. %s x %s\n' % (needed_qty, multi)
                             if stock_qty > needed_qty:
                                 rm_week_data[cover_position] = 0.0
                                 stock_status[raw_material] -= \
                                     needed_qty
-                                rm_comment_text = \
+                                rm_comment_text += \
                                     'Coperta da mag.: %s\n' % \
                                     needed_qty
                             elif stock_qty < needed_qty:
                                 # not enough used all remain stock:
                                 rm_week_data[cover_position] -= stock_qty
                                 stock_status[raw_material] = 0.0  # used all av
-                                rm_comment_text = \
+                                rm_comment_text += \
                                     'Coperta da mag.: %s\n' % stock_qty
                             excel_pool.write_comment(
                                 ws_name, row,
@@ -486,7 +490,7 @@ class ResCompany(orm.Model):
                     # ---------------------------------------------------------
                     # Write data:
                     excel_pool.write_xls_line(
-                        ws_name, row, rm_comment_text,
+                        ws_name, row, rm_week_data,
                         default_format=xls_format['white']['number'],
                         col=fixed_col)
 

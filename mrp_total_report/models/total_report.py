@@ -174,7 +174,7 @@ class ResCompany(orm.Model):
                 'Livello', 'Famiglia', 'Prodotto', 'Nome', 'Mag.',
             ]
             week_pos = {}
-            columns = [7, 20, 20, 35, 10]
+            columns = [12, 20, 20, 35, 10]
             fixed_col = len(header)
             day = datetime.now()
             # go sunday before:
@@ -332,12 +332,14 @@ class ResCompany(orm.Model):
             # =================================================================
             # Sviluppo semilavorati se presenti:
             # =================================================================
-            semi_worked = []
             for line in product.dynamic_bom_line_ids:
                 if line.category_id.mrp_total_report:
                     semiworked = line.product_id
+                    if semiworked.bom_placeholder or product.bom_alternative:
+                        _logger.warning('Jump placeholder')
+                        continue
                     available_stock = \
-                        semiworked.mx_net_mrp_qty  # semiworked.mx_mrp_b_locked
+                        semiworked.mx_net_mrp_qty  # not used mx_mrp_b_locked
 
                     if semiworked not in stock_status:
                         stock_status[semiworked] = available_stock

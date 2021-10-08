@@ -68,7 +68,7 @@ class ResCompany(orm.Model):
                 ('order_id.mx_closed', '=', False),
                 # ('product_id.bom_placeholder', '=', False),
                 # ('product_id.bom_alternative', '=', False),
-                ], context=context)[:10]
+                ], context=context)  # todo demo: [:10]
 
             for line in sale_line_pool.browse(
                     cr, uid, sale_line_ids, context=context):

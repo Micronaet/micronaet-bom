@@ -104,7 +104,10 @@ class ResCompany(orm.Model):
                 product_touched[product][pos] += todo_qty
                 # todo add comment?
                 comment += ' q. %s\n' % todo_qty
-                product_touched[product][pos] += comment
+                if product_comment[product][pos]:
+                    product_comment[product][pos] += comment
+                else:
+                    product_comment[product][pos] = comment
             return product_touched, product_comment
 
         def get_purchased_material(self, cr, uid, context=None):

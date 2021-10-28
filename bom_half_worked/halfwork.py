@@ -200,5 +200,4 @@ class ProductProduct(orm.Model):
             'mrp.bom.line', 'halfwork_id', 
             'Halfwork component'),
         }
-        
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+

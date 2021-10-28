@@ -147,10 +147,46 @@ class ResCompany(orm.Model):
             return product_touched, product_comment
 
         def get_purchased_material(self, cr, uid, context=None):
-            """ Get list of purchase materia avaiting delivery
+            """ Get list of purchase material awaiting delivery
             """
-            # todo
-            return []
+            purchase_data = {}
+            company_pool = self.pool.get('res.company')  # for utility
+            company_ids = company_pool.search(cr, uid, [])
+            company = company_pool.browse(cr, uid, company_ids)[0]
+            exclude_partner_ids = []
+            exclude_partner_ids.append(company.partner_id.id)
+
+            in_picking_type_ids = []
+            for item in company.stock_report_tx_load_in_ids:
+                in_picking_type_ids.append(item.id)
+
+            move_pool = self.pool.get('stock.move')
+            move_ids = move_pool.search(cr, uid, [
+                ('picking_id.picking_type_id', 'in', in_picking_type_ids),
+                ('picking_id.partner_id', 'not in', exclude_partner_ids),
+                ('state', '=', 'assigned'),  # Only not delivered
+
+                # todo filter period?
+                # ('date', '>=', from_date), # XXX correct for virtual?
+                # ('date', '<=', to_date),
+            ])
+
+            for move in move_pool.browse(cr, uid, move_ids, context=context):
+                pick = move.picking_id
+                date = pick.date
+                date_expected = move.date_expected
+
+                product = move.product_id
+                default_code = product.default_code
+                qty = line.product_uom_qty
+
+                if product not in purchase_data:
+                    purchase_data[product] = {}
+                    # pick.name, pick.origin, pick.date,
+
+                # Order not current delivered:
+                # todo how to save data in database?
+            return purchase_data
 
         def get_week_cell(date, week_pos):
             """ Get position cell
@@ -174,7 +210,7 @@ class ResCompany(orm.Model):
                 'Livello', 'Famiglia', 'Prodotto', 'Nome', 'Mag.',
             ]
             week_pos = {}
-            columns = [12, 20, 20, 35, 10]
+            columns = [15, 20, 20, 35, 10]
             fixed_col = len(header)
             day = datetime.now()
             # go sunday before:
@@ -278,7 +314,6 @@ class ResCompany(orm.Model):
         excel_pool.row_height(ws_name, [row], height=25)
 
         stock_status = {}
-        pdb.set_trace()
         for product in sorted(total_report,
                               key=lambda p: (p.family_id.name, p.default_code)
                               ):

@@ -47,7 +47,10 @@ class ProductProduct(orm.Model):
     _inherit = 'product.product'
 
     _columns = {
-        'dynamic_bom_checked': fields.boolean('Bom checked'),
+        'dynamic_bom_checked': fields.boolean(
+            'DB controllata', readonly=True),
+        'dynamic_bom_checked_date': fields.date(
+            'Data controllo DB', readonly=True),       
         }
 
 class MrpBomCheckProblemWizard(orm.TransientModel):

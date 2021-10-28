@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
     <data>
+       <!--product.product-->
+       <record model="ir.ui.view" id="view_product_product_relative_form">
+           <field name="name">product.product.form</field>
+           <field name="model">product.product</field>
+           <field name="inherit_id" ref="product.product_normal_form_view"/>
+           <field name="arch" type="xml">
+               <field name="default_code" position="after">
+                    <field name="dynamic_bom_checked" />
+                    <field name="dynamic_bom_checked_date"  />                     
+               </field>
+           </field>
+       </record>
+               
        <!-- mrp.bom.check.problem.wizard -->
        <record id="mrp_bom_check_problem_wizard_view" model="ir.ui.view">
             <field name="name">Check BOM problem wizard</field>

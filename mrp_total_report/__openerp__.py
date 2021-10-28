@@ -39,6 +39,7 @@
         'mrp',
         'purchase',
         'mx_close_order',
+        'textilene_status',  # Some parameter for filter
         'bom_dynamic_structured',  # BOM category
         'inventory_field',  # Inventory category
         ],

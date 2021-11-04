@@ -34,6 +34,7 @@
         'order_bom_explode_report',  # report and wizard
         'textilene_status',  # only for group management TODO extract group!
         'purchase_line_description',
+        'bom_half_worked',
         ],
     'init_xml': [],
     'demo': [],

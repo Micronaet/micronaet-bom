@@ -1,6 +1,17 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+        <record model="ir.ui.view" id="view_product_product_BOM_relative_type_half_form">
+            <field name="name">product.product.relative_type.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="bom_half_worked.view_product_product_BOM_relative_type_half_form"/>
+            <field name="arch" type="xml">
+                <field name="half_bom_id" position="after">
+                    <field name="ordered_hw"/>
+                </field>
+            </field>
+        </record>
+
         <!--purchase.order.xlsx.line-->
         <record model="ir.ui.view" id="view_order_line_search">
            <field name="name">purchase.order.xlsx.line.search</field>

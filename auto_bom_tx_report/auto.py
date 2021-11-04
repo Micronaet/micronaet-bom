@@ -48,6 +48,8 @@ class ProductProduct(orm.Model):
     _inherit = 'product.product'
 
     _columns = {
+        'ordered_hw': fields.boolean('Semilavorato ordinato'),
+
         'old_tcar': fields.integer('Old Tscar'),
         'old_tscar': fields.integer('Old Tscar'),
 

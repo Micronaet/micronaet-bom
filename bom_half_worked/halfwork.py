@@ -194,8 +194,6 @@ class ProductProduct(orm.Model):
                 }, context=context)
 
     _columns = {
-        'ordered_hw': fields.boolean('Semilavorato ordinato'),
-
         # TODO remove:
         'halfwork': fields.boolean('Halworked',
             help='Manage BOM directly in product'),

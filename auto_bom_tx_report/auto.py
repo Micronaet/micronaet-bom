@@ -50,7 +50,7 @@ class ProductProduct(orm.Model):
     _columns = {
         'ordered_hw': fields.boolean('Semilavorato ordinato'),
 
-        'old_tcar': fields.integer('Old Tscar'),
+        'old_tcar': fields.integer('Old Tcar'),
         'old_tscar': fields.integer('Old Tscar'),
 
         'report_minimum_qty': fields.float(
@@ -85,7 +85,7 @@ class ComponentStatusReportWizard(orm.TransientModel):
             'days': wiz_browse.days,
             'first_supplier_id': wiz_browse.first_supplier_id.id or False,
             # 'negative_start': wiz_browse.negative_start,
-            'type_id': False, # TODO remove ex. wiz_browse.type_id.id or
+            'type_id': False,  # TODO remove ex. wiz_browse.type_id.id or
             'with_type_ids':
                 [item.id for item in wiz_browse.with_type_ids],
             'without_type_ids':

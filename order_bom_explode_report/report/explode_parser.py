@@ -94,8 +94,8 @@ class MrpProduction(orm.Model):
                 # TODO:
                 period: period type week, month
                 period: number of period for columns, max 12
-
         """
+
         def get_date():
             """ Get filter selected
             """
@@ -181,28 +181,34 @@ class MrpProduction(orm.Model):
                 return eval(product_id.bom_placeholder_rule)
             return True  # Mandatory if not rule
 
-        def update_hw_data_line(data, product, remain, mt):
+        def update_hw_data_line(data, product, remain, mt, hw_purchased):
             """ Update data line for remain hw line
-                data: xls line list
-                product: browse of current product
+                data: xls line list (record for component)
+                product: browse of current half worked
                 remain: OC remain to deliver / produce
                 mt: q. from BOM
+                hw_purchased: purchesed available hw
             """
             hw_fabric = data[9]
             # No more used (calculated during report):
             # total = data[10] # list of one element (save total mt usable)
-            if product.default_code not in hw_fabric:
+            hw_code = product.default_code
+            if hw_code not in hw_fabric:
+                # -------------------------------------------------------------
                 # Create empty record with fixed data:
-                available_qty = \
-                    product.mx_net_mrp_qty - product.mx_mrp_b_locked
-                hw_fabric[product.default_code] = [
+                # -------------------------------------------------------------
+                # Available = purchased + stock - locked
+                available_qty = (
+                    hw_purchased.get(hw_code, 0.0) + product.mx_net_mrp_qty -
+                    product.mx_mrp_b_locked)
+                hw_fabric[hw_code] = [
                     # 0. Stock - MRP - assigned (Before was: mx_net_qty)
                     available_qty if available_qty else 0.0,
                     0.0,  # 1. OC remain HW
                     0.0,  # 2. Stock Component (mt  of fabric)
                     # mt, # 3. Mt. from BOM
                     ]
-            current = hw_fabric[product.default_code]  # readability
+            current = hw_fabric[hw_code]  # readability
             current[1] += remain  # OC total
             # XXX better once when end totalization remain
 
@@ -253,6 +259,9 @@ class MrpProduction(orm.Model):
         # Add inventory check block:
         for_inventory_delta = data.get('for_inventory_delta', False)
         inventory_delta = {}
+
+        # Add HW purchase part:
+        hw_purchased = {}
 
         # ---------------------------------------------------------------------
         # XLS Log file:
@@ -474,6 +483,18 @@ class MrpProduction(orm.Model):
                 default_code = line.product_id.default_code
                 qty = line.product_uom_qty
 
+                # -------------------------------------------------------------
+                # HW bought part (use this loop) >> use for material check
+                # -------------------------------------------------------------
+                if line.product_id.ordered_hw and line.state == 'assigned' \
+                        and line.date_expected > period_to or \
+                        line.date_expected < period_from:
+                    if default_code in hw_purchased:
+                        hw_purchased[default_code] += qty
+                    else:
+                        hw_purchased[default_code] = qty
+
+                # Use only product present in y_axis:
                 if default_code not in y_axis:
                     write_xls_line('move', (
                         block, 'NOT USED', pick.name, pick.origin, pick.date,
@@ -664,8 +685,10 @@ class MrpProduction(orm.Model):
                         # Update extra line for fabric HW use:
                         # 19 feb 2019 use also for component:
                         # if mp_mode == 'fabric':
-                        update_hw_data_line(y_axis[comp_code],
-                            product, remain, comp.product_qty)
+                        update_hw_data_line(
+                            y_axis[comp_code],
+                            product, remain, comp.product_qty,
+                            hw_purchased)
                         # go ahead for download component
 
                 # Direct sale hw or component:
@@ -793,6 +816,7 @@ class MrpProduction(orm.Model):
                                 item.product_id,  # HW reference
                                 item_remain,  # HW remain
                                 comp.product_qty,  # Component remain
+                                hw_purchased,  # Purchased HW
                                 )
                         continue  # needed?
                     else:
@@ -823,7 +847,7 @@ class MrpProduction(orm.Model):
 
             # Search in order line:
             for line in order.order_line_ids:
-                product = line.product_id # readability
+                product = line.product_id  # readability
                 product_code = line.product_id.default_code
                 pos = get_position_season(date)
                 qty = line.product_uom_maked_sync_qty

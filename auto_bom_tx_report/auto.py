@@ -701,11 +701,10 @@ class MrpProduction(orm.Model):
                 'la testata della tabella diventa gialla)',
             )
 
-            row += 1
-
             # -----------------------------------------------------------------
             #                            Order line:
             # -----------------------------------------------------------------
+            row += 1
             try:
                 if o.status in ('obsolete', 'exit'):
                     order_text = 'Non ordinare:'
@@ -736,7 +735,7 @@ class MrpProduction(orm.Model):
             row += 1
 
             # -----------------------------------------------------------------
-            #                            ROW Halfwork
+            #                           ROW Halfwork
             # -----------------------------------------------------------------
             if hw:
                 # Merge cell:
@@ -761,7 +760,7 @@ class MrpProduction(orm.Model):
                     hw_total_mt += hw_status[2]  # usabled
 
                     # OC covered with stock (color the HW text):
-                    if hw_status[1] <= hw_status[0]: # black
+                    if hw_status[1] <= hw_status[0]:  # black
                         line6[0].append(get_xls_format('text'))
                     else:  # red
                         line6[0].append(get_xls_format('text_red'))

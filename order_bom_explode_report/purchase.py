@@ -30,9 +30,9 @@ from openerp import SUPERUSER_ID, api
 from openerp import tools
 from openerp.tools.translate import _
 from openerp.tools.float_utils import float_round as round
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
-    DEFAULT_SERVER_DATETIME_FORMAT, 
-    DATETIME_FORMATS_MAP, 
+from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DATETIME_FORMATS_MAP,
     float_compare)
 
 
@@ -41,22 +41,22 @@ _logger = logging.getLogger(__name__)
 class StockMove(orm.Model):
     """ Model name: Stock move
     """
-    
+
     _inherit = 'stock.move'
 
     def _get_purchase_product_last_date(self, cr, uid, context=None):
-        ''' Generate database for last purchase
-        '''
+        """ Generate database for last purchase
+        """
         res = {}
         domain = []
-        
+
         line_ids = self.search(cr, uid, [
             ('state', '=', 'done'),
-            ('origin', '=ilike', 'OF%'), #picking_id.origin
+            ('origin', '=ilike', 'OF%'),  # picking_id.origin
             ], context=context)
         for line in sorted(
-                self.browse(cr, uid, line_ids, context=context), 
-                key=lambda x: x.picking_id.date, 
+                self.browse(cr, uid, line_ids, context=context),
+                key=lambda x: x.picking_id.date,
                 reverse=True):
             product = line.product_id
             if not product or product.id in res:
@@ -65,8 +65,7 @@ class StockMove(orm.Model):
                 (line.picking_id.date or '')[:10],
                 line.product_uom.name,
                 line.product_uom_qty,
-                line.price_unit,                
+                line.price_unit,
                 )
-        _logger.info('Total purchase product: %s' % len(line_ids))    
+        _logger.info('Total purchase product: %s' % len(line_ids))
         return res
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

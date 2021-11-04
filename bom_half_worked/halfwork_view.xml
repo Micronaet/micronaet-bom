@@ -6,7 +6,7 @@
             <field name="model">product.product</field>
             <field name="priority" eval="50" />
             <field name="arch" type="xml">
-                <search string="String" version="7.0">        
+                <search string="String" version="7.0">
                     <field name="name" />
                     <field name="default_code" />
                     <!--<filter name="state_draft" string="Draft state" domain="[('state','=','draft')]"/>
@@ -24,10 +24,11 @@
                 <xpath expr="//page[@string='Related BOM']/group/separator[1]" position="after">
                     <group colspan="4" col="4" attrs="{'invisible': [('relative_type','!=','half')]}">
                         <field name="half_bom_id" attrs="{'invisible': [('half_bom_id','=',False)]}" readonly="1"/>
+                        <field name="ordered_hw"/>
                         <button name="create_product_half_bom" string="Create halfworked BOM" type="object" attrs="{'invisible': [('half_bom_id','!=',False)]}"/>
-                        <button name="relink_product_half_bom" string="Relink BOM" colspan="1" type="object" attrs="{'invisible': [('half_bom_id','=',False)]}" confirm="Link BOM to this product if not present (for auto assign line to the product), confirm?"/>                        
-                        <button name="unlink_product_half_bom" string="Unlink BOM" colspan="1" type="object" attrs="{'invisible': [('half_bom_id','=',False)]}" confirm="Delete link to BOM (that still remain present), regenerate new bom, link below lines to new bom, confirm?"/>                        
-                        
+                        <button name="relink_product_half_bom" string="Relink BOM" colspan="1" type="object" attrs="{'invisible': [('half_bom_id','=',False)]}" confirm="Link BOM to this product if not present (for auto assign line to the product), confirm?"/>
+                        <button name="unlink_product_half_bom" string="Unlink BOM" colspan="1" type="object" attrs="{'invisible': [('half_bom_id','=',False)]}" confirm="Delete link to BOM (that still remain present), regenerate new bom, link below lines to new bom, confirm?"/>
+
                         <separator string="Component" colspan="4"/>
                         <field name="half_bom_ids" attrs="{'invisible': [('half_bom_id','=',False)]}" colspan="4" context="{'default_bom_id': half_bom_id}" nolabel="1">
                             <tree string="Half BOM component" editable="bottom">
@@ -41,8 +42,8 @@
                     </group>
                 </xpath>
             </field>
-        </record>    
-        
+        </record>
+
         <record model="ir.ui.view" id="view_mrp_bom_halfwork_form">
             <field name="name">mrp.bom.form</field>
             <field name="model">mrp.bom</field>
@@ -52,11 +53,11 @@
                    <field string="Linked HW" name="halfwork_id" readonly="1" attrs="{'invisible': [('halfwork_id','=',False)]}"/>
                 </field>
                 <xpath expr="//field[@name='bom_line_ids']/tree/field[@name='product_id']" position="after">
-                   <field name="halfwork_id" invisible="1"/>                    
+                   <field name="halfwork_id" invisible="1"/>
                    <field name="relative_type" invisible="1"/>
                 </xpath>
                 <xpath expr="//field[@name='bom_line_ids']/tree/field[@name='product_id']" position="after">
-                    <button name="open_halfwork_form" string="Open halfwork bom" icon="STOCK_JUSTIFY_FILL" type="object" 
+                    <button name="open_halfwork_form" string="Open halfwork bom" icon="STOCK_JUSTIFY_FILL" type="object"
                        attrs="{'invisible': [('relative_type','!=','half')]}"/>
                     <field name="obtainable_component" />
                 </xpath>
@@ -65,7 +66,7 @@
                 </field>
             </field>
         </record>
-        
+
         <record model="ir.ui.view" id="view_product_product_half_tree">
             <field name="name">product.product.halfwork.tree</field>
             <field name="model">product.product</field>
@@ -84,24 +85,24 @@
                 </tree>
             </field>
         </record>
-        
+
         <record model="ir.actions.act_window" id="action_halfwork">
             <field name="name">Halfworked</field>
             <field name="res_model">product.product</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_product_product_half_tree"/>
-            <field name="search_view_id" ref="view_hw_product_search"/>            
+            <field name="search_view_id" ref="view_hw_product_search"/>
             <field name="context">{'default_relative_type': 'half'}</field>
             <field name="domain">[('relative_type', '=', 'half')]</field>
         </record>
-        <menuitem 
-            parent="base.menu_product" 
-            id="menu_halfwork_product" 
+        <menuitem
+            parent="base.menu_product"
+            id="menu_halfwork_product"
             sequence="50"
             action="action_halfwork"
             />
-        
+
     </data>
 </openerp>
 

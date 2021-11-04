@@ -1,20 +1,6 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
-        <!--product.product-->
-        <!-- Inherit Form View to Modify it -->
-        <record id="view_product_product_extra_report_data_form" model="ir.ui.view">
-            <field name="name">Extra data for product</field>
-            <field name="model">product.product</field>
-            <field name="inherit_id" ref=""/>
-            <field name="arch" type="xml">
-                <xpath expr="//field[@name='name']" position="">
-                    <!-- Add your fields or attributes here -->
-                </xpath>
-
-            </field>
-        </record>
-
         <!--purchase.order.xlsx.line-->
         <record model="ir.ui.view" id="view_order_line_search">
            <field name="name">purchase.order.xlsx.line.search</field>

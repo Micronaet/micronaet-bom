@@ -24,7 +24,6 @@
                 <xpath expr="//page[@string='Related BOM']/group/separator[1]" position="after">
                     <group colspan="4" col="4" attrs="{'invisible': [('relative_type','!=','half')]}">
                         <field name="half_bom_id" attrs="{'invisible': [('half_bom_id','=',False)]}" readonly="1"/>
-                        <field name="ordered_hw"/>
                         <button name="create_product_half_bom" string="Create halfworked BOM" type="object" attrs="{'invisible': [('half_bom_id','!=',False)]}"/>
                         <button name="relink_product_half_bom" string="Relink BOM" colspan="1" type="object" attrs="{'invisible': [('half_bom_id','=',False)]}" confirm="Link BOM to this product if not present (for auto assign line to the product), confirm?"/>
                         <button name="unlink_product_half_bom" string="Unlink BOM" colspan="1" type="object" attrs="{'invisible': [('half_bom_id','=',False)]}" confirm="Delete link to BOM (that still remain present), regenerate new bom, link below lines to new bom, confirm?"/>

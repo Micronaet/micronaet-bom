@@ -300,7 +300,6 @@ class MrpProduction(orm.Model):
             'Codice', 'Q', 'Rif.',
             ))
 
-
         # pool used:
         company_pool = self.pool.get('res.company')  # for utility
         product_pool = self.pool.get('product.product')
@@ -494,9 +493,8 @@ class MrpProduction(orm.Model):
                 # -------------------------------------------------------------
                 # HW bought part (use this loop) >> use for material check
                 # -------------------------------------------------------------
-                if line.product_id.ordered_hw and line.state == 'assigned' \
-                        and (date_expected > period_to or
-                             date_expected < period_from):
+                if (line.product_id.ordered_hw and line.state == 'assigned'
+                        and period_from < date_expected < period_to):
                     if default_code in hw_purchased:
                         hw_purchased[default_code] += qty
                     else:

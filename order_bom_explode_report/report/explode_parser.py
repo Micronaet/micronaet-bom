@@ -260,7 +260,7 @@ class MrpProduction(orm.Model):
         for_inventory_delta = data.get('for_inventory_delta', False)
         inventory_delta = {}
 
-        # Add HW purchase part:
+        # Add HW line part for purchased:
         hw_purchased = {}
 
         # ---------------------------------------------------------------------
@@ -495,8 +495,8 @@ class MrpProduction(orm.Model):
                 # HW bought part (use this loop) >> use for material check
                 # -------------------------------------------------------------
                 if line.product_id.ordered_hw and line.state == 'assigned' \
-                        and date_expected > period_to or \
-                        date_expected < period_from:
+                        and (date_expected > period_to or
+                             date_expected < period_from):
                     if default_code in hw_purchased:
                         hw_purchased[default_code] += qty
                     else:

@@ -278,21 +278,28 @@ class MrpProduction(orm.Model):
         self.WS = {
             'move': WB.add_worksheet('Movimenti'),
             'extra': WB.add_worksheet('Extra'),
+            'purchase': WB.add_worksheet('Semilavorati acquistati'),
             }
 
         # Row counters:
         self.counter = {
             'move': 0,
             'extra': 0,
+            'purchase': 0,
             }
 
-        # Write Header line:
+        # A. Write Header line:
         write_xls_line('move', (
             'Blocco', 'Stato', 'Documento', 'Origine', 'Data', 'Posizione',
             'Prodotto', 'Mat. prima', 'Calcolo', 'MM', 'OC', 'OF',
             'Note', 'Categoria'
             ))
-        # NOTE: no extra page header
+        # B. no extra page header
+        # C. Write extra part for HW purchased:
+        write_xls_line('purchase', (
+            'Codice', 'Q', 'Rif.',
+            ))
+
 
         # pool used:
         company_pool = self.pool.get('res.company')  # for utility
@@ -482,17 +489,23 @@ class MrpProduction(orm.Model):
             for line in pick.move_lines:
                 default_code = line.product_id.default_code
                 qty = line.product_uom_qty
+                date_expected = line.date_expected
 
                 # -------------------------------------------------------------
                 # HW bought part (use this loop) >> use for material check
                 # -------------------------------------------------------------
                 if line.product_id.ordered_hw and line.state == 'assigned' \
-                        and line.date_expected > period_to or \
-                        line.date_expected < period_from:
+                        and date_expected > period_to or \
+                        date_expected < period_from:
                     if default_code in hw_purchased:
                         hw_purchased[default_code] += qty
                     else:
                         hw_purchased[default_code] = qty
+                    write_xls_line('purchase', (
+                        default_code, qty,
+                        '%s (%s) il %s' % (
+                            pick.name, pick.origin, date_expected),
+                    ))
 
                 # Use only product present in y_axis:
                 if default_code not in y_axis:
@@ -511,11 +524,11 @@ class MrpProduction(orm.Model):
                 # Order not current delivered:
                 if line.state == 'assigned':  # virtual
                     # USE deadline data in the period:
-                    if line.date_expected > period_to or \
-                            line.date_expected < period_from:  # extra range
+                    if date_expected > period_to or \
+                            date_expected < period_from:  # extra range
                         write_xls_line('move', (
                             block, 'NOT USED', pick.name, pick.origin,
-                            line.date_expected, '',  # POS
+                            date_expected, '',  # POS
                             '',  # product_code
                             default_code, '', 0, 0, 0,
                             'OF date expected extra range!: Q.: %s' % qty,
@@ -523,11 +536,11 @@ class MrpProduction(orm.Model):
                             ))
                         continue
 
-                    pos = get_position_season(line.date_expected)
+                    pos = get_position_season(date_expected)
                     y_axis[default_code][5][pos] += qty  # OF block
                     write_xls_line('move', (
                         block, 'USED', pick.name, pick.origin,
-                        line.date_expected, pos, '',  # product_code
+                        date_expected, pos, '',  # product_code
                         default_code, '', 0, 0, qty, 'OF',
                         ''
                         ))

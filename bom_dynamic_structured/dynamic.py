@@ -433,6 +433,10 @@ class MRPBomLine(orm.Model):
         return res
     
     _columns = {
+        'has_oven': fields.boolean(
+            'Richiesto forno', 
+            help='Indica che questo componente richiede il forno di '
+            'verniciatura'),
         'dynamic_mask': fields.char('Dynamic mask', size=20),
         'category_id': fields.many2one(
             'mrp.bom.structure.category', 'Category'), # required=True

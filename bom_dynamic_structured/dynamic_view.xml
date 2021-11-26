@@ -73,6 +73,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='bom_line_ids']/tree/field[@name='product_id']" position="after">
                    <field name="category_id" />
+                   <field name="has_oven" />
                 </xpath>
             </field>
         </record>
@@ -270,6 +271,7 @@
                                 <field name="parent_bom_line_ids" colspan="4" nolabel="1" readonly="1">
                                     <tree string="Default parent BOM component" editable="bottom" colors="red:category_id==False">
                                         <field name="bom_id" invisible="1"/>
+                                        <field name="has_oven" string="Forno"/>
                                         <field name="category_id" />
                                         <field name="product_id"/>
                                         <field name="product_qty" />

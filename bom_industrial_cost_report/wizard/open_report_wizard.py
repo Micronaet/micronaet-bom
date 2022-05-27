@@ -130,15 +130,15 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             },
             'yellow': {
                 'text': excel_pool.get_format(key='bg_yellow'),
-                'number': excel_pool.get_format(key='number_yellow'),
+                'number': excel_pool.get_format(key='bg_yellow_number'),
             },
             'red': {
                 'text': excel_pool.get_format(key='bg_red'),
-                'number': excel_pool.get_format(key='number_red'),
+                'number': excel_pool.get_format(key='bg_red_number'),
             },
             'green': {
                 'text': excel_pool.get_format(key='bg_green'),
-                'number': excel_pool.get_format(key='number_green'),
+                'number': excel_pool.get_format(key='bg_green_number'),
             },
         }
 

@@ -100,14 +100,14 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             'Stagione', 'Cliente', 'Fattura', 'Data',
             'Prodotto', 'Nome', 'DB',
             'Quant.', 'Pr. unit', 'Pr. Netto', 'Costo DB', 'Marg. unit.',
-            'Fatt. tot.', 'Marg. tot',
+            'Fatt. tot.', 'Marg. tot', 'Marg. %',
             'No DB', 'Errore',
         ]
         width = [
             8, 35, 12, 10,
             15, 30, 8,
             10, 10, 10, 10, 10,
-            12, 12,
+            12, 12, 10,
             5, 40,
         ]
 
@@ -189,10 +189,13 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
             # Bom price
             bom_product = bom_data.get(code5)
+            margin_rate = 0.0
             if bom_product:
                 cost = bom_product.to_industrial
                 margin = real_price - cost
                 margin_total = margin * quantity
+                if subtotal:
+                    margin_rate = 100.0 * margin_total / subtotal
                 db = code5
                 error = u''
             else:
@@ -231,6 +234,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
                 (subtotal, color['number']),
                 (margin_total, color['number']),
+                (margin_rate, color['number']),
 
                 u'' if db else u'X',
                 error,

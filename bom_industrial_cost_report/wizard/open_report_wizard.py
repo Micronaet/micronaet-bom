@@ -194,11 +194,11 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 margin = real_price - cost
                 margin_total = margin * quantity
                 db = code5
-                error = ''
+                error = u''
             else:
                 cost = margin = margin_total = 0.0  # no value if no cost!
-                db = ''
-                error = 'DB non trovata (niente margine)'
+                db = u''
+                error = u'DB non trovata (niente margine)'
 
             # -----------------------------------------------------------------
             # Color setup:
@@ -232,7 +232,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 (subtotal, color['number']),
                 (margin_total, color['number']),
 
-                '' if db else 'X',
+                u'' if db else u'X',
                 error,
             ]
             row += 1
@@ -250,12 +250,12 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             from_cell = excel_pool.rowcol_to_cell(row + 2, col)
             to_cell = excel_pool.rowcol_to_cell(row + total_row, col)
             formula = u"=SUBTOTAL(9,%s:%s)" % (from_cell, to_cell)
-            #excel_pool.write_formula(
-            #    ws_name,
-            #    row, col, formula,
-            #    excel_format['white']['number'],
-            #    0.0,  # complete_total[position],
-            #)
+            excel_pool.write_formula(
+                ws_name,
+                row, col, formula,
+                excel_format['white']['number'],
+                0.0,  # complete_total[position],
+            )
 
         return excel_pool.return_attachment(cr, uid, 'Comparativo fatturato')
 

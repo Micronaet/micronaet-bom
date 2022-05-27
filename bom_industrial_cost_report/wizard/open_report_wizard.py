@@ -149,7 +149,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         excel_pool.write_xls_line(
             ws_name, row, [title], default_format=excel_format['title'])
         excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
-        excel_pool.freeze_panes(ws_name, 5, 2)
+        excel_pool.freeze_panes(ws_name, 2, 5)
 
         row += 1
         excel_pool.write_xls_line(

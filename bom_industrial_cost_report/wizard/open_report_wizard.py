@@ -152,7 +152,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         excel_pool.write_xls_line(
             ws_name, row, [
                 u'Analisi marginalità su fatturato:'
-            ], default_format=excel_format['white']['text'])
+            ], default_format=excel_format['title'])
         excel_pool.merge_cell(ws_name, [row, 0, row, 11])
 
         row += 1
@@ -239,7 +239,6 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             excel_pool.write_xls_line(
                 ws_name, row, data, default_format=color['text'])
 
-
         # ---------------------------------------------------------------------
         # Update with total:
         # ---------------------------------------------------------------------
@@ -249,13 +248,19 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         for col in (12, 13):
             from_cell = excel_pool.rowcol_to_cell(row + 2, col)
             to_cell = excel_pool.rowcol_to_cell(row + total_row, col)
-            formula = u"=SUBTOTAL(9,%s:%s)" % (from_cell, to_cell)
             excel_pool.write_formula(
                 ws_name,
-                row, col, formula,
+                row, col, u"=SUBTOTAL(9,%s:%s)" % (from_cell, to_cell),
                 excel_format['white']['number'],
                 0.0,  # complete_total[position],
             )
+        excel_pool.write_formula(
+            ws_name,
+            row, 14, u'= 100 * N1 / M1',
+            excel_format['white']['number'],
+            0.0,  # complete_total[position],
+        )
+
         return excel_pool.return_attachment(cr, uid, 'Comparativo fatturato')
 
     def action_print_extra_period(self, cr, uid, ids, context=None):

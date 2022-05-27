@@ -98,7 +98,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
         header = [
             'Stagione', 'Cliente', 'Fattura', 'Data',
-            'Prodotto', 'Nome', 'DB'
+            'Prodotto', 'Nome', 'DB',
             'Quant.', 'Prezzo', 'Netto', 'Costo', 'Margine',
             'No DB', 'Errore',
         ]

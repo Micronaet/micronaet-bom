@@ -11,13 +11,18 @@
                        <button string="Cancel" special="cancel" />
                    </header>
                    <group colspan="4" col="4">
-                       <separator string="Report dettagliato:" colspan="3"/>
+                       <separator string="Report dettagliato:" colspan="2"/>
+                       <button name="action_print_invoice_cost_analysis" string="Margini fatturato" type="object" icon="gtk-print" class="oe_highlight" colspan="1"/>
                        <button name="action_print" string="Stampa distinte base" type="object" icon="gtk-print" class="oe_highlight" colspan="1"/>
+
                        <field name="from_date" />
                        <field name="to_date" />
+
                        <field name="report_name" />
+
                        <separator string="Report Excel con paragoni:" colspan="3"/>
                        <button name="action_print_extra_period" string="Stampa contronto annuale" type="object" icon="gtk-print" class="oe_highlight" colspan="1"/>
+
                        <field name="extra_period" colspan="4"/>
                    </group>
                 </form>

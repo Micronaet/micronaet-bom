@@ -51,6 +51,169 @@ class ProductBomReportLimitWizard(orm.TransientModel):
     # --------------------
     # Wizard button event:
     # --------------------
+    def action_print_invoice_cost_analysis(self, cr, uid, ids, context=None):
+        """ Compare price with extra period
+        """
+        product_pool = self.pool.get('product.product')
+        line_pool = self.pool.get('account.invoice.line')
+        excel_pool = self.pool.get('excel.writer')
+
+        # ---------------------------------------------------------------------
+        #                          Generate data:
+        # ---------------------------------------------------------------------
+        if context is None:
+            context = {}
+        wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
+
+        # ---------------------------------------------------------------------
+        # Setup domain for invoice:
+        # ---------------------------------------------------------------------
+        domain = []
+        from_date = wiz_proxy.from_date
+        to_date = wiz_proxy.to_date
+        if from_date:
+            domain.append(('invoice_id.date_invoice', '>=', from_date))
+        if to_date:
+            domain.append(('invoice_id.date_invoice', '<=', to_date))
+
+        # ---------------------------------------------------------------------
+        # Load DB template
+        # ---------------------------------------------------------------------
+        product_ids = product_pool.search(cr, uid, [
+            ('bom_selection', '=', True),
+        ], context=context)
+        bom_data = {}
+        for product in product_pool.browse(
+                cr, uid, product_ids, context=context):
+            code5 = (product.default_code or '')[:5]
+            if not code5:
+                _logger.error('Prodotto senza codice: %s' % product.name)
+                continue
+            bom_data[code5] = product
+
+        # ---------------------------------------------------------------------
+        #                          Excel export:
+        # ---------------------------------------------------------------------
+        ws_name = 'Distinte'
+
+        header = [
+            'Stagione', 'Cliente', 'Fattura', 'Data',
+            'Prodotto', 'Nome',
+            'Quant.', 'Prezzo', 'Netto', 'Costo',
+            # Media?
+        ]
+        width = [
+            15, 35, 10, 12,
+            15, 30,
+            10, 10, 10, 10,
+        ]
+
+        # ---------------------------------------------------------------------
+        # Create WS:
+        # ---------------------------------------------------------------------
+        excel_pool.create_worksheet(name=ws_name)
+        excel_pool.column_width(ws_name, width)
+        # excel_pool.row_height(ws_name, row_list, height=10)
+        title = ['Controllo margini fatturato']
+
+        # ---------------------------------------------------------------------
+        # Generate format used:
+        # ---------------------------------------------------------------------
+        excel_pool.set_format(number_format='#,##0.#0')
+        excel_format = {
+            'title': excel_pool.get_format(key='title'),
+            'header': excel_pool.get_format(key='header'),
+            'white': {
+                'text': excel_pool.get_format(key='text'),
+                'number': excel_pool.get_format(key='number'),
+            },
+            'yellow': {
+                'text': excel_pool.get_format(key='bg_yellow'),
+                'number': excel_pool.get_format(key='number_yellow'),
+            },
+            'red': {
+                'text': excel_pool.get_format(key='bg_red'),
+                'number': excel_pool.get_format(key='number_red'),
+            },
+            'green': {
+                'text': excel_pool.get_format(key='bg_green'),
+                'number': excel_pool.get_format(key='number_green'),
+            },
+        }
+
+        # ---------------------------------------------------------------------
+        # Write title / header
+        # ---------------------------------------------------------------------
+        row = 0
+        excel_pool.write_xls_line(
+            ws_name, row, [title], default_format=excel_format['title'])
+        row += 1
+        excel_pool.write_xls_line(
+            ws_name, row, header, default_format=excel_format['header'])
+
+        line_ids = line_pool.search(cr, uid, [], context=context)
+        for line in line_pool.browse(cr, uid, line_ids, context=context):
+            # -----------------------------------------------------------------
+            # Read data:
+            # -----------------------------------------------------------------
+            invoice = line.invoice_id
+            partner = invoice.partner_id
+            product = line.product_id
+            code5 = (product.default_code or '')[:5]
+            quantity = line.quantity
+
+            # -----------------------------------------------------------------
+            # Calc data used:
+            # -----------------------------------------------------------------
+            if quantity:
+                real_price = line.price_subtotal / quantity
+            else:
+                real_price = 0.0
+
+            # Bom price
+            bom_product = bom_data.get(code5)
+            if bom_product:
+                cost = bom_product.to_industrial
+                margin = real_price - cost
+                error = ''
+            else:
+                cost = 0.0
+                margin = 0.0  # no value if no cost!
+                error = 'DB non trovata (niente margine)'
+
+            # -----------------------------------------------------------------
+            # Color setup:
+            # -----------------------------------------------------------------
+            if quantity < 0:
+                color = excel_format['red']
+            elif not margin:
+                color = excel_format['yellow']
+            else:
+                color = excel_format['white']
+
+            # -----------------------------------------------------------------
+            # Write data:
+            # -----------------------------------------------------------------
+            data = [
+                invoice.season_period,
+                invoice.number,
+                invoice.date_invoice,
+                partner.name,
+                product.default_code,
+                product.name,
+                quantity,
+                product.price_unit,
+                real_price,
+                cost,
+                margin,
+                error,
+            ]
+            row += 1
+            excel_pool.write_xls_line(
+                ws_name, row, data, default_format=color['text'])
+
+        return excel_pool.return_attachment(cr, uid, 'Comparativo fatturato')
+
     def action_print_extra_period(self, cr, uid, ids, context=None):
         """ Compare price with extra period
         """

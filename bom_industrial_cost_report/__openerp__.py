@@ -33,8 +33,9 @@
         'base',
         'mrp',
         'product',
+        'account',
         'bom_production_cost',
-        'bom_dynamic_structured', # for dynamic bom structure       
+        'bom_dynamic_structured', # for dynamic bom structure
         'bom_check_problem_wizard', # For checked bom
         ],
     'init_xml': [],
@@ -42,11 +43,11 @@
     'data': [
         'security/bom_group.xml',
         'security/ir.model.access.csv',
-        
+
         'industrial_view.xml',
         'report/report_bom.xml',
         'wizard/open_report_view.xml',
-        
+
         'scheduler.xml',
         ],
     'active': False,

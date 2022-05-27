@@ -195,7 +195,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # Write data:
             # -----------------------------------------------------------------
             data = [
-                invoice.season_period,
+                line.season_period,
                 invoice.number,
                 invoice.date_invoice,
                 partner.name,

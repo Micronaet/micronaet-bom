@@ -107,7 +107,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             8, 35, 12, 10,
             15, 30, 8,
             10, 10, 10, 10, 10,
-            10, 10,
+            12, 12,
             5, 40,
         ]
 

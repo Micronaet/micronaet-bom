@@ -154,7 +154,13 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
 
         line_ids = line_pool.search(cr, uid, domain, context=context)
-        for line in line_pool.browse(cr, uid, line_ids, context=context):
+        for line in sorted(
+                line_pool.browse(cr, uid, line_ids, context=context),
+                key=lambda l: (
+                    l.invoice_id.partner_id.name,
+                    l.invoice_id.invoice_date,
+                )):
+
             # -----------------------------------------------------------------
             # Read data:
             # -----------------------------------------------------------------

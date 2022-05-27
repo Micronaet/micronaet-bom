@@ -176,10 +176,12 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             if bom_product:
                 cost = bom_product.to_industrial
                 margin = real_price - cost
+                db = code5
                 error = ''
             else:
                 cost = 0.0
                 margin = 0.0  # no value if no cost!
+                db = ''
                 error = 'DB non trovata (niente margine)'
 
             # -----------------------------------------------------------------
@@ -203,7 +205,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
                 product.default_code,
                 product.name,
-                code5,
+                db,
 
                 quantity,
                 (line.price_unit, color['number']),
@@ -211,7 +213,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 (cost, color['number']),
 
                 (margin, color['number']),
-                '' if code5 else 'X',
+                '' if db else 'X',
                 error,
             ]
             row += 1

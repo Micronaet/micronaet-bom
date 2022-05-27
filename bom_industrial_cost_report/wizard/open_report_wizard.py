@@ -220,7 +220,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 invoice.date_invoice,
 
                 product.default_code,
-                product.name,
+                u'%s' % product.name,
                 db,
 
                 quantity,
@@ -236,8 +236,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 error,
             ]
             row += 1
-            #excel_pool.write_xls_line(
-            #    ws_name, row, data, default_format=color['text'])
+            excel_pool.write_xls_line(
+                ws_name, row, data, default_format=color['text'])
 
         # ---------------------------------------------------------------------
         # Update with total:

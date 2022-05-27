@@ -155,7 +155,8 @@ class MrpBomIndustrialCost(orm.Model):
 
     _columns = {
         'name': fields.char('Name', size=64, required=True),
-        'unit_cost': fields.float('Costo Unitario', digits=(16, 3),
+        'unit_cost': fields.float(
+            'Costo Unitario', digits=(16, 3),
             help='Default cost used when append imported BOM'),
         'type': fields.selection([
             ('work', 'Manodopera'),
@@ -163,7 +164,8 @@ class MrpBomIndustrialCost(orm.Model):
             ], 'Tipo', required=True),
         'note': fields.text('Note'),
         # todo REMOVE:
-        'default_cost': fields.float('Default cost', digits=(16, 3),
+        'default_cost': fields.float(
+            'Default cost', digits=(16, 3),
             help='Default cost used when append imported BOM'),
         }
 

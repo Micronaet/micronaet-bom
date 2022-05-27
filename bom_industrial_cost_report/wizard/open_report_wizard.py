@@ -202,7 +202,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 product.default_code,
                 product.name,
                 quantity,
-                product.price_unit,
+                line.price_unit,
                 real_price,
                 cost,
                 margin,

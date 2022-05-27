@@ -99,13 +99,15 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         header = [
             'Stagione', 'Cliente', 'Fattura', 'Data',
             'Prodotto', 'Nome', 'DB',
-            'Quant.', 'Prezzo', 'Netto', 'Costo', 'Margine',
+            'Quant.', 'Pr. unit', 'Pr. Netto', 'Costo DB', 'Marg. unit.',
+            'Fatt. tot.', 'Marg. tot',
             'No DB', 'Errore',
         ]
         width = [
             8, 35, 12, 10,
             15, 30, 8,
             10, 10, 10, 10, 10,
+            10, 10,
             5, 40,
         ]
 
@@ -169,8 +171,9 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             # Calc data used:
             # -----------------------------------------------------------------
+            subtotal = line.price_subtotal
             if quantity:
-                real_price = line.price_subtotal / quantity
+                real_price = subtotal / quantity
             else:
                 real_price = 0.0
 
@@ -179,11 +182,11 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             if bom_product:
                 cost = bom_product.to_industrial
                 margin = real_price - cost
+                margin_total = margin * quantity
                 db = code5
                 error = ''
             else:
-                cost = 0.0
-                margin = 0.0  # no value if no cost!
+                cost = margin = margin_total = 0.0  # no value if no cost!
                 db = ''
                 error = 'DB non trovata (niente margine)'
 
@@ -214,8 +217,11 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 (line.price_unit, color['number']),
                 (real_price, color['number']),
                 (cost, color['number']),
-
                 (margin, color['number']),
+
+                (subtotal, color['number']),
+                (margin_total, color['number']),
+
                 '' if db else 'X',
                 error,
             ]

@@ -256,7 +256,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 excel_format['white']['number'],
                 0.0,  # complete_total[position],
             )
-
+        pdb.set_trace()
         return excel_pool.return_attachment(cr, uid, 'Comparativo fatturato')
 
     def action_print_extra_period(self, cr, uid, ids, context=None):

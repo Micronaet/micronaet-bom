@@ -859,8 +859,8 @@ class ProductProduct(orm.Model):
         res[0][9] = parameter
 
         # Update product record after:
-        for product_id, data in update_after:
-            self.write(cr, uid, product_id, data, context=context)
+        for product_id, record in update_after:
+            self.write(cr, uid, product_id, record, context=context)
 
         # todo save json in history here?
         return res

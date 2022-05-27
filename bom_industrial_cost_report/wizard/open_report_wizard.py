@@ -236,8 +236,9 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 error,
             ]
             row += 1
-            excel_pool.write_xls_line(
+            '''excel_pool.write_xls_line(
                 ws_name, row, data, default_format=color['text'])
+                '''
 
         # ---------------------------------------------------------------------
         # Update with total:
@@ -250,12 +251,13 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             from_cell = excel_pool.rowcol_to_cell(row + 2, col)
             to_cell = excel_pool.rowcol_to_cell(row + total_row, col)
             formula = u"=SUBTOTAL(9,%s:%s)" % (from_cell, to_cell)
+            '''
             excel_pool.write_formula(
                 ws_name,
                 row, col, formula,
                 excel_format['white']['number'],
                 0.0,  # complete_total[position],
-            )
+            )'''
         return excel_pool.return_attachment(cr, uid, 'Comparativo fatturato')
 
     def action_print_extra_period(self, cr, uid, ids, context=None):

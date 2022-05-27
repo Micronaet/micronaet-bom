@@ -98,15 +98,15 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
         header = [
             'Stagione', 'Cliente', 'Fattura', 'Data',
-            'Prodotto', 'Nome',
+            'Prodotto', 'Nome', 'DB'
             'Quant.', 'Prezzo', 'Netto', 'Costo', 'Margine',
-            'Errore',
+            'No DB', 'Errore',
         ]
         width = [
-            15, 35, 10, 12,
-            15, 30,
+            15, 35, 15, 10,
+            15, 30, 12,
             10, 10, 10, 10, 10,
-            40,
+            5, 40,
         ]
 
         # ---------------------------------------------------------------------
@@ -203,6 +203,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
                 product.default_code,
                 product.name,
+                code5,
 
                 quantity,
                 (line.price_unit, color['number']),
@@ -210,6 +211,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 (cost, color['number']),
 
                 (margin, color['number']),
+                '' if code5 else 'X',
                 error,
             ]
             row += 1

@@ -257,11 +257,11 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 0.0,  # complete_total[position],
             )
 
-        excel_pool.write_formula(
-            ws_name,
-            row, 14, '=N1 / M1', excel_format['white']['number'],
-            0.0,  # complete_total[position],
-        )
+        # excel_pool.write_formula(
+        #    ws_name,
+        #    row, 14, '=N1 / M1', excel_format['white']['number'],
+        #    0.0,  # complete_total[position],
+        #)
         return excel_pool.return_attachment(cr, uid, 'Comparativo fatturato')
 
     def action_print_extra_period(self, cr, uid, ids, context=None):

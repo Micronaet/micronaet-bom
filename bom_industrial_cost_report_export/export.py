@@ -138,7 +138,7 @@ class ProductProduct(orm.Model):
         """ Integration report
         """
         _logger.info('Start extracting...')
-        # TODO reactivate
+        # todo reactivate
         # data =  {
         #    'active_ids': False, # Load all template
         #    'model': 'product.product',

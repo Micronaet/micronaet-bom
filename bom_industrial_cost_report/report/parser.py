@@ -23,15 +23,11 @@
 import os
 import sys
 import logging
-import openerp
 import xlsxwriter
-import openerp.netsvc as netsvc
-import openerp.addons.decimal_precision as dp
 from openerp.tools.translate import _
 from openerp.report import report_sxw
 from openerp.report.report_sxw import rml_parse
 from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
 from openerp.osv import fields, osv, expression, orm
 from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
     DEFAULT_SERVER_DATETIME_FORMAT,
@@ -202,7 +198,7 @@ def get_price_detail(price_ids):
     """
     res = ''
     # If not detail:
-    return res  # XXX no detail mode
+    """
     for seller, price, date_quotation in price_ids:
         res += '%s EUR (%s) %s \n' % (
             price,  # Unit price
@@ -210,6 +206,8 @@ def get_price_detail(price_ids):
             seller.name,  # Supplier browse
             )
     return res
+    """
+    return res  # XXX no detail mode
 
 
 class ProductProduct(orm.Model):
@@ -555,7 +553,7 @@ class ProductProduct(orm.Model):
                 if default_code in history_db:
                     continue  # old price
 
-                if product.bom_industrial_no_price:  # TODO remove? dont' work
+                if product.bom_industrial_no_price:  # todo remove? dont' work
                     price = 0.0
                 else:
                     price = history.price
@@ -689,7 +687,7 @@ class ProductProduct(orm.Model):
                             not cmpt.product_id.bom_industrial_no_price and \
                             not max_value
                         if cmpt.product_id.bom_industrial_no_price:
-                            min_value = max_value = 0.0 # no price in BOM
+                            min_value = max_value = 0.0  # no price in BOM
 
                         record = [
                             '%s - %s' % (
@@ -858,6 +856,8 @@ class ProductProduct(orm.Model):
 
         # Update parameters:
         res[0][9] = parameter
+
+        # todo save json in history here?
         return res
 
 

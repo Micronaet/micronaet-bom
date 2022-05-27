@@ -115,7 +115,7 @@ class MrpBomIndustrialCost(orm.Model):
             'views': [(False, 'tree'), (False, 'form')],
             'domain': [('id', 'in', line_ids)],
             'context': context,
-            'target': 'current', # 'new'
+            'target': 'current',  # 'new'
             'nodestroy': False,
             }
 
@@ -162,7 +162,7 @@ class MrpBomIndustrialCost(orm.Model):
             ('industrial', 'Costi industriali'),
             ], 'Tipo', required=True),
         'note': fields.text('Note'),
-        # TODO REMOVE:
+        # todo REMOVE:
         'default_cost': fields.float('Default cost', digits=(16, 3),
             help='Default cost used when append imported BOM'),
         }
@@ -194,19 +194,20 @@ class MrpBomIndustrialCostLine(orm.Model):
 
             # Loop on sellers and pricelist:
             for seller in product.seller_ids:
-                 for pricelist in seller.pricelist_ids: # XXX multi q. probl?
-                     if not pricelist.is_active:
-                         continue
+                for pricelist in seller.pricelist_ids:  # XXX multi q. probl?
+                    if not pricelist.is_active:
+                        continue
 
-                     date_quotation = pricelist.date_quotation or False
-                     if not res[line.id]['last_cost'] or \
-                             date_quotation > res[line.id]['last_date']:
-                         res[line.id]['last_cost'] = pricelist.price
-                         res[line.id]['last_date'] = date_quotation
+                    date_quotation = pricelist.date_quotation or False
+                    if not res[line.id]['last_cost'] or \
+                            date_quotation > res[line.id]['last_date']:
+                        res[line.id]['last_cost'] = pricelist.price
+                        res[line.id]['last_date'] = date_quotation
         return res
 
     _columns = {
-        'name': fields.char('Mask', size=64, required=True,
+        'name': fields.char(
+            'Mask', size=64, required=True,
             help='Mask for code, use % for all, _ for replace one char'),
         'product_id': fields.many2one('product.product', 'Prodotto'),
         'uom_id': fields.related(
@@ -229,7 +230,7 @@ class MrpBomIndustrialCostLine(orm.Model):
         }
 
 
-class MrpBomIndustrialCost(orm.Model):
+class MrpBomIndustrialCostInherit(orm.Model):
     """ Model name: Industrial cost
     """
 
@@ -361,8 +362,9 @@ class MrpBomIndustrialHistory(orm.Model):
                 cr, uid,
                 'bom_industrial_cost_report.group_bom_cost_manager',
                 'Confronto prezzi DB modello %s' % (
-                    ('[PRESENTI GAP: %s!]' % gap_total) if gap_total > 0 \
-                        else '[NON PRESENTI]',
+                    ('[PRESENTI GAP: %s!]' % gap_total) if
+                    gap_total > 0
+                    else '[NON PRESENTI]',
                     ),
                 'Confronto costi DB modello storico e attuale: %s' % now,
                 'template_check_cost.xlsx',
@@ -376,6 +378,10 @@ class MrpBomIndustrialHistory(orm.Model):
         """ History button
         """
         _logger.info('Run report background')
+        if not ids:
+            ids = [self.create(cr, uid, {
+                'name': 'Schedulata il %s' % datetime.now(),
+            }, context=context)]
         history_id = ids[0]
         line_pool = self.pool.get('mrp.bom.industrial.history.line')
 
@@ -408,9 +414,11 @@ class MrpBomIndustrialHistory(orm.Model):
         # ---------------------------------------------------------------------
         # 2 mode of update : current value, history value:
         if context.get('update_current_industrial'):
+            # Update current from / to industrial in product
             update_current_industrial = True
             update_record = False
         else:
+            # Update only data from / to industrial in template
             update_current_industrial = False
             update_record = True
 

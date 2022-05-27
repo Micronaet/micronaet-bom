@@ -215,12 +215,12 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             data = [
                 line.season_period,
-                partner.name,
+                u'{}'.format(partner.name),
                 invoice.number,
                 invoice.date_invoice,
 
-                product.default_code,
-                u'%s' % product.name,
+                u'{}'.format(product.default_code),
+                u'{}'.format(product.name),
                 db,
 
                 quantity,

@@ -148,8 +148,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         # Write title / header
         # ---------------------------------------------------------------------
         row = 0
-        excel_pool.write_xls_line(
-            ws_name, row, header, default_format=excel_format['header'])
+        # Total line
 
         row += 1
         excel_pool.write_xls_line(
@@ -241,16 +240,17 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         total_row = row - 1
         row = 0
         # todo keep updated if change columns:
-        col = 12  # subtotal
-        from_cell = excel_pool.rowcol_to_cell(row + 2, col)
-        to_cell = excel_pool.rowcol_to_cell(row + total_row, col)
-        formula = u"=SUBTOTAL(9,%s:%s)" % (from_cell, to_cell)
-        excel_pool.write_formula(
-            ws_name,
-            row, col, formula,
-            excel_format['white']['number'],
-            0.0,  # complete_total[position],
-        )
+        for col in (12, 13):
+            # col = 12  # subtotal
+            from_cell = excel_pool.rowcol_to_cell(row + 2, col)
+            to_cell = excel_pool.rowcol_to_cell(row + total_row, col)
+            formula = u"=SUBTOTAL(9,%s:%s)" % (from_cell, to_cell)
+            excel_pool.write_formula(
+                ws_name,
+                row, col, formula,
+                excel_format['white']['number'],
+                0.0,  # complete_total[position],
+            )
 
         return excel_pool.return_attachment(cr, uid, 'Comparativo fatturato')
 

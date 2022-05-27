@@ -62,7 +62,7 @@ def industrial_index_get_text(index):
     return res
 
 
-def get_pricelist(product, min_date, max_date=False, history_db=False):
+def get_pricelist(product, min_date, max_date=False, history_db=None):
     """ Return:
         min price, max price, all pricelist for this product active price,
         min_date: min quotation date (mandatory)
@@ -101,7 +101,7 @@ def get_pricelist(product, min_date, max_date=False, history_db=False):
             False,  # 3. Supplier Min
             False,  # 4. Supplier Max
             ]
-
+    supplier = ''
     for seller in product.seller_ids:
         supplier = seller.name
         for pricelist in seller.pricelist_ids:
@@ -513,6 +513,7 @@ class ProductProduct(orm.Model):
             _logger.warning('Product price current will be updated!')
         else:
             _logger.warning('No current product price updated!')
+        update_after = []
 
         # Range date:
         from_date = datas.get('from_date', '')
@@ -826,21 +827,21 @@ class ProductProduct(orm.Model):
             # Update product industrial price:
             # -----------------------------------------------------------------
             if update_record:
-                self.write(cr, uid, product.id, {
+                update_after.append((product.id, {
                     'from_industrial': data[0],
                     'to_industrial': data[1],
                     'industrial_missed': data[2],
                     'industrial_index': data[7]['index'],
-                    }, context=context)
+                    }))
 
             # -----------------------------------------------------------------
             # Update product current industrial price:
             # -----------------------------------------------------------------
             if update_current_industrial:
-                self.write(cr, uid, product.id, {
+                update_after.append((product.id, {
                     'current_from_industrial': data[0],
                     'current_to_industrial': data[1],
-                    }, context=context)
+                    }))
 
             # Total text:
             # Mat + Extra + Cost1 + Cost2
@@ -856,6 +857,10 @@ class ProductProduct(orm.Model):
 
         # Update parameters:
         res[0][9] = parameter
+
+        # Update product record after:
+        for product_id, data in update_after:
+            self.write(cr, uid, product_id, data, context=context)
 
         # todo save json in history here?
         return res

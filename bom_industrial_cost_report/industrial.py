@@ -272,7 +272,7 @@ class MrpBomIndustrialHistory(orm.Model):
         # ---------------------------------------------------------------------
         # Excel report:
         # ---------------------------------------------------------------------
-        WS_name = _('Fatture commercializzati')
+        WS_name = _('Costi industriali')
         excel_pool.create_worksheet(WS_name)
 
         # Format used:

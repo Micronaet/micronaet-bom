@@ -99,8 +99,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         header = [
             'Stagione', 'Cliente', 'Fattura', 'Data',
             'Prodotto', 'Nome',
-            'Quant.', 'Prezzo', 'Netto', 'Costo',
-            # Media?
+            'Quant.', 'Prezzo', 'Netto', 'Costo', 'Margine',
+            'Errore',
         ]
         width = [
             15, 35, 10, 12,
@@ -184,7 +184,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             # Color setup:
             # -----------------------------------------------------------------
-            if quantity < 0:
+            if real_price < 0:
                 color = excel_format['red']
             elif not margin:
                 color = excel_format['yellow']
@@ -196,15 +196,18 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             data = [
                 line.season_period,
+                partner.name,
                 invoice.number,
                 invoice.date_invoice,
-                partner.name,
+
                 product.default_code,
                 product.name,
+
                 quantity,
                 line.price_unit,
                 real_price,
                 cost,
+
                 margin,
                 error,
             ]

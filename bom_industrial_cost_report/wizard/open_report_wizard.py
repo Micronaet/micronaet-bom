@@ -105,7 +105,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         width = [
             15, 35, 10, 12,
             15, 30,
-            10, 10, 10, 10,
+            10, 10, 10, 10, 10,
+            40,
         ]
 
         # ---------------------------------------------------------------------
@@ -204,11 +205,11 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 product.name,
 
                 quantity,
-                line.price_unit,
-                real_price,
-                cost,
+                (line.price_unit, color['number']),
+                (real_price, color['number']),
+                (cost, color['number']),
 
-                margin,
+                (margin, color['number']),
                 error,
             ]
             row += 1

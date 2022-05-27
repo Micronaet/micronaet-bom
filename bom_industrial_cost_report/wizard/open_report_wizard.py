@@ -158,7 +158,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 line_pool.browse(cr, uid, line_ids, context=context),
                 key=lambda l: (
                     l.invoice_id.partner_id.name,
-                    l.invoice_id.invoice_date,
+                    l.invoice_id.date_invoice,
                 )):
 
             # -----------------------------------------------------------------

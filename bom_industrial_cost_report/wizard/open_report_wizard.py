@@ -180,6 +180,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             product = line.product_id
             code5 = (product.default_code or '')[:5]
             quantity = line.quantity
+            # order = line.order_id  todo get incoterms here to test
 
             # Cache parameter
             if partner not in partner_cache:
@@ -208,6 +209,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 cost = bom_product.to_industrial
 
                 # B. Extra transport cost:
+                # todo manage only if incoterms:
                 if industrial_transport_rate:
                     cost += cost * industrial_transport_rate / 100.0
 

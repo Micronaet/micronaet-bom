@@ -38,6 +38,24 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 _logger = logging.getLogger(__name__)
 
 
+class ResPartner(orm.Model):
+    """ Model name: Partner
+    """
+    _inherit = 'res.partner'
+
+    _columns = {
+        'industrial_transport_rate': fields.float(
+            'Tasso trasporto %', digits=(16, 4),
+            help='Il tasso del trasporto viene calcolato e sommato al costo'
+                 'effettivo del prodotto',
+        ),
+        'industrial_extra_discount': fields.float(
+            'Sconto extra', digits=(16, 4),
+            help='In tasso di extra sconto viene tolto dal fatturato',
+        ),
+    }
+
+
 class ResCompany(orm.Model):
     """ Model name: ResCompany
     """
@@ -485,8 +503,9 @@ class MrpBomIndustrialHistory(orm.Model):
         # ---------------------------------------------------------------------
         # Save history record data:
         # ---------------------------------------------------------------------
-        # TODO save in lines:
-        """self.write(cr, uid, ids, {
+        # todo save in lines:
+        """
+        self.write(cr, uid, ids, {
             'name': 'Storico %s' % now,
             'filename': filename,
             'previous_text': previous_text,
@@ -624,7 +643,8 @@ class ProductProduct(orm.Model):
             'bom_selection': False,
             }, context=context)
 
-    def _get_industrial_sale_ab(self, cr, uid, ids, fields, args, context=None):
+    def _get_industrial_sale_ab(
+            self, cr, uid, ids, fields, args, context=None):
         """ Fields function for calculate
         """
         res = {}

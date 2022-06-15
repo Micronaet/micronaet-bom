@@ -100,6 +100,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             'Stagione', 'Cliente', 'Fattura', 'Data',
             'Prodotto', 'Nome', 'DB',
             'Quant.', 'Pr. unit', 'Pr. Netto', 'Costo DB', 'Marg. unit.',
+            '% trasp', '% extra sc.',
             'Fatt. tot.', 'Marg. tot', 'Marg. %',
             'No DB', 'Errore',
         ]
@@ -107,6 +108,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             8, 35, 12, 10,
             15, 30, 8,
             10, 10, 10, 10, 10,
+            6, 6,
             12, 12, 10,
             5, 40,
         ]
@@ -161,6 +163,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         excel_pool.freeze_panes(ws_name, 2, 5)
         excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
 
+        partner_cache = {}
         line_ids = line_pool.search(cr, uid, domain, context=context)
         for line in sorted(
                 line_pool.browse(cr, uid, line_ids, context=context),
@@ -178,12 +181,23 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             code5 = (product.default_code or '')[:5]
             quantity = line.quantity
 
+            # Cache parameter
+            if partner not in partner_cache:
+                partner_cache[partner] = [
+                    partner.industrial_transport_rate,
+                    partner.industrial_extra_discount,
+                ]
+            industrial_transport_rate, industrial_extra_discount = \
+                partner_cache[partner]
+
             # -----------------------------------------------------------------
             # Calc data used:
             # -----------------------------------------------------------------
             subtotal = line.price_subtotal
             if quantity:
                 real_price = subtotal / quantity
+                # A. Extra discount:
+                real_price -= real_price * industrial_extra_discount / 100.0
             else:
                 real_price = 0.0
 
@@ -192,6 +206,11 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             margin_rate = 0.0
             if bom_product:
                 cost = bom_product.to_industrial
+
+                # B. Extra transport cost:
+                if industrial_transport_rate:
+                    cost += cost * industrial_transport_rate / 100.0
+
                 margin = real_price - cost
                 margin_total = margin * quantity
                 if subtotal:
@@ -231,6 +250,9 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 (real_price, color['number']),
                 (cost, color['number']),
                 (margin, color['number']),
+
+                (industrial_transport_rate, color['number']),
+                (industrial_extra_discount, color['number']),
 
                 (subtotal, color['number']),
                 (margin_total, color['number']),

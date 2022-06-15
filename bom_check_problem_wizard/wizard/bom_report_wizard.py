@@ -50,7 +50,7 @@ class ProductProduct(orm.Model):
         'dynamic_bom_checked': fields.boolean(
             'DB controllata', readonly=True),
         'dynamic_bom_checked_date': fields.date(
-            'Data controllo DB', readonly=True),       
+            'Data controllo DB', readonly=True),
         }
 
 class MrpBomCheckProblemWizard(orm.TransientModel):
@@ -150,13 +150,13 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
 
         if only_hw:
             domain.extend([
-            '|',  # '|',
-            ('default_code', '=ilike', 'MT%'),
-            ('default_code', '=ilike', 'TL%'),
-            # ('default_code', '=ilike', 'PO%'),
-            # ('default_code', '=ilike', 'MS%'),
-            # ('default_code', '=ilike', 'TS%'),
-            ])
+                '|',  # '|',
+                ('default_code', '=ilike', 'MT%'),
+                ('default_code', '=ilike', 'TL%'),
+                # ('default_code', '=ilike', 'PO%'),
+                # ('default_code', '=ilike', 'MS%'),
+                # ('default_code', '=ilike', 'TS%'),
+                ])
 
         # Product and bom data:
         product_ids = product_pool.search(cr, uid, domain, context=context)

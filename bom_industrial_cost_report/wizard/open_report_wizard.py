@@ -271,7 +271,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         total_row = row - 1
         row = 0
         # todo keep updated if change columns:
-        for col in (12, 13):
+        for col in (14, 15):
             from_cell = excel_pool.rowcol_to_cell(row + 2, col)
             to_cell = excel_pool.rowcol_to_cell(row + total_row, col)
             excel_pool.write_formula(
@@ -282,7 +282,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             )
         excel_pool.write_formula(
             ws_name,
-            row, 14, u'= 100 * N1 / M1',
+            row, 16, u'= 100 * N1 / M1',
             excel_format['green']['number'],
             0.0,  # complete_total[position],
         )

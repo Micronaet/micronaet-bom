@@ -282,7 +282,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             )
         excel_pool.write_formula(
             ws_name,
-            row, 16, u'= 100 * N1 / M1',
+            row, 16, u'= 100 * O1 / P1',
             excel_format['green']['number'],
             0.0,  # complete_total[position],
         )

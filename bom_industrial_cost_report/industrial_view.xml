@@ -414,12 +414,12 @@
                      sequence="20"
                      />
 
-         <menuitem
+         <!--<menuitem
              parent="base.menu_partner_form"
              id="menu_view_res_partner_rate"
              action="action_view_res_partner_rate_partner_menu"
              sequence="90"
-             />
+             />-->
 
     </data>
 </openerp>

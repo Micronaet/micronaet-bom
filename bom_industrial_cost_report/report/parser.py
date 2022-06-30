@@ -786,6 +786,7 @@ class ProductProduct(orm.Model):
                 }
             for cost, item in self.get_cost_industrial_for_product(
                     cr, uid, [product.id], context=context).iteritems():
+
                 # Index total:
                 if cost.type not in data[6]:
                     data[6][cost.type] = 0.0
@@ -808,7 +809,8 @@ class ProductProduct(orm.Model):
                 else:
                     raise osv.except_osv(
                         _('Tipo errato'),
-                        _('Tipo di costo non presente: %s') % cost.name,
+                        _('Tipo di costo non presente: %s') %
+                        product.default_code,
                         )
 
                 data[0] += value  # min

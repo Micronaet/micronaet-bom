@@ -808,7 +808,7 @@ class ProductProduct(orm.Model):
                 else:
                     raise osv.except_osv(
                         _('Tipo errato'),
-                        _('Tipo di costo non presente'),
+                        _('Tipo di costo non presente: %s') % cost.name,
                         )
 
                 data[0] += value  # min

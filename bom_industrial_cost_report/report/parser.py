@@ -24,6 +24,7 @@ import os
 import sys
 import logging
 import xlsxwriter
+import pickle
 from openerp.tools.translate import _
 from openerp.report import report_sxw
 from openerp.report.report_sxw import rml_parse
@@ -216,6 +217,19 @@ class ProductProduct(orm.Model):
 
     _inherit = 'product.product'
 
+    _columns = {
+        'dump_data': fields.text(
+            'Dump data',
+            help='File di dump ultima distinta controllata dal responsabile'),
+        'dump_user_id': fields.many2one(
+            'res.users', 'Controllore DB',
+            help='Responsabile che ha controllato e storicizzato la DB'),
+        'dump_datetime': fields.datetime(
+            'Data controllo',
+            help='Data e ora della storicizzazione ultima distinta controllata'
+                 'dal responsabile'),
+        }
+
     # -------------------------------------------------------------------------
     # Button event:
     # -------------------------------------------------------------------------
@@ -226,8 +240,22 @@ class ProductProduct(orm.Model):
         """ Return single report
         """
         datas = {}
-        datas['wizard'] = True # started from wizard
+        datas['wizard'] = True  # started from wizard
         datas['active_ids'] = ids
+        return {
+            'type': 'ir.actions.report.xml',
+            'report_name': 'industrial_cost_bom_report',
+            'datas': datas,
+            # 'context': context,
+            }
+
+    def open_single_report_with_dump(self, cr, uid, ids, context=None):
+        """ Return single report
+        """
+        datas = {}
+        datas['wizard'] = True  # started from wizard
+        datas['active_ids'] = ids
+        datas['json_history'] = True
         return {
             'type': 'ir.actions.report.xml',
             'report_name': 'industrial_cost_bom_report',
@@ -515,6 +543,13 @@ class ProductProduct(orm.Model):
             _logger.warning('No current product price updated!')
         update_after = []
 
+        # Note: used pickle for better read in python non JSON
+        json_history = datas.get('json_history', False)
+        if json_history:
+            _logger.warning('Status BOM will saved in Dump data!')
+        else:
+            _logger.warning('Status BOM Dump data not saved!')
+
         # Range date:
         from_date = datas.get('from_date', '')
         to_date = datas.get('to_date', '')
@@ -607,6 +642,13 @@ class ProductProduct(orm.Model):
         component_f = open(os.path.expanduser('~/component.txt'), 'w')
         component_saved = []
         for product in selected_product:
+            # History:
+            if json_history:
+                # Manage history in pickle field
+                dump_data = {
+                    'product': [],
+                }  # Clean every new product
+
             data = [
                 0.0,  # 0. Min
                 0.0,  # 1. Max
@@ -632,7 +674,7 @@ class ProductProduct(orm.Model):
                     _logger.warning('Jump placeholder elements')
                     continue  # jump component
 
-                half_bom_ids = component.half_bom_ids # if half component
+                half_bom_ids = component.half_bom_ids  # if half component
                 if half_bom_ids:
                     # HW component (level 2)
                     hw_total = 0.0
@@ -683,7 +725,7 @@ class ProductProduct(orm.Model):
                             data[11][0] += q_pipe
                             data[11][1] += q_pipe * pipe_price
 
-                        # TODO manage as pipe?
+                        # todo manage as pipe?
                         red_price = \
                             not cmpt.product_id.bom_industrial_no_price and \
                             not max_value
@@ -724,8 +766,21 @@ class ProductProduct(orm.Model):
                             component_saved.append(component.default_code)
 
                         data[3].append(record)  # Populate product database
-                else:
-                    # Raw material (level 1)
+
+                        # History:
+                        if json_history:
+                            dump_data['product'].append({
+                                'product_id': cmpt.product_id.id,
+                                'default_code': cmpt.product_id.default_code,
+                                'semiproduct': component.default_code,
+                                'quantity': cmpt_q,  # item x component
+                                # 'uom': uom_name,
+                                'min_price': min_value,
+                                'max_price': max_value,
+                                # simulated?
+                            })
+
+                else:  # Raw material (level 1)
                     cmpt_q = item.product_qty
                     # Simulation:
                     (min_value, max_value, price_ids, supplier_min,
@@ -763,6 +818,19 @@ class ProductProduct(orm.Model):
                     data[0] += min_value * cmpt_q
                     data[1] += max_value * cmpt_q
                     data[12] += simulated_cost
+
+                    # History:
+                    if json_history:
+                        dump_data['product'].append({
+                            'product_id': component.id,
+                            'default_code': component.default_code,
+                            'semiproduct': False,
+                            'quantity': cmpt_q,  # item x component
+                            # 'uom': uom_name,
+                            'min_price': min_value,
+                            'max_price': max_value,
+                            # simulated?
+                        })
 
             # Add extra (save in total the max)
             data[0] += data[0] * margin_extra / 100.0
@@ -845,6 +913,20 @@ class ProductProduct(orm.Model):
                     'current_to_industrial': data[1],
                     }))
 
+            # -----------------------------------------------------------------
+            # History:
+            # -----------------------------------------------------------------
+            if json_history:
+                # Update dump with totals:
+                dump_data['from_industrial'] = data[0]
+                dump_data['to_industrial'] = data[1]
+
+                update_after.append((product.id, {
+                    'dump_data': pickle.dumps(dump_data),
+                    'dump_user_id': uid,
+                    'dump_datetime': datetime.now()
+                    }))
+
             # Total text:
             # Mat + Extra + Cost1 + Cost2
             for t in type_i18n:
@@ -863,8 +945,6 @@ class ProductProduct(orm.Model):
         # Update product record after:
         for product_id, record in update_after:
             self.write(cr, uid, product_id, record, context=context)
-
-        # todo save json in history here?
         return res
 
 

@@ -223,6 +223,12 @@
                      <field name="name" />
                      <button name="open_current_dynamic_bom" string="Manage dynamic lines" type="object" icon="gtk-justify-fill"/>
 
+                     <field name="dump_datetime" groups="bom_industrial_cost_report.group_bom_cost_history_manager" />
+                     <field name="dump_user_id" groups="bom_industrial_cost_report.group_bom_cost_history_manager" />
+                     <button name="open_single_report_with_dump" string="Controllata" type="object" icon="terp-locked"
+                             groups="bom_industrial_cost_report.group_bom_cost_history_manager"
+                             attrs="{'invisible': [('bom_selection','=',False)]}" confirm="Distinta base controllata, confermi la storicizzazione dei componenti?"/>
+
                      <field name="from_industrial" />
                      <field name="to_industrial" />
 

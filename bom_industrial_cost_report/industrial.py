@@ -401,7 +401,7 @@ class MrpBomIndustrialHistory(orm.Model):
         if not ids:
             ids = [self.create(cr, uid, {
                 'name': 'Schedulata il %s' % datetime.now(),
-            }, context=context)]
+                }, context=context)]
         history_id = ids[0]
         line_pool = self.pool.get('mrp.bom.industrial.history.line')
 
@@ -464,7 +464,7 @@ class MrpBomIndustrialHistory(orm.Model):
                 datas, context)
         except:
             _logger.error('Error generation history BOM report [%s]' % (
-                sys.exc_info(),))
+                sys.exc_info(), ))
             return False
 
         # ---------------------------------------------------------------------
@@ -510,7 +510,8 @@ class MrpBomIndustrialHistory(orm.Model):
             'filename': filename,
             'previous_text': previous_text,
             'post_text': post_text,
-            }, context=context)"""
+            }, context=context)
+        """
         return True
 
     _columns = {
@@ -630,14 +631,14 @@ class ProductProduct(orm.Model):
     # Button for select
     # -------------------------------------------------------------------------
     def bom_selection_on(self, cr, uid, ids, context=None):
-        """
+        """ Select as template
         """
         return self.write(cr, uid, ids, {
             'bom_selection': True,
             }, context=context)
 
     def bom_selection_off(self, cr, uid, ids, context=None):
-        """
+        """ Discard from template
         """
         return self.write(cr, uid, ids, {
             'bom_selection': False,

@@ -254,7 +254,7 @@ class ProductProductBOMDump(orm.Model):
             dump_data.get('to_industrial'),
         )
 
-        history += '<table width="1000">'
+        history += '<table width="100%">'
         history += '<tr>' \
             '<th>Categoria</th><th>Semilavorato</th><th>Nome</th>' \
             '<th>Codice</th><th>Nome</th>' \
@@ -309,10 +309,11 @@ class ProductProductBOMDump(orm.Model):
                 )
 
             # Mixed data:
-            key = (category, semiproduct_id, product_id)
-            # todo colud be a problem using this key?
+            key = category, product_id
+            # todo could be a problem using this key?
 
             mixed_data[key] = {
+                'status': 'red',  # no more present as default
                 'category': category,
                 'semiproduct': semiproduct,
                 'product': product,
@@ -321,6 +322,7 @@ class ProductProductBOMDump(orm.Model):
                     'min_price': min_price,
                     'max_price': max_price,
                 },
+                'compare': {},
             }
         history += '</table>'
 
@@ -329,19 +331,116 @@ class ProductProductBOMDump(orm.Model):
         # ---------------------------------------------------------------------
         compare = ''
         dump_compare_data = pickle.loads(dump_compare_data)
-        compare += 'Range di prezzo: [<b>%s</b> - <b>%s</b>]<br/>' % (
-            dump_data.get('from_industrial'),
-            dump_data.get('to_industrial'),
-        )
+
+        # todo total box
+        records = dump_compare_data['product']
+        for record in records:
+            # Semiproduct part:
+            semiproduct_id = record.get('semiproduct_id')
+
+            # Product part:
+            product_id = record.get('product_id')
+            category = record.get('category')
+            quantity = record.get('quantity')
+            min_price = record.get('min_price')
+            max_price = record.get('max_price')
+
+            key = (category, product_id)
+            if key in mixed_data:
+                mixed_data[key]['status'] = 'green'  # Find in both
+                mixed_data[key]['compare'] = {
+                    'quantity': quantity,
+                    'min_price': min_price,
+                    'max_price': max_price,
+                }
+            else:  # Present only in compare not in history
+                # Semiproduct part:
+                semiproduct_id = record.get('semiproduct_id')
+                semiproduct = ''
+                try:
+                    if semiproduct_id:
+                        semiproduct = product_pool.browse(
+                            cr, uid, semiproduct_id, context=context)
+                except:
+                    pass
+
+                # Product part:
+                product_id = record.get('product_id')
+                product = ''
+                try:
+                    product = product_pool.browse(
+                        cr, uid, product_id, context=context)
+                except:
+                    pass
+
+                mixed_data[key] = {
+                    'status': 'blue',  # No more present
+                    'category': category,
+                    'semiproduct': semiproduct,
+                    'product': product,
+                    'history': {},
+                    'compare': {
+                        'quantity': quantity,
+                        'min_price': min_price,
+                        'max_price': max_price,
+                    },
+                }
+
+        # ---------------------------------------------------------------------
+        # Compare
+        # ---------------------------------------------------------------------
+        compare += 'Range di prezzo storico: [<b>%s</b> - <b>%s</b>] ' \
+                   'Range di prezzo attuale: [<b>%s</b> - <b>%s</b>] <br/>' % (
+                        dump_data.get('from_industrial'),
+                        dump_data.get('to_industrial'),
+                        dump_compare_data.get('from_industrial'),
+                        dump_compare_data.get('to_industrial'),
+                        )
 
         compare += '<table width="1000">'
         compare += '<tr>' \
+            '<th colspan="5">Dettaglio</th><th colspan="3">Storico</th>' \
+            '<th colspan="3">Attuale</th></tr>'
+
+        compare += '<tr>' \
             '<th>Categoria</th><th>Semilavorato</th><th>Nome</th>' \
             '<th>Codice</th><th>Nome</th>' \
-            '<th>Q.</th>' \
-            '<th>Min</th><th>Max</th>' \
+            '<th>Q.</th><th>Min</th><th>Max</th>' \
+            '<th>Q.</th><th>Min</th><th>Max</th>' \
             '</tr>'
 
+        for key in sorted(mixed_data):
+            record = mixed_data[key]
+
+            status = record.get('status')
+            semiproduct = record.get('semiproduct')
+            product = record.get('product')
+            history_block = record.get('history')
+            compare_block = record.get('compare')
+
+            compare += '<tr>' \
+                '<td>%s</td><td>%s</td><td>%s</td>' \
+                '<td>%s</td><td>%s</td>' \
+                '<td>%s</td><td>%s</td><td>%s</td>' \
+                '<td>%s</td><td>%s</td><td>%s</td>' \
+                '</tr>' % (
+                    record.get('category'),
+
+                    semiproduct.default_code if semiproduct else '',
+                    semiproduct.name if semiproduct else '',
+
+                    product.default_code if product else '',
+                    product.name if product else '',
+
+                    history_block.get('quantity'),
+                    history_block.get('min_price'),
+                    history_block.get('max_price'),
+
+                    compare_block.get('quantity'),
+                    compare_block.get('min_price'),
+                    compare_block.get('max_price'),
+                    )
+        compare += '</table>'
         return history, compare
 
     def _get_dump_data(self, cr, uid, ids, fields, args, context=None):

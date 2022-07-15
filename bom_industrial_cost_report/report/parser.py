@@ -287,6 +287,7 @@ class ProductProductBOMDump(orm.Model):
                 )
 
         res += '</table>'
+        pdb.set_trace()
         return res
 
     def _get_dump_data(self, cr, uid, ids, fields, args, context=None):

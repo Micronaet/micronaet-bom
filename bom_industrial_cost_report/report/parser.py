@@ -300,7 +300,7 @@ class ProductProduct(orm.Model):
             'view_type': 'form',
             'view_mode': 'tree,form',
             # 'res_id': 1,
-            'res_model': 'purchase.order.xlsx.line',
+            'res_model': 'product.product.bom.dump',
             'view_id': view_id,
             'views': [(view_id, 'tree'), (view_id, 'form')],
             'domain': [('product_id', '=', ids[0])],

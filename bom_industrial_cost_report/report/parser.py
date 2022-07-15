@@ -220,6 +220,11 @@ class ProductProductBOMDump(orm.Model):
     _order = 'dump_datetime desc'
     _rec_name = 'product_id'
 
+    def get_html_tag(self, data, tag='td', color='', background=''):
+        """ Format tag data
+        """
+        return '<%s>%s</%s>' % (tag, data, tag)
+
     def dump_data_in_html(self, dump_data):
         """ Dump data
         """
@@ -230,6 +235,19 @@ class ProductProductBOMDump(orm.Model):
             dump_data.get('from_industrial'),
             dump_data.get('to_industrial'),
         )
+
+        records = dump_data['product']
+
+        for record in records:
+            product_id = record.get('product_id')
+            res += '<tr>%s%s%s%s%s</tr>' % (
+                self.get_html_tag(record.get('semiproduct', '')),
+                self.get_html_tag(record.get('default_code', '')),
+                self.get_html_tag(record.get('quantity', '')),
+                self.get_html_tag(record.get('min_price', '')),
+                self.get_html_tag(record.get('max_price', '')),
+                )
+
         return res
 
     def _get_dump_data(self, cr, uid, ids, fields, args, context=None):

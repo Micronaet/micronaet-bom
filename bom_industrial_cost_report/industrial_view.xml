@@ -26,7 +26,7 @@
                              <field name="dump_datetime" />
                              <field name="dump_user_id"/>
                              <seperator string="Dump" colspan="4"/>
-                             <field name="dump_data" colspan="4" nolabel="1"/>
+                             <field name="dump_html" colspan="4" nolabel="1" widget="html"/>
                           </group>
                      </sheet>
                  </form>

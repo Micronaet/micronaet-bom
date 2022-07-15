@@ -230,23 +230,28 @@ class ProductProductBOMDump(orm.Model):
         """
         res = ''
         dump_data = pickle.loads(dump_data)
-        pdb.set_trace()
         res += 'Range di prezzo: [<b>%s</b> - <b>%s</b>]' % (
             dump_data.get('from_industrial'),
             dump_data.get('to_industrial'),
         )
 
         records = dump_data['product']
+        res += '<table>'
+        res += '<tr>' \
+               '<th>Semilavorato</th><th>Codice</th><th>Q.</th>' \
+               '<th>Prezzo min</th><th>Prezzo max</th>' \
+               '</tr>'
 
         for record in records:
             product_id = record.get('product_id')
             res += '<tr>%s%s%s%s%s</tr>' % (
-                self.get_html_tag(record.get('semiproduct', '')),
-                self.get_html_tag(record.get('default_code', '')),
-                self.get_html_tag(record.get('quantity', '')),
-                self.get_html_tag(record.get('min_price', '')),
-                self.get_html_tag(record.get('max_price', '')),
+                self.get_html_tag(record.get('semiproduct') or ''),
+                self.get_html_tag(record.get('default_code') or ''),
+                self.get_html_tag(record.get('quantity') or ''),
+                self.get_html_tag(record.get('min_price') or ''),
+                self.get_html_tag(record.get('max_price') or ''),
                 )
+        res += '</table>'
 
         return res
 

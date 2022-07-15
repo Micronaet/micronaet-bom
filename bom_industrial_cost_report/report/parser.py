@@ -397,10 +397,11 @@ class ProductProductBOMDump(orm.Model):
                         dump_compare_data.get('to_industrial'),
                         )
 
-        compare += '<table width="1000">'
+        compare += '<table width="100%">'
         compare += '<tr>' \
-            '<th colspan="5">Dettaglio</th><th colspan="3">Storico</th>' \
-            '<th colspan="3">Attuale</th></tr>'
+            '<th colspan="5" align="center">Dettaglio</th>' \
+            '<th colspan="3" align="center">Storico</th>' \
+            '<th colspan="3" align="center">Attuale</th></tr>'
 
         compare += '<tr>' \
             '<th>Categoria</th><th>Semilavorato</th><th>Nome</th>' \

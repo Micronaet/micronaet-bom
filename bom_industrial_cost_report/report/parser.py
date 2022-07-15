@@ -241,17 +241,20 @@ class ProductProductBOMDump(orm.Model):
             dump_data.get('to_industrial'),
         )
 
-        records = dump_data['product']
-        res += '<table width="500">'
+        res += '<table width="900">'
         res += '<tr>' \
-               '<th>Semilavorato</th><th>Codice</th><th>Q.</th>' \
+               '<th>Semilavorato</th><th>Nome</th>' \
+               '<th>Codice</th><th>Nome</th>' \
+               '<th>Q.</th>' \
                '<th>Min</th><th>Max</th>' \
                '</tr>'
 
+        records = dump_data['product']
         for record in sorted(
                 records,
                 key=lambda x: (x['semiproduct'], x['default_code'])):
 
+            # Semiproduct part:
             semiproduct_id = record.get('semiproduct_id')
             try:
                 if semiproduct_id:
@@ -263,6 +266,7 @@ class ProductProductBOMDump(orm.Model):
             except:
                 semiproduct_name = 'Semilavorato eliminato'
 
+            # Product part:
             product_id = record.get('product_id')
             try:
                 product = product_pool.browse(
@@ -270,19 +274,19 @@ class ProductProductBOMDump(orm.Model):
                 product_name = product.name
             except:
                 product_name = 'Prodotto eliminato'
-            res += '<tr>%s%s%s%s%s</tr>' % (
-                self.get_html_tag(
-                    record.get('semiproduct') or '',
-                    title=semiproduct_name),
-                self.get_html_tag(
-                    record.get('default_code') or '',
-                    title=product_name),
+
+            # Write row:
+            res += '<tr>%s%s%s%s%s%s%s</tr>' % (
+                self.get_html_tag(record.get('semiproduct') or ''),
+                semiproduct_name,
+                self.get_html_tag(record.get('default_code') or ''),
+                product_name,
                 self.get_html_tag(record.get('quantity') or ''),
                 self.get_html_tag(record.get('min_price') or ''),
                 self.get_html_tag(record.get('max_price') or ''),
                 )
-        res += '</table>'
 
+        res += '</table>'
         return res
 
     def _get_dump_data(self, cr, uid, ids, fields, args, context=None):

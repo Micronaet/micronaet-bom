@@ -223,6 +223,7 @@ class ProductProductBOMDump(orm.Model):
     def get_html_tag(self, data, tag='td', color='', background='', title=''):
         """ Format tag data
         """
+        data = data or ''
         parameter = ''
         if title:
             parameter += 'title="%s"' % title
@@ -258,13 +259,13 @@ class ProductProductBOMDump(orm.Model):
             semiproduct_id = record.get('semiproduct_id')
             try:
                 if semiproduct_id:
-                    product = product_pool.browse(
+                    semiproduct = product_pool.browse(
                         cr, uid, semiproduct_id, context=context)
-                    semiproduct_name = product.name
+                    semiproduct_name = semiproduct.name
                 else:
                     semiproduct_name = ''
             except:
-                semiproduct_name = 'Semilavorato eliminato'
+                semiproduct_name = '[Semilavorato eliminato]'
 
             # Product part:
             product_id = record.get('product_id')
@@ -273,17 +274,19 @@ class ProductProductBOMDump(orm.Model):
                     cr, uid, product_id, context=context)
                 product_name = product.name
             except:
-                product_name = 'Prodotto eliminato'
+                product_name = '[Prodotto eliminato]'
 
             # Write row:
             res += '<tr>%s%s%s%s%s%s%s</tr>' % (
-                self.get_html_tag(record.get('semiproduct') or ''),
+                self.get_html_tag(record.get('semiproduct')),
                 semiproduct_name,
-                self.get_html_tag(record.get('default_code') or ''),
+
+                self.get_html_tag(record.get('default_code')),
                 product_name,
-                self.get_html_tag(record.get('quantity') or ''),
-                self.get_html_tag(record.get('min_price') or ''),
-                self.get_html_tag(record.get('max_price') or ''),
+
+                self.get_html_tag(record.get('quantity')),
+                self.get_html_tag(record.get('min_price')),
+                self.get_html_tag(record.get('max_price')),
                 )
 
         res += '</table>'

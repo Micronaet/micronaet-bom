@@ -256,11 +256,11 @@ class ProductProductBOMDump(orm.Model):
 
         history += '<table width="1000">'
         history += '<tr>' \
-               '<th>Categoria</th><th>Semilavorato</th><th>Nome</th>' \
-               '<th>Codice</th><th>Nome</th>' \
-               '<th>Q.</th>' \
-               '<th>Min</th><th>Max</th>' \
-               '</tr>'
+            '<th>Categoria</th><th>Semilavorato</th><th>Nome</th>' \
+            '<th>Codice</th><th>Nome</th>' \
+            '<th>Q.</th>' \
+            '<th>Min</th><th>Max</th>' \
+            '</tr>'
 
         mixed_data = {}
         records = dump_data['product']

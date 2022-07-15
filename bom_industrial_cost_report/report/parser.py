@@ -279,6 +279,7 @@ class ProductProductBOMDump(orm.Model):
                     semiproduct_name = ''
             except:
                 semiproduct_name = '[Semilavorato eliminato]'
+                semiproduct = False
 
             # Product part:
             product_id = record.get('product_id')
@@ -288,6 +289,7 @@ class ProductProductBOMDump(orm.Model):
                 product_name = product.name
             except:
                 product_name = '[Prodotto eliminato]'
+                product = False
 
             category = record.get('category')
             quantity = record.get('quantity')

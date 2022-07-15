@@ -220,17 +220,23 @@ class ProductProductBOMDump(orm.Model):
     _order = 'dump_datetime desc'
     _rec_name = 'product_id'
 
-    def get_html_tag(self, data, tag='td', color='', background=''):
+    def get_html_tag(self, data, tag='td', color='', background='', title=''):
         """ Format tag data
         """
-        return '<%s>%s</%s>' % (tag, data, tag)
+        parameter = ''
+        if title:
+            parameter += 'title="%s"' % title
 
-    def dump_data_in_html(self, dump_data):
+        return '<%s %s>%s</%s>' % (tag, parameter, data, tag)
+
+    def dump_data_in_html(self, cr, uid, dump_data, context=None):
         """ Dump data
         """
+        product_pool = self.pool.get('product.product')
+
         res = ''
         dump_data = pickle.loads(dump_data)
-        res += 'Range di prezzo: [<b>%s</b> - <b>%s</b>]' % (
+        res += 'Range di prezzo: [<b>%s</b> - <b>%s</b>]<br/>' % (
             dump_data.get('from_industrial'),
             dump_data.get('to_industrial'),
         )
@@ -242,11 +248,22 @@ class ProductProductBOMDump(orm.Model):
                '<th>Min</th><th>Max</th>' \
                '</tr>'
 
-        for record in records:
+        for record in sorted(
+                records,
+                key=lambda x: (x['semiproduct'], x['default_code'])):
+
             product_id = record.get('product_id')
+            try:
+                product = product_pool.browse(
+                    cr, uid, product_id, context=context)
+                product_name = product.name
+            except:
+                product_name = 'Prodotto eliminato'
             res += '<tr>%s%s%s%s%s</tr>' % (
                 self.get_html_tag(record.get('semiproduct') or ''),
-                self.get_html_tag(record.get('default_code') or ''),
+                self.get_html_tag(
+                    record.get('default_code') or '',
+                    title=product_name),
                 self.get_html_tag(record.get('quantity') or ''),
                 self.get_html_tag(record.get('min_price') or ''),
                 self.get_html_tag(record.get('max_price') or ''),
@@ -260,7 +277,8 @@ class ProductProductBOMDump(orm.Model):
         """
         res = {}
         for record in self.browse(cr, uid, ids, context=context):
-            res[record.id] = self.dump_data_in_html(record.dump_data)
+            res[record.id] = self.dump_data_in_html(
+                cr, uid, record.dump_data, context=context)
         return res
 
     _columns = {

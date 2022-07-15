@@ -239,7 +239,7 @@ class ProductProductBOMDump(orm.Model):
         res += '<table>'
         res += '<tr>' \
                '<th>Semilavorato</th><th>Codice</th><th>Q.</th>' \
-               '<th>Prezzo min</th><th>Prezzo max</th>' \
+               '<th>Min</th><th>Max</th>' \
                '</tr>'
 
         for record in records:

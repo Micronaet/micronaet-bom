@@ -256,8 +256,7 @@ class ProductProductBOMDump(orm.Model):
                 key=lambda x: (x['semiproduct'], x['default_code'])):
 
             # Semiproduct part:
-            semiproduct_name = ''
-            '''semiproduct_id = record.get('semiproduct_id')
+            semiproduct_id = record.get('semiproduct_id')
             try:
                 if semiproduct_id:
                     semiproduct = product_pool.browse(
@@ -267,11 +266,8 @@ class ProductProductBOMDump(orm.Model):
                     semiproduct_name = ''
             except:
                 semiproduct_name = '[Semilavorato eliminato]'
-            '''
 
             # Product part:
-            product_name = ''
-            '''
             product_id = record.get('product_id')
             try:
                 product = product_pool.browse(
@@ -279,15 +275,15 @@ class ProductProductBOMDump(orm.Model):
                 product_name = product.name
             except:
                 product_name = '[Prodotto eliminato]'
-            '''
+
 
             # Write row:
             res += '<tr>%s%s%s%s%s%s%s</tr>' % (
                 self.get_html_tag(record.get('semiproduct')),
-                semiproduct_name,
+                self.get_html_tag(semiproduct_name),
 
                 self.get_html_tag(record.get('default_code')),
-                product_name,
+                self.get_html_tag(product_name),
 
                 self.get_html_tag(record.get('quantity')),
                 self.get_html_tag(record.get('min_price')),

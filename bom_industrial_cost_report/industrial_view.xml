@@ -25,16 +25,17 @@
                              <newline/>
                              <field name="dump_datetime" />
                              <field name="dump_user_id"/>
-                             <notebook>
+                             <notebook colspan="4">
                                  <page name="history_page" string="Storica">
-                                     <group colspan="4">
-                                         <seperator string="Storico" colspan="4"/>
+                                     <group col="4">
+                                         <separator string="Storico" colspan="4"/>
                                          <field name="dump_html" colspan="4" nolabel="1" widget="html"/>
                                      </group>
                                  </page>
                                  <page name="history_page" string="Comparazione">
-                                     <group colspan="4">
-                                         <seperator string="Comparazione" colspan="4"/>
+                                     <group col="4">
+                                         <separator string="Comparazione" colspan="3"/>
+                                         <button name="open_single_report_with_compare_dump" string="Confronta con la attuale" type="object" colspan="1" icon="gtk-refresh" help="Aggiorna la versione corrente per confrontare con quella storicizzata"/>
                                          <field name="dump_compare_html" colspan="4" nolabel="1" widget="html"/>
                                      </group>
                                  </page>

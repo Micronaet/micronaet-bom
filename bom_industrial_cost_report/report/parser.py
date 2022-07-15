@@ -220,6 +220,14 @@ class ProductProductBOMDump(orm.Model):
     _order = 'dump_datetime desc'
     _rec_name = 'product_id'
 
+    def open_single_report_with_compare_dump(self, cr, uid, ids, context=None):
+        """ Return single report (not launched from interface but from code)
+        """
+        product_pool = self.pool.get('product.product')
+        current = self.browse(cr, uid, ids, context=context)[0]
+        return product_pool.open_single_report_with_compare_dump(
+            cr, uid, [current.product_id.id], context=context)
+
     def get_html_tag(self, data, tag='td', color='', background='', title=''):
         """ Format tag data
         """
@@ -230,26 +238,31 @@ class ProductProductBOMDump(orm.Model):
 
         return '<%s %s>%s</%s>' % (tag, parameter, data, tag)
 
-    def dump_data_in_html(self, cr, uid, dump_data, context=None):
+    def dump_data_in_html(
+            self, cr, uid, dump_data, dump_compare_data, context=None):
         """ Dump data
         """
         product_pool = self.pool.get('product.product')
 
-        res = ''
+        # ---------------------------------------------------------------------
+        # BOM History:
+        # ---------------------------------------------------------------------
+        history = ''
         dump_data = pickle.loads(dump_data)
-        res += 'Range di prezzo: [<b>%s</b> - <b>%s</b>]<br/>' % (
+        history += 'Range di prezzo: [<b>%s</b> - <b>%s</b>]<br/>' % (
             dump_data.get('from_industrial'),
             dump_data.get('to_industrial'),
         )
 
-        res += '<table width="1000">'
-        res += '<tr>' \
-               '<th>Semilavorato</th><th>Nome</th>' \
+        history += '<table width="1000">'
+        history += '<tr>' \
+               '<th>Categoria</th><th>Semilavorato</th><th>Nome</th>' \
                '<th>Codice</th><th>Nome</th>' \
                '<th>Q.</th>' \
                '<th>Min</th><th>Max</th>' \
                '</tr>'
 
+        mixed_data = {}
         records = dump_data['product']
         for record in sorted(
                 records,
@@ -276,21 +289,60 @@ class ProductProductBOMDump(orm.Model):
             except:
                 product_name = '[Prodotto eliminato]'
 
+            category = record.get('category')
+            quantity = record.get('quantity')
+            min_price = record.get('min_price')
+            max_price = record.get('max_price')
+
             # Write row:
-            res += '<tr>%s%s%s%s%s%s%s</tr>' % (
+            history += '<tr>%s%s%s%s%s%s%s%s</tr>' % (
+                self.get_html_tag(category),
                 self.get_html_tag(record.get('semiproduct')),
                 self.get_html_tag(semiproduct_name),
 
                 self.get_html_tag(record.get('default_code')),
                 self.get_html_tag(product_name),
 
-                self.get_html_tag(record.get('quantity')),
-                self.get_html_tag(record.get('min_price')),
-                self.get_html_tag(record.get('max_price')),
+                self.get_html_tag(quantity),
+                self.get_html_tag(min_price),
+                self.get_html_tag(max_price),
                 )
 
-        res += '</table>'
-        return res, res
+            # Mixed data:
+            key = (category, semiproduct_id, product_id)
+            # todo colud be a problem using this key?
+
+            mixed_data[key] = {
+                'category': category,
+                'semiproduct': semiproduct,
+                'product': product,
+                'history': {
+                    'quantity': quantity,
+                    'min_price': min_price,
+                    'max_price': max_price,
+                },
+            }
+        history += '</table>'
+
+        # ---------------------------------------------------------------------
+        # Compare
+        # ---------------------------------------------------------------------
+        compare = ''
+        dump_compare_data = pickle.loads(dump_compare_data)
+        compare += 'Range di prezzo: [<b>%s</b> - <b>%s</b>]<br/>' % (
+            dump_data.get('from_industrial'),
+            dump_data.get('to_industrial'),
+        )
+
+        compare += '<table width="1000">'
+        compare += '<tr>' \
+            '<th>Categoria</th><th>Semilavorato</th><th>Nome</th>' \
+            '<th>Codice</th><th>Nome</th>' \
+            '<th>Q.</th>' \
+            '<th>Min</th><th>Max</th>' \
+            '</tr>'
+
+        return history, compare
 
     def _get_dump_data(self, cr, uid, ids, fields, args, context=None):
         """ Fields function for calculate
@@ -298,7 +350,8 @@ class ProductProductBOMDump(orm.Model):
         res = {}
         for record in self.browse(cr, uid, ids, context=context):
             dump_html, dump_compare_html = self.dump_data_in_html(
-                cr, uid, record.dump_data, context=context)
+                cr, uid, record.dump_data, record.product_id.dump_data,
+                context=context)
             res[record.id] = {
                 'dump_html': dump_html,
                 'dump_compare_html': dump_compare_html,
@@ -835,6 +888,7 @@ class ProductProduct(orm.Model):
             # Load component list (and subcomponent for HW):
             # -----------------------------------------------------------------
             for item in product.dynamic_bom_line_ids:
+                category_name = item.category_id.name or ''
                 component = item.product_id
                 if component.bom_placeholder or component.bom_alternative:
                     _logger.warning('Jump placeholder elements')
@@ -936,6 +990,7 @@ class ProductProduct(orm.Model):
                         # History:
                         if json_history:
                             dump_data['product'].append({
+                                'category': category_name,
                                 'semiproduct_id': component.id,  # only here
                                 'product_id': cmpt.product_id.id,
 
@@ -990,6 +1045,7 @@ class ProductProduct(orm.Model):
                     # History:
                     if json_history:
                         dump_data['product'].append({
+                            'category': category_name,
                             'product_id': component.id,
                             'default_code': component.default_code,
                             'semiproduct': False,

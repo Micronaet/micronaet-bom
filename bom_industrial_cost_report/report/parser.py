@@ -220,6 +220,26 @@ class ProductProductBOMDump(orm.Model):
     _order = 'dump_datetime desc'
     _rec_name = 'product_id'
 
+    def dump_data_in_html(self, dump_data):
+        """ Dump data
+        """
+        res = ''
+        dump_data = pickle.loads(dump_data)
+        pdb.set_trace()
+        res += 'Range di prezzo: [<b>%s</b> - <b>%s</b>]' % (
+            dump_data.get('from_industrial'),
+            dump_data.get('to_industrial'),
+        )
+        return res
+
+    def _get_dump_data(self, cr, uid, ids, fields, args, context=None):
+        """ Fields function for calculate
+        """
+        res = {}
+        for record in self.browse(cr, uid, ids, context=context):
+            res[record.id] = self.dump_data_in_html(record.dump_data)
+        return res
+
     _columns = {
         'product_id': fields.many2one('product.product', 'Prodotti'),
         'dump_data': fields.text(
@@ -232,6 +252,9 @@ class ProductProductBOMDump(orm.Model):
             'Data controllo',
             help='Data e ora della storicizzazione ultima distinta controllata'
                  'dal responsabile'),
+        'dump_html': fields.function(
+            _get_dump_data, method=True, type='text', string='DB storica'),
+
         }
 
 

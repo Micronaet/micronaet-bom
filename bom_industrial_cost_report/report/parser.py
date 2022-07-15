@@ -211,6 +211,30 @@ def get_price_detail(price_ids):
     return res  # XXX no detail mode
 
 
+class ProductProductBOMDump(orm.Model):
+    """ Model name: Product dump product
+    """
+
+    _name = 'product.product.bom.dump'
+    _description = 'Dump BOM'
+    _order = 'dump_datetime desc'
+    _rec_name = 'product_id'
+
+    _columns = {
+        'product_id': fields.many2one('product.product', 'Prodotti'),
+        'dump_data': fields.text(
+            'Dump data',
+            help='File di dump ultima distinta controllata dal responsabile'),
+        'dump_user_id': fields.many2one(
+            'res.users', 'Controllore DB',
+            help='Responsabile che ha controllato e storicizzato la DB'),
+        'dump_datetime': fields.datetime(
+            'Data controllo',
+            help='Data e ora della storicizzazione ultima distinta controllata'
+                 'dal responsabile'),
+        }
+
+
 class ProductProduct(orm.Model):
     """ Model name: ProductProduct add utility for report
     """
@@ -255,13 +279,37 @@ class ProductProduct(orm.Model):
         datas = {}
         datas['wizard'] = True  # started from wizard
         datas['active_ids'] = ids
-        datas['json_history'] = True
+        datas['json_history'] = 'locked'
         return {
             'type': 'ir.actions.report.xml',
             'report_name': 'industrial_cost_bom_report',
             'datas': datas,
             # 'context': context,
             }
+
+    def open_single_report_with_compare_dump(self, cr, uid, ids, context=None):
+        """ Return single report (not launched from interface but from code)
+        """
+        datas = {}
+        datas['wizard'] = True  # started from wizard
+        datas['active_ids'] = ids
+        datas['json_history'] = 'compare'
+
+        return {
+            'type': 'ir.actions.report.xml',
+            'report_name': 'industrial_cost_bom_report',
+            'datas': datas,
+            # 'context': context,
+            }
+
+    def compare_locked_bom_dump(self, cr, uid, ids, context=None):
+        """ Compare procedure for check locked bom and this
+        """
+        for product in self.browse(cr, uid, ids, context=context):
+            # todo call compare report for store before?
+            locked = pickle.loads(product.dump_data)
+            compare = pickle.loads(product.dump_compare_data)
+        return True
 
     def open_multi_report(self, cr, uid, ids, context=None):
         """ Return multi report
@@ -507,6 +555,7 @@ class ProductProduct(orm.Model):
         # ---------------------------------------------------------------------
         # Parameters in datas dictionary:
         # ---------------------------------------------------------------------
+        dump_pool = self.pool.get('product.product.bom.dump')
         simulation_db = []
         simulation_pool = self.pool.get('mrp.bom.industrial.simulation')
         simulation_ids = simulation_pool.search(cr, uid, [], context=context)
@@ -545,8 +594,12 @@ class ProductProduct(orm.Model):
 
         # Note: used pickle for better read in python non JSON
         json_history = datas.get('json_history', False)
+        # Json history save locked version of dump BOM
+        # Json compare history saved version just for compare with original
+        # locked
         if json_history:
-            _logger.warning('Status BOM will saved in Dump data!')
+            _logger.warning('Status BOM will saved in Dump data (%s)!' %
+                            json_history)
         else:
             _logger.warning('Status BOM Dump data not saved!')
 
@@ -609,7 +662,7 @@ class ProductProduct(orm.Model):
                 selected_product[0].company_id.industrial_margin_a
             margin_b = \
                 selected_product[0].company_id.industrial_margin_b
-            # TODO manage extra:
+            # todo manage extra:
             margin_extra = \
                 selected_product[0].company_id.industrial_margin_extra
 
@@ -921,10 +974,27 @@ class ProductProduct(orm.Model):
                 dump_data['from_industrial'] = data[0]
                 dump_data['to_industrial'] = data[1]
 
-                update_after.append((product.id, {
-                    'dump_data': pickle.dumps(dump_data),
-                    'dump_user_id': uid,
-                    'dump_datetime': datetime.now()
+                if datas['json_history'] == 'locked':
+                    # Update with dump and manager data
+                    update_after.append((product.id, {
+                        'dump_data': pickle.dumps(dump_data),
+                        'dump_user_id': uid,
+                        'dump_datetime': datetime.now()
+                    }))
+
+                    # Only for locked write in history:
+                    dump_id = dump_pool.create(cr, uid, {
+                        'product_id': product.id,
+                        'dump_data': pickle.dumps(dump_data),
+                        'dump_user_id': uid,
+                        'dump_datetime': datetime.now(),
+                    }, context=context)
+
+                    # todo also file PDF?
+                else:  # Compare dump
+                    # Update with dump only
+                    update_after.append((product.id, {
+                        'dump_data': pickle.dumps(dump_data),
                     }))
 
             # Total text:

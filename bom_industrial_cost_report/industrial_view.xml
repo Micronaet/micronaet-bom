@@ -25,8 +25,20 @@
                              <newline/>
                              <field name="dump_datetime" />
                              <field name="dump_user_id"/>
-                             <seperator string="Dump" colspan="4"/>
-                             <field name="dump_html" colspan="4" nolabel="1" widget="html"/>
+                             <notebook>
+                                 <page name="history_page" string="Storica">
+                                     <group colspan="4">
+                                         <seperator string="Storico" colspan="4"/>
+                                         <field name="dump_html" colspan="4" nolabel="1" widget="html"/>
+                                     </group>
+                                 </page>
+                                 <page name="history_page" string="Comparazione">
+                                     <group colspan="4">
+                                         <seperator string="Comparazione" colspan="4"/>
+                                         <field name="dump_compare_html" colspan="4" nolabel="1" widget="html"/>
+                                     </group>
+                                 </page>
+                             </notebook>
                           </group>
                      </sheet>
                  </form>

@@ -242,7 +242,7 @@ class ProductProductBOMDump(orm.Model):
             dump_data.get('to_industrial'),
         )
 
-        res += '<table width="900">'
+        res += '<table width="1000">'
         res += '<tr>' \
                '<th>Semilavorato</th><th>Nome</th>' \
                '<th>Codice</th><th>Nome</th>' \
@@ -276,7 +276,6 @@ class ProductProductBOMDump(orm.Model):
             except:
                 product_name = '[Prodotto eliminato]'
 
-
             # Write row:
             res += '<tr>%s%s%s%s%s%s%s</tr>' % (
                 self.get_html_tag(record.get('semiproduct')),
@@ -291,16 +290,19 @@ class ProductProductBOMDump(orm.Model):
                 )
 
         res += '</table>'
-        return res
+        return res, res
 
     def _get_dump_data(self, cr, uid, ids, fields, args, context=None):
         """ Fields function for calculate
         """
         res = {}
         for record in self.browse(cr, uid, ids, context=context):
-            res[record.id] = self.dump_data_in_html(
+            dump_html, dump_compare_html = self.dump_data_in_html(
                 cr, uid, record.dump_data, context=context)
-            print(res[record.id])
+            res[record.id] = {
+                'dump_html': dump_html,
+                'dump_compare_html': dump_compare_html,
+            }
         return res
 
     _columns = {
@@ -316,8 +318,11 @@ class ProductProductBOMDump(orm.Model):
             help='Data e ora della storicizzazione ultima distinta controllata'
                  'dal responsabile'),
         'dump_html': fields.function(
-            _get_dump_data, method=True, type='text', string='DB storica'),
-
+            _get_dump_data, method=True, type='text', string='DB storica',
+            multi=True),
+        'dump_compare_html': fields.function(
+            _get_dump_data, method=True, type='text', string='DB comparata',
+            multi=True),
         }
 
 

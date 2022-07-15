@@ -922,8 +922,9 @@ class ProductProduct(orm.Model):
                         # History:
                         if json_history:
                             dump_data['product'].append({
-                                'semiproduct_id': cmpt.id,  # only here
+                                'semiproduct_id': component.id,  # only here
                                 'product_id': cmpt.product_id.id,
+
                                 'default_code': cmpt.product_id.default_code,
                                 'semiproduct': component.default_code,
                                 'quantity': cmpt_q,  # item x component

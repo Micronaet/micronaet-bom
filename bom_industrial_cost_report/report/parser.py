@@ -236,7 +236,7 @@ class ProductProductBOMDump(orm.Model):
         )
 
         records = dump_data['product']
-        res += '<table>'
+        res += '<table width="500">'
         res += '<tr>' \
                '<th>Semilavorato</th><th>Codice</th><th>Q.</th>' \
                '<th>Min</th><th>Max</th>' \

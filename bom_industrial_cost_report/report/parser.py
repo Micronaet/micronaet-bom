@@ -287,6 +287,28 @@ class ProductProduct(orm.Model):
             # 'context': context,
             }
 
+    def open_history_dump(self, cr, uid, ids, context=None):
+        """ History dump list
+        """
+        # model_pool = self.pool.get('ir.model.data')
+        view_id = False  # model_pool.get_object_reference(
+        # cr, uid, 'auto_bom_tx_report', 'view_order_line_tree')[1]
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('DB Storicizzate'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            # 'res_id': 1,
+            'res_model': 'purchase.order.xlsx.line',
+            'view_id': view_id,
+            'views': [(view_id, 'tree'), (view_id, 'form')],
+            'domain': [('product_id', '=', ids[0])],
+            'context': context,
+            'target': 'current',  # 'new'
+            'nodestroy': False,
+        }
+
     def open_single_report_with_compare_dump(self, cr, uid, ids, context=None):
         """ Return single report (not launched from interface but from code)
         """

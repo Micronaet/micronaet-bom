@@ -252,6 +252,17 @@ class ProductProductBOMDump(orm.Model):
                 records,
                 key=lambda x: (x['semiproduct'], x['default_code'])):
 
+            semiproduct_id = record.get('semiproduct_id')
+            try:
+                if semiproduct_id:
+                    product = product_pool.browse(
+                        cr, uid, semiproduct_id, context=context)
+                    semiproduct_name = product.name
+                else:
+                    semiproduct_name = ''
+            except:
+                semiproduct_name = 'Semilavorato eliminato'
+
             product_id = record.get('product_id')
             try:
                 product = product_pool.browse(
@@ -260,7 +271,9 @@ class ProductProductBOMDump(orm.Model):
             except:
                 product_name = 'Prodotto eliminato'
             res += '<tr>%s%s%s%s%s</tr>' % (
-                self.get_html_tag(record.get('semiproduct') or ''),
+                self.get_html_tag(
+                    record.get('semiproduct') or '',
+                    title=semiproduct_name),
                 self.get_html_tag(
                     record.get('default_code') or '',
                     title=product_name),
@@ -909,6 +922,7 @@ class ProductProduct(orm.Model):
                         # History:
                         if json_history:
                             dump_data['product'].append({
+                                'semiproduct_id': cmpt.id,  # only here
                                 'product_id': cmpt.product_id.id,
                                 'default_code': cmpt.product_id.default_code,
                                 'semiproduct': component.default_code,
@@ -964,6 +978,7 @@ class ProductProduct(orm.Model):
                             'product_id': component.id,
                             'default_code': component.default_code,
                             'semiproduct': False,
+                            'semiproduct_id': False,
                             'quantity': cmpt_q,  # item x component
                             # 'uom': uom_name,
                             'min_price': min_value,

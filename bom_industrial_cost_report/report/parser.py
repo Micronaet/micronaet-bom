@@ -270,26 +270,24 @@ class ProductProductBOMDump(orm.Model):
 
             # Semiproduct part:
             semiproduct_id = record.get('semiproduct_id')
+            semiproduct = semiproduct_name = ''
             try:
                 if semiproduct_id:
                     semiproduct = product_pool.browse(
                         cr, uid, semiproduct_id, context=context)
                     semiproduct_name = semiproduct.name
-                else:
-                    semiproduct_name = ''
             except:
                 semiproduct_name = '[Semilavorato eliminato]'
-                semiproduct = False
 
             # Product part:
             product_id = record.get('product_id')
+            product = ''
             try:
                 product = product_pool.browse(
                     cr, uid, product_id, context=context)
                 product_name = product.name
             except:
                 product_name = '[Prodotto eliminato]'
-                product = False
 
             category = record.get('category')
             quantity = record.get('quantity')

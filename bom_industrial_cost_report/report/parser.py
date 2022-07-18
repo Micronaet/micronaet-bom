@@ -333,20 +333,23 @@ class ProductProductBOMDump(orm.Model):
 
             # Mixed data:
             key = category, product_id
-            # todo could be a problem using this key, change in += if present
 
-            mixed_data[key] = {
-                'status': 'red',  # no more present as default
-                'category': category,
-                'semiproduct': semiproduct,
-                'product': product,
-                'history': {
-                    'quantity': quantity,
-                    'min_price': min_price,
-                    'max_price': max_price,
-                },
-                'compare': {},
-            }
+            if key in mixed_data:
+                # Particular case (for SL with same more component)
+                mixed_data[key]['history']['quantity'] += quantity
+            else:
+                mixed_data[key] = {
+                    'status': 'red',  # no more present as default
+                    'category': category,
+                    'semiproduct': semiproduct,
+                    'product': product,
+                    'history': {
+                        'quantity': quantity,
+                        'min_price': min_price,
+                        'max_price': max_price,
+                    },
+                    'compare': {},
+                }
         history += '</table>'
 
         # ---------------------------------------------------------------------
@@ -368,11 +371,15 @@ class ProductProductBOMDump(orm.Model):
             key = (category, product_id)
             if key in mixed_data:
                 mixed_data[key]['status'] = 'green'  # Find in both
-                mixed_data[key]['compare'] = {
-                    'quantity': quantity,
-                    'min_price': min_price,
-                    'max_price': max_price,
-                }
+                if 'quantity' in mixed_data[key]['compare']:
+                    # Particular case:
+                    mixed_data[key]['compare']['quantity'] += quantity
+                else:
+                    mixed_data[key]['compare'] = {
+                        'quantity': quantity,
+                        'min_price': min_price,
+                        'max_price': max_price,
+                    }
             else:  # Present only in compare not in history
                 # Semiproduct part:
                 semiproduct_id = record.get('semiproduct_id')

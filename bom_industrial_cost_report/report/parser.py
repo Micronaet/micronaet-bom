@@ -224,6 +224,7 @@ class ProductProductBOMDump(orm.Model):
         'red': '#fccac7',
         'green': '#e3fcc7',
         'blue': '#c7e1fc',
+        'orange': '#fcc332',
     }
 
     def open_single_report_with_compare_dump(self, cr, uid, ids, context=None):
@@ -263,17 +264,24 @@ class ProductProductBOMDump(orm.Model):
 
         history += '<table width="100%">'
         history += '<tr>' \
-            '<th>Categoria</th><th>Semilavorato</th><th>Nome</th>' \
-            '<th>Codice</th><th>Nome</th>' \
-            '<th>Q.</th>' \
-            '<th>Min</th><th>Max</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Categoria</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Semilavorato' \
+            '</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Nome</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Codice</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Nome</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Q.</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Min</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Max</th>' \
             '</tr>'
 
         mixed_data = {}
         records = dump_data['product']
+        counter = 0
         for record in sorted(
                 records,
                 key=lambda x: (x['semiproduct'], x['default_code'])):
+            counter += 1
 
             # Semiproduct part:
             semiproduct_id = record.get('semiproduct_id')
@@ -302,17 +310,25 @@ class ProductProductBOMDump(orm.Model):
             max_price = record.get('max_price')
 
             # Write row:
+            if not counter % 2:
+                parameters = {
+                    'bgcolor': self.colors['blue'],
+                    }
+            else:
+                parameters = {}
             history += '<tr>%s%s%s%s%s%s%s%s</tr>' % (
-                self.get_html_tag(category),
-                self.get_html_tag(record.get('semiproduct')),
-                self.get_html_tag(semiproduct_name),
+                self.get_html_tag(category, parameters=parameters),
+                self.get_html_tag(
+                    record.get('semiproduct'), parameters=parameters),
+                self.get_html_tag(semiproduct_name, parameters=parameters),
 
-                self.get_html_tag(record.get('default_code')),
-                self.get_html_tag(product_name),
+                self.get_html_tag(
+                    record.get('default_code'), parameters=parameters),
+                self.get_html_tag(product_name, parameters=parameters),
 
-                self.get_html_tag(quantity),
-                self.get_html_tag(min_price),
-                self.get_html_tag(max_price),
+                self.get_html_tag(quantity, parameters=parameters),
+                self.get_html_tag(min_price, parameters=parameters),
+                self.get_html_tag(max_price, parameters=parameters),
                 )
 
             # Mixed data:
@@ -403,24 +419,32 @@ class ProductProductBOMDump(orm.Model):
 
         compare += '<table width="100%">'
         compare += '<tr>' \
-            '<th colspan="5" text-align="center">Dettaglio</th>' \
-            '<th colspan="3" text-align="center">Storico</th>' \
-            '<th colspan="3" text-align="center">Attuale</th></tr>'
+            '<th bgcolor="#bcbcbc" colspan="5" style="text-align:center;">' \
+            'Dettaglio</th>' \
+            '<th bgcolor="#bcbcbc" colspan="3" style="text-align:center;">' \
+            'Storico</th>' \
+            '<th bgcolor="#bcbcbc" colspan="3" style="text-align:center;">' \
+            'Attuale</th></tr>'
 
         compare += '<tr>' \
-            '<th text-align="center">Categoria</th>' \
-            '<th text-align="center">Semilavorato</th>' \
-            '<th text-align="center">Nome</th>' \
-            '<th text-align="center">Codice</th>' \
-            '<th text-align="center">Nome</th>' \
-            '<th text-align="center">Q.</th>' \
-            '<th text-align="center">Min</th>' \
-            '<th text-align="center">Max</th>' \
-            '<th text-align="center">Q.</th>' \
-            '<th text-align="center">Min</th>' \
-            '<th text-align="center">Max</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Categoria</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Semilavorato' \
+            '</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Nome</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Codice</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Nome</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Q.</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Min</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Max</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Q.</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Min</th>' \
+            '<th bgcolor="#bcbcbc" style="text-align:center;">Max</th>' \
             '</tr>'
 
+        # Differnce in q, min or max
+        parameters_error = {
+            'bgcolor': self.colors['orange'],
+        }
         for key in sorted(mixed_data):
             record = mixed_data[key]
 
@@ -433,6 +457,12 @@ class ProductProductBOMDump(orm.Model):
             parameters = {
                 'bgcolor': self.colors[status],
                 }
+
+            difference = {}
+            for field in ('quantity', 'min_price', 'max_price'):
+                difference[field] = \
+                    history_block.get(field) and \
+                    compare_block.get(field) != history_block.get(field)
 
             compare += '<tr>%s%s%s%s%s%s%s%s%s%s%s</tr>' % (
                     self.get_html_tag(
@@ -473,15 +503,18 @@ class ProductProductBOMDump(orm.Model):
 
                     self.get_html_tag(
                         compare_block.get('quantity'),
-                        parameters=parameters,
+                        parameters=parameters_error if difference['quantity']
+                        else parameters,
                         ),
                     self.get_html_tag(
                         compare_block.get('min_price'),
-                        parameters=parameters,
+                        parameters=parameters_error if difference['min_price']
+                        else parameters,
                         ),
                     self.get_html_tag(
                         compare_block.get('max_price'),
-                        parameters=parameters,
+                        parameters=parameters_error if difference['max_price']
+                        else parameters,
                         ),
                     )
         compare += '</table>'

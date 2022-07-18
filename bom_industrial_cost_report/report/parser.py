@@ -220,6 +220,12 @@ class ProductProductBOMDump(orm.Model):
     _order = 'dump_datetime desc'
     _rec_name = 'product_id'
 
+    colors = {
+        'red': '#fccac7',
+        'green': '#e3fcc7',
+        'blue': '#c7e1fc',
+    }
+
     def open_single_report_with_compare_dump(self, cr, uid, ids, context=None):
         """ Return single report (not launched from interface but from code)
         """
@@ -387,7 +393,7 @@ class ProductProductBOMDump(orm.Model):
         # ---------------------------------------------------------------------
         # Compare
         # ---------------------------------------------------------------------
-        compare += 'Range di prezzo storico: [<b>%s</b> - <b>%s</b>] ' \
+        compare += 'Range di prezzo storico: [<b>%s</b> - <b>%s</b>] <br/>' \
                    'Range di prezzo attuale: [<b>%s</b> - <b>%s</b>] <br/>' % (
                         dump_data.get('from_industrial'),
                         dump_data.get('to_industrial'),
@@ -418,7 +424,7 @@ class ProductProductBOMDump(orm.Model):
             compare_block = record.get('compare')
 
             parameters = {
-                'bgcolor': status,
+                'bgcolor': self.colors[status],
                 }
 
             compare += '<tr>%s%s%s%s%s%s%s%s%s%s%s</tr>' % (

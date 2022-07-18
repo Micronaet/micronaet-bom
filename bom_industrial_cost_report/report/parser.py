@@ -403,15 +403,22 @@ class ProductProductBOMDump(orm.Model):
 
         compare += '<table width="100%">'
         compare += '<tr>' \
-            '<th colspan="5" align="center">Dettaglio</th>' \
-            '<th colspan="3" align="center">Storico</th>' \
-            '<th colspan="3" align="center">Attuale</th></tr>'
+            '<th colspan="5" text-align="center">Dettaglio</th>' \
+            '<th colspan="3" text-align="center">Storico</th>' \
+            '<th colspan="3" text-align="center">Attuale</th></tr>'
 
         compare += '<tr>' \
-            '<th>Categoria</th><th>Semilavorato</th><th>Nome</th>' \
-            '<th>Codice</th><th>Nome</th>' \
-            '<th>Q.</th><th>Min</th><th>Max</th>' \
-            '<th>Q.</th><th>Min</th><th>Max</th>' \
+            '<th text-align="center">Categoria</th>' \
+            '<th text-align="center">Semilavorato</th>' \
+            '<th text-align="center">Nome</th>' \
+            '<th text-align="center">Codice</th>' \
+            '<th text-align="center">Nome</th>' \
+            '<th text-align="center">Q.</th>' \
+            '<th text-align="center">Min</th>' \
+            '<th text-align="center">Max</th>' \
+            '<th text-align="center">Q.</th>' \
+            '<th text-align="center">Min</th>' \
+            '<th text-align="center">Max</th>' \
             '</tr>'
 
         for key in sorted(mixed_data):

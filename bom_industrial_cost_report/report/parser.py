@@ -409,11 +409,27 @@ class ProductProductBOMDump(orm.Model):
         # ---------------------------------------------------------------------
         # Compare
         # ---------------------------------------------------------------------
-        compare += 'Range di prezzo storico: [<b>%s</b> - <b>%s</b>] <br/>' \
-                   'Range di prezzo attuale: [<b>%s</b> - <b>%s</b>] <br/>' % (
+        if dump_data.get('from_industrial') != \
+                dump_compare_data.get('from_industrial'):
+            bg_color_1 = 'blue'
+        else:
+            bg_color_1 = 'black'
+        if dump_data.get('to_industrial') != \
+                dump_compare_data.get('to_industrial'):
+            bg_color_2 = 'blue'
+        else:
+            bg_color_2 = 'black'
+
+        compare += 'Range di prezzo storico: ' \
+                   '[<b>%s</b> - <b>%s</b>] <br/>' \
+                   'Range di prezzo attuale: ' \
+                   '[<span style="color:%s"><b>%s</b></span> - ' \
+                   ' <span style="color:%s"><b>%s</b></span>] <br/>' % (
                         dump_data.get('from_industrial'),
                         dump_data.get('to_industrial'),
+                        bg_color_1,
                         dump_compare_data.get('from_industrial'),
+                        bg_color_2,
                         dump_compare_data.get('to_industrial'),
                         )
 
@@ -444,6 +460,7 @@ class ProductProductBOMDump(orm.Model):
         # Differnce in q, min or max
         parameters_error = {
             'bgcolor': self.colors['orange'],
+            # 'color': 'blue',
         }
         for key in sorted(mixed_data):
             record = mixed_data[key]
@@ -460,9 +477,9 @@ class ProductProductBOMDump(orm.Model):
 
             difference = {}
             for field in ('quantity', 'min_price', 'max_price'):
-                difference[field] = \
-                    history_block.get(field) and \
-                    compare_block.get(field) != history_block.get(field)
+                difference[field] = (
+                    history_block.get(field) and compare_block.get(field) and
+                    compare_block.get(field) != history_block.get(field))
 
             compare += '<tr>%s%s%s%s%s%s%s%s%s%s%s</tr>' % (
                     self.get_html_tag(

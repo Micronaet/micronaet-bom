@@ -228,15 +228,16 @@ class ProductProductBOMDump(orm.Model):
         return product_pool.open_single_report_with_compare_dump(
             cr, uid, [current.product_id.id], context=context)
 
-    def get_html_tag(self, data, tag='td', color='', background='', title=''):
+    def get_html_tag(self, data, tag='td', parameters=None):
         """ Format tag data
         """
+        if parameters is None:
+            parameters = {}
         data = data or ''
-        parameter = ''
-        if title:
-            parameter += 'title="%s"' % title
-
-        return '<%s %s>%s</%s>' % (tag, parameter, data, tag)
+        tag_param = ''
+        for param in parameters:
+            tag_param += ' %s="%s"' % (param, parameters[param])
+        return '<%s%s>%s</%s>' % (tag, tag_param, data, tag)
 
     def dump_data_in_html(
             self, cr, uid, dump_data, dump_compare_data, context=None):
@@ -245,7 +246,7 @@ class ProductProductBOMDump(orm.Model):
         product_pool = self.pool.get('product.product')
 
         # ---------------------------------------------------------------------
-        # BOM History:
+        #                            BOM History:
         # ---------------------------------------------------------------------
         history = ''
         dump_data = pickle.loads(dump_data)
@@ -310,7 +311,7 @@ class ProductProductBOMDump(orm.Model):
 
             # Mixed data:
             key = category, product_id
-            # todo could be a problem using this key?
+            # todo could be a problem using this key, change in += if present
 
             mixed_data[key] = {
                 'status': 'red',  # no more present as default
@@ -335,9 +336,6 @@ class ProductProductBOMDump(orm.Model):
         # todo total box
         records = dump_compare_data['product']
         for record in records:
-            # Semiproduct part:
-            semiproduct_id = record.get('semiproduct_id')
-
             # Product part:
             product_id = record.get('product_id')
             category = record.get('category')
@@ -419,27 +417,59 @@ class ProductProductBOMDump(orm.Model):
             history_block = record.get('history')
             compare_block = record.get('compare')
 
-            compare += '<tr>' \
-                '<td>%s</td><td>%s</td><td>%s</td>' \
-                '<td>%s</td><td>%s</td>' \
-                '<td>%s</td><td>%s</td><td>%s</td>' \
-                '<td>%s</td><td>%s</td><td>%s</td>' \
-                '</tr>' % (
-                    record.get('category'),
+            parameters = {
+                'bgcolor': status,
+                }
 
-                    semiproduct.default_code if semiproduct else '',
-                    semiproduct.name if semiproduct else '',
+            compare += '<tr>%s%s%s%s%s%s%s%s%s%s%s</tr>' % (
+                    self.get_html_tag(
+                        record.get('category'),
+                        parameters=parameters,
+                        ),
 
-                    product.default_code if product else '',
-                    product.name if product else '',
+                    self.get_html_tag(
+                        semiproduct.default_code if semiproduct else '',
+                        parameters=parameters,
+                        ),
+                    self.get_html_tag(
+                        semiproduct.name if semiproduct else '',
+                        parameters=parameters,
+                        ),
 
-                    history_block.get('quantity'),
-                    history_block.get('min_price'),
-                    history_block.get('max_price'),
+                    self.get_html_tag(
+                        product.default_code if product else '',
+                        parameters=parameters,
+                        ),
+                    self.get_html_tag(
+                        product.name if product else '',
+                        parameters=parameters,
+                        ),
 
-                    compare_block.get('quantity'),
-                    compare_block.get('min_price'),
-                    compare_block.get('max_price'),
+                    self.get_html_tag(
+                        history_block.get('quantity'),
+                        parameters=parameters,
+                        ),
+                    self.get_html_tag(
+                        history_block.get('min_price'),
+                        parameters=parameters,
+                        ),
+                    self.get_html_tag(
+                        history_block.get('max_price'),
+                        parameters=parameters,
+                        ),
+
+                    self.get_html_tag(
+                        compare_block.get('quantity'),
+                        parameters=parameters,
+                        ),
+                    self.get_html_tag(
+                        compare_block.get('min_price'),
+                        parameters=parameters,
+                        ),
+                    self.get_html_tag(
+                        compare_block.get('max_price'),
+                        parameters=parameters,
+                        ),
                     )
         compare += '</table>'
         return history, compare

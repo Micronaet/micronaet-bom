@@ -317,6 +317,11 @@ class ProductProductBOMDump(orm.Model):
                     }
             else:
                 parameters = {}
+
+            if not min_price or not max_price:
+                parameters['bgcolor'] = self.colors['error']
+                parameters['title'] = 'Prezzo minimo o massimo non presente'
+
             history += '<tr>%s%s%s%s%s%s%s%s</tr>' % (
                 self.get_html_tag(category, parameters=parameters),
                 self.get_html_tag(

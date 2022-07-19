@@ -496,7 +496,7 @@ class ProductProductBOMDump(orm.Model):
                     history_block.get(field) and compare_block.get(field) and
                     compare_block.get(field) != history_block.get(field))
 
-            if record.get('telaio'):
+            if record.get('Telaio'):
                 pdb.set_trace()
             compare += '<tr>%s%s%s%s%s%s%s%s%s%s%s</tr>' % (
                     self.get_html_tag(

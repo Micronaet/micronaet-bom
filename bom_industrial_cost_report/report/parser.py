@@ -286,14 +286,15 @@ class ProductProductBOMDump(orm.Model):
 
             # Semiproduct part:
             semiproduct_id = record.get('semiproduct_id')
-            semiproduct = semiproduct_name = ''
+            semiproduct = ''
+            semiproduct_name = record.get('semiproduct')
             try:
                 if semiproduct_id:
                     semiproduct = product_pool.browse(
                         cr, uid, semiproduct_id, context=context)
-                    semiproduct_name = semiproduct.name
             except:
-                semiproduct_name = '[Semilavorato eliminato]'
+                semiproduct_name = '[Semilavorato eliminato] %s' % \
+                                   semiproduct_name
 
             # Product part:
             product_id = record.get('product_id')
@@ -348,6 +349,7 @@ class ProductProductBOMDump(orm.Model):
                     'status': 'red',  # no more present as default
                     'category': category,
                     'semiproduct': semiproduct,
+                    'semiproduct_name': semiproduct_name,  # Extended (3 lev.)
                     'product': product,
                     'history': {
                         'quantity': quantity,
@@ -388,6 +390,7 @@ class ProductProductBOMDump(orm.Model):
             else:  # Present only in compare not in history
                 # Semiproduct part:
                 semiproduct_id = record.get('semiproduct_id')
+                semiproduct_name = record.get('semiproduct_name', '')
                 semiproduct = ''
                 try:
                     if semiproduct_id:
@@ -409,14 +412,15 @@ class ProductProductBOMDump(orm.Model):
                     'status': 'blue',  # No more present
                     'category': category,
                     'semiproduct': semiproduct,
+                    'semiproduct_name': semiproduct_name,
                     'product': product,
                     'history': {},
                     'compare': {
                         'quantity': quantity,
                         'min_price': min_price,
                         'max_price': max_price,
-                    },
-                }
+                        },
+                    }
 
         # ---------------------------------------------------------------------
         # Compare
@@ -479,6 +483,7 @@ class ProductProductBOMDump(orm.Model):
 
             status = record.get('status')
             semiproduct = record.get('semiproduct')
+            semiproduct_name = record.get('semiproduct_name')
             product = record.get('product')
             history_block = record.get('history')
             compare_block = record.get('compare')
@@ -511,7 +516,7 @@ class ProductProductBOMDump(orm.Model):
                         parameters=parameters,
                         ),
                     self.get_html_tag(
-                        semiproduct.name if semiproduct else '',
+                        semiproduct_name,
                         parameters=parameters,
                         ),
 
@@ -524,6 +529,10 @@ class ProductProductBOMDump(orm.Model):
                         parameters=parameters,
                         ),
 
+                    # ---------------------------------------------------------
+                    #                          Prices:
+                    # ---------------------------------------------------------
+                    # History:
                     self.get_html_tag(
                         history_block.get('quantity'),
                         parameters=parameters,
@@ -537,6 +546,7 @@ class ProductProductBOMDump(orm.Model):
                         parameters=parameters,
                         ),
 
+                    # Current:
                     self.get_html_tag(
                         compare_block.get('quantity'),
                         parameters=parameters_error if difference['quantity']
@@ -1225,7 +1235,7 @@ class ProductProduct(orm.Model):
 
                                     'default_code':
                                         cmpt.product_id.default_code,
-                                    'semiproduct': '%s%s' % (
+                                    'semiproduct': '%s%s' % (  # Name
                                         component.default_code,
                                         extra_reference,
                                         ),
@@ -1281,7 +1291,7 @@ class ProductProduct(orm.Model):
                             'category': category_name,
                             'product_id': component.id,
                             'default_code': component.default_code,
-                            'semiproduct': False,
+                            'semiproduct': '',
                             'semiproduct_id': False,
                             'quantity': cmpt_q,  # item x component
                             # 'uom': uom_name,

@@ -487,6 +487,7 @@ class ProductProductBOMDump(orm.Model):
             if not history_block.get('min_price') or not \
                     history_block.get('max_price'):
                 parameters['bgcolor'] = self.colors['error']
+                parameters['title'] = 'Prezzo minimo o massimo non presente'
 
             difference = {}
             for field in ('quantity', 'min_price', 'max_price'):

@@ -1009,6 +1009,9 @@ class ProductProduct(orm.Model):
         reference_year = to_date[:4]
         _logger.warning('Reference year for pipe price: %s' % reference_year)
 
+        old_date = 730  # days parameter
+        old_component_date = str(datetime.now() - timedelta(days=old_date))[:10]
+
         # ---------------------------------------------------------------------
         # Load history database if to_date range is setup:
         # ---------------------------------------------------------------------
@@ -1226,6 +1229,8 @@ class ProductProduct(orm.Model):
                                 fabric_text,  # fabric text for price
                                 simulated_cost,
                                 date_quotation,
+                                date_quotation and
+                                date_quotation < old_component_date,
                                 ]
 
                             if red_price:
@@ -1304,7 +1309,8 @@ class ProductProduct(orm.Model):
                         '',  # fabric text for price
                         simulated_cost,  # Simulated price
                         date_quotation,  # Date quotation
-                        ])  # Populate product database
+                        date_quotation and date_quotation < old_component_date,
+                    ])  # Populate product database
 
                     if red_price:
                         data[2] = True  # This product now is in error!

@@ -358,7 +358,6 @@ class ProductProductBOMDump(orm.Model):
         compare = ''
         dump_compare_data = pickle.loads(dump_compare_data)
 
-        # todo total box
         records = dump_compare_data['product']
         for record in records:
             # Product part:
@@ -478,9 +477,15 @@ class ProductProductBOMDump(orm.Model):
             history_block = record.get('history')
             compare_block = record.get('compare')
 
+            # -----------------------------------------------------------------
+            # Color parameters:
+            # -----------------------------------------------------------------
             parameters = {
                 'bgcolor': self.colors[status],
                 }
+            if not history_block.get('min_price') or not \
+                    history_block.get('max_price'):
+                parameters['bgcolor'] = self.colors['red']
 
             difference = {}
             for field in ('quantity', 'min_price', 'max_price'):

@@ -1103,8 +1103,8 @@ class ProductProduct(orm.Model):
                         # Manage 3 level BOM:
                         # -----------------------------------------------------
                         if master_cmpt.product_id.half_bom_ids:
-                            extra_reference = \
-                                master_cmpt.product_id.default_code
+                            extra_reference = ' [%s]' % (
+                                master_cmpt.product_id.default_code)
                             cmpt_loop = master_cmpt.product_id.half_bom_ids
                         else:
                             extra_reference = ''
@@ -1168,10 +1168,10 @@ class ProductProduct(orm.Model):
                                 min_value = max_value = 0.0  # no price in BOM
 
                             record = [
-                                '%s - %s %s' % (
+                                '%s - %s%s' % (
                                     cmpt.product_id.default_code or '',
                                     cmpt.product_id.name or '',
-                                    extra_reference,  # todo check!
+                                    extra_reference,
                                     ),
                                 cmpt_q,  # q. total
                                 uom_name,  # UOM

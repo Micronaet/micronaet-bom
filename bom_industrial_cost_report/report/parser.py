@@ -222,6 +222,7 @@ class ProductProductBOMDump(orm.Model):
 
     colors = {
         'red': '#fccac7',
+        'error': '#fc5555',
         'green': '#e3fcc7',
         'blue': '#c7e1fc',
         'orange': '#fcc332',
@@ -485,7 +486,7 @@ class ProductProductBOMDump(orm.Model):
                 }
             if not history_block.get('min_price') or not \
                     history_block.get('max_price'):
-                parameters['bgcolor'] = self.colors['red']
+                parameters['bgcolor'] = self.colors['error']
 
             difference = {}
             for field in ('quantity', 'min_price', 'max_price'):

@@ -262,7 +262,7 @@ class ProductProductBOMDump(orm.Model):
             dump_data.get('to_industrial'),
         )
 
-        history += '<table width="100%">'
+        history += '<table width="100%" border="1">'
         history += '<tr>' \
             '<th bgcolor="#bcbcbc" style="text-align:center;">Categoria</th>' \
             '<th bgcolor="#bcbcbc" style="text-align:center;">Semilavorato' \
@@ -440,7 +440,7 @@ class ProductProductBOMDump(orm.Model):
                         dump_compare_data.get('to_industrial'),
                         )
 
-        compare += '<table width="100%">'
+        compare += '<table width="100%" border="1">'
         compare += '<tr>' \
             '<th bgcolor="#bcbcbc" colspan="5" style="text-align:center;">' \
             'Dettaglio</th>' \

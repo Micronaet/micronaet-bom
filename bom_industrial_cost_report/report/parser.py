@@ -283,7 +283,7 @@ class ProductProductBOMDump(orm.Model):
                 records,
                 key=lambda x: (x['semiproduct'], x['default_code'])):
             counter += 1
-
+            pdb.set_trace()
             # Semiproduct part:
             semiproduct_id = record.get('semiproduct_id')
             semiproduct = semiproduct_name = ''

@@ -496,6 +496,8 @@ class ProductProductBOMDump(orm.Model):
                     history_block.get(field) and compare_block.get(field) and
                     compare_block.get(field) != history_block.get(field))
 
+            if record.get('telaio'):
+                pdb.set_trace()
             compare += '<tr>%s%s%s%s%s%s%s%s%s%s%s</tr>' % (
                     self.get_html_tag(
                         record.get('category'),
@@ -507,7 +509,7 @@ class ProductProductBOMDump(orm.Model):
                         parameters=parameters,
                         ),
                     self.get_html_tag(
-                        semiproduct_name or '',
+                        semiproduct.name if semiproduct else '',
                         parameters=parameters,
                         ),
 

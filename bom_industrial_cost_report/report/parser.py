@@ -283,7 +283,6 @@ class ProductProductBOMDump(orm.Model):
                 records,
                 key=lambda x: (x['semiproduct'], x['default_code'])):
             counter += 1
-            pdb.set_trace()
             # Semiproduct part:
             semiproduct_id = record.get('semiproduct_id')
             semiproduct = semiproduct_name = ''
@@ -404,6 +403,7 @@ class ProductProductBOMDump(orm.Model):
                     'status': 'blue',  # No more present
                     'category': category,
                     'semiproduct': semiproduct,
+                    'semiproduct_name': record.get('semiproduct_id'),
                     'product': product,
                     'history': {},
                     'compare': {
@@ -474,6 +474,7 @@ class ProductProductBOMDump(orm.Model):
 
             status = record.get('status')
             semiproduct = record.get('semiproduct')
+            semiproduct_name = record.get('semiproduct_name')
             product = record.get('product')
             history_block = record.get('history')
             compare_block = record.get('compare')
@@ -506,7 +507,7 @@ class ProductProductBOMDump(orm.Model):
                         parameters=parameters,
                         ),
                     self.get_html_tag(
-                        semiproduct.name if semiproduct else '',
+                        semiproduct_name or '',
                         parameters=parameters,
                         ),
 

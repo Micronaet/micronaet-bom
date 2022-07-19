@@ -1091,120 +1091,135 @@ class ProductProduct(orm.Model):
             for item in product.dynamic_bom_line_ids:
                 category_name = item.category_id.name or ''
                 component = item.product_id
-                if component.default_code.startswith('TEL'):
-                    pdb.set_trace()
                 if component.bom_placeholder or component.bom_alternative:
                     _logger.warning('Jump placeholder elements')
                     continue  # jump component
 
                 half_bom_ids = component.half_bom_ids  # if half component
-                if half_bom_ids:
-                    # HW component (level 2)
+                if half_bom_ids:   # HW component (level 2 and Frame!)
                     hw_total = 0.0
-                    for cmpt in half_bom_ids:
-                        # last_date = False # TODO last price?
-                        cmpt_q = item.product_qty * cmpt.product_qty  # XXX
+                    for master_cmpt in half_bom_ids:
+                        # -----------------------------------------------------
+                        # Manage 3 level BOM:
+                        # -----------------------------------------------------
+                        if master_cmpt.half_bom_ids:
+                            extra_reference = \
+                                master_cmpt.product_id.default_code
+                            cmpt_loop = master_cmpt.half_bom_ids
+                        else:
+                            extra_reference = ''
+                            cmpt_loop = [master_cmpt]
 
-                        # Simulation:
-                        (min_value, max_value, price_ids, supplier_min,
-                         supplier_max) = get_pricelist(
-                            cmpt.product_id, from_date, to_date, history_db)
-                        simulated_cost = cmpt_q * get_simulated(
-                            max_value, supplier_max, cmpt.product_id,
-                            simulation_db)
-                        price_detail = get_price_detail(price_ids)
+                        for cmpt in cmpt_loop:
+                            # last_date = False # TODO last price?
+                            cmpt_q = item.product_qty * cmpt.product_qty  # XXX
 
-                        # Fabric element:
-                        is_fabric = is_fabric_product(cmpt.product_id)
-                        uom_name = cmpt.product_id.uom_id.name
-                        fabric_text = ''
-                        if is_fabric:
-                            fabric_text = '(MQ: %8.5f EUR/MQ: %8.5f)' % (
-                                cmpt_q * is_fabric,
-                                max_value / is_fabric,
-                                )
-
-                        # Pipe element:
-                        if cmpt.product_id.is_pipe:
-                            # Calc with weight and price kg not cost manag.:
-                            # TODO Simulation:
-                            if reference_year:
-                                pipe_price = get_pipe_material_price(
-                                    material_price_db, cmpt, reference_year)
-                            else:
-                                pipe_price = \
-                                    cmpt.product_id.pipe_material_id.last_price
-
-                            min_value = max_value = \
-                                pipe_price * cmpt.product_id.weight
-                            # Total pipe weight:
-                            q_pipe = item.product_qty * cmpt.product_qty *\
-                                cmpt.product_id.weight
-
-                            simulated_cost = q_pipe * get_simulated(
-                                pipe_price, supplier_max, cmpt.product_id,
+                            # Simulation:
+                            (min_value, max_value, price_ids, supplier_min,
+                             supplier_max) = get_pricelist(
+                                cmpt.product_id, from_date, to_date,
+                                history_db)
+                            simulated_cost = cmpt_q * get_simulated(
+                                max_value, supplier_max, cmpt.product_id,
                                 simulation_db)
+                            price_detail = get_price_detail(price_ids)
 
-                            data[11][0] += q_pipe
-                            data[11][1] += q_pipe * pipe_price
+                            # Fabric element:
+                            is_fabric = is_fabric_product(cmpt.product_id)
+                            uom_name = cmpt.product_id.uom_id.name
+                            fabric_text = ''
+                            if is_fabric:
+                                fabric_text = '(MQ: %8.5f EUR/MQ: %8.5f)' % (
+                                    cmpt_q * is_fabric,
+                                    max_value / is_fabric,
+                                    )
 
-                        # todo manage as pipe?
-                        red_price = \
-                            not cmpt.product_id.bom_industrial_no_price and \
-                            not max_value
-                        if cmpt.product_id.bom_industrial_no_price:
-                            min_value = max_value = 0.0  # no price in BOM
+                            # Pipe element:
+                            if cmpt.product_id.is_pipe:
+                                # Calc with weight and price kg not cost mng.:
+                                # todo Simulation:
+                                if reference_year:
+                                    pipe_price = get_pipe_material_price(
+                                        material_price_db, cmpt,
+                                        reference_year)
+                                else:
+                                    pipe_price = \
+                                        cmpt.product_id.pipe_material_id.\
+                                            last_price
 
-                        record = [
-                            '%s - %s' % (
-                                cmpt.product_id.default_code or '',
-                                cmpt.product_id.name or '',
-                                ),
-                            cmpt_q,  # q. total
-                            uom_name,  # UOM
-                            max_value,  # unit price (max not the last!)
-                            max_value * cmpt_q,  # subtotal (last = unit x q)
-                            price_detail,  # list of price (used for detail)
-                            component,  # HW product
-                            cmpt.product_id,  # Product for extra data
-                            red_price,  # no price
-                            fabric_text,  # fabric text for price
-                            simulated_cost,
-                            ]
+                                min_value = max_value = \
+                                    pipe_price * cmpt.product_id.weight
+                                # Total pipe weight:
+                                q_pipe = item.product_qty * cmpt.product_qty *\
+                                    cmpt.product_id.weight
 
-                        if red_price:
-                            data[2] = True  # This product now is in error!
+                                simulated_cost = q_pipe * get_simulated(
+                                    pipe_price, supplier_max, cmpt.product_id,
+                                    simulation_db)
 
-                        # Update min and max value:
-                        data[0] += min_value * cmpt_q
-                        data[1] += max_value * cmpt_q
-                        data[12] += simulated_cost
+                                data[11][0] += q_pipe
+                                data[11][1] += q_pipe * pipe_price
 
-                        if component.default_code not in component_saved:
-                            hw_total += max_value * cmpt_q
-                            component_f.write('%-30s|%25.5f\r\n' % (
-                                component.default_code,
-                                hw_total,
-                                ))
-                            component_saved.append(component.default_code)
+                            # todo manage as pipe?
+                            red_price = \
+                                not cmpt.product_id.bom_industrial_no_price \
+                                and not max_value
+                            if cmpt.product_id.bom_industrial_no_price:
+                                min_value = max_value = 0.0  # no price in BOM
 
-                        data[3].append(record)  # Populate product database
+                            record = [
+                                '%s - %s %s' % (
+                                    cmpt.product_id.default_code or '',
+                                    cmpt.product_id.name or '',
+                                    extra_reference,  # todo check!
+                                    ),
+                                cmpt_q,  # q. total
+                                uom_name,  # UOM
+                                max_value,  # unit price (max not the last!)
+                                max_value * cmpt_q,  # subt. (last = unit x q)
+                                price_detail,  # list of price, used for detail
+                                component,  # HW product
+                                cmpt.product_id,  # Product for extra data
+                                red_price,  # no price
+                                fabric_text,  # fabric text for price
+                                simulated_cost,
+                                ]
 
-                        # History:
-                        if json_history:
-                            dump_data['product'].append({
-                                'category': category_name,
-                                'semiproduct_id': component.id,  # only here
-                                'product_id': cmpt.product_id.id,
+                            if red_price:
+                                data[2] = True  # This product now is in error!
 
-                                'default_code': cmpt.product_id.default_code,
-                                'semiproduct': component.default_code,
-                                'quantity': cmpt_q,  # item x component
-                                # 'uom': uom_name,
-                                'min_price': min_value,
-                                'max_price': max_value,
-                                # simulated?
-                            })
+                            # Update min and max value:
+                            data[0] += min_value * cmpt_q
+                            data[1] += max_value * cmpt_q
+                            data[12] += simulated_cost
+
+                            if component.default_code not in component_saved:
+                                hw_total += max_value * cmpt_q
+                                component_f.write('%-30s|%25.5f\r\n' % (
+                                    component.default_code,
+                                    hw_total,
+                                    ))
+                                component_saved.append(component.default_code)
+
+                            data[3].append(record)  # Populate product database
+
+                            # History:
+                            if json_history:
+                                dump_data['product'].append({
+                                    'category': category_name,
+                                    # only here:
+                                    'semiproduct_id': component.id,
+                                    'product_id': cmpt.product_id.id,
+
+                                    'default_code':
+                                        cmpt.product_id.default_code,
+                                    'semiproduct': component.default_code,
+                                    'quantity': cmpt_q,  # item x component
+                                    # 'uom': uom_name,
+                                    'min_price': min_value,
+                                    'max_price': max_value,
+                                    # simulated?
+                                })
 
                 else:  # Raw material (level 1)
                     cmpt_q = item.product_qty

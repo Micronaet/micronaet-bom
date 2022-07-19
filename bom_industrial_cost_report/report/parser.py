@@ -922,6 +922,7 @@ class ProductProduct(orm.Model):
         # Parameters in datas dictionary:
         # ---------------------------------------------------------------------
         dump_pool = self.pool.get('product.product.bom.dump')
+
         simulation_db = []
         simulation_pool = self.pool.get('mrp.bom.industrial.simulation')
         simulation_ids = simulation_pool.search(cr, uid, [], context=context)
@@ -1090,6 +1091,8 @@ class ProductProduct(orm.Model):
             for item in product.dynamic_bom_line_ids:
                 category_name = item.category_id.name or ''
                 component = item.product_id
+                if component.default_code.startswith('TEL'):
+                    pdb.set_trace()
                 if component.bom_placeholder or component.bom_alternative:
                     _logger.warning('Jump placeholder elements')
                     continue  # jump component

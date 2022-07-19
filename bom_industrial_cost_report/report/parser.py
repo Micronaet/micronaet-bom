@@ -342,6 +342,7 @@ class ProductProductBOMDump(orm.Model):
                     'status': 'red',  # no more present as default
                     'category': category,
                     'semiproduct': semiproduct,
+                    'semiproduct_name': semiproduct_name,
                     'product': product,
                     'history': {
                         'quantity': quantity,
@@ -403,7 +404,7 @@ class ProductProductBOMDump(orm.Model):
                     'status': 'blue',  # No more present
                     'category': category,
                     'semiproduct': semiproduct,
-                    'semiproduct_name': record.get('semiproduct_id'),
+                    'semiproduct_name': record.get('semiproduct_name'),
                     'product': product,
                     'history': {},
                     'compare': {

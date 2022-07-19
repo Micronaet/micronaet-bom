@@ -1010,7 +1010,8 @@ class ProductProduct(orm.Model):
         _logger.warning('Reference year for pipe price: %s' % reference_year)
 
         old_date = 730  # days parameter
-        old_component_date = str(datetime.now() - timedelta(days=old_date))[:10]
+        old_component_date = str(
+            datetime.now() - timedelta(days=old_date))[:10]
 
         # ---------------------------------------------------------------------
         # Load history database if to_date range is setup:

@@ -1213,7 +1213,10 @@ class ProductProduct(orm.Model):
 
                                     'default_code':
                                         cmpt.product_id.default_code,
-                                    'semiproduct': component.default_code,
+                                    'semiproduct': '%s%s' % (
+                                        component.default_code,
+                                        extra_reference,
+                                        ),
                                     'quantity': cmpt_q,  # item x component
                                     # 'uom': uom_name,
                                     'min_price': min_value,

@@ -91,6 +91,7 @@ def get_pricelist(product, min_date, max_date=False, history_db=None):
             [record],  # 2. Price list
             record[0],  # 3. Supplier min
             record[0],  # 4. Supplier max
+            record[2],  # 5. Date quotation
             ]
 
     else:  # Empty data record:
@@ -101,7 +102,9 @@ def get_pricelist(product, min_date, max_date=False, history_db=None):
             [],  # 2. Price list
             False,  # 3. Supplier Min
             False,  # 4. Supplier Max
+            '',  # 5. Last quotation
             ]
+
     supplier = ''
     for seller in product.seller_ids:
         supplier = seller.name
@@ -148,9 +151,11 @@ def get_pricelist(product, min_date, max_date=False, history_db=None):
             if not res[0] or price < res[0]:  # 0 price will be replaced
                 res[0] = price
                 res[3] = supplier  # Min supplier
+                res[5] = date_quotation
             if price > res[1]:
                 res[1] = price
                 res[4] = supplier
+                res[5] = date_quotation
 
     if not res[0] and last_price[0]:  # if not price but there's last
         # Keep the same:
@@ -158,6 +163,7 @@ def get_pricelist(product, min_date, max_date=False, history_db=None):
         res[1] = last_price[0]
         res[3] = supplier
         res[4] = supplier
+        res[5] = date_quotation
     return res
 
 
@@ -966,13 +972,17 @@ class ProductProduct(orm.Model):
             material_price_db[material_id][material_price.year] = \
                 material_price.last_price
 
-        # Need update record price:
+        # ---------------------------------------------------------------------
+        # Context parameters:
+        # ---------------------------------------------------------------------
+        # 1. Need update record price:
         update_record = datas.get('update_record', False)
         if update_record:
             _logger.warning('Product price will save in history!')
         else:
             _logger.warning('No product price updated!')
 
+        # 2. Need update current price
         update_current_industrial = datas.get(
             'update_current_industrial', False)
         if update_current_industrial:
@@ -981,6 +991,7 @@ class ProductProduct(orm.Model):
             _logger.warning('No current product price updated!')
         update_after = []
 
+        # 3. Need to write dump DB for history
         # Note: used pickle for better read in python non JSON
         json_history = datas.get('json_history', False)
         # Json history save locked version of dump BOM
@@ -1136,11 +1147,16 @@ class ProductProduct(orm.Model):
                             # last_date = False # TODO last price?
                             cmpt_q = item.product_qty * cmpt.product_qty  # XXX
 
+                            # -------------------------------------------------
                             # Simulation:
+                            # -------------------------------------------------
+                            # Retrieve used data:
                             (min_value, max_value, price_ids, supplier_min,
-                             supplier_max) = get_pricelist(
+                             supplier_max, date_quotation) = get_pricelist(
                                 cmpt.product_id, from_date, to_date,
                                 history_db)
+
+                            # Simulation data:
                             simulated_cost = cmpt_q * get_simulated(
                                 max_value, supplier_max, cmpt.product_id,
                                 simulation_db)
@@ -1189,6 +1205,10 @@ class ProductProduct(orm.Model):
                             if cmpt.product_id.bom_industrial_no_price:
                                 min_value = max_value = 0.0  # no price in BOM
 
+                            # Date depend on product:
+                            if cmpt.product_id.is_pipe:
+                                date_quotation = ''
+
                             record = [
                                 '%s - %s%s' % (
                                     cmpt.product_id.default_code or '',
@@ -1205,6 +1225,7 @@ class ProductProduct(orm.Model):
                                 red_price,  # no price
                                 fabric_text,  # fabric text for price
                                 simulated_cost,
+                                date_quotation,
                                 ]
 
                             if red_price:
@@ -1250,8 +1271,9 @@ class ProductProduct(orm.Model):
                     cmpt_q = item.product_qty
                     # Simulation:
                     (min_value, max_value, price_ids, supplier_min,
-                     supplier_max) = get_pricelist(
-                        item.product_id, from_date, to_date, history_db)
+                     supplier_max, date_quotation) = get_pricelist(
+                        item.product_id, from_date, to_date, history_db,
+                        )
                     simulated_cost = cmpt_q * get_simulated(
                         max_value, supplier_max, item.product_id,
                         simulation_db)
@@ -1261,6 +1283,11 @@ class ProductProduct(orm.Model):
                         not component.bom_industrial_no_price and not max_value
                     if component.bom_industrial_no_price:
                         min_value = max_value = 0.0
+
+                    # Date depend on product:
+                    if component.is_pipe:
+                        date_quotation = ''
+
                     data[3].append([
                         '%s - %s' % (
                             component.default_code or '',
@@ -1276,6 +1303,7 @@ class ProductProduct(orm.Model):
                         red_price,  # Prod with no price
                         '',  # fabric text for price
                         simulated_cost,  # Simulated price
+                        date_quotation,  # Date quotation
                         ])  # Populate product database
 
                     if red_price:

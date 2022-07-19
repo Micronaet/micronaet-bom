@@ -1102,10 +1102,10 @@ class ProductProduct(orm.Model):
                         # -----------------------------------------------------
                         # Manage 3 level BOM:
                         # -----------------------------------------------------
-                        if master_cmpt.half_bom_ids:
+                        if master_cmpt.product_id.half_bom_ids:
                             extra_reference = \
                                 master_cmpt.product_id.default_code
-                            cmpt_loop = master_cmpt.half_bom_ids
+                            cmpt_loop = master_cmpt.product_id.half_bom_ids
                         else:
                             extra_reference = ''
                             cmpt_loop = [master_cmpt]

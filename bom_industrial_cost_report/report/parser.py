@@ -283,6 +283,7 @@ class ProductProductBOMDump(orm.Model):
                 records,
                 key=lambda x: (x['semiproduct'], x['default_code'])):
             counter += 1
+
             # Semiproduct part:
             semiproduct_id = record.get('semiproduct_id')
             semiproduct = semiproduct_name = ''
@@ -342,7 +343,6 @@ class ProductProductBOMDump(orm.Model):
                     'status': 'red',  # no more present as default
                     'category': category,
                     'semiproduct': semiproduct,
-                    'semiproduct_name': semiproduct_name,
                     'product': product,
                     'history': {
                         'quantity': quantity,
@@ -404,7 +404,6 @@ class ProductProductBOMDump(orm.Model):
                     'status': 'blue',  # No more present
                     'category': category,
                     'semiproduct': semiproduct,
-                    'semiproduct_name': record.get('semiproduct_name'),
                     'product': product,
                     'history': {},
                     'compare': {
@@ -475,7 +474,6 @@ class ProductProductBOMDump(orm.Model):
 
             status = record.get('status')
             semiproduct = record.get('semiproduct')
-            semiproduct_name = record.get('semiproduct_name')
             product = record.get('product')
             history_block = record.get('history')
             compare_block = record.get('compare')
@@ -497,8 +495,6 @@ class ProductProductBOMDump(orm.Model):
                     history_block.get(field) and compare_block.get(field) and
                     compare_block.get(field) != history_block.get(field))
 
-            if record.get('category') == 'Telaio':
-                pdb.set_trace()
             compare += '<tr>%s%s%s%s%s%s%s%s%s%s%s</tr>' % (
                     self.get_html_tag(
                         record.get('category'),

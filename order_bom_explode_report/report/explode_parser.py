@@ -350,9 +350,9 @@ class MrpProduction(orm.Model):
         inventory_pos = get_position_season(get_date())  # for inventory mgmt.
         for product in product_proxy:  # XXX Product ordered for now
             for item in product.dynamic_bom_line_ids:  # XXX All Semi-worked:
-                # TODO Remove log:
+                # todo Remove log:
 
-                # Note: 12/12/2017 Remove placeholder elements:
+                # Remove placeholder elements:
                 if item.product_id.bom_placeholder or \
                         item.product_id.bom_alternative:
                     _logger.warning('Placeholder product jumped: %s' %
@@ -415,7 +415,7 @@ class MrpProduction(orm.Model):
                             continue
 
                         if exclude_inventory_ids and \
-                                component.product_id.inventory_category_id.id\
+                                component.product_id.inventory_category_id.id \
                                 in exclude_inventory_ids:
                             continue  # Jump BOM element in excluded category
 
@@ -451,7 +451,8 @@ class MrpProduction(orm.Model):
         month = datetime.now().month
         year = datetime.now().year
         if month >= 9:
-            period_from = '%s-09-01' % year
+            period_from = '2021-09-01'  # todo when no inventory
+            # period_from = '%s-09-01' % year  # todo when inventory
             period_to = '%s-08-31' % (year + 1)
         else:
             period_from = '%s-09-01' % (year - 1)  # for OC and OF

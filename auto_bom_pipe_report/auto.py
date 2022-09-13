@@ -103,7 +103,7 @@ class MrpProduction(orm.Model):
         #f_tubi.write(result)
         #f_tubi.close()
         
-        attachments = [('Tubi_%s.odt' % now, result)]
+        attachments = [('Tubi_%s.doc' % now, result)]
                 
         # ---------------------------------------------------------------------
         # Send report:
@@ -131,4 +131,4 @@ class MrpProduction(orm.Model):
             context=context,
             )
         return True
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+        

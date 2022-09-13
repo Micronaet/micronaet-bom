@@ -451,8 +451,9 @@ class MrpProduction(orm.Model):
         month = datetime.now().month
         year = datetime.now().year
         if month >= 9:
-            period_from = '2021-09-01'  # todo when no inventory
-            # period_from = '%s-09-01' % year  # todo when inventory
+            # Not work!:
+            # period_from = '2021-09-01'  # todo when no inventory
+            period_from = '%s-09-01' % year  # todo when inventory
             period_to = '%s-08-31' % (year + 1)
         else:
             period_from = '%s-09-01' % (year - 1)  # for OC and OF

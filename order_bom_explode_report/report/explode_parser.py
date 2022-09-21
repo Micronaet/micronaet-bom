@@ -399,7 +399,7 @@ class MrpProduction(orm.Model):
                     category = item.category_id.type_id.name if \
                         item.category_id and item.category_id.type_id else \
                         _('No category')
-                    # TODO write category as component mode (pipe / fabric)
+                    # todo write category as component mode (pipe / fabric)
                     add_x_item(y_axis, item, category, purchase_db)
                 elif mode == 'component':  # >>> component HW and component BOM
                     # TODO log half-component with empty list

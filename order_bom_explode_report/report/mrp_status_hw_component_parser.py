@@ -43,7 +43,10 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+
 class Parser(report_sxw.rml_parse):
+    """ Pipe Tubi Telaio report
+    """
     default_days = 30
     def __init__(self, cr, uid, name, context):
         super(Parser, self).__init__(cr, uid, name, context)
@@ -53,6 +56,7 @@ class Parser(report_sxw.rml_parse):
             'get_date': self.get_date,
             'get_parent_oc_period': self.get_parent_oc_period,
             'get_pipe_unused': self.get_pipe_unused,
+            'get_pipe_product_unused': self.get_pipe_product_unused,
             })
 
     def get_parent_oc_period(self, parent):
@@ -110,9 +114,9 @@ class Parser(report_sxw.rml_parse):
                         # Reference:
                         'Parent', 'DB padre', 'Product', 'Order ref.',
                         # Order quantity:
-                        #'OC') # MA
-                        #'B' # B total
-                        #'Delivery') # BC
+                        # 'OC') # MA
+                        # 'B' # B total
+                        # 'Delivery') # BC
                         # Quantity for accounting:
                         'Remain to MRP', # OC
                         'Ready', # B net
@@ -186,7 +190,7 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         #                               PROCEDURE:
         # ---------------------------------------------------------------------
-        self.order_month = {} # Parent distribution for month (extra row info)
+        self.order_month = {}  # Parent distribution for month (extra row info)
 
         if data is None:
             data = {}
@@ -507,7 +511,7 @@ class Parser(report_sxw.rml_parse):
 
             parent_first = True
 
-            #for hw in record[0].bom_line_ids:
+            # for hw in record[0].bom_line_ids:
             for hw in sorted(
                     record[0].bom_line_ids,
                     key=lambda x: x.product_id.default_code,
@@ -534,11 +538,11 @@ class Parser(report_sxw.rml_parse):
                     proposed_hw = 0
                 data_B = [
                     hw_data[2].get((parent, halfwork), '?'), # total
-                    halfwork.default_code, # hw code
-                    int(round(hw_data[0])), # Todo halfwork
-                    int(round(hw_data[1])), # Stock
+                    halfwork.default_code,  # hw code
+                    int(round(hw_data[0])),  # Todo halfwork
+                    int(round(hw_data[1])),  # Stock
                     int(round(proposed_hw)),
-                    False, # XXX no more used #yet_write, # yet write status
+                    False,  # XXX no more used #yet_write, # yet write status
                     ]
 
                 hw_first = True
@@ -621,10 +625,39 @@ class Parser(report_sxw.rml_parse):
             list_browse = [item for item in product_pool.browse(
                 cr, uid, self.pipe_ids, context=context) if
                     abs(item.mx_net_mrp_qty) <= min_val]
-        else: # present
+        else:  # present
             list_browse = [item for item in product_pool.browse(
                 cr, uid, self.pipe_ids, context=context) if
                     abs(item.mx_net_mrp_qty) > min_val]
 
         return sorted(list_browse, key=lambda x: x.default_code)
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+
+    def get_pipe_product_unused(self, pipe_id):
+        """ Return pipe product
+        """
+        cr = self.cr
+        uid = self.uid
+        context = {}
+
+        bom_line_pool = self.pool.get('mrp.bom.line')
+        products = set()
+
+        # Search Semiproduct where is use pipe:
+        hw_ids = bom_line_pool.search(cr, uid, [
+            ('product_id', '=', pipe_id),
+        ], context=context)
+
+        # Search product where is used semiproduct:
+        for hw in bom_line_pool.browse(hw_ids):
+            hw_id = hw.bom_id.product_id.id
+            line_ids = bom_line_pool.search([
+                ('product_id', '=', hw_id),
+            ])
+            for line in bom_line_pool.browse(
+                    cr, uid, line_ids, context=context):
+                product_code = line.bom_id.product_id.default_code
+                products.add(product_code)
+        if products:
+            return ' - '.join(list(products))
+        else:
+            return 'NESSUNO'

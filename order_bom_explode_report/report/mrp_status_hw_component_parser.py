@@ -63,13 +63,13 @@ class Parser(report_sxw.rml_parse):
         return res
 
     def get_date(self, ):
-        ''' Get filter selected
-        '''
+        """ Get filter selected
+        """
         return datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
 
     def get_filter(self, data):
-        ''' Get filter selected
-        '''
+        """ Get filter selected
+        """
         if data is None:
             data = {}
 
@@ -78,8 +78,8 @@ class Parser(report_sxw.rml_parse):
         return _('Active production for %s days') % days
 
     def get_object(self, data):
-        ''' Search all mrp elements
-        '''
+        """ Search all mrp elements
+        """
         # Readability:
         cr = self.cr
         uid = self.uid
@@ -93,8 +93,8 @@ class Parser(report_sxw.rml_parse):
         #                                Utility:
         # ---------------------------------------------------------------------
         def log_line(self, line, extra=None, mode='product'):
-            ''' Utility for log in excel file:
-            '''
+            """ Utility for log in excel file:
+            """
             if extra is None:
                 extra = {}
 
@@ -227,7 +227,7 @@ class Parser(report_sxw.rml_parse):
         else:
             reference_date = '%s-09-01 00:00:00' % (now_year - 1)
 
-        # TODO remove after inventory:
+        # todo remove after inventory:
         # reference_date = '2020-09-01 00:00:00'
 
         _logger.warning('Reference date for HW: %s' % reference_date)
@@ -256,8 +256,8 @@ class Parser(report_sxw.rml_parse):
         parent_todo = {}
         stock_used = [] # for product and halfwork
 
-        hws = {} # Halfworked database for collect HW informations
-        cmpts = {} # Component database for collect needed pipe
+        hws = {}  # Halfworked database for collect HW informations
+        cmpts = {}  # Component database for collect needed pipe
 
         # Open order:
         order_ids = company_pool.mrp_domain_sale_order_line(
@@ -605,8 +605,8 @@ class Parser(report_sxw.rml_parse):
         return res
 
     def get_pipe_unused(self, only_zero=False):
-        ''' Return pipe unused
-        '''
+        """ Return pipe unused
+        """
         min_val = 0.001
 
         # Readability:

@@ -281,21 +281,21 @@ class Parser(report_sxw.rml_parse):
                     log_line(self, [
                         '', '', '', order.name, '', '', '', '', '', '',
                         ], extra)
-                    continue # TODO raise error or log
+                    continue  # todo raise error or log
 
                 # Cannot use parent as first 3 char!!!
-                #parent = default_code[:3]
+                # parent = default_code[:3]
                 parent = product.parent_bom_id.code or _('NODBERROR')
 
                 if parent not in parent_todo:
                     # Stock, Order to produce, has stock negative
                     parent_todo[parent] = [
-                        False, # 0. Parent bom for explode
-                        0.0, # 1. Stock status net
-                        0.0, # 2. Order to produce # merge with 1?
-                        0, # 3. Stock status negative (total)
-                        0, # 4. No parent bom (total)
-                        0.0, # 5. Produce to delivery
+                        False,  # 0. Parent bom for explode
+                        0.0,  # 1. Stock status net
+                        0.0,  # 2. Order to produce # merge with 1?
+                        0,  # 3. Stock status negative (total)
+                        0,  # 4. No parent bom (total)
+                        0.0,  # 5. Produce to delivery
                         ]
 
                 # -------------------------------------------------------------

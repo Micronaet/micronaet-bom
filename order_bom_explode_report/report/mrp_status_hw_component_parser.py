@@ -642,12 +642,12 @@ class Parser(report_sxw.rml_parse):
         bom_line_pool = self.pool.get('mrp.bom.line')
         products = set()
 
-        # Search Semiproduct where is use pipe:
+        # Search Semi-product where is use pipe:
         hw_ids = bom_line_pool.search(cr, uid, [
             ('product_id', '=', pipe_id),
         ], context=context)
 
-        # Search product where is used semiproduct:
+        # Search product where is used semi-product:
         for hw in bom_line_pool.browse(hw_ids):
             hw_id = hw.bom_id.product_id.id
             line_ids = bom_line_pool.search([
@@ -658,6 +658,6 @@ class Parser(report_sxw.rml_parse):
                 product_code = line.bom_id.product_id.default_code
                 products.add(product_code)
         if products:
-            return ' - '.join(list(products))
+            return ' - '.join(products)
         else:
             return 'NESSUNO'

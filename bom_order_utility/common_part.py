@@ -30,9 +30,9 @@ from openerp import SUPERUSER_ID, api
 from openerp import tools
 from openerp.tools.translate import _
 from openerp.tools.float_utils import float_round as round
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
-    DEFAULT_SERVER_DATETIME_FORMAT, 
-    DATETIME_FORMATS_MAP, 
+from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DATETIME_FORMATS_MAP,
     float_compare)
 
 
@@ -41,48 +41,48 @@ _logger = logging.getLogger(__name__)
 class ResCompany(orm.Model):
     """ Model name: ResCompany
     """
-    
+
     _inherit = 'res.company'
-    
+
     # -------------------------------------------------------------------------
     # Utility for report generation:
     # -------------------------------------------------------------------------
     def mrp_domain_sale_order_line(self, cr, uid, context=None):
-        ''' Active order line with production extend
-        '''
+        """ Active order line with production extend
+        """
         sale_pool = self.pool.get('sale.order')
         order_ids = sale_pool.search(cr, uid, [
             ('state', 'not in', ('cancel', 'sent', 'draft')),
             ('pricelist_order', '=', False),
-            ('mx_closed', '=', False), # Only open orders (not all MRP after)
+            ('mx_closed', '=', False),  # Only open orders (not all MRP after)
             # Also forecasted order
             # No filter date TODO use over data for reporting extra
             # XXX no x axis filter!
             ])
-            
+
         # Add forecasted draft order (not in closed production)
         forecasted_ids = sale_pool.search(cr, uid, [
             ('forecasted_production_id', '!=', False),
             ('forecasted_production_id.state', 'not in', ('done', 'cancel')),
             ])
-        order_ids.extend(forecasted_ids) # XXX no double FC is draft mode
-        return order_ids 
+        order_ids.extend(forecasted_ids)  # XXX no double FC is draft mode
+        return order_ids
 
     def mrp_domain_sale_order_line_ids(self, cr, uid, context=None):
-        ''' Active order line with production extend
+        """ Active order line with production extend
             return set for management operation on sets
-        '''
-        
+        """
+
         order_ids = self.mrp_domain_sale_order_line(cr, uid, context=context)
         sol_pool = self.pool.get('sale.order.line')
         sol_ids = sol_pool.search(cr, uid, [
             ('order_id', 'in', order_ids),
             ('mx_closed', '=', False),
             ], context=context)
-            
+
         # Filter product
         sol_proxy = sol_pool.browse(cr, uid, sol_ids, context=context)
         product_set_ids = set([item.product_id.id for item in sol_proxy])
         return product_set_ids
-    
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

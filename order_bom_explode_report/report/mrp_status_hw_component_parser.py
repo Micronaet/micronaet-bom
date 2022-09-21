@@ -184,7 +184,7 @@ class Parser(report_sxw.rml_parse):
                     col += 1
                 self.counters[mode] += 1
             else:
-                pass # error
+                pass  # error
             return
 
         # ---------------------------------------------------------------------
@@ -196,7 +196,7 @@ class Parser(report_sxw.rml_parse):
             data = {}
 
         # Log part
-        # TODO change:
+        # todo change:
         filename = '/home/administrator/photo/log/parent_product.xlsx'
         WB = xlsxwriter.Workbook(filename)
         extra = {
@@ -258,7 +258,7 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         # Database:
         parent_todo = {}
-        stock_used = [] # for product and halfwork
+        stock_used = []  # for product and halfwork
 
         hws = {}  # Halfworked database for collect HW informations
         cmpts = {}  # Component database for collect needed pipe

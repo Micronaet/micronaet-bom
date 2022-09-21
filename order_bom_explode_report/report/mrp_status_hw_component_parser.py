@@ -325,7 +325,7 @@ class Parser(report_sxw.rml_parse):
                     # Net in stock (once x product)
                     parent_todo[parent][1] += stock_net
                 else:
-                    extra['stock_check'] += 'not used' # XXX +=?
+                    extra['stock_check'] += 'not used'  # XXX +=?
                     stock_net = 0.0 # no used
 
                 # ---------------
@@ -334,7 +334,7 @@ class Parser(report_sxw.rml_parse):
                 # Use utility function:
                 (oc_remain, not_delivered) = \
                     company_pool.mrp_order_line_to_produce_assigned(line)
-                    #company_pool.mrp_order_line_to_produce(line)
+                    # company_pool.mrp_order_line_to_produce(line)
                 parent_todo[parent][2] += oc_remain
                 # TODO oc_remain must be checked with stock_net here!!!!!!!!!!
                 parent_todo[parent][5] += not_delivered
@@ -376,12 +376,12 @@ class Parser(report_sxw.rml_parse):
                     if halfwork.relative_type != 'half':
                         continue
 
-                    # XXX Add only halfworked here
-                    if halfwork not in hws: # halfwork browse obj
+                    # XXX Add only half worked here
+                    if halfwork not in hws:  # halfwork browse obj
                         hws[halfwork] = [
-                            0.0, # 0. Needed
-                            halfwork.mx_net_qty, # 1. Net (after - MRP) # TODO remove MRP ?
-                            {}, # 2. # compt (HW could be diff. depend on BOM)
+                            0.0,  # 0. Needed
+                            halfwork.mx_net_qty,  # 1. Net (after - MRP) # TODO remove MRP ?
+                            {},  # 2. # compt (HW could be diff. depend on BOM)
                             # XXX No OF
                             ]
 
@@ -398,7 +398,7 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------
         mrp_ids = mrp_pool.search(cr, uid, [
             # State filter:
-            #('state', '!=', 'cancel'), # not correct !!!
+            # ('state', '!=', 'cancel'), # not correct !!!
             # Period filter (only up not down limit)
             ('date_planned', '>=', reference_date),
             ], context=context)
@@ -418,13 +418,13 @@ class Parser(report_sxw.rml_parse):
                 for hw in product.parent_bom_id.bom_line_ids:
                     halfwork = hw.product_id
                     if halfwork.relative_type != 'half':
-                        continue # Not used in this report
+                        continue  # Not used in this report
 
                     if halfwork not in hws:
-                        continue # TODO Raise error not in bom?
+                        continue  # TODO Raise error not in bom?
 
                     hw_q = qty_maked * hw.product_qty
-                    hws[halfwork][1] -= hw_q # - MRP # TODO check same problem
+                    hws[halfwork][1] -= hw_q  # - MRP # TODO check same problem
                     # TODO check if is bouble - MRP!!!
 
         # TODO generate here component database for pipes (from hws):
@@ -463,9 +463,9 @@ class Parser(report_sxw.rml_parse):
         res = []
 
         # Empty record
-        empty_A = ['' for n in range(0, 7)] # parent 7
-        empty_B = ['' for n in range(0, 6)] # halfwork 6
-        empty_C = ['' for n in range(0, 10)] # component 9
+        empty_A = ['' for n in range(0, 7)]  # parent 7
+        empty_B = ['' for n in range(0, 6)]  # halfwork 6
+        empty_C = ['' for n in range(0, 10)]  # component 9
 
         # TODO remove use cmpt_present instead:
         hw_present = [] # for highlight only first total in report (for orders)
@@ -491,13 +491,13 @@ class Parser(report_sxw.rml_parse):
             # -----------------------------------------------------------------
             # Parent data:
             data_A = [
-                parent, # 0. Code
-                int(record[2]), # 1. OC
-                int(record[1]), # 2. Mag (Net stock - MRP calculated)
-                int(record[5]), # 3. Produced to delivery
-                int(record[2]), # XXX ex.: - record[1] + record[5], # 4. todo
-                record[3], # 5. tot. negative stock (for green-red light)
-                record[4], # 6. tot. no bom (for green-red light)
+                parent,  # 0. Code
+                int(record[2]),  # 1. OC
+                int(record[1]),  # 2. Mag (Net stock - MRP calculated)
+                int(record[5]),  # 3. Produced to delivery
+                int(record[2]),  # XXX ex.: - record[1] + record[5], # 4. todo
+                record[3],  # 5. tot. negative stock (for green-red light)
+                record[4],  # 6. tot. no bom (for green-red light)
                 # TODO
                 ]
 

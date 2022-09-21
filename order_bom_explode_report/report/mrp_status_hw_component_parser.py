@@ -656,7 +656,8 @@ class Parser(report_sxw.rml_parse):
             for line in bom_line_pool.browse(
                     cr, uid, line_ids, context=context):
                 product_code = line.bom_id.product_id.default_code
-                products.add(product_code)
+                if product_code:
+                    products.add(product_code)
         if products:
             return ' - '.join(products)
         else:

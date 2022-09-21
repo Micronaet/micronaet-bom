@@ -650,7 +650,7 @@ class Parser(report_sxw.rml_parse):
         # Search product where is used semi-product:
         for hw in bom_line_pool.browse(cr, uid, hw_ids, context=context):
             hw_id = hw.bom_id.product_id.id
-            line_ids = bom_line_pool.search([
+            line_ids = bom_line_pool.search(cr, uid, [
                 ('product_id', '=', hw_id),
             ])
             for line in bom_line_pool.browse(

@@ -291,12 +291,12 @@ class PurchaseOrderXLSX(orm.Model):
                     if not product_ids:
                         _logger.error(
                             'No product with code: %s' % default_code)
-                        # FATAL ERROR (maybe file not in correct format, raise:
-                        raise osv.except_osv(
-                            _('Errore controllare anche il formato del file'),
-                            _('Non trovato il codice prodotto: %s' % (
-                                default_code)),
-                            )
+                        # FATAL ERROR (maybe file not in correct format, raise)
+                        # raise osv.except_osv(
+                        #    _('Errore controllare anche il formato del file'),
+                        #    _('Non trovato il codice prodotto: %s' % (
+                        #        default_code)),
+                        #    )
                         error += 'Riga: %s > No prodotto: %s\n' % (
                             row, default_code)
                         continue
@@ -306,7 +306,7 @@ class PurchaseOrderXLSX(orm.Model):
                         _logger.error('More material code: %s' % default_code)
                         error += 'Riga: %s > Codice doppio: %s\n' % (
                             row, default_code)
-                        pass # TODO multi code
+                        pass  # todo multi code
 
                     product_id = product_ids[0]
                     product_proxy = product_pool.browse(
@@ -428,7 +428,7 @@ class PurchaseOrderXLSX(orm.Model):
         _logger.info('Imported: %s' % filename)
         return self.write(cr, uid, ids, {
             'mode': 'imported',
-            'file': False, # reset file for clean database!
+            'file': False,  # reset file for clean database!
             'error': error,
             }, context=context)
 

@@ -47,7 +47,7 @@ class PurchaseOrderXLSX(orm.Model):
     _name = 'purchase.order.xlsx'
     _description = 'Imported order'
     _rec_name = 'name'
-    _order = 'name'
+    _order = 'name desc'
 
     # --------------------
     # Wizard button event:
@@ -497,5 +497,3 @@ class PurchaseOrderXLSX(orm.Model):
         'purchase_ids': fields.one2many(
             'purchase.order', 'xlsx_id', 'Purchase order'),
         }
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

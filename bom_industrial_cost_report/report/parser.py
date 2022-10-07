@@ -1180,7 +1180,7 @@ class ProductProduct(orm.Model):
                                     '(MQ: %8.5f EUR/MQ: %8.5f-Sim.: %8.5f)' % (
                                         cmpt_q * is_fabric,
                                         max_value / is_fabric,
-                                        simulated_cost,
+                                        simulated_price,
                                         )
 
                             # -------------------------------------------------

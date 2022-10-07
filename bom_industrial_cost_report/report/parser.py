@@ -1160,23 +1160,32 @@ class ProductProduct(orm.Model):
                                 cmpt.product_id, from_date, to_date,
                                 history_db)
 
+                            # -------------------------------------------------
                             # Simulation data:
-                            simulated_cost = cmpt_q * get_simulated(
+                            # -------------------------------------------------
+                            simulated_price = get_simulated(
                                 max_value, supplier_max, cmpt.product_id,
                                 simulation_db)
+                            simulated_cost = cmpt_q * simulated_price
                             price_detail = get_price_detail(price_ids)
 
+                            # -------------------------------------------------
                             # Fabric element:
+                            # -------------------------------------------------
                             is_fabric = is_fabric_product(cmpt.product_id)
                             uom_name = cmpt.product_id.uom_id.name
                             fabric_text = ''
                             if is_fabric:
-                                fabric_text = '(MQ: %8.5f EUR/MQ: %8.5f)' % (
-                                    cmpt_q * is_fabric,
-                                    max_value / is_fabric,
-                                    )
+                                fabric_text = \
+                                    '(MQ: %8.5f EUR/MQ: %8.5f-Sim.: %8.5f)' % (
+                                        cmpt_q * is_fabric,
+                                        max_value / is_fabric,
+                                        simulated_cost,
+                                        )
 
+                            # -------------------------------------------------
                             # Pipe element:
+                            # -------------------------------------------------
                             if cmpt.product_id.is_pipe:
                                 # Calc with weight and price kg not cost mng.:
                                 # todo Simulation:

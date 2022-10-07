@@ -918,7 +918,7 @@ class ProductProduct(orm.Model):
         """ Report action for generate database used (both ODT and XLSX export)
         """
         def get_simulated(value, supplier, product, simulation_db):
-            """ Simulation price for now use max value)
+            """ Simulation price for now use max value
             """
             default_code = product.default_code or ''
             for param in simulation_db:

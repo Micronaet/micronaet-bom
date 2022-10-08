@@ -952,6 +952,7 @@ class ProductProduct(orm.Model):
         # ---------------------------------------------------------------------
         dump_pool = self.pool.get('product.product.bom.dump')
 
+        # Load simulation paremeter list (mask and price)
         simulation_db = []
         simulation_pool = self.pool.get('mrp.bom.industrial.simulation')
         simulation_ids = simulation_pool.search(cr, uid, [], context=context)
@@ -1182,12 +1183,13 @@ class ProductProduct(orm.Model):
                                     '(MQ: %8.5f EUR/MQ: %8.5f (Sim. %8.5f)' % (
                                         cmpt_q * is_fabric,
                                         max_value / is_fabric,
-                                        simulated_unit,
+                                        simulated_unit,  # Reference simulat.
                                         )
 
                             # -------------------------------------------------
                             # Pipe element:
                             # -------------------------------------------------
+                            pipe_simulated_unit = 0.0
                             if cmpt.product_id.is_pipe:
                                 # Calc with weight and price kg not cost mng.:
                                 # todo Simulation:
@@ -1206,9 +1208,10 @@ class ProductProduct(orm.Model):
                                 q_pipe = item.product_qty * cmpt.product_qty *\
                                     cmpt.product_id.weight
 
-                                simulated_cost = q_pipe * get_simulated(
+                                pipe_simulated_unit = get_simulated(
                                     pipe_price, supplier_max, cmpt.product_id,
                                     simulation_db)
+                                simulated_cost = q_pipe * pipe_simulated_unit
 
                                 data[11][0] += q_pipe
                                 data[11][1] += q_pipe * pipe_price
@@ -1243,7 +1246,8 @@ class ProductProduct(orm.Model):
                                 date_quotation,
                                 date_quotation and
                                 date_quotation < old_component_date,
-                                simulated_unit,
+                                # Simulated price items:
+                                pipe_simulated_unit or simulated_unit,
                                 ]
 
                             if red_price:

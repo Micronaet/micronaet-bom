@@ -819,7 +819,7 @@ class ProductProduct(orm.Model):
         row = 0
         for (r_min, r_max, r_error, r_components, r_extra1, r_extra2, r_index,
              r_total, product, r_parameter, r_total_text, pipe_data,
-             simulated_cost, simulated_unit) in \
+             simulated_cost) in \
                 self.report_get_objects_bom_industrial_cost(
                     cr, uid, datas=datas, context=context):
             row += 1
@@ -1215,8 +1215,6 @@ class ProductProduct(orm.Model):
 
                                 data[11][0] += q_pipe
                                 data[11][1] += q_pipe * pipe_price
-                                # data[13][cmpt.product_id.default_code] = \
-                                #    pipe_simulated_unit
 
                             # todo manage as pipe?
                             red_price = \
@@ -1340,7 +1338,6 @@ class ProductProduct(orm.Model):
                     data[0] += min_value * cmpt_q
                     data[1] += max_value * cmpt_q
                     data[12] += simulated_cost
-                    # data[13][component.product_id.default_code] = simulated_unit
 
                     # History:
                     if json_history:

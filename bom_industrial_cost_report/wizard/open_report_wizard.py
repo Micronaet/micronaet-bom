@@ -337,7 +337,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 # Explode record:
                 (min_price, max_price, error, components, extra1, extra2,
                  index, total, product, parameter, total_text,
-                 pipe_total_weight, simulated_price, simulated_unit) = record
+                 pipe_total_weight, simulated_price) = record
 
                 # Write all price present (False = reference for 100%)
                 # todo manage error field?

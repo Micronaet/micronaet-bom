@@ -1122,7 +1122,7 @@ class ProductProduct(orm.Model):
                 '',  # 10. Total text
                 [0.0, 0.0],  # 11. Pipe weight total (q, total)
                 0.0,  # 12. Simulated price
-                0.0,  # 13. Simulated unit
+                {},  # 13. Simulated unit database
                 ]
 
             # -----------------------------------------------------------------
@@ -1215,6 +1215,8 @@ class ProductProduct(orm.Model):
 
                                 data[11][0] += q_pipe
                                 data[11][1] += q_pipe * pipe_price
+                                data[13][cmpt.default_code] = \
+                                    pipe_simulated_unit
 
                             # todo manage as pipe?
                             red_price = \
@@ -1257,6 +1259,7 @@ class ProductProduct(orm.Model):
                             data[0] += min_value * cmpt_q
                             data[1] += max_value * cmpt_q
                             data[12] += simulated_cost
+                            # todo data[13]
 
                             if component.default_code not in component_saved:
                                 hw_total += max_value * cmpt_q
@@ -1337,6 +1340,7 @@ class ProductProduct(orm.Model):
                     data[0] += min_value * cmpt_q
                     data[1] += max_value * cmpt_q
                     data[12] += simulated_cost
+                    data[13][component.default_code] = simulated_unit
 
                     # History:
                     if json_history:

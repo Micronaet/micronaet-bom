@@ -109,9 +109,9 @@ def get_pricelist(product, min_date, max_date=False, history_db=None):
     for seller in product.seller_ids:
         supplier = seller.name
         for pricelist in seller.pricelist_ids:
-            # no inactive price XXX remove this filter?
-            if not pricelist.is_active:  # no inactive
-                continue
+            # 08/10/2022 remove this filter?
+            # if not pricelist.is_active:  # no inactive
+            #    continue
 
             # Take only period date:
             if product.bom_industrial_no_price:

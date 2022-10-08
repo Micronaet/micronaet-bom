@@ -819,7 +819,8 @@ class ProductProduct(orm.Model):
         row = 0
         for (r_min, r_max, r_error, r_components, r_extra1, r_extra2, r_index,
              r_total, product, r_parameter, r_total_text, pipe_data,
-             simulated_cost) in self.report_get_objects_bom_industrial_cost(
+             simulated_cost, simulated_price) in \
+                self.report_get_objects_bom_industrial_cost(
                     cr, uid, datas=datas, context=context):
             row += 1
 
@@ -1241,6 +1242,7 @@ class ProductProduct(orm.Model):
                                 date_quotation,
                                 date_quotation and
                                 date_quotation < old_component_date,
+                                simulated_price,
                                 ]
 
                             if red_price:
@@ -1289,9 +1291,10 @@ class ProductProduct(orm.Model):
                      supplier_max, date_quotation) = get_pricelist(
                         item.product_id, from_date, to_date, history_db,
                         )
-                    simulated_cost = cmpt_q * get_simulated(
+                    simulated_price = get_simulated(
                         max_value, supplier_max, item.product_id,
                         simulation_db)
+                    simulated_cost = cmpt_q * simulated_price
                     price_detail = get_price_detail(price_ids)
 
                     red_price = \
@@ -1320,6 +1323,7 @@ class ProductProduct(orm.Model):
                         simulated_cost,  # Simulated price
                         date_quotation,  # Date quotation
                         date_quotation and date_quotation < old_component_date,
+                        simulated_price,
                     ])  # Populate product database
 
                     if red_price:

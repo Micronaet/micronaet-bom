@@ -337,12 +337,12 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 # Explode record:
                 (min_price, max_price, error, components, extra1, extra2,
                  index, total, product, parameter, total_text,
-                 pipe_total_weight, simulated_price) = record
+                 pipe_total_weight, simulated_cost, simulated_price) = record
 
                 # Write all price present (False = reference for 100%)
                 # todo manage error field?
                 if product not in master_data:
-                        master_data[product] = ({}, simulated_price)
+                        master_data[product] = ({}, simulated_cost)
                 master_data[product][0][reference] = max_price  # Save this
 
         # ---------------------------------------------------------------------

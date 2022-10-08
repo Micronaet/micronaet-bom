@@ -152,7 +152,7 @@ class ProductProduct(orm.Model):
         return res
 
         # ---------------------------------------------------------------------
-        # NEW VERSIONE:
+        # NEW VERSION:
         # ---------------------------------------------------------------------
         f_bom = open('/home/odoo/0.bom_report.csv', 'w')
 

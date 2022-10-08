@@ -1215,7 +1215,7 @@ class ProductProduct(orm.Model):
 
                                 data[11][0] += q_pipe
                                 data[11][1] += q_pipe * pipe_price
-                                data[13][cmpt.default_code] = \
+                                data[13][cmpt.product_id.default_code] = \
                                     pipe_simulated_unit
 
                             # todo manage as pipe?
@@ -1340,7 +1340,7 @@ class ProductProduct(orm.Model):
                     data[0] += min_value * cmpt_q
                     data[1] += max_value * cmpt_q
                     data[12] += simulated_cost
-                    data[13][component.default_code] = simulated_unit
+                    data[13][component.product_id.default_code] = simulated_unit
 
                     # History:
                     if json_history:

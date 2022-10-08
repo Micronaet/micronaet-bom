@@ -1121,6 +1121,7 @@ class ProductProduct(orm.Model):
                 '',  # 10. Total text
                 [0.0, 0.0],  # 11. Pipe weight total (q, total)
                 0.0,  # 12. Simulated price
+                0.0,  # 13. Simulated unit
                 ]
 
             # -----------------------------------------------------------------

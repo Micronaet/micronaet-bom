@@ -1199,6 +1199,7 @@ class ProductProduct(orm.Model):
                             if cmpt.product_id.is_pipe:
                                 # Calc with weight and price kg not cost mng.:
                                 # todo Simulation:
+
                                 if reference_year:
                                     # Use history when limited date present:
                                     pipe_price = get_pipe_material_price(

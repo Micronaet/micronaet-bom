@@ -1175,7 +1175,7 @@ class ProductProduct(orm.Model):
                             # -------------------------------------------------
                             # Fabric element:
                             # -------------------------------------------------
-                            is_fabric = is_fabric_product(cmpt.product_id)
+                            is_fabric = is_fabric_product(cmpt.product_id) # mq
                             uom_name = cmpt.product_id.uom_id.name
                             fabric_text = ''
                             if is_fabric:
@@ -1183,7 +1183,8 @@ class ProductProduct(orm.Model):
                                     '(MQ: %8.5f EUR/MQ: %8.5f (Sim. %8.5f)' % (
                                         cmpt_q * is_fabric,
                                         max_value / is_fabric,
-                                        simulated_unit,  # Reference simulat.
+                                        # Reference simulat.:
+                                        simulated_unit * is_fabric,
                                         )
 
                             # -------------------------------------------------

@@ -937,11 +937,14 @@ class ProductProduct(orm.Model):
                     break
             return value
 
-        def get_pipe_material_price(material_price_db, cmpt, reference_year):
-            """ Extract pipe price also in previous period
+        def get_pipe_material_price(pipe_price_history, cmpt, reference_year):
+            """ Extract pipe price also in previous period (always year)
             """
             material_id = cmpt.product_id.pipe_material_id.id
-            return material_price_db.get(
+            # if material_id not in material_price_db:
+            #    _logger.error(
+            #        'No pipe price for reference %s' % reference_year)
+            return pipe_price_history.get(
                 material_id, {}).get(reference_year) or 0.0
 
         if datas is None:
@@ -952,7 +955,7 @@ class ProductProduct(orm.Model):
         # ---------------------------------------------------------------------
         dump_pool = self.pool.get('product.product.bom.dump')
 
-        # Load simulation paremeter list (mask and price)
+        # Load simulation parameter list (mask and price)
         simulation_db = []
         simulation_pool = self.pool.get('mrp.bom.industrial.simulation')
         simulation_ids = simulation_pool.search(cr, uid, [], context=context)
@@ -960,19 +963,21 @@ class ProductProduct(orm.Model):
                 cr, uid, simulation_ids, context=context):
             simulation_db.append(simulation)
 
-        # Material history price if needed:
-        material_price_db = {}
-        material_price_pool = self.pool.get('product.pipe.material.history')
-        material_price_ids = material_price_pool.search(
+        # ---------------------------------------------------------------------
+        #                 Pipe history price if needed:
+        # ---------------------------------------------------------------------
+        pipe_price_history = {}
+        pipe_price_pool = self.pool.get('product.pipe.material.history')
+        pipe_price_ids = pipe_price_pool.search(
             cr, uid, [], context=context)
-        for material_price in material_price_pool.browse(
-                cr, uid, material_price_ids, context=context):
-            material = material_price.material_id
+        for pipe_price in pipe_price_pool.browse(
+                cr, uid, pipe_price_ids, context=context):
+            material = pipe_price.material_id
             material_id = material.id
-            if material_id not in material_price_db:
-                material_price_db[material_id] = {}
-            material_price_db[material_id][material_price.year] = \
-                material_price.last_price
+            if material_id not in pipe_price_history:
+                pipe_price_history[material_id] = {}
+            pipe_price_history[material_id][pipe_price.year] = \
+                pipe_price.last_price
 
         # ---------------------------------------------------------------------
         # Context parameters:
@@ -1014,6 +1019,7 @@ class ProductProduct(orm.Model):
         old_date = 730  # days parameter
         old_component_date = str(
             datetime.now() - timedelta(days=old_date))[:10]
+        # todo in old BOM use to_date as start?
 
         # ---------------------------------------------------------------------
         # Load history database if to_date range is setup:
@@ -1043,7 +1049,6 @@ class ProductProduct(orm.Model):
                     continue  # External date or not present
 
                 product = history.pricelist_id.product_id
-
                 default_code = product.default_code
                 if default_code in history_db:
                     continue  # old price
@@ -1173,7 +1178,7 @@ class ProductProduct(orm.Model):
                             price_detail = get_price_detail(price_ids)
 
                             # -------------------------------------------------
-                            # Fabric element:
+                            #                  Fabric element:
                             # -------------------------------------------------
                             is_fabric = is_fabric_product(cmpt.product_id) # mq
                             uom_name = cmpt.product_id.uom_id.name
@@ -1188,17 +1193,19 @@ class ProductProduct(orm.Model):
                                         )
 
                             # -------------------------------------------------
-                            # Pipe element:
+                            #                   Pipe element:
                             # -------------------------------------------------
                             pipe_simulated_unit = 0.0
                             if cmpt.product_id.is_pipe:
                                 # Calc with weight and price kg not cost mng.:
                                 # todo Simulation:
                                 if reference_year:
+                                    # Use history when limited date present:
                                     pipe_price = get_pipe_material_price(
-                                        material_price_db, cmpt,
+                                        pipe_price_history, cmpt,
                                         reference_year)
                                 else:
+                                    # Use last price in material:
                                     pipe_price = \
                                         cmpt.product_id.pipe_material_id.\
                                             last_price
@@ -1258,7 +1265,7 @@ class ProductProduct(orm.Model):
                             data[0] += min_value * cmpt_q
                             data[1] += max_value * cmpt_q
                             data[12] += simulated_cost
-                            # todo data[13]
+                            # data[13] # not used here!
 
                             if component.default_code not in component_saved:
                                 hw_total += max_value * cmpt_q

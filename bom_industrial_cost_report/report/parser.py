@@ -1184,7 +1184,7 @@ class ProductProduct(orm.Model):
                                         cmpt_q * is_fabric,
                                         max_value / is_fabric,
                                         # Reference simulat.:
-                                        simulated_unit * is_fabric,
+                                        simulated_unit / is_fabric,
                                         )
 
                             # -------------------------------------------------

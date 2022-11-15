@@ -62,8 +62,8 @@ class ProductPipeMaterial(orm.Model):
     _description = 'Pipe description'
 
     def realculate_all_price(self, cr, uid, ids, context=None):
-        ''' Manually launch schedule operation
-        '''
+        """ Manually launch schedule operation
+        """
         self.pool.get('product.product').schedule_pipe_price_calculation(
             cr, uid, context=context)
 
@@ -135,8 +135,8 @@ class ProductProduct(orm.Model):
 
     # Scheduled operations:
     def schedule_pipe_price_calculation(self, cr, uid, context=None):
-        ''' Calculate all pipe value if weight / volume is present
-        '''
+        """ Calculate all pipe value if weight / volume is present
+        """
         pipe_ids = self.search(cr, uid, [
             ('is_pipe', '=', True),
             ('pipe_material_id.weight_specific', '>', 0.0), # has wh/vol.
@@ -145,10 +145,37 @@ class ProductProduct(orm.Model):
         return self.calculate_pipe_price_from_dimension(
             cr, uid, pipe_ids, context=context)
 
+    def get_auto_weight(self, cr, uid, ids, context=None):
+        """ Calculate auto weigth from pipe item
+        """
+        product = self.browse(cr, uid, ids, context=context)[0]
+
+        thick = product.pipe_thick
+
+        # Area:
+        ray1 = product.pipe_diameter / 2
+        if product.pipe_diameter2:
+            ray2 = product.pipe_diameter2 / 2
+        else:
+            ray2 = ray1
+
+        plain_area = ray1 * ray2 * math.pi
+        empty_area = (ray1 - thick) * (ray2 - thick) * math.pi
+
+        # Volume:
+        plain_volume = plain_area * product.pipe_length
+        empty_volume = empty_area * product.pipe_length
+        volume = (plain_volume - empty_volume) / 1000000  # m3
+
+        # Weight:
+        weight = volume * product.pipe_material_id.weight_specific
+
+        return weight
+
     def calculate_pipe_price_from_dimension(self, cr, uid, ids, context=None):
-        ''' Calculate volume depend on dimension of pipe and weight / volume
+        """ Calculate volume depend on dimension of pipe and weight / volume
             remove auto weight, use context parameter
-        '''
+        """
         # Auto weight parameter:
         if context is None:
             context = {}
@@ -174,7 +201,7 @@ class ProductProduct(orm.Model):
                 # Volume:
                 plain_volume = plain_area * product.pipe_length
                 empty_volume = empty_area * product.pipe_length
-                volume = (plain_volume - empty_volume) / 1000000 # m3
+                volume = (plain_volume - empty_volume) / 1000000  # m3
 
                 # Weight:
                 weight = volume * product.pipe_material_id.weight_specific

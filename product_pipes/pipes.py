@@ -128,6 +128,7 @@ class ProductPipeMaterial(orm.Model):
             'Storico prezzi'),
         }
 
+
 class ProductProduct(orm.Model):
     """ Model name: Product
     """
@@ -139,14 +140,14 @@ class ProductProduct(orm.Model):
         """
         pipe_ids = self.search(cr, uid, [
             ('is_pipe', '=', True),
-            ('pipe_material_id.weight_specific', '>', 0.0), # has wh/vol.
-            ('pipe_material_id.last_price', '>', 0.0), # has price
+            ('pipe_material_id.weight_specific', '>', 0.0),  # has wh/vol.
+            ('pipe_material_id.last_price', '>', 0.0),  # has price
             ], context=context)
         return self.calculate_pipe_price_from_dimension(
             cr, uid, pipe_ids, context=context)
 
     def get_auto_weight(self, cr, uid, ids, context=None):
-        """ Calculate auto weigth from pipe item
+        """ Calculate auto weight from pipe item
         """
         product = self.browse(cr, uid, ids, context=context)[0]
 

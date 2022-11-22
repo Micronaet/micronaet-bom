@@ -110,7 +110,7 @@ class SaleOrder(orm.Model):
             for state in mail_message[mode]:
                 total = mail_message[mode][state]
                 body += ' - %s: Totale %s su %s righe\n' % (
-                    state, total[0], total[1],
+                    state, int(total[0]), int(total[1]),
                     )
         thread_pool.message_post(
             cr, uid, False,

@@ -106,10 +106,10 @@ class SaleOrder(orm.Model):
         # Body message:
         body = 'Margini OC e FT, dettaglio:<br/>\n'
         for mode in mail_message:
-            body += 'Analisi %s\n' % mode
+            body += 'Analisi %s<br/>\n' % mode
             for state in mail_message[mode]:
                 total = mail_message[mode][state]
-                body += ' - %s: Totale %s su %s righe\n' % (
+                body += ' - %s: Totale <b>%s</b> su %s righe<br/>\n' % (
                     state, int(total[0]), int(total[1]),
                     )
         thread_pool.message_post(

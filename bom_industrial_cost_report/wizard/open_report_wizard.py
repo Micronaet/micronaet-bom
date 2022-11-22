@@ -54,7 +54,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
     def action_print_invoice_cost_analysis(self, cr, uid, ids, context=None):
         """ Compare price with extra period
         """
-        min_margin = 0.3  # 30%
+        min_margin = 30.0
 
         product_pool = self.pool.get('product.product')
         line_pool = self.pool.get('account.invoice.line')
@@ -105,7 +105,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             '% trasp', '% extra sc.',
             'Fatt. tot.', 'Marg. tot', 'Marg. %',
             'No DB', 'Errore',
-            'Marg. < %s%%' % (min_margin * 100.0),
+            'Marg. < %s%%' % min_margin,
         ]
         width = [
             8, 35, 12, 10,

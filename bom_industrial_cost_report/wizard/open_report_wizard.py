@@ -473,7 +473,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # Read data:
             # -----------------------------------------------------------------
             order = line.order_id
-            partner = invoice.partner_id
+            partner = order.partner_id
             product = line.product_id
             code5 = (product.default_code or '')[:5]
             quantity = line.product_uom_qty

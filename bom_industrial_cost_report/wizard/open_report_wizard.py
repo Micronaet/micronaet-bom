@@ -147,6 +147,10 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 'text': excel_pool.get_format(key='bg_green'),
                 'number': excel_pool.get_format(key='bg_green_number'),
             },
+            'grey': {
+                'text': excel_pool.get_format(key='bg_grey'),
+                'number': excel_pool.get_format(key='bg_grey_number'),
+            },
         }
 
         # ---------------------------------------------------------------------
@@ -233,6 +237,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             if real_price < 0:
                 color = excel_format['red']
             elif not margin:
+                color = excel_format['grey']
+            elif margin < min_margin:
                 color = excel_format['yellow']
             else:
                 color = excel_format['white']

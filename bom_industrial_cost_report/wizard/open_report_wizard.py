@@ -104,12 +104,12 @@ class SaleOrder(orm.Model):
             partner_ids.append(user.partner_id.id)
 
         # Body message:
-        body = 'Margini OC e FT, dettaglio:\n'
+        body = 'Margini OC e FT, dettaglio:<br/>\n'
         for mode in mail_message:
             body += 'Analisi %s\n' % mode
             for state in mail_message[mode]:
                 total = mail_message[mode][state]
-                body += ' - %s: Totale %s su %s righe' % (
+                body += ' - %s: Totale %s su %s righe\n' % (
                     state, total[0], total[1],
                     )
         thread_pool.message_post(

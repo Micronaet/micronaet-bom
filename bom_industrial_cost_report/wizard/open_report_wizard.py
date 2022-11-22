@@ -73,7 +73,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         order_domain = []
         from_date = wiz_proxy.from_date
         to_date = wiz_proxy.to_date
-        min_margin = min(wiz_proxy.min_magin, 0.0)  # Not negative
+        min_margin = min(wiz_proxy.min_margin, 0.0)  # Not negative
 
         if from_date:
             domain.append(('invoice_id.date_invoice', '>=', from_date))

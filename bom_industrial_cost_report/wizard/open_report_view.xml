@@ -19,6 +19,7 @@
                        <field name="to_date" />
 
                        <field name="report_name" />
+                       <field name="min_margin" />
 
                        <separator string="Report Excel con paragoni:" colspan="3"/>
                        <button name="action_print_extra_period" string="Stampa contronto annuale" type="object" icon="gtk-print" class="oe_highlight" colspan="1"/>

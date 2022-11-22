@@ -242,12 +242,16 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # Color setup:
             # -----------------------------------------------------------------
             if not db:
+                margin_coment = 'NIENTE DISTINTA'
                 color = excel_format['grey']
             elif margin_rate <= 0:
+                margin_coment = 'NEGATIVO'
                 color = excel_format['red']
             elif margin_rate < min_margin:
+                margin_coment = 'BASSO'
                 color = excel_format['yellow']
             else:
+                margin_coment = 'CORRETTO'
                 color = excel_format['white']
 
             # -----------------------------------------------------------------
@@ -278,7 +282,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
                 u'' if db else u'X',
                 error,
-                'X' if margin_rate < min_margin else '',
+                margin_coment,
             ]
             row += 1
             excel_pool.write_xls_line(
@@ -402,12 +406,16 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # Color setup:
             # -----------------------------------------------------------------
             if not db:
+                margin_coment = 'NIENTE DISTINTA'
                 color = excel_format['grey']
             elif margin_rate <= 0:
+                margin_coment = 'NEGATIVO'
                 color = excel_format['red']
             elif margin_rate < min_margin:
+                margin_coment = 'BASSO'
                 color = excel_format['yellow']
             else:
+                margin_coment = 'CORRETTO'
                 color = excel_format['white']
 
             # -----------------------------------------------------------------
@@ -438,7 +446,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
                 u'' if db else u'X',
                 error,
-                'X' if margin_rate < min_margin else '',
+                margin_coment,
             ]
             row += 1
             excel_pool.write_xls_line(

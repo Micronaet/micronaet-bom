@@ -639,7 +639,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             }
 
     _columns = {
-        'min_margin': fields.date('Margine minimo', required=True),
+        'min_margin': fields.float(
+            'Margine minimo', digits=(10, 3), required=True),
         'from_date': fields.date('From date'),
         'to_date': fields.date('To date'),
         'report_name': fields.selection([

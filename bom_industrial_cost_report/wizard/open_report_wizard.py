@@ -421,7 +421,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         excel_pool.write_xls_line(
             ws_name, row, [
                 u'Analisi marginalità su ordinato '
-                u'(rosso=negativo, giallo=<%s%%, bianco=corretto) - Filtro: ' %
+                u'(rosso=negativo, giallo=<%s%%, bianco=corretto) - Filtro: '
+                u'%s' %
                 min_margin, order_comment,
             ], default_format=excel_format['title'])
         excel_pool.merge_cell(ws_name, [row, 0, row, 11])

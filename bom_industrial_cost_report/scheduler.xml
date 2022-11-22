@@ -15,5 +15,19 @@
 			<field eval="96" name="interval_number"/>
 			<field eval="&quot;&quot;&quot;mrp.bom.industrial.history&quot;&quot;&quot;" name="model"/>
 		</record>
+		<record id="ir_cron_send_margin_order_invoice_bom_report_scheduler_0" model="ir.cron">
+			<field eval="&quot;&quot;&quot;send_margin_order_invoice_bom_report_scheduler&quot;&quot;&quot;" name="function"/>
+			<field eval="&quot;&quot;&quot;days&quot;&quot;&quot;" name="interval_type"/>
+			<field name="user_id" ref="base.user_root"/>
+			<field eval="&quot;&quot;&quot;Scheduled Send margin report&quot;&quot;&quot;" name="name"/>
+			<field eval="-1" name="numbercall"/>
+			<field eval="&quot;&quot;&quot;2008-07-04 23:00:00&quot;&quot;&quot;" name="nextcall"/>
+			<field eval="5" name="priority"/>
+			<field eval="0" name="doall"/>
+			<field eval="1" name="active"/>
+			<field name="args">()</field>
+			<field eval="1" name="interval_number"/>
+			<field eval="&quot;&quot;&quot;sale.order&quot;&quot;&quot;" name="model"/>
+		</record>
 	</data>
 </openerp>

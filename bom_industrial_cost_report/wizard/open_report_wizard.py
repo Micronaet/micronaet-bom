@@ -43,6 +43,80 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 _logger = logging.getLogger(__name__)
 
 
+class SaleOrder(orm.Model):
+    """ Add Scheduled action
+    """
+    _inherit = 'sale.order'
+
+    def send_margin_order_invoice_bom_report_scheduler(
+            self, cr, uid, margin=30.0, context=None):
+        """ Generate PDF with data and send mail
+        """
+        if context is None:
+            context = {
+                'lang': 'it_IT',
+                }
+
+        wizard_pool = self.pool.get('product.bom.report.limit.wizard')
+        ctx = context.copy()
+        ctx['save_mode'] = True  # generate file not print report
+
+        # Setup wizard call:
+        now = datetime.now()
+        month = now.month
+        if month >= 9:
+            year = now.year
+        else:
+            year = now.year - 1
+        from_date = '%s-%02d-01' % (year, month)
+
+        wizard_id = wizard_pool.create(cr, uid, {
+            'from_date': from_date,
+            # 'to_date': '',
+            'min_margin': margin,
+            'report_name': 'industrial_cost_bom_report',
+        }, context=context)
+        filename = wizard_pool.action_print_invoice_cost_analysis(
+            cr, uid, [wizard_id], context=ctx)
+
+        # ---------------------------------------------------------------------
+        # Report in ODT mode:
+        # ---------------------------------------------------------------------
+        now = now.strftime(DEFAULT_SERVER_DATETIME_FORMAT).replace(
+            '-', '_').replace(':', '.')
+
+        # Create attachment block for send after:
+        xlsx_raw = open(filename, 'rb').read()
+        attachments = [('Controllo margini OC e FT %s.xlsx' % now, xlsx_raw)]
+
+        # ---------------------------------------------------------------------
+        # Send report:
+        # ---------------------------------------------------------------------
+        # Send mail with attachment:
+        group_pool = self.pool.get('res.groups')
+        model_pool = self.pool.get('ir.model.data')
+        thread_pool = self.pool.get('mail.thread')
+        group_id = model_pool.get_object_reference(
+            cr, uid, 'bom_industrial_cost_report', 'group_margin_report')[1]
+        partner_ids = []
+        for user in group_pool.browse(
+                cr, uid, group_id, context=context).users:
+            partner_ids.append(user.partner_id.id)
+
+        thread_pool.message_post(
+            cr, uid, False,
+            type='email',
+            body='Margini OC e FT',
+            subject='Invio automatico margini su venduto/ordinato: %s' % (
+                datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT),
+                ),
+            partner_ids=[(6, 0, partner_ids)],
+            attachments=attachments,
+            context=context,
+            )
+        return True
+
+
 class ProductBomReportLimitWizard(orm.TransientModel):
     """ Wizard for open report with limited price date
     """
@@ -54,16 +128,19 @@ class ProductBomReportLimitWizard(orm.TransientModel):
     def action_print_invoice_cost_analysis(self, cr, uid, ids, context=None):
         """ Compare price with extra period
         """
+        # ---------------------------------------------------------------------
+        #                          Generate data:
+        # ---------------------------------------------------------------------
+        # Parameters:
+        if context is None:
+            context = {}
+        save_mode = context.get('save_mode')
+
         product_pool = self.pool.get('product.product')
         line_pool = self.pool.get('account.invoice.line')
         order_line_pool = self.pool.get('sale.order.line')
         excel_pool = self.pool.get('excel.writer')
 
-        # ---------------------------------------------------------------------
-        #                          Generate data:
-        # ---------------------------------------------------------------------
-        if context is None:
-            context = {}
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
 
         # ---------------------------------------------------------------------
@@ -481,10 +558,17 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             0.0,  # complete_total[position],
         )
 
-        # todo manage also save mode for mail report:
-
-        return excel_pool.return_attachment(
-            cr, uid, 'Comparativo fatturato e ordinato')
+        # ---------------------------------------------------------------------
+        # Manage save or report mode:
+        # ---------------------------------------------------------------------
+        if save_mode:
+            now = str(datetime.now()).replace(':', '').replace('/', '')
+            excel_file = '/tmp/%s' % now
+            excel_pool.save_file_as(excel_file)
+            return excel_file
+        else:
+            return excel_pool.return_attachment(
+                cr, uid, 'Comparativo fatturato e ordinato')
 
     def action_print_extra_period(self, cr, uid, ids, context=None):
         """ Compare price with extra period

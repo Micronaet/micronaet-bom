@@ -76,7 +76,7 @@ class SaleOrder(orm.Model):
             'min_margin': margin,
             'report_name': 'industrial_cost_bom_report',
         }, context=context)
-        filename = wizard_pool.action_print_invoice_cost_analysis(
+        filename, mail_message = wizard_pool.action_print_invoice_cost_analysis(
             cr, uid, [wizard_id], context=ctx)
 
         # ---------------------------------------------------------------------
@@ -103,10 +103,19 @@ class SaleOrder(orm.Model):
                 cr, uid, group_id, context=context).users:
             partner_ids.append(user.partner_id.id)
 
+        # Body message:
+        body = 'Margini OC e FT, dettaglio:\n'
+        for mode in mail_message:
+            body += 'Analisi %s\n' % mode
+            for state in mail_message[mode]:
+                total = mail_message[mode][state]
+                body += ' - %s: Totale %s su %s righe' % (
+                    state, total[0], total[1],
+                    )
         thread_pool.message_post(
             cr, uid, False,
             type='email',
-            body='Margini OC e FT',
+            body=body,
             subject='Invio automatico margini su venduto/ordinato: %s' % (
                 datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT),
                 ),
@@ -135,6 +144,21 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         if context is None:
             context = {}
         save_mode = context.get('save_mode')
+        if save_mode:
+            mail_message = {
+                'Fatturato': {
+                    'NIENTE DISTINTA': [0.0, 0.0],  # Total, lines
+                    'BASSO': [0.0, 0.0],  # Total, lines
+                    'NEGATIVO': [0.0, 0.0],  # Total, lines
+                    'CORRETTO': [0.0, 0.0],  # Total, lines
+                    },
+                'Ordinato': {
+                    'NIENTE DISTINTA': [0.0, 0.0],  # Total, lines
+                    'BASSO': [0.0, 0.0],  # Total, lines
+                    'NEGATIVO': [0.0, 0.0],  # Total, lines
+                    'CORRETTO': [0.0, 0.0],  # Total, lines
+                    },
+                }
 
         product_pool = self.pool.get('product.product')
         line_pool = self.pool.get('account.invoice.line')
@@ -344,6 +368,10 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 margin_comment = 'CORRETTO'
                 color = excel_format['white']
 
+            if save_mode:
+                mail_message[ws_name][margin_comment][0] += subtotal
+                mail_message[ws_name][margin_comment][1] += 1
+
             # -----------------------------------------------------------------
             # Write data:
             # -----------------------------------------------------------------
@@ -508,6 +536,10 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 margin_comment = 'CORRETTO'
                 color = excel_format['white']
 
+            if save_mode:
+                mail_message[ws_name][margin_comment][0] += subtotal
+                mail_message[ws_name][margin_comment][1] += 1
+
             # -----------------------------------------------------------------
             # Write data:
             # -----------------------------------------------------------------
@@ -571,7 +603,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             now = str(datetime.now()).replace(':', '').replace('/', '')
             excel_file = '/tmp/%s' % now
             excel_pool.save_file_as(excel_file)
-            return excel_file
+            return excel_file, mail_message
         else:
             return excel_pool.return_attachment(
                 cr, uid, 'Comparativo fatturato e ordinato')

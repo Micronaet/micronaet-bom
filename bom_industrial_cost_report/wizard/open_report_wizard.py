@@ -104,7 +104,7 @@ class SaleOrder(orm.Model):
             partner_ids.append(user.partner_id.id)
 
         # Body message:
-        body = 'Margini OC e FT, dettaglio:<br/>\n'
+        body = '<b>Margini OC e FT, dettaglio:</b><br/>\n'
         for mode in mail_message:
             body += 'Analisi %s<br/>\n' % mode
             for state in mail_message[mode]:

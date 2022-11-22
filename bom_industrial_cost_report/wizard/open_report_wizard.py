@@ -108,7 +108,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             'Prodotto', 'Nome', 'DB',
             'Quant.', 'Pr. unit', 'Pr. Netto', 'Costo DB', 'Marg. unit.',
             '% trasp', '% extra sc.',
-            ' tot.' % mode[0], 'Marg. tot', 'Marg. %',
+            '%s tot.' % mode[0], 'Marg. tot', 'Marg. %',
             'No DB', 'Errore',
             'Marg. < %s%%' % min_margin,
         ]

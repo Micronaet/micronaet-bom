@@ -238,7 +238,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 color = excel_format['red']
             elif not margin:
                 color = excel_format['grey']
-            elif margin < min_margin:
+            elif margin_rate < min_margin:
                 color = excel_format['yellow']
             else:
                 color = excel_format['white']

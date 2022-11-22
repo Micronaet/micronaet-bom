@@ -32,6 +32,7 @@
     'depends': [
         'base',
         'mrp',
+        'sale',
         'product',
         'account',
         'bom_production_cost',

@@ -30,7 +30,7 @@
       </record>
 
       <record model="ir.actions.act_window" id="action_product_bom_report_limit">
-          <field name="name">Print limited BOM</field>
+          <field name="name">Stampe di analisi con distinte</field>
           <field name="res_model">product.bom.report.limit.wizard</field>
           <field name="view_type">form</field>
           <field name="view_mode">form</field>

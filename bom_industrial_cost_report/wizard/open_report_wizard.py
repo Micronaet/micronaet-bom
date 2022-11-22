@@ -105,7 +105,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             '% trasp', '% extra sc.',
             'Fatt. tot.', 'Marg. tot', 'Marg. %',
             'No DB', 'Errore',
-            'Marg. < %s%%' % min_margin * 100.0,
+            'Marg. < %s%%' % (min_margin * 100.0),
         ]
         width = [
             8, 35, 12, 10,

@@ -416,7 +416,7 @@ class MRPLavoration(orm.Model):
         'total_prepare': fields.float('Tot. prepare H.', digits=(16, 3)),
         'total_stop': fields.float('Tot. stop H.', digits=(16, 3)),
         'workers': fields.char('Workers', size=64),
-        'is_mrp_lavoration': fields.boolean('Is Lavoration'),  # TODO remove!!!
+        'is_mrp_lavoration': fields.boolean('Is Lavoration'),  # todo remove!!!
         'device_id': fields.many2one('stock.picking.device', 'Device'),
 
         # Override:

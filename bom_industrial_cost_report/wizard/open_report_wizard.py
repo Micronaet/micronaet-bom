@@ -54,6 +54,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
     def action_print_invoice_cost_analysis(self, cr, uid, ids, context=None):
         """ Compare price with extra period
         """
+        min_margin = 0.3  # 30%
+
         product_pool = self.pool.get('product.product')
         line_pool = self.pool.get('account.invoice.line')
         excel_pool = self.pool.get('excel.writer')
@@ -103,6 +105,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             '% trasp', '% extra sc.',
             'Fatt. tot.', 'Marg. tot', 'Marg. %',
             'No DB', 'Errore',
+            'Marg. < %s%%' % min_margin * 100.0,
         ]
         width = [
             8, 35, 12, 10,
@@ -110,7 +113,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             10, 10, 10, 10, 10,
             6, 6,
             12, 12, 10,
-            5, 40,
+            5, 40, 15
         ]
 
         # ---------------------------------------------------------------------
@@ -119,7 +122,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         excel_pool.create_worksheet(name=ws_name)
         excel_pool.column_width(ws_name, width)
         # excel_pool.row_height(ws_name, row_list, height=10)
-        title = ['Controllo margini fatturato']
+        # title = ['Controllo margini fatturato']
 
         # ---------------------------------------------------------------------
         # Generate format used:
@@ -262,6 +265,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
                 u'' if db else u'X',
                 error,
+                'X' if margin_rate < min_margin else '',
             ]
             row += 1
             excel_pool.write_xls_line(

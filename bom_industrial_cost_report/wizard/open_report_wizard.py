@@ -70,17 +70,24 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         # Setup domain for invoice:
         # ---------------------------------------------------------------------
         domain = []
-        order_domain = []
+        order_domain = [
+            ('order_id.state', 'not in', ('draft', 'cancel', 'sent')),
+            ('mx_closed', '=', False),
+            ('order_id.mx_closed', '=', False),
+            # ('forecasted_production_id', '=', False)
+        ]
         from_date = wiz_proxy.from_date
         to_date = wiz_proxy.to_date
         min_margin = max(wiz_proxy.min_margin, 0.0)  # Not negative
 
         if from_date:
             domain.append(('invoice_id.date_invoice', '>=', from_date))
-            order_domain.append(('order_id.date_order', '>=', from_date))
+            order_domain.append(('order_id.date_order', '>=',
+                                 '%s 00:00:00' % from_date))
         if to_date:
             domain.append(('invoice_id.date_invoice', '<=', to_date))
-            order_domain.append(('order_id.date_order', '<=', to_date))
+            order_domain.append(('order_id.date_order', '<=',
+                                 '%s 23:59:59' % to_date))
 
         # ---------------------------------------------------------------------
         # Load DB template
@@ -425,7 +432,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 line.season_period,
                 u'{}'.format(partner.name),
                 order.name,
-                order.date_order,
+                (order.date_order or '')[:10],
 
                 u'{}'.format(product.default_code),
                 u'{}'.format(product.name),

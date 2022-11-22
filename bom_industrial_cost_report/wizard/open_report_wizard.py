@@ -56,7 +56,7 @@ class SaleOrder(orm.Model):
             context = {
                 'lang': 'it_IT',
                 }
-
+        season_month = 9
         wizard_pool = self.pool.get('product.bom.report.limit.wizard')
         ctx = context.copy()
         ctx['save_mode'] = True  # generate file not print report
@@ -64,11 +64,11 @@ class SaleOrder(orm.Model):
         # Setup wizard call:
         now = datetime.now()
         month = now.month
-        if month >= 9:
+        if month >= season_month:
             year = now.year
         else:
             year = now.year - 1
-        from_date = '%s-%02d-01' % (year, month)
+        from_date = '%s-%02d-01' % (year, season_month)
 
         wizard_id = wizard_pool.create(cr, uid, {
             'from_date': from_date,

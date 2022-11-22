@@ -980,7 +980,7 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         now = now.replace('-', '_').replace(':', '.')
-        if mode == 'odt': # TODO remove, no more used!
+        if mode == 'odt':  # TODO remove, no more used!
             report_name = 'stock_status_explode_report'
 
             # -----------------------------------------------------------------

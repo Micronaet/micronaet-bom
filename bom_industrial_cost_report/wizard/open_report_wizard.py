@@ -157,14 +157,20 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         to_date = wiz_proxy.to_date
         min_margin = max(wiz_proxy.min_margin, 0.0)  # Not negative
 
+        comment = ''
+        order_comment = ''
         if from_date:
             domain.append(('invoice_id.date_invoice', '>=', from_date))
             order_domain.append(('order_id.date_order', '>=',
                                  '%s 00:00:00' % from_date))
+            comment += 'FT dalla data %s' % from_date
+            order_comment += 'FT Dalla data %s' % from_date
         if to_date:
             domain.append(('invoice_id.date_invoice', '<=', to_date))
             order_domain.append(('order_id.date_order', '<=',
                                  '%s 23:59:59' % to_date))
+            comment += 'FT alla data %s' % to_date
+            order_comment += 'FT alla data %s' % to_date
 
         # ---------------------------------------------------------------------
         # Load DB template
@@ -250,8 +256,9 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         excel_pool.write_xls_line(
             ws_name, row, [
                 u'Analisi marginalità su fatturato '
-                u'(rosso=negativo, giallo=<%s%%, bianco=corretto):' %
-                min_margin
+                u'(rosso=negativo, giallo=<%s%%, bianco=corretto) -  Filtro: '
+                u'%s' %
+                min_margin, comment,
             ], default_format=excel_format['title'])
         excel_pool.merge_cell(ws_name, [row, 0, row, 11])
 
@@ -326,16 +333,16 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # Color setup:
             # -----------------------------------------------------------------
             if not db:
-                margin_coment = 'NIENTE DISTINTA'
+                margin_comment = 'NIENTE DISTINTA'
                 color = excel_format['grey']
             elif margin_rate <= 0:
-                margin_coment = 'NEGATIVO'
+                margin_comment = 'NEGATIVO'
                 color = excel_format['red']
             elif margin_rate < min_margin:
-                margin_coment = 'BASSO'
+                margin_comment = 'BASSO'
                 color = excel_format['yellow']
             else:
-                margin_coment = 'CORRETTO'
+                margin_comment = 'CORRETTO'
                 color = excel_format['white']
 
             # -----------------------------------------------------------------
@@ -366,7 +373,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
                 u'' if db else u'X',
                 error,
-                margin_coment,
+                margin_comment,
             ]
             row += 1
             excel_pool.write_xls_line(
@@ -414,8 +421,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         excel_pool.write_xls_line(
             ws_name, row, [
                 u'Analisi marginalità su ordinato '
-                u'(rosso=negativo, giallo=<%s%%, bianco=corretto):' %
-                min_margin
+                u'(rosso=negativo, giallo=<%s%%, bianco=corretto) - Filtro: ' %
+                min_margin, order_comment,
             ], default_format=excel_format['title'])
         excel_pool.merge_cell(ws_name, [row, 0, row, 11])
 
@@ -490,16 +497,16 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # Color setup:
             # -----------------------------------------------------------------
             if not db:
-                margin_coment = 'NIENTE DISTINTA'
+                margin_comment = 'NIENTE DISTINTA'
                 color = excel_format['grey']
             elif margin_rate <= 0:
-                margin_coment = 'NEGATIVO'
+                margin_comment = 'NEGATIVO'
                 color = excel_format['red']
             elif margin_rate < min_margin:
-                margin_coment = 'BASSO'
+                margin_comment = 'BASSO'
                 color = excel_format['yellow']
             else:
-                margin_coment = 'CORRETTO'
+                margin_comment = 'CORRETTO'
                 color = excel_format['white']
 
             # -----------------------------------------------------------------
@@ -530,7 +537,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
                 u'' if db else u'X',
                 error,
-                margin_coment,
+                margin_comment,
             ]
             row += 1
             excel_pool.write_xls_line(

@@ -54,10 +54,9 @@ class ProductBomReportLimitWizard(orm.TransientModel):
     def action_print_invoice_cost_analysis(self, cr, uid, ids, context=None):
         """ Compare price with extra period
         """
-        min_margin = 30.0
-
         product_pool = self.pool.get('product.product')
         line_pool = self.pool.get('account.invoice.line')
+        order_line_pool = self.pool.get('sale.order.line')
         excel_pool = self.pool.get('excel.writer')
 
         # ---------------------------------------------------------------------
@@ -71,12 +70,17 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         # Setup domain for invoice:
         # ---------------------------------------------------------------------
         domain = []
+        order_domain = []
         from_date = wiz_proxy.from_date
         to_date = wiz_proxy.to_date
+        min_margin = min(wiz_proxy.min_magin, 0.0)  # Not negative
+
         if from_date:
             domain.append(('invoice_id.date_invoice', '>=', from_date))
+            order_domain.append(('order_id.date_order', '>=', from_date))
         if to_date:
             domain.append(('invoice_id.date_invoice', '<=', to_date))
+            order_domain.append(('order_id.date_order', '<=', to_date))
 
         # ---------------------------------------------------------------------
         # Load DB template
@@ -96,14 +100,15 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         #                          Excel export:
         # ---------------------------------------------------------------------
-        ws_name = 'Distinte'
+        ws_name = 'Fatturato'
+        mode = 'Fatt.', 'Fattura'
 
         header = [
-            'Stagione', 'Cliente', 'Fattura', 'Data',
+            'Stagione', 'Cliente', mode[1], 'Data',
             'Prodotto', 'Nome', 'DB',
             'Quant.', 'Pr. unit', 'Pr. Netto', 'Costo DB', 'Marg. unit.',
             '% trasp', '% extra sc.',
-            'Fatt. tot.', 'Marg. tot', 'Marg. %',
+            ' tot.' % mode[0], 'Marg. tot', 'Marg. %',
             'No DB', 'Errore',
             'Marg. < %s%%' % min_margin,
         ]
@@ -301,7 +306,170 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             0.0,  # complete_total[position],
         )
 
-        return excel_pool.return_attachment(cr, uid, 'Comparativo fatturato')
+        # =====================================================================
+        #                             SALE ORDER:
+        # =====================================================================
+        # Create WS:
+        # ---------------------------------------------------------------------
+        ws_name = 'Ordinato'
+        mode = 'Ord.', 'Ordini'  # Replace header fields
+
+        excel_pool.create_worksheet(name=ws_name)
+        excel_pool.column_width(ws_name, width)
+        # Format yet present
+
+        # ---------------------------------------------------------------------
+        # Write title / header
+        # ---------------------------------------------------------------------
+        row = 0
+        # Total line:
+        excel_pool.write_xls_line(
+            ws_name, row, [
+                u'Analisi marginalità su ordinato '
+                u'(rosso=negativo, giallo=<%s%%, bianco=corretto):' %
+                min_margin
+            ], default_format=excel_format['title'])
+        excel_pool.merge_cell(ws_name, [row, 0, row, 11])
+
+        row += 1
+        excel_pool.write_xls_line(
+            ws_name, row, header, default_format=excel_format['header'])
+        excel_pool.freeze_panes(ws_name, 2, 5)
+        excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
+
+        order_line_ids = order_line_pool.search(
+            cr, uid, order_domain, context=context)
+        for line in sorted(
+                order_line_pool.browse(
+                    cr, uid, order_line_ids, context=context),
+                key=lambda l: (
+                    l.order_id.partner_id.name,
+                    l.order_id.date_order,
+                )):
+
+            # -----------------------------------------------------------------
+            # Read data:
+            # -----------------------------------------------------------------
+            order = line.order_id
+            partner = invoice.partner_id
+            product = line.product_id
+            code5 = (product.default_code or '')[:5]
+            quantity = line.product_uom_qty
+
+            # Cache parameter
+            if partner not in partner_cache:
+                partner_cache[partner] = [
+                    partner.industrial_transport_rate,
+                    partner.industrial_extra_discount,
+                ]
+            industrial_transport_rate, industrial_extra_discount = \
+                partner_cache[partner]
+
+            # -----------------------------------------------------------------
+            # Calc data used:
+            # -----------------------------------------------------------------
+            subtotal = line.price_subtotal
+            if quantity:
+                real_price = subtotal / quantity
+                # A. Extra discount:
+                real_price -= real_price * industrial_extra_discount / 100.0
+            else:
+                real_price = 0.0
+
+            # Bom price
+            bom_product = bom_data.get(code5)
+            margin_rate = 0.0
+            if bom_product:
+                cost = bom_product.to_industrial
+
+                # B. Extra transport cost:
+                # todo manage only if incoterms:
+                if industrial_transport_rate:
+                    cost += cost * industrial_transport_rate / 100.0
+
+                margin = real_price - cost
+                margin_total = margin * quantity
+                if subtotal:
+                    margin_rate = 100.0 * margin_total / subtotal
+                db = code5
+                error = u''
+            else:
+                cost = margin = margin_total = 0.0  # no value if no cost!
+                db = u''
+                error = u'DB non trovata (niente margine)'
+
+            # -----------------------------------------------------------------
+            # Color setup:
+            # -----------------------------------------------------------------
+            if real_price < 0:
+                color = excel_format['red']
+            elif not margin:
+                color = excel_format['grey']
+            elif margin_rate < min_margin:
+                color = excel_format['yellow']
+            else:
+                color = excel_format['white']
+
+            # -----------------------------------------------------------------
+            # Write data:
+            # -----------------------------------------------------------------
+            data = [
+                line.season_period,
+                u'{}'.format(partner.name),
+                order.name,
+                order.date_order,
+
+                u'{}'.format(product.default_code),
+                u'{}'.format(product.name),
+                db,
+
+                quantity,
+                (line.price_unit, color['number']),
+                (real_price, color['number']),
+                (cost, color['number']),
+                (margin, color['number']),
+
+                (industrial_transport_rate, color['number']),
+                (industrial_extra_discount, color['number']),
+
+                (subtotal, color['number']),
+                (margin_total, color['number']),
+                (margin_rate, color['number']),
+
+                u'' if db else u'X',
+                error,
+                'X' if margin_rate < min_margin else '',
+            ]
+            row += 1
+            excel_pool.write_xls_line(
+                ws_name, row, data, default_format=color['text'])
+
+        # ---------------------------------------------------------------------
+        # Update with total:
+        # ---------------------------------------------------------------------
+        total_row = row - 1
+        row = 0
+        # todo keep updated if change columns number or position:
+        for col in (14, 15):
+            from_cell = excel_pool.rowcol_to_cell(row + 2, col)
+            to_cell = excel_pool.rowcol_to_cell(1 + row + total_row, col)
+            excel_pool.write_formula(
+                ws_name,
+                row, col, u"=SUBTOTAL(9,%s:%s)" % (from_cell, to_cell),
+                excel_format['green']['number'],
+                0.0,  # complete_total[position],
+            )
+        excel_pool.write_formula(
+            ws_name,
+            row, 16, u'= 100 * P1 / O1',
+            excel_format['green']['number'],
+            0.0,  # complete_total[position],
+        )
+
+        # todo manage also save mode for mail report:
+
+        return excel_pool.return_attachment(
+            cr, uid, 'Comparativo fatturato e ordinato')
 
     def action_print_extra_period(self, cr, uid, ids, context=None):
         """ Compare price with extra period
@@ -471,6 +639,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             }
 
     _columns = {
+        'min_margin': fields.date('Margine minimo', required=True),
         'from_date': fields.date('From date'),
         'to_date': fields.date('To date'),
         'report_name': fields.selection([
@@ -484,5 +653,6 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         }
 
     _defaults = {
+        'min_margin': lambda *x: 30.0,
         'report_name': lambda *x: 'industrial_cost_bom_report',
     }

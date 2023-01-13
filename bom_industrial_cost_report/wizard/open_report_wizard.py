@@ -140,6 +140,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         #                          Generate data:
         # ---------------------------------------------------------------------
+        new_date = str(datetime.now() - timedelta(days=7))[:19]
         # Parameters:
         if context is None:
             context = {}
@@ -160,6 +161,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                     },
                 }
 
+        # Pool used:
         product_pool = self.pool.get('product.product')
         line_pool = self.pool.get('account.invoice.line')
         order_line_pool = self.pool.get('sale.order.line')
@@ -218,6 +220,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         mode = 'Fatt.', 'Fattura'
 
         header = [
+            'Nuovi',
             'Stagione', 'Cliente', mode[1], 'Data',
             'Prodotto', 'Nome', 'DB',
             'Quant.', 'Pr. unit', 'Pr. Netto', 'Costo DB', 'Marg. unit.',
@@ -227,6 +230,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             'Marg. < %s%%' % min_margin,
         ]
         width = [
+            5,
             8, 35, 12, 10,
             15, 30, 8,
             10, 10, 10, 10, 10,
@@ -288,7 +292,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         row += 1
         excel_pool.write_xls_line(
             ws_name, row, header, default_format=excel_format['header'])
-        excel_pool.freeze_panes(ws_name, 2, 5)
+        excel_pool.freeze_panes(ws_name, 2, 6)
         excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
 
         partner_cache = {}
@@ -375,11 +379,13 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             # Write data:
             # -----------------------------------------------------------------
+            invoice_date = invoice.date_invoice
             data = [
+                'NUOVO' if invoice_date >= new_date else '',
                 line.season_period,
                 u'{}'.format(partner.name),
                 invoice.number,
-                invoice.date_invoice,
+                invoice_date,
 
                 u'{}'.format(product.default_code),
                 u'{}'.format(product.name),
@@ -543,11 +549,14 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             # Write data:
             # -----------------------------------------------------------------
+            date_order = (order.date_order or '')[:10]
             data = [
+                'NUOVO' if date_order >= new_date else '',
+
                 line.season_period,
                 u'{}'.format(partner.name),
                 order.name,
-                (order.date_order or '')[:10],
+                date_order,
 
                 u'{}'.format(product.default_code),
                 u'{}'.format(product.name),
@@ -690,7 +699,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         excel_pool.create_worksheet(name=ws_name)
         excel_pool.column_width(ws_name, width)
         # excel_pool.row_height(ws_name, row_list, height=10)
-        title = ('Confronto distinte base',)
+        title = ('Confronto distinte base', )
 
         # ---------------------------------------------------------------------
         # Generate format used:

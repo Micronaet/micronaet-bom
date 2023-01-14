@@ -380,8 +380,15 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # Write data:
             # -----------------------------------------------------------------
             invoice_date = invoice.date_invoice
+            if invoice_date >= new_date:
+                row_state = 'NUOVO'
+                hidden = False
+            else:
+                row_state = 'VECCHIO'
+                hidden = True
+
             data = [
-                'NUOVO' if invoice_date >= new_date else 'VECCHIO',
+                row_state,
                 line.season_period,
                 u'{}'.format(partner.name),
                 invoice.number,
@@ -411,6 +418,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             row += 1
             excel_pool.write_xls_line(
                 ws_name, row, data, default_format=color['text'])
+            if hidden:
+                excel_pool.row_hidden(ws_name, row)
 
         # ---------------------------------------------------------------------
         # Update with total:
@@ -553,8 +562,15 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # Write data:
             # -----------------------------------------------------------------
             date_order = (order.date_order or '')[:10]
+            if date_order >= new_date:
+                row_state = 'NUOVO'
+                hidden = False
+            else:
+                row_state = 'VECCHIO'
+                hidden = True
+
             data = [
-                'NUOVO' if date_order >= new_date else 'VECCHIO',
+                row_state,
 
                 line.season_period,
                 u'{}'.format(partner.name),
@@ -585,6 +601,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             row += 1
             excel_pool.write_xls_line(
                 ws_name, row, data, default_format=color['text'])
+            if hidden:
+                excel_pool.row_hidden(ws_name, row)
 
         # ---------------------------------------------------------------------
         # Update with total:
@@ -607,6 +625,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             excel_format['green']['number'],
             0.0,  # complete_total[position],
         )
+
         # Enable filter:
         excel_pool.preset_filter_column(ws_name, 'A', 'x == "NUOVO"')
 

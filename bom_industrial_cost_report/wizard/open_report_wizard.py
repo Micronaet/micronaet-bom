@@ -604,6 +604,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             excel_format['green']['number'],
             0.0,  # complete_total[position],
         )
+        # Enable filter:
+        excel_pool.worksheet.preset_filter_column(ws_name, 'A', 'x > "NUOVO"')
 
         # ---------------------------------------------------------------------
         # Manage save or report mode:

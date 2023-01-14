@@ -142,7 +142,15 @@ class MrpBomInherit(orm.Model):
                     excel_pool.write_xls_line(
                         ws_name, row, header_data,
                         default_format=color_format['text'])
+
                     # Line part:
+                    product = component_data[0]
+                    # replace first product in detail:
+                    component_data[0] = '%s - %s (%s)' % (
+                        product.default_code,
+                        product.name,
+                        product.first_supplier_id.name or '/',
+                    )
                     excel_pool.write_xls_line(
                         ws_name, row, component_data,
                         default_format=color_format['text'], col=header_col)

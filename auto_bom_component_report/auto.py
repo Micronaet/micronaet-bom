@@ -48,7 +48,7 @@ class ComponentStatusReportWizard(orm.TransientModel):
     # --------------------
     # Wizard button event:
     # --------------------
-    # TODO check!!!!!!!!!!!!!!!!!!!
+    # todo check!!!!!!!!!!!!!!!!!!!
     def action_open_cmpt_report_xlsx(self, cr, uid, ids, context=None):
         """ Event for button done
         """
@@ -150,10 +150,16 @@ class MrpProduction(orm.Model):
         mrp_pool = self.pool.get('mrp.production')
         now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         now = now.replace('-', '_').replace(':', '.')
+        logfile = False
         if mode == 'xlsx':
             filename = mrp_pool.extract_mrp_production_report_xlsx(
                 cr, uid, data=datas, context=context)
             _logger.info('Extracted file in %s' % filename)
+            if 'component_logfile' in context:
+                logfile = context['component_logfile']
+                _logger.info('Send also log file: %s' % logfile)
+            else:
+                _logger.error('Not sent log file')
 
             # Create attachment block for send after:
             result = open(filename, 'rb').read()  # xlsx raw
@@ -174,7 +180,19 @@ class MrpProduction(orm.Model):
                 _logger.error('Error generation component report [%s]' % (
                     sys.exc_info(),))
                 return False
+
+        # ---------------------------------------------------------------------
+        # Prepare attachment:
+        # ---------------------------------------------------------------------
+        # Report attachment:
         attachments = [('Componenti_%s.%s' % (now, mode), result)]
+
+        # Log detail if present:
+        if logfile:
+            attachments.append((
+                'Dettaglio_log.xslx',
+                open(logfile, 'rb').read()  # log xlsx raw
+            ))
 
         # ---------------------------------------------------------------------
         # Send report:

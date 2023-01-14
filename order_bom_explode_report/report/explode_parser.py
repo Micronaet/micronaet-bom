@@ -223,6 +223,9 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         # Start procedure:
         # ---------------------------------------------------------------------
+        if context is None:
+            context = {}
+
         if data is None:
             data = {}
 
@@ -271,6 +274,9 @@ class MrpProduction(orm.Model):
             mode,
             now.replace('/', '_').replace(':', '.'),
             )
+        # Save in context if if will be used after:
+        context['component_logfile'] = xls_log
+
         _logger.warning('Log file: %s' % xls_log)
         WB = xlsxwriter.Workbook(xls_log)
 

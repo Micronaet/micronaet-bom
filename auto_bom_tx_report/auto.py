@@ -142,7 +142,34 @@ class MrpProduction(orm.Model):
         }
         return status_translate.get(status, '')
 
-    # TODO MOVE IN MODULE? used also from component auto report
+    def where_is_used_component(self, product):
+        """ Check DB where this product is used as component
+        """
+        cr = self.cr
+        uid = self.uid
+        context = {}
+        bom_line = self.pool.get('mrp.bom.line')
+
+        # Where component is used:
+        line_ids = bom_line.search(cr, uid, [
+            ('product_id', '=', product.id),
+            ('bom_id.bom_category', 'in', ('parent', 'half', 'dynamic')),
+        ], context=context)
+
+        res = ''
+        if not line_ids:
+            return res
+
+        for line in bom_line.browse(cr, uid, line_ids, context=context):
+            if line.dynamic_mask:
+                res += u'[%s]* ' % line.dynamic_mask
+            else:  # Parent bom or half
+                bom = line.bom_id
+                bom_product = bom.product_id
+                res += u'[%s] ' % bom_product.default_code or bom_product.name
+        return res
+
+    # todo MOVE IN MODULE? used also from component auto report
     def extract_mrp_production_report_xlsx(
             self, cr, uid, data=None, context=None):
         """ Extract data from report and put in excel mode
@@ -382,17 +409,22 @@ class MrpProduction(orm.Model):
         def write_xls_block_line(WS, row, line):
             """ Write line block for fabric, return new row position
             """
-            # Extract element from line_
+            # -----------------------------------------------------------------
+            # Extract element from line:
+            # -----------------------------------------------------------------
             (inv, tcar, tscar, mm, oc, of, sal, o, category, hw, hw_total,
                 purchase, inventory_category) = line
 
-            # Hide not active product:
+            # 1. Hide not active product:
             if not o.active:
                 return row
 
-            # Jump pipes:
+            # 2. Jump pipes:
             if category == 'Pipes':
                 return row  # same row
+
+            # 3. Check DB where is used this component
+            db_comment = self.where_is_used_component(o)
 
             # -----------------------------------------------------------------
             #                            ROW 0
@@ -409,7 +441,7 @@ class MrpProduction(orm.Model):
             WS.merge_range(row, 16, row, 19, '')  # Inventory category
             WS.merge_range(row, 20, row, 22, '')  # Not order status
 
-            # TODO add extra color here!
+            # todo add extra color here!
             if sal[11] < 0:
                 format_text = get_xls_format('bg_red')
                 color = 'Rosso'
@@ -489,7 +521,7 @@ class MrpProduction(orm.Model):
                 ('', format_white),
                 ('', format_white),
 
-                ('', format_header),
+                ('DB: %s' % db_comment, format_header),  # DB where is used!
                 ('', format_header),
                 ('', format_header),
                 ('', format_header),
@@ -843,7 +875,7 @@ class MrpProduction(orm.Model):
         # Create Excel file:
         # ---------------------------------------------------------------------
         WB = xlsxwriter.Workbook(filename)
-        WS_page = {}
+        WS_page = {}  # Multi page
 
         # Current month cell:
         convert_month = {

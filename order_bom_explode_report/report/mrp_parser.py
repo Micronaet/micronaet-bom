@@ -106,7 +106,7 @@ class MrpBomInherit(orm.Model):
         row += 2
         excel_pool.write_xls_line(
             ws_name, row, [
-                u'MRP', u'Pianificata', ' Famiglia',
+                u'MRP', u'Pianificata', u'Famiglia',
 
                 u'Componente',
                 u'Fabbis.', u'Pre', u'Post',
@@ -123,13 +123,7 @@ class MrpBomInherit(orm.Model):
 
         header_col = 3
         for key in res:
-            mrp, components, state = key
-            if state == 'yellow':
-                color_format = format_mode['yellow']
-            elif state == 'red':
-                color_format = format_mode['red']
-            else:  # green
-                color_format = format_mode['black']
+            mrp, components, mrp_state = key
 
             header_data = [
                 mrp.name,
@@ -139,29 +133,40 @@ class MrpBomInherit(orm.Model):
             for component_data in components:
                 row += 1
 
+                # -------------------------------------------------------------
                 # Header part:
-                try:
-                    excel_pool.write_xls_line(
-                        ws_name, row, header_data,
-                        default_format=color_format['text'])
+                # -------------------------------------------------------------
+                # use also header color?
+                excel_pool.write_xls_line(
+                    ws_name, row, header_data,
+                    default_format=format_mode['black']['text'])
 
-                    # Line part:
-                    product = component_data[0]
+                # Line part:
+                product = component_data[0]
 
-                    # replace first product in detail:
-                    product_reference = u'%s - %s (%s)' % (
-                        product.default_code,
-                        product.name,
-                        product.first_supplier_id.name or '/',
-                    )
-                    excel_pool.write_xls_line(
-                        ws_name, row, [product_reference],
-                        default_format=color_format['text'], col=header_col)
-                    excel_pool.write_xls_line(
-                        ws_name, row, component_data[1:],
-                        default_format=color_format['text'], col=header_col+1)
-                except:
-                    pdb.set_trace()
+                # ---------------------------------------------------------
+                # Color of detail part:
+                # ---------------------------------------------------------
+                state = component_data[5]  # this column is the line state
+                if state == 'yellow':
+                    color_format = format_mode['yellow']
+                elif state == 'red':
+                    color_format = format_mode['red']
+                else:  # green
+                    color_format = format_mode['black']
+
+                # Replace first product in detail:
+                product_reference = u'%s - %s (%s)' % (
+                    product.default_code,
+                    product.name,
+                    product.first_supplier_id.name or '/',
+                )
+                excel_pool.write_xls_line(
+                    ws_name, row, [product_reference],
+                    default_format=color_format['text'], col=header_col)
+                excel_pool.write_xls_line(
+                    ws_name, row, component_data[1:],
+                    default_format=color_format['text'], col=header_col+1)
 
         return excel_pool.send_mail_to_group(
             cr, uid,

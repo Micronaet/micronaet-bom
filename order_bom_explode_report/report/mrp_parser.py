@@ -154,9 +154,9 @@ class MrpBomInherit(orm.Model):
                 # Line part:
                 product = record[0]
 
-                # ---------------------------------------------------------
+                # -------------------------------------------------------------
                 # Color of detail part:
-                # ---------------------------------------------------------
+                # -------------------------------------------------------------
                 state = record[5]  # this column is the line state
                 if state == 'yellow':
                     color_format = format_mode['yellow']

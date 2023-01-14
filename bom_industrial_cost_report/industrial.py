@@ -285,7 +285,8 @@ class MrpBomIndustrialHistory(orm.Model):
 
         # Generate report if necessary:
         product_ids = product_pool.search(cr, uid, [
-            ('bom_selection', '=', True)], context=context)
+            ('bom_selection', '=', True),
+        ], context=context)
 
         # ---------------------------------------------------------------------
         # Excel report:

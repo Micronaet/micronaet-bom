@@ -145,8 +145,9 @@ class MrpBomInherit(orm.Model):
 
                     # Line part:
                     product = component_data[0]
+
                     # replace first product in detail:
-                    component_data[0] = '%s - %s (%s)' % (
+                    component_data[0] = u'%s - %s (%s)' % (
                         product.default_code,
                         product.name,
                         product.first_supplier_id.name or '/',

@@ -435,7 +435,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         )
 
         # Enable filter:
-        excel_pool.preset_filter_column(ws_name, 'A', 'x > "NUOVO"')
+        excel_pool.preset_filter_column(ws_name, 'A', 'x == "NUOVO"')
 
         # =====================================================================
         #                             SALE ORDER:
@@ -608,7 +608,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             0.0,  # complete_total[position],
         )
         # Enable filter:
-        excel_pool.preset_filter_column(ws_name, 'A', 'x > "NUOVO"')
+        excel_pool.preset_filter_column(ws_name, 'A', 'x == "NUOVO"')
 
         # ---------------------------------------------------------------------
         # Manage save or report mode:

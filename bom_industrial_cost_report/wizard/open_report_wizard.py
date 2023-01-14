@@ -297,6 +297,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
         partner_cache = {}
         line_ids = line_pool.search(cr, uid, domain, context=context)
+        hidden_row = []  # Hide old records
         for line in sorted(
                 line_pool.browse(cr, uid, line_ids, context=context),
                 key=lambda l: (
@@ -379,13 +380,13 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             # Write data:
             # -----------------------------------------------------------------
+            row += 1
             invoice_date = invoice.date_invoice
             if invoice_date >= new_date:
                 row_state = 'NUOVO'
-                hidden = False
             else:
                 row_state = 'VECCHIO'
-                hidden = True
+                hidden_row.append(row)
 
             data = [
                 row_state,
@@ -415,11 +416,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 error,
                 margin_comment,
             ]
-            row += 1
             excel_pool.write_xls_line(
                 ws_name, row, data, default_format=color['text'])
-            if hidden:
-                excel_pool.row_hidden(ws_name, row)
 
         # ---------------------------------------------------------------------
         # Update with total:
@@ -443,8 +441,14 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             0.0,  # complete_total[position],
         )
 
+        # ---------------------------------------------------------------------
         # Enable filter:
+        # ---------------------------------------------------------------------
+        # Preset filter:
         excel_pool.preset_filter_column(ws_name, 'A', 'x == "NUOVO"')
+        # Hidden row:
+        if hidden_row:
+            excel_pool.row_hidden(ws_name, hidden_row)
 
         # =====================================================================
         #                             SALE ORDER:
@@ -479,6 +483,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
         order_line_ids = order_line_pool.search(
             cr, uid, order_domain, context=context)
+        hidden_row = []  # Reset list for new sheet (hide old record)
         for line in sorted(
                 order_line_pool.browse(
                     cr, uid, order_line_ids, context=context),
@@ -561,13 +566,13 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             # Write data:
             # -----------------------------------------------------------------
+            row += 1
             date_order = (order.date_order or '')[:10]
             if date_order >= new_date:
                 row_state = 'NUOVO'
-                hidden = False
             else:
                 row_state = 'VECCHIO'
-                hidden = True
+                hidden_row.append(row)
 
             data = [
                 row_state,
@@ -598,11 +603,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 error,
                 margin_comment,
             ]
-            row += 1
             excel_pool.write_xls_line(
                 ws_name, row, data, default_format=color['text'])
-            if hidden:
-                excel_pool.row_hidden(ws_name, row)
 
         # ---------------------------------------------------------------------
         # Update with total:
@@ -626,8 +628,14 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             0.0,  # complete_total[position],
         )
 
+        # ---------------------------------------------------------------------
         # Enable filter:
+        # ---------------------------------------------------------------------
+        # Preset filter:
         excel_pool.preset_filter_column(ws_name, 'A', 'x == "NUOVO"')
+        # Hidden row:
+        if hidden_row:
+            excel_pool.row_hidden(ws_name, hidden_row)
 
         # ---------------------------------------------------------------------
         # Manage save or report mode:

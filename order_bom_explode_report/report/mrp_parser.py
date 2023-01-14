@@ -270,7 +270,8 @@ class MrpBomInherit(orm.Model):
             ('date_planned', '<=', limit_date),
             ('date_planned', '=', '2023-01-01'),  # todo remove
             ], order='date_planned, id', context=context)
-
+        _logger.warning('Found #%s MRP <= %s' % (
+            len(mrp_ids), limit_date))
         # Generate MRP total component report with totals:
         for mrp in mrp_pool.browse(cr, uid, mrp_ids, context=context):
             mrp_db[mrp] = {}

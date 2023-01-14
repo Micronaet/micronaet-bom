@@ -113,7 +113,7 @@ class MrpBomInherit(orm.Model):
                 ], default_format=format_mode['header'])
         excel_pool.freeze_panes(ws_name, 2, 6)
         excel_pool.autofilter(ws_name, row, 0, row, 5)
-        excel_pool.preset_filter_column(ws_name, 'D', ['red', 'yellow'])
+        excel_pool.preset_filter_column(ws_name, 'D', 'x != "green"')
 
         # Add comment:
         comment = u'E\' lo stato magazzino dopo lo scarico dell\'attuale ' \

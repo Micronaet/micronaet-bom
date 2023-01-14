@@ -106,7 +106,8 @@ class MrpBomInherit(orm.Model):
         row += 2
         excel_pool.write_xls_line(
             ws_name, row, [
-                u'MRP', u'Pianificata',
+                u'MRP', u'Pianificata', ' Famiglia',
+
                 u'Componente',
                 u'Fabbis.', u'Pre', u'Post',
                 u'Fabb.\nperiodo', u'Ordini\nForn.', u'Arrivi',
@@ -118,9 +119,9 @@ class MrpBomInherit(orm.Model):
                   u'produzione (stato magazzino – scarico produzioni chiuse ' \
                   u'– attuale fabbisogno produzione)'
         excel_pool.write_comment(
-            ws_name, row, 5, comment, parameters=parameters)
+            ws_name, row, 6, comment, parameters=parameters)
 
-        header_col = 2
+        header_col = 3
         for key in res:
             mrp, components, state = key
             if state == 'yellow':
@@ -133,7 +134,8 @@ class MrpBomInherit(orm.Model):
             header_data = [
                 mrp.name,
                 mrp.date_planned,
-            ]
+                mrp.product_id.name,
+                ]
             for component_data in components:
                 row += 1
 

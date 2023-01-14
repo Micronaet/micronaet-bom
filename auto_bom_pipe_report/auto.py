@@ -71,9 +71,9 @@ class MrpProduction(orm.Model):
             'with_type_ids': [],
             'type_id': False,
             'with_deadline': False,
-            'only_negative': False, # TODO
+            'only_negative': False,  # TODO
             'line_ids': [],
-            # 'mp_mode': False,# TODO check
+            # 'mp_mode': False,  # TODO check
             # 'days': 30,
             # 'first_supplier_id': False,
             }

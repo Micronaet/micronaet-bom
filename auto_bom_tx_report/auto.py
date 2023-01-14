@@ -142,12 +142,9 @@ class MrpProduction(orm.Model):
         }
         return status_translate.get(status, '')
 
-    def where_is_used_component(self, product):
+    def where_is_used_component(self, cr, uid, product, context=None):
         """ Check DB where this product is used as component
         """
-        cr = self.cr
-        uid = self.uid
-        context = {}
         bom_line = self.pool.get('mrp.bom.line')
 
         # Where component is used:
@@ -424,7 +421,7 @@ class MrpProduction(orm.Model):
                 return row  # same row
 
             # 3. Check DB where is used this component
-            db_comment = self.where_is_used_component(o)
+            db_comment = self.where_is_used_component(self.cr, self.uid, o)
 
             # -----------------------------------------------------------------
             #                            ROW 0

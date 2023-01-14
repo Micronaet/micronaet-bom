@@ -99,25 +99,24 @@ class MrpBomInherit(orm.Model):
         row = 0  # Start line
         excel_pool.write_xls_line(
             ws_name, row, [
-                'Analisi componenti in produzione:'
+                u'Analisi componenti in produzione:'
                 ], default_format=format_mode['title'])
 
         # Header line:
         row += 2
         excel_pool.write_xls_line(
             ws_name, row, [
-                'MRP', 'Pianificata',
-                'Componente',
-                'Fabbis.', 'Pre', 'Post*',
-                'Fabb.\nperiodo', 'Ordini\nForn.', 'Arrivi',
-                'Stato'
+                u'MRP', u'Pianificata',
+                u'Componente',
+                u'Fabbis.', u'Pre', u'Post',
+                u'Fabb.\nperiodo', u'Ordini\nForn.', u'Arrivi',
+                u'Stato'
                 ], default_format=format_mode['header'])
 
-        # todo Add comment:
-        comment = '''
-            E' lo stato magazzino dopo lo scarico dell'attuale produzione 
-            (stato magazzino – scarico produzioni chiuse – attuale fabbisogno 
-            produzione)'''
+        # Add comment:
+        comment = u'E\' lo stato magazzino dopo lo scarico dell\'attuale ' \
+                  u'produzione (stato magazzino – scarico produzioni chiuse ' \
+                  u'– attuale fabbisogno produzione)'
         excel_pool.write_comment(
             ws_name, row, 5, comment, parameters=parameters)
 
@@ -149,11 +148,11 @@ class MrpBomInherit(orm.Model):
 
         return excel_pool.send_mail_to_group(
             cr, uid,
-            'order_bom_explode_report.'
-            'group_report_mrp_stock_availability_mail_user',
-            'Controllo stato componenti su MRP pianificate',
-            'Dettaglio fattibilità MRP alla data: %s' % now,
-            'mrp_availability_check.xlsx',
+            u'order_bom_explode_report.'
+            u'group_report_mrp_stock_availability_mail_user',
+            u'Controllo stato componenti su MRP pianificate',
+            u'Dettaglio fattibilità MRP alla data: %s' % now,
+            u'mrp_availability_check.xlsx',
             context=context)
 
     def report_mrp_status_component_master_data(
@@ -212,7 +211,7 @@ class MrpBomInherit(orm.Model):
         limit_date = '%s 23:59:59' % (
             datetime.now() + timedelta(days=days)).strftime(
                 DEFAULT_SERVER_DATE_FORMAT)
-        _logger.warning('Range period: MRP from %s, Max open MRP <= %s' % (
+        _logger.warning(u'Range period: MRP from %s, Max open MRP <= %s' % (
             reference_date, limit_date))
 
         # Database used:
@@ -241,14 +240,14 @@ class MrpBomInherit(orm.Model):
         # ------------------
         headers = {
             'mrp': [
-                'MRP', 'Data', 'Ordine', 'Prodotto', 'TODO', 'Componente',
-                'Q. TODO', 'Delta', 'Commento',
+                u'MRP', u'Data', u'Ordine', u'Prodotto', u'TODO',
+                u'Componente', u'Q. TODO', u'Delta', u'Commento',
                 ],
             'order': [
-                'MRP', 'Data', 'Ordine',
-                'Prodotto', 'Q. Usata prod.', 'Q. TODO prod.',
-                'Componente', 'Q. Usata comp.', 'Q. TODO comp.',
-                'Commento',
+                u'MRP', u'Data', u'Ordine',
+                u'Prodotto', u'Q. Usata prod.', u'Q. TODO prod.',
+                u'Componente', u'Q. Usata comp.', u'Q. TODO comp.',
+                u'Commento',
                 ],
             }
         for mode, header in headers.iteritems():
@@ -268,8 +267,9 @@ class MrpBomInherit(orm.Model):
             ('state', 'not in', ('done', 'cancel')),
             # XXX Period filter (only up not down limit), correct?
             ('date_planned', '<=', limit_date),
-            ('date_planned', '=', '2023-01-01'),  # todo remove
+            ('date_planned', '>=', '2023-01-01'),  # todo remove
             ], order='date_planned, id', context=context)
+
         _logger.warning('Found #%s MRP <= %s' % (
             len(mrp_ids), limit_date))
         # Generate MRP total component report with totals:
@@ -294,17 +294,17 @@ class MrpBomInherit(orm.Model):
                     todo = qty - qty_delivered
 
                 if todo < 0.0:
-                    comment += 'Over delivered'
+                    comment += u'Over delivered'
                 elif not todo:
-                    comment += 'All delivered'
+                    comment += u'All delivered'
                 elif sol.mx_closed:
                     todo = 0.0  # closed
-                    comment += 'Forced closed'
+                    comment += u'Forced closed'
 
                 for component in sol.product_id.dynamic_bom_line_ids:
                     product = component.product_id
 
-                    # Total TODO product
+                    # Total to do product
                     if product not in mrp_db[mrp]:
                         # This, Delta previous MRP
                         mrp_db[mrp][product] = [0.0, 0.0]
@@ -322,7 +322,7 @@ class MrpBomInherit(orm.Model):
                     mrp_db[mrp][product][1] = delta_stock[product.id]
 
                     write_xls_log('mrp', [
-                        '%s [%s]' % (mrp.name, mrp.id),
+                        u'%s [%s]' % (mrp.name, mrp.id),
                         mrp.date_planned,
                         sol.order_id.name,
                         sol.product_id.default_code,
@@ -350,6 +350,8 @@ class MrpBomInherit(orm.Model):
             ], context=context)
 
         sol_proxy = sol_pool.browse(cr, uid, sol_ids, context=context)
+        _logger.warning('Unload from stock old B sale line maked #%s' % len(
+            sol_ids))
         for sol in sol_proxy:
             comment = ''
             qty = sol.product_uom_qty
@@ -363,12 +365,12 @@ class MrpBomInherit(orm.Model):
                 order_remain = qty - qty_delivered
 
             if order_remain < 0.0:
-                comment += 'Over delivered'
+                comment += u'Over delivered'
             elif not order_remain:
-                comment += 'All delivered'
+                comment += u'All delivered'
             elif sol.mx_closed:
-                order_remain = 0.0 # closed
-                comment += 'Forced closed'
+                order_remain = 0.0  # closed
+                comment += u'Forced closed'
 
             for component in sol.product_id.dynamic_bom_line_ids:
                 product = component.product_id
@@ -428,9 +430,9 @@ class MrpBomInherit(orm.Model):
                 of = component.mx_of_in
                 of_move = ''
                 for move in component.mx_of_ids:
-                    of_move += '%s (%s)\n' % (
+                    of_move += u'%s (%s)\n' % (
                         int(move.product_uom_qty or 0.0),
-                        '%s-%s' % (
+                        u'%s-%s' % (
                             move.date_expected[8:10],
                             move.date_expected[5:7],
                             ) if move.date_expected else '?',

@@ -90,7 +90,7 @@ class MrpBomInherit(orm.Model):
         now = datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
         excel_pool.column_width(ws_name, [
             10, 11, 20,
-            10, 15, 30,
+            10, 15, 35,
             10, 10, 10, 10, 10, 10
             ])
 
@@ -111,6 +111,7 @@ class MrpBomInherit(orm.Model):
                 u'Fabbis.', u'Pre', u'Post',
                 u'Fabb.\nperiodo', u'Ordini\nForn.', u'Arrivi',
                 ], default_format=format_mode['header'])
+        excel_pool.row_height(ws_name, row, 40)
         excel_pool.freeze_panes(ws_name, 2, 6)
         excel_pool.autofilter(ws_name, row, 0, row, 5)
         excel_pool.preset_filter_column(ws_name, 'D', 'x != "green"')
@@ -235,6 +236,7 @@ class MrpBomInherit(orm.Model):
         if context is None:
             context = {}
         data = context.get('data', {})
+        # bom_cache = {}  # Cache used for get dynamic bom items
 
         # Pool used:
         sol_pool = self.pool.get('sale.order.line')

@@ -89,10 +89,8 @@ class MrpBomInherit(orm.Model):
 
         now = datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
         excel_pool.column_width(ws_name, [
-            15, 45,
-            40,
-            10, 10, 10, 10, 10, 10,
-            15,
+            15, 15, 25,
+            40, 10, 10, 10, 10, 10, 10, 15,
             ])
 
         # Title line:
@@ -127,10 +125,10 @@ class MrpBomInherit(orm.Model):
 
             header_data = [
                 mrp.name,
-                mrp.date_planned,
+                mrp.date_planned[:10],
                 mrp.product_id.name,
                 ]
-            for component_data in components:
+            for record in components:
                 row += 1
 
                 # -------------------------------------------------------------
@@ -142,12 +140,12 @@ class MrpBomInherit(orm.Model):
                     default_format=format_mode['black']['text'])
 
                 # Line part:
-                product = component_data[0]
+                product = record[0]
 
                 # ---------------------------------------------------------
                 # Color of detail part:
                 # ---------------------------------------------------------
-                state = component_data[5]  # this column is the line state
+                state = record[5]  # this column is the line state
                 if state == 'yellow':
                     color_format = format_mode['yellow']
                 elif state == 'red':
@@ -155,18 +153,24 @@ class MrpBomInherit(orm.Model):
                 else:  # green
                     color_format = format_mode['black']
 
-                # Replace first product in detail:
-                product_reference = u'%s - %s (%s)' % (
-                    product.default_code,
-                    product.name,
-                    product.first_supplier_id.name or '/',
-                )
+                # Setup again record for detail (todo remove this operation?)
+                detail_line = [
+                    u'%s - %s (%s)' % (
+                        product.default_code,
+                        product.name,
+                        product.first_supplier_id.name or '/'),
+                    int(record[1]),
+                    int(record[2] + record[1]),
+                    int(record[2]),
+                    int(record[3]),
+                    int(record[4]),
+                    record[6].strip(),
+                    state,
+                ]
+
                 excel_pool.write_xls_line(
-                    ws_name, row, [product_reference],
+                    ws_name, row, detail_line,
                     default_format=color_format['text'], col=header_col)
-                excel_pool.write_xls_line(
-                    ws_name, row, component_data[1:],
-                    default_format=color_format['text'], col=header_col+1)
 
         return excel_pool.send_mail_to_group(
             cr, uid,

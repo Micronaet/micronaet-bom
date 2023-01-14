@@ -415,7 +415,6 @@ class MrpBomInherit(orm.Model):
             record = mrp_db[mrp]
             components = []
             mrp_status = 'green'
-            pdb.set_trace()
             for component, qty in record.iteritems():
                 this_qty = qty[0]
                 delta_stock_qty = qty[1]

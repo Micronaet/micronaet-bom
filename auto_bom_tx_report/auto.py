@@ -421,7 +421,8 @@ class MrpProduction(orm.Model):
                 return row  # same row
 
             # 3. Check DB where is used this component
-            db_comment = self.where_is_used_component(self.cr, self.uid, o)
+            # Note external reference for cr, uid, context
+            db_comment = self.where_is_used_component(cr, uid, o, context)
 
             # -----------------------------------------------------------------
             #                            ROW 0

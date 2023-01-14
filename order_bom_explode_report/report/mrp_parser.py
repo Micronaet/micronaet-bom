@@ -138,13 +138,16 @@ class MrpBomInherit(orm.Model):
                 row += 1
 
                 # Header part:
-                excel_pool.write_xls_line(
-                    ws_name, row, header_data,
-                    default_format=color_format['text'])
-                # Line part:
-                excel_pool.write_xls_line(
-                    ws_name, row, component_data,
-                    default_format=color_format['text'], col=header_col)
+                try:
+                    excel_pool.write_xls_line(
+                        ws_name, row, header_data,
+                        default_format=color_format['text'])
+                    # Line part:
+                    excel_pool.write_xls_line(
+                        ws_name, row, component_data,
+                        default_format=color_format['text'], col=header_col)
+                except:
+                    pdb.set_trace()
 
         return excel_pool.send_mail_to_group(
             cr, uid,
@@ -348,7 +351,7 @@ class MrpBomInherit(orm.Model):
             ('mrp_id.date_planned', '>=', reference_date),
             ('mrp_id.date_planned', '<=', limit_date),
             ], context=context)
-
+        sol_ids = sol_ids[-1:]  # todo remove
         sol_proxy = sol_pool.browse(cr, uid, sol_ids, context=context)
         _logger.warning('Unload from stock old B sale line maked #%s' % len(
             sol_ids))

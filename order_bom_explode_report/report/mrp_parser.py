@@ -147,14 +147,17 @@ class MrpBomInherit(orm.Model):
                     product = component_data[0]
 
                     # replace first product in detail:
-                    component_data[0] = u'%s - %s (%s)' % (
+                    product_reference = u'%s - %s (%s)' % (
                         product.default_code,
                         product.name,
                         product.first_supplier_id.name or '/',
                     )
                     excel_pool.write_xls_line(
-                        ws_name, row, component_data,
+                        ws_name, row, [product_reference],
                         default_format=color_format['text'], col=header_col)
+                    excel_pool.write_xls_line(
+                        ws_name, row, component_data[1:],
+                        default_format=color_format['text'], col=header_col+1)
                 except:
                     pdb.set_trace()
 

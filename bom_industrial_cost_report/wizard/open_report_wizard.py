@@ -381,7 +381,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             invoice_date = invoice.date_invoice
             data = [
-                'NUOVO' if invoice_date >= new_date else '',
+                'NUOVO' if invoice_date >= new_date else 'VECCHIO',
                 line.season_period,
                 u'{}'.format(partner.name),
                 invoice.number,
@@ -433,6 +433,9 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             excel_format['green']['number'],
             0.0,  # complete_total[position],
         )
+
+        # Enable filter:
+        excel_pool.preset_filter_column(ws_name, 'A', 'x > "NUOVO"')
 
         # =====================================================================
         #                             SALE ORDER:
@@ -551,7 +554,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             date_order = (order.date_order or '')[:10]
             data = [
-                'NUOVO' if date_order >= new_date else '',
+                'NUOVO' if date_order >= new_date else 'VECCHIO',
 
                 line.season_period,
                 u'{}'.format(partner.name),

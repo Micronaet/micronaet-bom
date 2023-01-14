@@ -178,13 +178,14 @@ class MrpBomInherit(orm.Model):
                     int(record[4]),
                     record[6].strip(),
                 ]
-                if state != 'green':
-                    hidden_rows.append(row)
-
                 excel_pool.write_xls_line(
                     ws_name, row, detail_line,
                     default_format=color_format['text'], col=header_col)
-        if hidden_rows:
+
+                if state == 'green':  # Hide green rows
+                    hidden_rows.append(row)
+
+        if hidden_rows:  # All green lines!
             excel_pool.row_hidden(ws_name, hidden_rows)
 
         return excel_pool.send_mail_to_group(

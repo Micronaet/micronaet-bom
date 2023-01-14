@@ -35,26 +35,26 @@
         'mrp',
         'report_aeroo',
         'order_bom',
-        'bom_category', 
-        'inventory_field', # for inventory field
-        'bom_order_utility', # Utility for filter
-        'bom_dynamic_structured', # for filter type category
-        'textilene_status', # TODO remove when moved company parameters
+        'bom_category',
+        'inventory_field',  # for inventory field
+        'bom_order_utility',  # Utility for filter
+        'bom_dynamic_structured',  # for filter type category
+        'textilene_status',  # TODO remove when moved company parameters
         'production_accounting_external',
-        'production_forecast_order', # for forecast check
-        'no_parcels_count', # exclude no parcels product        
-        'product_last_supplier', # last purchase supplier data (for filter)
+        'production_forecast_order',  # for forecast check
+        'no_parcels_count',  # exclude no parcels product
+        'product_last_supplier',  # last purchase supplier data (for filter)
         ],
     'init_xml': [],
     'demo': [],
     'data': [
-        #'security/xml_groups.xml',
-        #'security/ir.model.access.csv',        
-        
+        'security/report_group.xml',
+        # 'security/ir.model.access.csv',
+
         'bom_explode_view.xml',
         'report/explode_report.xml',
         'wizard/report_component_status.xml',
-        #'scheduler.xml',
+        'scheduler.xml',
         ],
     'active': False,
     'installable': True,

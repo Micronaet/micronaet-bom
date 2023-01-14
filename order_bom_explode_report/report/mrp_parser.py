@@ -25,8 +25,6 @@ import os
 import sys
 import logging
 import openerp
-import openerp.netsvc as netsvc
-import openerp.addons.decimal_precision as dp
 import xlsxwriter # XLSX export
 from openerp.osv import fields, osv, expression, orm
 from datetime import datetime, timedelta
@@ -44,47 +42,128 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 _logger = logging.getLogger(__name__)
 
 
-class Parser(report_sxw.rml_parse):
-    """ Report for MRP Product
+class MrpBomInherit(orm.Model):
+    """ Add master function here
     """
-    default_days = 30
+    _inherit = 'mrp.bom'
 
-    def __init__(self, cr, uid, name, context):
-        super(Parser, self).__init__(cr, uid, name, context)
-        self.localcontext.update({
-            'get_object': self.get_object,
-            'get_filter': self.get_filter,
-            'get_date': self.get_date,
-        })
-
-    def get_date(self, ):
-        """ Get filter selected
+    def report_mrp_status_component_excel_file(self, cr, uid, context=None):
+        """ Extract filename from master data
         """
-        return datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+        excel_pool = self.pool.get('excel.writer')
+        parameters = {'width': 300, }  # Comment box
 
-    def get_filter(self, data):
-        """ Get filter selected
+        res = self.report_mrp_status_component_master_data(
+            cr, uid, context=context)
+
+        # ---------------------------------------------------------------------
+        # Excel report:
+        # ---------------------------------------------------------------------
+        ws_name = _(u'Consumi MRP schedulate')
+        excel_pool.create_worksheet(ws_name)
+
+        # Format used:
+        excel_pool.set_format(number_format='#,##0.#0')
+        format_mode = {
+            'title': excel_pool.get_format('title'),
+            'header': excel_pool.get_format('header'),
+
+            'black': {
+                'text': excel_pool.get_format('text'),
+                'number': excel_pool.get_format('number'),
+            },
+            'red': {
+                'text': excel_pool.get_format('bg_red'),
+                'number': excel_pool.get_format('bg_red_number'),
+
+            },
+            'yellow': {
+                'text': excel_pool.get_format('bg_yellow'),
+                'number': excel_pool.get_format('bg_yellow_number'),
+            },
+            'green': {
+                'text': excel_pool.get_format('bg_green'),
+                'number': excel_pool.get_format('bg_green_number'),
+            },
+        }
+
+        now = datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+        excel_pool.column_width(ws_name, [
+            15, 45,
+            40,
+            10, 10, 10, 10, 10, 10,
+            15,
+            ])
+
+        # Title line:
+        row = 0  # Start line
+        excel_pool.write_xls_line(
+            ws_name, row, [
+                'Analisi componenti in produzione:'
+                ], default_format=format_mode['title'])
+
+        # Header line:
+        row += 2
+        excel_pool.write_xls_line(
+            ws_name, row, [
+                'MRP', 'Pianificata',
+                'Componente',
+                'Fabbis.', 'Pre', 'Post*',
+                'Fabb.\nperiodo', 'Ordini\nForn.', 'Arrivi',
+                'Stato'
+                ], default_format=format_mode['header'])
+
+        # todo Add comment:
+        comment = '''
+            E' lo stato magazzino dopo lo scarico dell'attuale produzione 
+            (stato magazzino – scarico produzioni chiuse – attuale fabbisogno 
+            produzione)'''
+        excel_pool.write_comment(
+            ws_name, row, 5, comment, parameters=parameters)
+
+        header_col = 2
+        for key in res:
+            mrp, components, state = key
+            if state == 'yellow':
+                color_format = format_mode['yellow']
+            elif state == 'red':
+                color_format = format_mode['red']
+            else:  # green
+                color_format = format_mode['black']
+
+            header_data = [
+                mrp.name,
+                mrp.date_planned,
+            ]
+            for component_data in components:
+                row += 1
+
+                # Header part:
+                excel_pool.write_xls_line(
+                    ws_name, row, header_data,
+                    default_format=color_format['text'])
+                # Line part:
+                excel_pool.write_xls_line(
+                    ws_name, row, component_data,
+                    default_format=color_format['text'], col=header_col)
+
+        return excel_pool.send_mail_to_group(
+            cr, uid,
+            'order_bom_explode_report.'
+            'group_report_mrp_stock_availability_mail_user',
+            'Controllo stato componenti su MRP pianificate',
+            'Dettaglio fattibilità MRP alla data: %s' % now,
+            'mrp_availability_check.xlsx',
+            context=context)
+
+    def report_mrp_status_component_master_data(
+            self, cr, uid, context=None):
+        """ Master function called from parser in old report
         """
-        if data is None:
-            data = {}
-
-        days = data.get('days', self.default_days)
-
-        return _('Active production for %s days') % days
-
-    def get_object(self, data):
-        """ Search all MRP elements
-        """
-        _logger.info('START REPORT STOCK UNLOAD PRODUCTION')
-
-        # Readability:
-        cr = self.cr
-        uid = self.uid
-        context = {}
-
         # ---------------------------------------------------------------------
         # Utility function:
         # ---------------------------------------------------------------------
+        # A. Log:
         def write_xls_log(mode, log):
             """ Write log in WS updating counter
             """
@@ -95,35 +174,38 @@ class Parser(report_sxw.rml_parse):
             self.counter[mode] += 1
             return
 
-        # ---------------------------------------------------------------------
-        # Utility function:
-        # ---------------------------------------------------------------------
+        # B. Report sort
         def report_order_component(x):
             """ Order for component in reporting
             """
             if x[5] == 'green':
-                return (1, x[0].default_code)
+                return 1, x[0].default_code
             elif x[5] == 'yellow':
-                return (2, x[0].default_code)
+                return 2, x[0].default_code
             else: # red
-                return (3, x[0].default_code)
+                return 3, x[0].default_code
 
         # ---------------------------------------------------------------------
+        #                         Master function:
+        # ---------------------------------------------------------------------
+        _logger.info('Master function: Report stock unload planned MRP')
+
         # Read parameters:
-        # ---------------------------------------------------------------------
-        if data is None:
-            data = {}
-        days = data.get('days', self.default_days)
-        first_supplier_id = data.get('first_supplier_id')
+        if context is None:
+            context = {}
+        data = context.get('data', {})
 
-        # pool used:
+        # Pool used:
         sol_pool = self.pool.get('sale.order.line')
         mrp_pool = self.pool.get('mrp.production')
+
+        days = data.get('days', 30)
+        # first_supplier_id = data.get('first_supplier_id')
 
         now = '%s' % datetime.now()
         if now[5:7] >= '09':
             year_now = now[:4]
-        else: # next year for 01 > 08
+        else:  # next year for 01 > 08
             year_now = int(now[:4]) - 1
         reference_date = '%s-09-01 00:00:00' % year_now
 
@@ -135,9 +217,9 @@ class Parser(report_sxw.rml_parse):
 
         # Database used:
         mrp_db = {}
-        mrp_unload = {} # Stock unload from MRP
-        mrp_order = {} # Order opened
-        delta_stock = {} # Consumed component in stock (assume start is 0)
+        mrp_unload = {}  # Stock unload from MRP
+        mrp_order = {}  # Order opened
+        delta_stock = {}  # Consumed component in stock (assume start is 0)
 
         # ---------------------------------------------------------------------
         # XLS log export:
@@ -145,9 +227,8 @@ class Parser(report_sxw.rml_parse):
         filename = '/home/administrator/photo/log/mrp_product.xlsx'
         _logger.warning('Log file: %s' % filename)
 
-        WB = xlsxwriter.Workbook(filename)
-
         # Work Sheet:
+        WB = xlsxwriter.Workbook(filename)
         self.WS = {
             'mrp': WB.add_worksheet('MRP'),
             'order': WB.add_worksheet('Order'),
@@ -180,12 +261,11 @@ class Parser(report_sxw.rml_parse):
         # BLOCK A: PRODUCTION OPEN IN RANGE: TODO production needed
         # ---------------------------------------------------------------------
         # Prepare data for remain production component
-        # Update mrp stock with used halfword in productions
+        # Update mrp stock with used semi product in productions
 
         mrp_ids = mrp_pool.search(cr, uid, [
             # State filter:
             ('state', 'not in', ('done', 'cancel')),
-
             # XXX Period filter (only up not down limit), correct?
             ('date_planned', '<=', limit_date),
             ], order='date_planned, id', context=context)
@@ -201,8 +281,9 @@ class Parser(report_sxw.rml_parse):
                 qty = sol.product_uom_qty
                 qty_maked = sol.product_uom_maked_sync_qty
                 qty_delivered = sol.delivered_qty
-                #qty_assigned = sol.mx_assigned_qty
-                #qty_ready = qty_maked + qty_assigned
+                # todo manage assigned?
+                # qty_assigned = sol.mx_assigned_qty
+                # qty_ready = qty_maked + qty_assigned
 
                 # Depend on maked or delivery check:
                 if qty_maked >= qty_delivered:
@@ -215,13 +296,13 @@ class Parser(report_sxw.rml_parse):
                 elif not todo:
                     comment += 'All delivered'
                 elif sol.mx_closed:
-                    todo = 0.0 # closed
+                    todo = 0.0  # closed
                     comment += 'Forced closed'
 
                 for component in sol.product_id.dynamic_bom_line_ids:
                     product = component.product_id
 
-                    # Total todo product
+                    # Total TODO product
                     if product not in mrp_db[mrp]:
                         # This, Delta previous MRP
                         mrp_db[mrp][product] = [0.0, 0.0]
@@ -243,8 +324,8 @@ class Parser(report_sxw.rml_parse):
                         mrp.date_planned,
                         sol.order_id.name,
                         sol.product_id.default_code,
-                        todo, # Product TODO
-                        product.default_code, # Component
+                        todo,  # Product TODO
+                        product.default_code,  # Component
                         this_qty,
                         delta_stock[product.id],
                         comment,
@@ -302,7 +383,7 @@ class Parser(report_sxw.rml_parse):
 
                 # Done and cancel means no OC remain:
                 if sol.mrp_id.state in ('done', 'cancel'):
-                    component_qty = 0.0 # for log
+                    component_qty = 0.0  # for log
                 else:
                     component_qty = order_remain * component.product_qty
                     mrp_order[product.id] -= component_qty
@@ -314,11 +395,11 @@ class Parser(report_sxw.rml_parse):
 
                     # Product:
                     sol.product_id.default_code,
-                    qty_maked, # Maked / Used
-                    order_remain, # Remain order to produce
+                    qty_maked,  # Maked / Used
+                    order_remain,  # Remain order to produce
 
                     # Component:
-                    product.default_code, # Component
+                    product.default_code,  # Component
                     qty_maked_cmpt,
                     component_qty,
 
@@ -333,13 +414,14 @@ class Parser(report_sxw.rml_parse):
             record = mrp_db[mrp]
             components = []
             mrp_status = 'green'
-            for component, qty in record.iteritems():
+            for key in record:
+                component, qty = key
                 this_qty = qty[0]
                 delta_stock_qty = qty[1]
 
                 # Current stock = stock - mrp (previous unload) - delta TODO
                 stock_today = mrp_unload.get(component.id, 0.0)
-                stock_net_qty = component.mx_net_qty # XXX without mrp unload!
+                stock_net_qty = component.mx_net_qty  # XXX without mrp unload!
                 stock = stock_net_qty + stock_today + delta_stock_qty
                 oc_period = mrp_order.get(component.id, 0.0)
                 of = component.mx_of_in
@@ -349,8 +431,8 @@ class Parser(report_sxw.rml_parse):
                         int(move.product_uom_qty or 0.0),
                         '%s-%s' % (
                             move.date_expected[8:10],
-                             move.date_expected[5:7],
-                             ) if move.date_expected else '?',
+                            move.date_expected[5:7],
+                            ) if move.date_expected else '?',
                         )
 
                 if stock >= 0.0:
@@ -366,15 +448,15 @@ class Parser(report_sxw.rml_parse):
 
                 # component, need, stock, OC period, OF, status
                 components.append((
-                    component, # 0. Component
-                    this_qty, # 1. MRP net q.
-                    stock, # 2. net stock after this order
-                    oc_period, # 3.
-                    of, # 4.
-                    status, # 5.
-                    of_move, # 6.
-                    stock_today, # 7. Stock net
-                    stock_net_qty, # 8. Stock without mrp unload
+                    component,  # 0. Component
+                    this_qty,  # 1. MRP net q.
+                    stock,  # 2. net stock after this order
+                    oc_period,  # 3.
+                    of,  # 4.
+                    status,  # 5.
+                    of_move,  # 6.
+                    stock_today,  # 7. Stock net
+                    stock_net_qty,  # 8. Stock without mrp unload
                     ))
             res.append((
                 mrp,
@@ -384,4 +466,47 @@ class Parser(report_sxw.rml_parse):
                 )
         WB.close()
         return res
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+
+
+class Parser(report_sxw.rml_parse):
+    """ Report for MRP Product
+    """
+    # default_days = 30
+
+    def __init__(self, cr, uid, name, context):
+        super(Parser, self).__init__(cr, uid, name, context)
+        self.localcontext.update({
+            'get_object': self.get_object,
+            'get_filter': self.get_filter,
+            'get_date': self.get_date,
+        })
+
+    def get_date(self, ):
+        """ Get filter selected
+        """
+        return datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+
+    def get_filter(self, data):
+        """ Get filter selected
+        """
+        if data is None:
+            data = {}
+
+        days = data.get('days', self.default_days)
+
+        return _('Active production for %s days') % days
+
+    def get_object(self, data):
+        """" Parser function to get master data
+        """
+        bom_pool = self.pool.get('mrp.bom')
+
+        # Readability:
+        cr = self.cr
+        uid = self.uid
+        context = {
+            'data': data,
+            }
+
+        return bom_pool.report_mrp_status_component_master_data(
+            cr, uid, context=context)

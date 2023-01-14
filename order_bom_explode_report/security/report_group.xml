@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+   <data>
+        <record id="group_report_mrp_stock_availability_mail_user" model="res.groups">
+            <field name="name">Report mail utenti per consumi progressivi di magazzino</field>
+        </record>
+   </data>
+</openerp>

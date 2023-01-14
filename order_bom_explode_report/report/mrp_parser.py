@@ -22,6 +22,7 @@
 #
 ##############################################################################
 import os
+import pdb
 import sys
 import logging
 import openerp
@@ -414,8 +415,8 @@ class MrpBomInherit(orm.Model):
             record = mrp_db[mrp]
             components = []
             mrp_status = 'green'
-            for key in record:
-                component, qty = key
+            pdb.set_trace()
+            for component, qty in record.iteritems():
                 this_qty = qty[0]
                 delta_stock_qty = qty[1]
 

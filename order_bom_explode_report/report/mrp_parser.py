@@ -26,10 +26,9 @@ import pdb
 import sys
 import logging
 import openerp
-import xlsxwriter # XLSX export
+import xlsxwriter  # XLSX export
 from openerp.osv import fields, osv, expression, orm
 from datetime import datetime, timedelta
-from openerp import SUPERUSER_ID#, api
 from openerp import tools
 from openerp.report import report_sxw
 from openerp.report.report_sxw import rml_parse
@@ -269,6 +268,7 @@ class MrpBomInherit(orm.Model):
             ('state', 'not in', ('done', 'cancel')),
             # XXX Period filter (only up not down limit), correct?
             ('date_planned', '<=', limit_date),
+            ('date_planned', '=', '2023-01-01'),  # todo remove
             ], order='date_planned, id', context=context)
 
         # Generate MRP total component report with totals:

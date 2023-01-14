@@ -89,8 +89,9 @@ class MrpBomInherit(orm.Model):
 
         now = datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
         excel_pool.column_width(ws_name, [
-            15, 15, 25,
-            40, 10, 10, 10, 10, 10, 10, 15,
+            10, 11, 20,
+            10, 15, 30,
+            10, 10, 10, 10, 10, 10
             ])
 
         # Title line:
@@ -101,27 +102,36 @@ class MrpBomInherit(orm.Model):
                 ], default_format=format_mode['title'])
 
         # Header line:
-        row += 2
+        row += 1
         excel_pool.write_xls_line(
             ws_name, row, [
                 u'MRP', u'Pianificata', u'Famiglia',
 
-                u'Componente',
+                u'Stato', u'Codice', u'Componente',
                 u'Fabbis.', u'Pre', u'Post',
                 u'Fabb.\nperiodo', u'Ordini\nForn.', u'Arrivi',
-                u'Stato'
                 ], default_format=format_mode['header'])
+        excel_pool.freeze_panes(ws_name, 2, 6)
+        excel_pool.autofilter(ws_name, row, 0, row, 5)
+        excel_pool.preset_filter_column(ws_name, 'D', ['red', 'yellow'])
 
         # Add comment:
         comment = u'E\' lo stato magazzino dopo lo scarico dell\'attuale ' \
                   u'produzione (stato magazzino – scarico produzioni chiuse ' \
                   u'– attuale fabbisogno produzione)'
         excel_pool.write_comment(
-            ws_name, row, 6, comment, parameters=parameters)
+            ws_name, row, 8, comment, parameters=parameters)
 
         header_col = 3
         for key in res:
             mrp, components, mrp_state = key
+
+            if mrp_state == 'yellow':
+                header_color = format_mode['yellow']
+            elif mrp_state == 'red':
+                header_color = format_mode['red']
+            else:  # green
+                header_color = format_mode['black']
 
             header_data = [
                 mrp.name,
@@ -137,7 +147,7 @@ class MrpBomInherit(orm.Model):
                 # use also header color?
                 excel_pool.write_xls_line(
                     ws_name, row, header_data,
-                    default_format=format_mode['black']['text'])
+                    default_format=header_color['text'])
 
                 # Line part:
                 product = record[0]
@@ -153,10 +163,11 @@ class MrpBomInherit(orm.Model):
                 else:  # green
                     color_format = format_mode['black']
 
-                # Setup again record for detail (todo remove this operation?)
+                # Setup again record for detail todo (remove this operation?)
                 detail_line = [
-                    u'%s - %s (%s)' % (
-                        product.default_code,
+                    state,
+                    product.default_code,
+                    u'%s (%s)' % (
                         product.name,
                         product.first_supplier_id.name or '/'),
                     int(record[1]),
@@ -165,7 +176,6 @@ class MrpBomInherit(orm.Model):
                     int(record[3]),
                     int(record[4]),
                     record[6].strip(),
-                    state,
                 ]
 
                 excel_pool.write_xls_line(

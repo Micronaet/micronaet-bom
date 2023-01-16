@@ -190,7 +190,7 @@ class MrpProduction(orm.Model):
         # Log detail if present:
         if logfile:
             attachments.append((
-                'Dettaglio_log.xslx',
+                'Dettaglio_log.xlsx',
                 open(logfile, 'rb').read()  # log xlsx raw
             ))
 

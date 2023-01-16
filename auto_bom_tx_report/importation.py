@@ -206,7 +206,7 @@ class PurchaseOrderXLSX(orm.Model):
         f.write(b64_file)
         f.close()
 
-        xslx_id = current_proxy.id
+        # xlsx_id = current_proxy.id
         month_db = {
             # Previous year:
             2: '09', 3: '10', 4: '11', 5: '12',
@@ -393,7 +393,7 @@ class PurchaseOrderXLSX(orm.Model):
                             continue
 
                         month = month_db[col]
-                        day = '01' # TODO Parameterize (wizard data)
+                        day = '01'  # TODO Parameterize (wizard data)
                         if month in ['09', '10', '11', '12']:
                             year = year_a
                         else:

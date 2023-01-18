@@ -88,10 +88,10 @@ class MrpProduction(orm.Model):
     def get_explode_report_object(self, cr, uid, data=None, context=None):
         """ Search all product elements
             data:
-                mode: use (product), halfwork, component for choose row
+                mode: use (product), semi product, component for choose row
                 elements
 
-                # TODO:
+                # todo:
                 period: period type week, month
                 period: number of period for columns, max 12
         """
@@ -169,6 +169,17 @@ class MrpProduction(orm.Model):
                 col += 1
 
             self.counter[mode] += 1  # row update
+            return
+
+        def write_xls_line_list(mode, line):
+            """ Write line every item in new row
+            """
+            row = self.counter[mode]
+
+            col = 0
+            for item in line:
+                self.WS[mode].write(row, col, item)
+                self.counter[mode] += 1  # row update
             return
 
         def has_mandatory_placeholder(default_code, product_id):
@@ -285,6 +296,7 @@ class MrpProduction(orm.Model):
             'move': WB.add_worksheet('Movimenti'),
             'extra': WB.add_worksheet('Extra'),
             'purchase': WB.add_worksheet('Semilavorati acquistati'),
+            'selection': WB.add_worksheet('Selezione'),
             }
 
         # Row counters:
@@ -292,6 +304,7 @@ class MrpProduction(orm.Model):
             'move': 0,
             'extra': 0,
             'purchase': 0,
+            'selection': 0,
             }
 
         # A. Write Header line:
@@ -304,6 +317,10 @@ class MrpProduction(orm.Model):
         # C. Write extra part for HW purchased:
         write_xls_line('purchase', (
             'Codice', 'Q', 'Rif.',
+            ))
+        # D. Selezione documentale
+        write_xls_line('selection', (
+            'Modo', 'Riferimento',
             ))
 
         # pool used:
@@ -329,7 +346,11 @@ class MrpProduction(orm.Model):
                 'T3D', 'TES', 'TEX', 'TGT', 'TIO', 'TJO', 'TSK', 'TSQ', 'TWH',
                 'TWL', 'TWM', 'TXM', 'TXI', 'TXR',
                 )
-            # TODO add also not_in_report check!!!  and not_in_report='f'
+            # Log selection:
+            write_xls_line('selection', ['Codici tessuto'])
+            write_xls_line_list('selection', fabric_list)
+
+            # todo add also not_in_report check!!!  and not_in_report='f'
             query = '''
                 SELECT id from product_product
                 WHERE substring(default_code, 1, 3) IN ('%s');
@@ -337,8 +358,14 @@ class MrpProduction(orm.Model):
 
             cr.execute(query)
             fabric_ids = [item[0] for item in cr.fetchall()]
-            for fabric in product_pool.browse(
-                    cr, uid, fabric_ids, context=context):
+            fabrics = product_pool.browse(
+                    cr, uid, fabric_ids, context=context)
+
+            # Log selection:
+            write_xls_line('selection', ['Elenco tessuti'])
+            write_xls_line_list('selection', [f.default_code for f in fabrics])
+
+            for fabric in fabrics:
                 add_x_item(
                     y_axis, fabric, category_fabric,
                     purchase_db, mode='product',
@@ -449,7 +476,7 @@ class MrpProduction(orm.Model):
         exclude_partner_ids = []
 
         # Append also this company partner for inventory that need to be excl.
-        # TODO check if is correct the remove of company:
+        # todo check if is correct the remove of company:
         exclude_partner_ids.append(company_proxy.partner_id.id)
 
         # From date:
@@ -488,10 +515,15 @@ class MrpProduction(orm.Model):
             # check data date (old method
             # ('date', '>=', from_date), # XXX correct for virtual?
             # ('date', '<=', to_date),
-            # TODO state filter
+            # todo state filter
             ])
+        load_picks = pick_pool.browse(cr, uid, pick_ids, context=context)
 
-        for pick in pick_pool.browse(cr, uid, pick_ids, context=context):
+        # Log selection:
+        write_xls_line('selection', ['Documenti Carico'])
+        write_xls_line_list('selection', [p.name for p in load_picks])
+
+        for pick in load_picks:
             pos = get_position_season(pick.date)  # for done cols  (min_date?)
             for line in pick.move_lines:
                 default_code = line.product_id.default_code
@@ -553,7 +585,7 @@ class MrpProduction(orm.Model):
                     continue
 
                 # -------------------------------------------------------------
-                #          BF document
+                #                         BF document
                 # -------------------------------------------------------------
                 # Order delivered so picking in movement
                 elif line.state == 'done':
@@ -608,10 +640,15 @@ class MrpProduction(orm.Model):
             ('date', '>=', period_from),  # XXX 01/09
             ('date', '<=', period_to),
             ])
+        unload_picks = pick_pool.browse(cr, uid, pick_ids)
 
-        for pick in pick_pool.browse(cr, uid, pick_ids):
+        # Log selection:
+        write_xls_line('selection', ['Documenti Scarico'])
+        write_xls_line_list('selection', [p.name for p in unload_picks])
+
+        for pick in unload_picks:
             pos = get_position_season(pick.date)  # cols  (min_date?)
-            # TODO no check for period range
+            # todo no check for period range
             for line in pick.move_lines:
                 product_code = line.product_id.default_code
                 product = line.product_id
@@ -649,8 +686,13 @@ class MrpProduction(orm.Model):
 
         order_ids = company_pool.mrp_domain_sale_order_line(
             cr, uid, context=context)
+        orders = sale_pool.browse(cr, uid, order_ids, context=context)
 
-        for order in sale_pool.browse(cr, uid, order_ids, context=context):
+        # Log selection:
+        write_xls_line('selection', ['Documenti Ordine'])
+        write_xls_line_list('selection', [oc.name for oc in orders])
+
+        for order in orders:
             # Search in order line:
             for line in order.order_line:
                 # FC order no deadline (use date)
@@ -860,8 +902,13 @@ class MrpProduction(orm.Model):
 
             # No customer exclude filter
             ])
+        mrps = mrp_pool.browse(cr, uid, mrp_ids, context=context)
 
-        for order in mrp_pool.browse(cr, uid, mrp_ids, context=context):
+        # Log selection:
+        write_xls_line('selection', ['Documenti MRP'])
+        write_xls_line_list('selection', [m.name for m in mrps])
+
+        for order in mrps:
             date = order.date_planned
 
             # Search in order line:

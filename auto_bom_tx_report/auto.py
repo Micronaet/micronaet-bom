@@ -146,24 +146,28 @@ class MrpProduction(orm.Model):
         """ Check DB where this product is used as component
         """
         bom_line = self.pool.get('mrp.bom.line')
-
-        # Where component is used:
-        line_ids = bom_line.search(cr, uid, [
-            ('product_id', '=', product.id),
-            ('bom_id.bom_category', 'in', ('parent', 'half', 'dynamic')),
-        ], context=context)
-
         res = ''
-        if not line_ids:
-            return res
 
-        for line in bom_line.browse(cr, uid, line_ids, context=context):
-            if line.dynamic_mask:
-                res += u'[%s]* ' % line.dynamic_mask
-            else:  # Parent bom or half
-                bom = line.bom_id
-                bom_product = bom.product_id
-                res += u'[%s] ' % bom_product.default_code or bom_product.name
+        try:
+            # Where component is used:
+            line_ids = bom_line.search(cr, uid, [
+                ('product_id', '=', product.id),
+                ('bom_id.bom_category', 'in', ('parent', 'half', 'dynamic')),
+            ], context=context)
+
+            if not line_ids:
+                return res
+
+            for line in bom_line.browse(cr, uid, line_ids, context=context):
+                if line.dynamic_mask:
+                    res += u'[%s]* ' % line.dynamic_mask
+                else:  # Parent bom or half
+                    bom = line.bom_id
+                    bom_product = bom.product_id
+                    res += u'[%s] ' % bom_product.default_code or \
+                           bom_product.name
+        except:
+            _logger.error('Error searching BOM where it is used!')
         return res
 
     # todo MOVE IN MODULE? used also from component auto report

@@ -108,7 +108,8 @@ class MrpProduction(orm.Model):
                 cr, uid, group_id, context=context).users:
             partner_ids.append(user.partner_id.id)
 
-        thread_pool.message_post(cr, uid, False,
+        thread_pool.message_post(
+            cr, uid, False,
             type='email',
             body='Stato MRP con dettaglio 30 GG',
             subject='Invio automatico stato materiali per le prossime '

@@ -311,7 +311,6 @@ class MrpBomInherit(orm.Model):
             ('state', 'not in', ('done', 'cancel')),
             # XXX Period filter (only up not down limit), correct?
             ('date_planned', '<=', limit_date),
-            # ('date_planned', '>=', '2023-01-01'),  # todo remove (for demo)
             ], order='date_planned, id', context=context)
 
         _logger.warning('Found #%s MRP <= %s' % (
@@ -392,7 +391,6 @@ class MrpBomInherit(orm.Model):
             ('mrp_id.date_planned', '>=', reference_date),
             ('mrp_id.date_planned', '<=', limit_date),
             ], context=context)
-        # sol_ids = sol_ids[-1:]  # todo remove (for demo)
         sol_proxy = sol_pool.browse(cr, uid, sol_ids, context=context)
         _logger.warning('Unload from stock old B sale line maked #%s' % len(
             sol_ids))

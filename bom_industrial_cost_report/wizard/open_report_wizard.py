@@ -227,8 +227,10 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             '% trasp', '% extra sc.',
 
             # 15, 16, (17, 18): (subtotal)
-            'Costo tot.', '%s tot.' % mode[0], 'Marg. tot', 'Marg. %',
-            'Ricar. %',
+            'Costo tot.', '%s tot.' % mode[0], 'Utile tot',
+            'Marg. %', 'Ricar. %',
+
+            'Fatt. tot.'
             'No DB', 'Errore',
             'Marg. < %s%%' % min_margin,
         ]
@@ -541,7 +543,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
             # Bom price
             bom_product = bom_data.get(code5)
-            margin_rate = 0.0
+            margin_rate = recharge_rate = cost_total = 0.0
             if bom_product:
                 cost = bom_product.to_industrial
 
@@ -552,8 +554,12 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
                 margin = real_price - cost
                 margin_total = margin * quantity
+                cost_total = cost * quantity
                 if subtotal:
                     margin_rate = 100.0 * margin_total / subtotal
+                if cost:
+                    recharge_rate = 100.0 * margin_total / cost
+
                 db = code5
                 error = u''
             else:
@@ -586,7 +592,10 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             row += 1
             date_order = (order.date_order or '')[:10]
-            if date_order >= new_date:
+
+            if not cost or not subtotal:
+                row_state = 'ESCLUSO'
+            elif date_order >= new_date:
                 row_state = 'NUOVO'
             else:
                 row_state = 'VECCHIO'
@@ -613,9 +622,11 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 (industrial_transport_rate, color['number']),
                 (industrial_extra_discount, color['number']),
 
+                (cost_total, color['number']),
                 (subtotal, color['number']),
                 (margin_total, color['number']),
                 (margin_rate, color['number']),
+                (recharge_rate, color['number']),
 
                 u'' if db else u'X',
                 error,
@@ -630,7 +641,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         total_row = row - 1
         row = 0
         # todo keep updated if change columns number or position:
-        for col in (15, 16):
+        for col in (15, 16, 17):
             from_cell = excel_pool.rowcol_to_cell(row + 2, col)
             to_cell = excel_pool.rowcol_to_cell(1 + row + total_row, col)
             excel_pool.write_formula(
@@ -641,7 +652,13 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             )
         excel_pool.write_formula(
             ws_name,
-            row, 17, u'= 100 * Q1 / P1',
+            row, 18, u'= 100 * R1 / Q1',
+            excel_format['green']['number'],
+            0.0,  # complete_total[position],
+        )
+        excel_pool.write_formula(
+            ws_name,
+            row, 19, u'= 100 * R1 / P1',
             excel_format['green']['number'],
             0.0,  # complete_total[position],
         )

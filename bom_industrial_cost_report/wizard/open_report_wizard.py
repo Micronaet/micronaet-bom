@@ -342,7 +342,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
             # Bom price
             bom_product = bom_data.get(code5)
-            margin_rate = 0.0
+            margin_rate = recharge_rate = 0.0
             if bom_product:
                 cost = bom_product.to_industrial
 
@@ -416,6 +416,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 (industrial_transport_rate, color['number']),
                 (industrial_extra_discount, color['number']),
 
+                (cost_total, color['number']),
                 (subtotal, color['number']),
                 (margin_total, color['number']),
                 (margin_rate, color['number']),

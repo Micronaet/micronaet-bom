@@ -225,7 +225,10 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             'Prodotto', 'Nome', 'DB',
             'Quant.', 'Pr. unit', 'Pr. Netto', 'Costo DB', 'Marg. unit.',
             '% trasp', '% extra sc.',
-            '%s tot.' % mode[0], 'Marg. tot', 'Marg. %',
+
+            # 15, 16, (17, 18): (subtotal)
+            'Costo tot.', '%s tot.' % mode[0], 'Marg. tot', 'Marg. %',
+            'Ricar. %',
             'No DB', 'Errore',
             'Marg. < %s%%' % min_margin,
         ]
@@ -235,7 +238,9 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             15, 30, 8,
             10, 10, 10, 10, 10,
             6, 6,
-            12, 12, 10,
+            12, 12,
+            12, 10,
+            10,
             5, 40, 15
         ]
 
@@ -348,8 +353,11 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
                 margin = real_price - cost
                 margin_total = margin * quantity
+                cost_total = cost * quantity
                 if subtotal:
                     margin_rate = 100.0 * margin_total / subtotal
+                if cost:
+                    recharge_rage = 100.0 * margin_total / cost
                 db = code5
                 error = u''
             else:
@@ -411,6 +419,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 (subtotal, color['number']),
                 (margin_total, color['number']),
                 (margin_rate, color['number']),
+                (recharge_rage, color['number']),
 
                 u'' if db else u'X',
                 error,
@@ -425,7 +434,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         total_row = row - 1
         row = 0
         # todo keep updated if change columns:
-        for col in (15, 16):
+        for col in (15, 16, 17):
             from_cell = excel_pool.rowcol_to_cell(row + 2, col)
             to_cell = excel_pool.rowcol_to_cell(1 + row + total_row, col)
             excel_pool.write_formula(
@@ -436,7 +445,13 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             )
         excel_pool.write_formula(
             ws_name,
-            row, 17, u'= 100 * Q1 / P1',
+            row, 18, u'= 100 * R1 / Q1',
+            excel_format['green']['number'],
+            0.0,  # complete_total[position],
+        )
+        excel_pool.write_formula(
+            ws_name,
+            row, 19, u'= 100 * R1 / P1',
             excel_format['green']['number'],
             0.0,  # complete_total[position],
         )

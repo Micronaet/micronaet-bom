@@ -392,14 +392,19 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             row += 1
             invoice_date = invoice.date_invoice
-            if not cost or not subtotal:
-                row_state = 'ESCLUSO'
-                hidden_row.append(row)
-            elif invoice_date >= new_date:
-                row_state = 'NUOVO'
+
+            if invoice_date >= new_date:
+                if not cost or not subtotal:
+                    row_state = 'ESCLUSO NUOVO'
+                    hidden_row.append(row)
+                else:
+                    row_state = 'NUOVO'
             else:
-                row_state = 'VECCHIO'
                 hidden_row.append(row)
+                if not cost or not subtotal:
+                    row_state = 'ESCLUSO VECCHIO'
+                else:
+                    row_state = 'VECCHIO'
 
             data = [
                 row_state,
@@ -594,14 +599,18 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             row += 1
             date_order = (order.date_order or '')[:10]
 
-            if not cost or not subtotal:
-                row_state = 'ESCLUSO'
-                hidden_row.append(row)
-            elif date_order >= new_date:
-                row_state = 'NUOVO'
+            if invoice_date >= new_date:
+                if not cost or not subtotal:
+                    row_state = 'ESCLUSO NUOVO'
+                    hidden_row.append(row)
+                else:
+                    row_state = 'NUOVO'
             else:
-                row_state = 'VECCHIO'
                 hidden_row.append(row)
+                if not cost or not subtotal:
+                    row_state = 'ESCLUSO VECCHIO'
+                else:
+                    row_state = 'VECCHIO'
 
             data = [
                 row_state,

@@ -342,7 +342,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
             # Bom price
             bom_product = bom_data.get(code5)
-            margin_rate = recharge_rate = 0.0
+            margin_rate = recharge_rate = cost_total = 0.0
             if bom_product:
                 cost = bom_product.to_industrial
 
@@ -390,7 +390,9 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             row += 1
             invoice_date = invoice.date_invoice
-            if invoice_date >= new_date:
+            if not cost or not subtotal:
+                row_state = 'ESCLUSO'
+            elif invoice_date >= new_date:
                 row_state = 'NUOVO'
             else:
                 row_state = 'VECCHIO'

@@ -357,7 +357,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 if subtotal:
                     margin_rate = 100.0 * margin_total / subtotal
                 if cost:
-                    recharge_rage = 100.0 * margin_total / cost
+                    recharge_rate = 100.0 * margin_total / cost
                 db = code5
                 error = u''
             else:
@@ -419,7 +419,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 (subtotal, color['number']),
                 (margin_total, color['number']),
                 (margin_rate, color['number']),
-                (recharge_rage, color['number']),
+                (recharge_rate, color['number']),
 
                 u'' if db else u'X',
                 error,

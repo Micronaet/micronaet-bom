@@ -181,7 +181,8 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         ]
         from_date = wiz_proxy.from_date
         to_date = wiz_proxy.to_date
-        min_margin = max(wiz_proxy.min_margin, 0.0)  # Not negative
+        # todo margin check in recharge (was changed!)
+        min_margin = max(wiz_proxy.min_margin, 0.0)  # RECHARGE! Not negative
 
         comment = ''
         order_comment = ''
@@ -232,7 +233,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
             'Fatt. tot.'
             'No DB', 'Errore',
-            'Marg. < %s%%' % min_margin,
+            'Ricarico < %s%%' % min_margin,
         ]
         width = [
             5,
@@ -290,7 +291,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         # Total line:
         excel_pool.write_xls_line(
             ws_name, row, [
-                u'Analisi marginalità su fatturato '
+                u'Analisi ricarico prodotto su fatturato '
                 u'(rosso=negativo, giallo=<%s%%, bianco=corretto) -  Filtro: '
                 u'%s' % (min_margin, comment),
             ], default_format=excel_format['title'])
@@ -376,7 +377,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             elif margin_rate <= 0:
                 margin_comment = 'NEGATIVO'
                 color = excel_format['red']
-            elif margin_rate < min_margin:
+            elif recharge_rate < min_margin:
                 margin_comment = 'BASSO'
                 color = excel_format['yellow']
             else:
@@ -495,7 +496,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         # Total line:
         excel_pool.write_xls_line(
             ws_name, row, [
-                u'Analisi marginalità su ordinato '
+                u'Analisi ricarico su prodotto ordinato '
                 u'(rosso=negativo, giallo=<%s%%, bianco=corretto) - Filtro: '
                 u'%s' % (min_margin, order_comment),
             ], default_format=excel_format['title'])
@@ -582,7 +583,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             elif margin_rate <= 0:
                 margin_comment = 'NEGATIVO'
                 color = excel_format['red']
-            elif margin_rate < min_margin:
+            elif recharge_rate < min_margin:
                 margin_comment = 'BASSO'
                 color = excel_format['yellow']
             else:
@@ -863,8 +864,9 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             }
 
     _columns = {
+        # todo not correct name for variable ! recharge not margin
         'min_margin': fields.float(
-            'Margine minimo', digits=(10, 3), required=True),
+            'Ricarico minimo', digits=(10, 3), required=True),
         'from_date': fields.date('From date'),
         'to_date': fields.date('To date'),
         'report_name': fields.selection([

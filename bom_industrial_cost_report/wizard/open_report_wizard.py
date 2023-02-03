@@ -191,13 +191,13 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             order_domain.append(('order_id.date_order', '>=',
                                  '%s 00:00:00' % from_date))
             comment += 'FT dalla data %s' % from_date
-            order_comment += 'FT Dalla data %s' % from_date
+            order_comment += 'OC dalla data %s' % from_date
         if to_date:
             domain.append(('invoice_id.date_invoice', '<=', to_date))
             order_domain.append(('order_id.date_order', '<=',
                                  '%s 23:59:59' % to_date))
             comment += 'FT alla data %s' % to_date
-            order_comment += 'FT alla data %s' % to_date
+            order_comment += 'OC alla data %s' % to_date
 
         # ---------------------------------------------------------------------
         # Load DB template
@@ -510,6 +510,10 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
         order_line_ids = order_line_pool.search(
             cr, uid, order_domain, context=context)
+        _logger.info('Domain: %s, # Ordini %' % (
+            order_domain, len(order_line_ids)
+        ))
+        pdb.set_trace()
         hidden_row = []  # Reset list for new sheet (hide old record)
         for line in sorted(
                 order_line_pool.browse(

@@ -510,7 +510,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
 
         order_line_ids = order_line_pool.search(
             cr, uid, order_domain, context=context)
-        _logger.info('Domain: %s, # Ordini %' % (
+        _logger.info('Domain: %s, # Ordini %s' % (
             order_domain, len(order_line_ids)
         ))
         pdb.set_trace()

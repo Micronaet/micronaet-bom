@@ -141,18 +141,19 @@ class MrpBomInherit(orm.Model):
                 mrp.product_id.name,
                 ]
             for record in components:
-                row += 1
+                # Line part:
+                product = record[0]
+                if product.bom_placeholder:
+                    continue  # Product not used!
 
                 # -------------------------------------------------------------
                 # Header part:
                 # -------------------------------------------------------------
+                row += 1
                 # use also header color?
                 excel_pool.write_xls_line(
                     ws_name, row, header_data,
                     default_format=header_color['text'])
-
-                # Line part:
-                product = record[0]
 
                 # -------------------------------------------------------------
                 # Color of detail part:

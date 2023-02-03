@@ -90,7 +90,7 @@ class MrpBomInherit(orm.Model):
         now = datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
         excel_pool.column_width(ws_name, [
             10, 11, 20,
-            10, 15, 35,
+            10, 15, 35, 30,
             10, 10, 10, 10, 10, 10
             ])
 
@@ -107,13 +107,13 @@ class MrpBomInherit(orm.Model):
             ws_name, row, [
                 u'MRP', u'Pianificata', u'Famiglia',
 
-                u'Stato', u'Codice', u'Componente',
+                u'Stato', u'Codice', u'Componente', 'Categoria',
                 u'Fabbis.', u'Pre', u'Post',
                 u'Fabb.\nperiodo', u'Ordini\nForn.', u'Arrivi',
                 ], default_format=format_mode['header'])
         excel_pool.row_height(ws_name, row, 40)
         excel_pool.freeze_panes(ws_name, 2, 6)
-        excel_pool.autofilter(ws_name, row, 0, row, 5)
+        excel_pool.autofilter(ws_name, row, 0, row, 6)
         excel_pool.preset_filter_column(ws_name, 'D', 'x != "green"')
 
         # Add comment:
@@ -172,6 +172,7 @@ class MrpBomInherit(orm.Model):
                     u'%s (%s)' % (
                         product.name,
                         product.first_supplier_id.name or '/'),
+                    product.inventory_category_id.name or '',
                     int(record[1]),
                     int(record[2] + record[1]),
                     int(record[2]),

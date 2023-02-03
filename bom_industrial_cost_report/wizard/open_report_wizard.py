@@ -513,7 +513,6 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         _logger.info('Domain: %s, # Ordini %s' % (
             order_domain, len(order_line_ids)
         ))
-        pdb.set_trace()
         hidden_row = []  # Reset list for new sheet (hide old record)
         for line in sorted(
                 order_line_pool.browse(
@@ -604,7 +603,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             row += 1
             date_order = (order.date_order or '')[:10]
 
-            if invoice_date >= new_date:
+            if date_order >= new_date:
                 if not cost or not subtotal:
                     row_state = 'ESCLUSO NUOVO'
                     hidden_row.append(row)

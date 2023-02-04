@@ -143,7 +143,7 @@ class MrpBomInherit(orm.Model):
             for record in components:
                 # Line part:
                 product = record[0]
-                if product.bom_placeholder:
+                if product.bom_placeholder or product.bom_alternative:
                     continue  # Product not used!
 
                 # -------------------------------------------------------------

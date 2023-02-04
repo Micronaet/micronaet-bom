@@ -121,7 +121,7 @@ class MrpBomInherit(orm.Model):
                   u'produzione (stato magazzino – scarico produzioni chiuse ' \
                   u'– attuale fabbisogno produzione)'
         excel_pool.write_comment(
-            ws_name, row, 8, comment, parameters=parameters)
+            ws_name, row, 9, comment, parameters=parameters)
 
         header_col = 3
         hidden_rows = []  # Hidden row for filter

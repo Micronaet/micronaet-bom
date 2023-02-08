@@ -82,6 +82,7 @@ if not mailer_ids:
 
 # First in sequence
 odoo_mailer = sorted(mailer.browse(mailer_ids), key=lambda m: m.sequence)[0]
+pdb.set_trace()
 
 # Open connection:
 print('[INFO] Sending using "%s" connection [%s:%s]' % (
@@ -96,7 +97,6 @@ else:
     print('[ERR] Connect only SMTP SSL server!')
     sys.exit()
 
-pdb.set_trace()
 smtp_server.ehlo()  # open the connection
 smtp_server.starttls()
 smtp_server.login(odoo_mailer.smtp_user, odoo_mailer.smtp_pass)

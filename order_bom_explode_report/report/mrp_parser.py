@@ -203,15 +203,51 @@ class MrpBomInherit(orm.Model):
         if hidden_rows:  # All green lines!
             excel_pool.row_hidden(ws_name, hidden_rows)
 
-        # excel_pool.save_file_as('/tmp/mrp.xlsx')
+        excel_filename = '/tmp/mrp_%s' % (str(
+            datetime.now())[:19].replace(':', '_').replace('/', '_').replace(
+            ' ', '_'))
+        excel_pool.save_file_as(excel_filename)
+
+        # ---------------------------------------------------------------------
+        # Replace with sending mail instead of use original method that raise:
+        # ---------------------------------------------------------------------
+        attach_filename = 'mrp_availability_check.xlsx'
+        subject = u'Controllo stato componenti su MRP pianificate'
+        body = u'Dettaglio fattibilità MRP alla data: %s' % now
+        group_name = \
+            'order_bom_explode_report.' \
+            'group_report_mrp_stock_availability_mail_user'
+        '''
+        original call:
         return excel_pool.send_mail_to_group(
-            cr, uid,
-            u'order_bom_explode_report.'
-            u'group_report_mrp_stock_availability_mail_user',
-            u'Controllo stato componenti su MRP pianificate',
-            u'Dettaglio fattibilità MRP alla data: %s' % now,
-            u'mrp_availability_check.xlsx',
+            cr, uid, group_name, subject, body, attach_filename,
             context=context)
+        '''
+        group_pool = self.pool.get('res.groups')
+        model_pool = self.pool.get('ir.model.data')
+        thread_pool = self.pool.get('mail.thread')
+
+        attachments = [(
+            attach_filename, open(excel_filename, 'rb').read(),  # Raw data
+            )]
+
+        group = group_name.split('.')
+        group_id = model_pool.get_object_reference(
+            cr, uid, group[0], group[1])[1]
+        partner_ids = []
+        for user in group_pool.browse(
+                cr, uid, group_id, context=context).users:
+            partner_ids.append(user.partner_id.id)
+        thread_pool.message_post(
+            cr, uid, False,
+            type='email',
+            body=body,
+            subject=subject,
+            partner_ids=[(6, 0, partner_ids)],
+            attachments=attachments,
+            context=context,
+            )
+
 
     def report_mrp_status_component_master_data(
             self, cr, uid, context=None):

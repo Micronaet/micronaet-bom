@@ -203,7 +203,7 @@ class MrpBomInherit(orm.Model):
         if hidden_rows:  # All green lines!
             excel_pool.row_hidden(ws_name, hidden_rows)
 
-        excel_pool.save_file_as('/tmp/mrp.xlsx')
+        # excel_pool.save_file_as('/tmp/mrp.xlsx')
         return excel_pool.send_mail_to_group(
             cr, uid,
             u'order_bom_explode_report.'

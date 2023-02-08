@@ -99,7 +99,6 @@ else:
 
 # smtp_server.ehlo()  # open the connection
 # smtp_server.starttls()
-pdb.set_trace()
 smtp_server.login(odoo_mailer.smtp_user, odoo_mailer.smtp_pass)
 
 # filename = u'MRP fattib. produzioni schedulate %s.xlsx' % now
@@ -116,10 +115,9 @@ bom = odoo.model('mrp.bom')
 # Launch extract procedure for this mode:
 # fullname = bom.report_mrp_status_component_excel_file()
 fullname = '/tmp/mrp_2023-02-08_15_26_49.xlsx'  # todo remove
-filename = 'MRP Produzioni schedulate con mancanza componenti.xlx'
+filename = 'MRP Produzioni schedulate con mancanza componenti.xlsx'
 to_address = 'nicola.riolini@gmail.com'.replace(' ', '')  # todo
 
-pdb.set_trace()
 for to in to_address.split(','):
     print('Sending mail to %s ...' % to)
     # Header:
@@ -127,7 +125,7 @@ for to in to_address.split(','):
     msg['Subject'] = 'Stampa fattibilita\' produzioni schedulate: %s' % now
     msg['From'] = odoo_mailer.smtp_user
     msg['To'] = to   # _address
-    # msg.attach(MIMEText(text, 'html'))
+    msg.attach(MIMEText(text, 'html'))
 
     # Attachment:
     part = MIMEBase('application', 'octet-stream')

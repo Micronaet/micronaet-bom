@@ -125,7 +125,6 @@ class MrpBomInherit(orm.Model):
 
         header_col = 3
         hidden_rows = []  # Hidden row for filter
-        pdb.set_trace()
         for key in res:
             mrp, components, mrp_state = key
 
@@ -168,13 +167,24 @@ class MrpBomInherit(orm.Model):
                     color_format = format_mode['black']
 
                 # Setup again record for detail todo (remove this operation?)
+                supplier = product.first_supplier_id
+                if supplier:
+                    supplier_name = supplier.name
+                else:
+                    supplier_name = u''
+
+                category = product.inventory_category_id
+                if category:
+                    category_name = category.name
+                else:
+                    category_name = u''
                 detail_line = [
                     state,
                     product.default_code,
                     u'%s (%s)' % (
                         product.name,
-                        product.first_supplier_id.name or u'/'),
-                    product.inventory_category_id.name or u'',
+                        supplier_name),
+                    category_name,
                     int(record[1]),
                     int(record[2] + record[1]),
                     int(record[2]),
@@ -230,7 +240,7 @@ class MrpBomInherit(orm.Model):
                 return 1, x[0].default_code
             elif x[5] == 'yellow':
                 return 2, x[0].default_code
-            else: # red
+            else:  # red
                 return 3, x[0].default_code
 
         # ---------------------------------------------------------------------
@@ -491,11 +501,11 @@ class MrpBomInherit(orm.Model):
                 elif stock + of >= 0.0:
                     status = 'yellow'
                     if mrp_status == 'green':
-                        mrp_status = 'yellow'
+                        mrp_status = u'yellow'
                 else:
                     status = 'red'
                     if mrp_status != 'red':
-                        mrp_status = 'red'
+                        mrp_status = u'red'
 
                 # component, need, stock, OC period, OF, status
                 components.append((

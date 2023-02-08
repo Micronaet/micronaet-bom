@@ -203,7 +203,7 @@ class MrpBomInherit(orm.Model):
         if hidden_rows:  # All green lines!
             excel_pool.row_hidden(ws_name, hidden_rows)
 
-        excel_filename = '/tmp/mrp_%s' % (str(
+        excel_filename = '/tmp/mrp_%s.xlsx' % (str(
             datetime.now())[:19].replace(':', '_').replace('/', '_').replace(
             ' ', '_'))
         excel_pool.save_file_as(excel_filename)
@@ -238,7 +238,8 @@ class MrpBomInherit(orm.Model):
         for user in group_pool.browse(
                 cr, uid, group_id, context=context).users:
             partner_ids.append(user.partner_id.id)
-        thread_pool.message_post(
+
+        return thread_pool.message_post(
             cr, uid, False,
             type='email',
             body=body,

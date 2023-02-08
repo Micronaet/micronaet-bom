@@ -52,7 +52,7 @@ odoo = {
 # Mail:
 now = now.replace('/', '_').replace('-', '_').replace(':', '_')
 
-text = ''' 
+text = u''' 
 Aggiornamento del %s
 Segnalazione dei prodotti che non sono disponibili per le
 produzioni cosi come sono pianificate.
@@ -126,6 +126,7 @@ for to in to_address.split(','):
     msg['From'] = odoo_mailer.smtp_user
     msg['To'] = to   # _address
     # msg.attach(MIMEText(text, 'html'))
+    msg.attach(MIMEText(text, 'plain'))
 
     # Attachment:
     part = MIMEBase('application', 'octet-stream')

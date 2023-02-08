@@ -125,6 +125,7 @@ class MrpBomInherit(orm.Model):
 
         header_col = 3
         hidden_rows = []  # Hidden row for filter
+        pdb.set_trace()
         for key in res:
             mrp, components, mrp_state = key
 
@@ -172,8 +173,8 @@ class MrpBomInherit(orm.Model):
                     product.default_code,
                     u'%s (%s)' % (
                         product.name,
-                        product.first_supplier_id.name or '/'),
-                    product.inventory_category_id.name or '',
+                        product.first_supplier_id.name or u'/'),
+                    product.inventory_category_id.name or u'',
                     int(record[1]),
                     int(record[2] + record[1]),
                     int(record[2]),
@@ -184,6 +185,7 @@ class MrpBomInherit(orm.Model):
                 excel_pool.write_xls_line(
                     ws_name, row, detail_line,
                     default_format=color_format['text'], col=header_col)
+                _logger.warning(detail_line)  # todo remove
 
                 if state == 'green':  # Hide green rows
                     hidden_rows.append(row)
@@ -191,6 +193,7 @@ class MrpBomInherit(orm.Model):
         if hidden_rows:  # All green lines!
             excel_pool.row_hidden(ws_name, hidden_rows)
 
+        pdb.set_trace()
         # return self.group\n self.group =
         return excel_pool.send_mail_to_group(
             cr, uid,

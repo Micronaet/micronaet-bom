@@ -49,16 +49,6 @@ odoo = {
     'port': config.get('dbaccess', 'port'),
     }
 
-# Mail:
-now = now.replace('/', '_').replace('-', '_').replace(':', '_')
-
-text = u''' 
-Aggiornamento del %s
-Segnalazione dei prodotti che non sono disponibili per le
-produzioni cosi come sono pianificate.
-La stampa ha visibile solo le righe con problemi.   
-''' % now,
-
 # -----------------------------------------------------------------------------
 # Connect to ODOO:
 # -----------------------------------------------------------------------------
@@ -70,11 +60,26 @@ odoo = erppeek.Client(
     )
 mailer = odoo.model('ir.mail_server')
 model = odoo.model('ir.model.data')
+bom = odoo.model('mrp.bom')
+
+# -----------------------------------------------------------------------------
+# Generate report:
+# -----------------------------------------------------------------------------
+fullname = bom.report_mrp_status_component_excel_file()
+# fullname = '/tmp/mrp_2023-02-08_15_26_49.xlsx'  # todo remove
+
+# -----------------------------------------------------------------------------
+# Parameter for SMTP mail:
+# -----------------------------------------------------------------------------
+filename = 'MRP Fattibili.xlsx'
+to_address = 'roberto.gatti@fiam.it,nicola.riolini@gmail.com'.replace(' ', '')
+
+# Mail:
+now = now.replace('/', '_').replace('-', '_').replace(':', '_')
 
 # -----------------------------------------------------------------------------
 # SMTP Sent:
 # -----------------------------------------------------------------------------
-# Get mailserver option:
 mailer_ids = mailer.search([])
 if not mailer_ids:
     print('[ERR] No mail server configured in ODOO')
@@ -97,35 +102,15 @@ else:
     print('[ERR] Connect only SMTP SSL server!')
     sys.exit()
 
-# smtp_server.ehlo()  # open the connection
-# smtp_server.starttls()
 smtp_server.login(odoo_mailer.smtp_user, odoo_mailer.smtp_pass)
-
-# filename = u'MRP fattib. produzioni schedulate %s.xlsx' % now
-# fullname = os.path.expanduser(
-#    os.path.join(smtp['folder'], filename))
-# context = {
-#    'save_mode': fullname,
-#    }
-
-# Setup context for MRP:
-# odoo.context = context
-bom = odoo.model('mrp.bom')
-
-# Launch extract procedure for this mode:
-fullname = bom.report_mrp_status_component_excel_file()
-# fullname = '/tmp/mrp_2023-02-08_15_26_49.xlsx'  # todo remove
-filename = 'MRP Fattibili.xlsx'
-to_address = 'roberto.gatti@fiam.it,nicola.riolini@gmail.com'.replace(' ', '')
-
 for to in to_address.split(','):
     print('Sending mail to %s ...' % to)
+
     # Header:
     msg = MIMEMultipart()
     msg['Subject'] = 'Stampa fattibilita\' produzioni schedulate: %s' % now
     msg['From'] = odoo_mailer.smtp_user
     msg['To'] = to   # _address
-    # msg.attach(MIMEText(text, 'html'))
     msg.attach(MIMEText('Produzioni fattibili', 'plain'))
 
     # Attachment:

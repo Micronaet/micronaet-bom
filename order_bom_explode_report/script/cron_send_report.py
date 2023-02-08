@@ -113,8 +113,8 @@ smtp_server.login(odoo_mailer.smtp_user, odoo_mailer.smtp_pass)
 bom = odoo.model('mrp.bom')
 
 # Launch extract procedure for this mode:
-# fullname = bom.report_mrp_status_component_excel_file()
-fullname = '/tmp/mrp_2023-02-08_15_26_49.xlsx'  # todo remove
+fullname = bom.report_mrp_status_component_excel_file()
+# fullname = '/tmp/mrp_2023-02-08_15_26_49.xlsx'  # todo remove
 filename = 'MRP Fattibili.xlsx'
 to_address = 'roberto.gatti@fiam.it,nicola.riolini@gmail.com'.replace(' ', '')
 

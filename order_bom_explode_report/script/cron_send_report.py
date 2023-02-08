@@ -125,7 +125,7 @@ for to in to_address.split(','):
     msg['Subject'] = 'Stampa fattibilita\' produzioni schedulate: %s' % now
     msg['From'] = odoo_mailer.smtp_user
     msg['To'] = to   # _address
-    msg.attach(MIMEText(text, 'html'))
+    # msg.attach(MIMEText(text, 'html'))
 
     # Attachment:
     part = MIMEBase('application', 'octet-stream')

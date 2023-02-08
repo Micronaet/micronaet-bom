@@ -117,21 +117,22 @@ fullname = '/tmp/mrp_2023-02-08_15_26_49.xlsx'  # todo remove
 filename = 'MRP Produzioni schedulate con mancanza componenti.xlx'
 to_address = 'nicola.riolini@gmail.com'.replace(' ', '')  # todo
 
+pdb.set_trace()
 for to in to_address.split(','):
     print('Sending mail to %s ...' % to)
+    # Header:
     msg = MIMEMultipart()
     msg['Subject'] = 'Stampa fattibilita\' produzioni schedulate: %s' % now
     msg['From'] = odoo_mailer.smtp_user
     msg['To'] = to   # _address
-
     # msg.attach(MIMEText(text, 'html'))
 
+    # Attachment:
     part = MIMEBase('application', 'octet-stream')
     part.set_payload(open(fullname, 'rb').read())
     Encoders.encode_base64(part)
     part.add_header(
         'Content-Disposition', 'attachment; filename="%s"' % filename)
-
     msg.attach(part)
 
     # Send mail:

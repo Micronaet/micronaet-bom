@@ -115,7 +115,6 @@ bom = odoo.model('mrp.bom')
 # fullname = bom.report_mrp_status_component_excel_file()
 fullname = '/tmp/mrp_2023-02-08_15_26_49.xlsx'  # todo remove
 filename = 'MRP Produzioni schedulate con mancanza componenti.xlx'
-
 to_address = 'nicola.riolini@gmail.com'.replace(' ', '')  # todo
 
 for to in to_address.split(','):
@@ -124,7 +123,8 @@ for to in to_address.split(','):
     msg['Subject'] = 'Stampa fattibilita\' produzioni schedulate: %s' % now
     msg['From'] = odoo_mailer.smtp_user
     msg['To'] = to   # _address
-    msg.attach(MIMEText(text, 'html'))
+
+    # msg.attach(MIMEText(text, 'html'))
 
     part = MIMEBase('application', 'octet-stream')
     part.set_payload(open(fullname, 'rb').read())

@@ -207,7 +207,9 @@ class MrpBomInherit(orm.Model):
             datetime.now())[:19].replace(':', '_').replace('/', '_').replace(
             ' ', '_'))
         excel_pool.save_file_as(excel_filename)
+        return excel_filename
 
+        # todo keep external with cron
         # ---------------------------------------------------------------------
         # Replace with sending mail instead of use original method that raise:
         # ---------------------------------------------------------------------
@@ -239,7 +241,7 @@ class MrpBomInherit(orm.Model):
                 cr, uid, group_id, context=context).users:
             partner_ids.append(user.partner_id.id)
 
-        return thread_pool.message_post(
+        thread_pool.message_post(
             cr, uid, False,
             type='email',
             body=body,
@@ -248,6 +250,7 @@ class MrpBomInherit(orm.Model):
             attachments=attachments,
             context=context,
             )
+        return excel_filename
 
 
     def report_mrp_status_component_master_data(

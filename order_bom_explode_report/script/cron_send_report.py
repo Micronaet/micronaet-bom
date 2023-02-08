@@ -116,7 +116,7 @@ bom = odoo.model('mrp.bom')
 # fullname = bom.report_mrp_status_component_excel_file()
 fullname = '/tmp/mrp_2023-02-08_15_26_49.xlsx'  # todo remove
 filename = 'MRP Fattibili.xlsx'
-to_address = 'nicola.riolini@gmail.com'.replace(' ', '')  # todo
+to_address = 'roberto.gatti@fiam.it,nicola.riolini@gmail.com'.replace(' ', '')
 
 for to in to_address.split(','):
     print('Sending mail to %s ...' % to)

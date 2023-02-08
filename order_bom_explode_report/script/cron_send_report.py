@@ -53,6 +53,7 @@ odoo = {
 now = now.replace('/', '_').replace('-', '_').replace(':', '_')
 
 text = ''' 
+Aggiornamento del %s
 Segnalazione dei prodotti che non sono disponibili per le
 produzioni cosi come sono pianificate.
 La stampa ha visibile solo le righe con problemi.   

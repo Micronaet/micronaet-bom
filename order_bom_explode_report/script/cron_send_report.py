@@ -50,12 +50,13 @@ odoo = {
     }
 
 # Mail:
+now = now.replace('/', '_').replace('-', '_').replace(':', '_')
+
 text = ''' 
 Segnalazione dei prodotti che non sono disponibili per le
 produzioni cosi come sono pianificate.
 La stampa ha visibile solo le righe con problemi.   
 ''' % now,
-now = now.replace('/', '_').replace('-', '_').replace(':', '_')
 
 # -----------------------------------------------------------------------------
 # Connect to ODOO:
@@ -96,11 +97,6 @@ else:
 smtp_server.ehlo()  # open the connection
 smtp_server.starttls()
 smtp_server.login(odoo_mailer.smtp_user, odoo_mailer.smtp_pass)
-
-# Extract 2 files
-if not smtp['report_mode']:
-    print('No recipients present')
-    sys.exit()
 
 # filename = u'MRP fattib. produzioni schedulate %s.xlsx' % now
 # fullname = os.path.expanduser(

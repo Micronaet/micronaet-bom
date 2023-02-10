@@ -72,7 +72,8 @@ fullname = bom.report_mrp_status_component_excel_file()
 # Parameter for SMTP mail:
 # -----------------------------------------------------------------------------
 filename = 'MRP Fattibili.xlsx'
-to_address = 'roberto.gatti@fiam.it,nicola.riolini@gmail.com'.replace(' ', '')
+to_address = 'roberto.gatti@fiam.it,nicola.riolini@gmail.com,' \
+             'laura.gasparini@fiam.it,produzione@fiam.it'.replace(' ', '')
 
 # Mail:
 now = now.replace('/', '_').replace('-', '_').replace(':', '_')

@@ -50,6 +50,10 @@ class MrpBomInherit(orm.Model):
     def report_mrp_status_component_excel_file(self, cr, uid, context=None):
         """ Extract filename from master data
         """
+        if context is None:
+            context = {}
+        context['lang'] = 'it_IT'
+
         excel_pool = self.pool.get('excel.writer')
         parameters = {'width': 300, }  # Comment box
 

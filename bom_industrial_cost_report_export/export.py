@@ -137,6 +137,10 @@ class ProductProduct(orm.Model):
             self, cr, uid, datas=None, context=None):
         """ Integration report
         """
+        if context is None:
+            context = {}
+        context['lang'] = 'it_IT'
+
         _logger.info('Start extracting...')
         # todo reactivate
         # data =  {

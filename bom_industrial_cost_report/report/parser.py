@@ -693,7 +693,7 @@ class ProductProduct(orm.Model):
             'type': 'ir.actions.report.xml',
             'report_name': 'industrial_cost_bom_report',
             'datas': datas,
-            # 'context': context,
+            'context': context,
             }
 
     def compare_locked_bom_dump(self, cr, uid, ids, context=None):
@@ -715,7 +715,7 @@ class ProductProduct(orm.Model):
             'type': 'ir.actions.report.xml',
             'report_name': 'industrial_cost_bom_report',
             'datas': datas,
-            # 'context': context,
+            'context': context,
             }
 
     def open_xls_report(self, cr, uid, ids, context=None):
@@ -734,6 +734,10 @@ class ProductProduct(orm.Model):
                 WS.write(row, col, item, format_cell)
                 col += 1
             return True
+
+        if context is None:
+            context = {}
+        context['lang'] = 'it_IT'
 
         datas = {}
         datas['wizard'] = True  # started from wizard
@@ -895,6 +899,10 @@ class ProductProduct(orm.Model):
         """ Return single report or list of selected bom
             Used in report and in XLSX extract files
         """
+        if context is None:
+            context = {}
+        context['lang'] = 'it_IT'
+
         # Readability:
         if data is None:
             data = {}
@@ -946,6 +954,10 @@ class ProductProduct(orm.Model):
             #        'No pipe price for reference %s' % reference_year)
             return pipe_price_history.get(
                 material_id, {}).get(reference_year) or 0.0
+
+        if context is None:
+            context = {}
+        context['lang'] = 'it_IT'
 
         if datas is None:
             datas = {}
@@ -1521,6 +1533,8 @@ class Parser(report_sxw.rml_parse):
         cr = self.cr
         uid = self.uid
         context = {}
+        context['lang'] = 'it_IT'
+
         product_pool = self.pool.get('product.product')
 
         return product_pool.report_get_objects_bom_industrial_cost(

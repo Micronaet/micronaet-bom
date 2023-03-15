@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# ODOO (ex OpenERP) 
+# ODOO (ex OpenERP)
 # Open Source Management Solution
 # Copyright (C) 2001-2015 Micronaet S.r.l. (<http://www.micronaet.it>)
 # Developer: Nicola Riolini @thebrush (<https://it.linkedin.com/in/thebrush>)
@@ -12,7 +12,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
@@ -34,23 +34,23 @@ from dateutil.relativedelta import relativedelta
 from openerp import SUPERUSER_ID
 from openerp import tools
 from openerp.tools.translate import _
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
-    DEFAULT_SERVER_DATETIME_FORMAT, 
-    DATETIME_FORMATS_MAP, 
+from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DATETIME_FORMATS_MAP,
     float_compare)
 
 
 _logger = logging.getLogger(__name__)
 
 class ProductInventoryExtractXLSWizard(orm.TransientModel):
-    ''' Wizard for extracting inventory wizard
-    '''
+    """ Wizard for extracting inventory wizard
+    """
     _name = 'product.inventory.extract.xls.wizard'
 
     def import_csv_inventory_cost_revenue(
             self, cr, uid, filename, context=None):
-        ''' Import CSV data for inventory
-        '''
+        """ Import CSV data for inventory
+        """
         product_pool = self.pool.get('product.product')
         i = 0
         for line in open(filename, 'r'):
@@ -58,7 +58,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             if i % 50 == 0:
                 _logger.info('Update cost / revenue: %s' % i)
             fields = line.split(';')
-            
+
             # Read parameters:
             default_code = fields[0].strip()
             description = fields[1].strip()
@@ -69,7 +69,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             product_ids = product_pool.search(cr, uid, [
                 ('default_code', '=', default_code),
                 ], context=context)
-                
+
             if product_ids: # exist:
                 product_pool.write(cr, uid, product_ids, {
                     'inv_revenue_account': revenue,
@@ -77,40 +77,40 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     'inv_first_supplier': supplier,
                     }, context=context)
             else:
-                _logger.error('Product code not found: %s' % default_code)               
+                _logger.error('Product code not found: %s' % default_code)
         return True
-        
+
     # --------------------
     # Wizard button event:
     # --------------------
     def action_extract_reload(self, cr, uid, ids, context=None):
-        ''' Reload cost / revenut before launch normal procedure        
+        """ Reload cost / revenut before launch normal procedure
             1. First get data from ODOO product and update fields
             2. After override values from file CSV present
-        '''    
+        """
         product_pool = self.pool.get('product.product')
-        
+
         # Before load original:
         product_ids = product_pool.search(cr, uid, [], context=context)
         i_tot = len(product_ids)
         _logger.info('Update %s product...' % i_tot)
         i = 0
-        for product in product_pool.browse(cr, uid, product_ids, 
+        for product in product_pool.browse(cr, uid, product_ids,
                 context=context):
-                
-            # Store in new fields for fast search during report:    
+
+            # Store in new fields for fast search during report:
             i += 1
             if i % 100 == 0:
                 _logger.info('%s / %s product updated' % (i, i_tot))
-                
+
             data = {
-                #'inv_first_supplier': 
+                #'inv_first_supplier':
                 #    product.first_supplier_id.id \
-                #        if product.first_supplier_id else False,        
-                'inv_revenue_account': 
+                #        if product.first_supplier_id else False,
+                'inv_revenue_account':
                     product.property_account_income.account_ref \
                         if product.property_account_income else False,
-                'inv_cost_account': 
+                'inv_cost_account':
                     product.property_account_expense.account_ref \
                         if product.property_account_expense else False,
                 }
@@ -128,41 +128,41 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             #if cost:
             #    data['inv_cost_value'] = cost
             product_pool.write(cr, uid, product.id, data, context=context)
-            
+
         # Update with file:
         #self.import_csv_inventory_cost_revenue(
         #    cr, uid, csv_file, context=context)
 
-        # Call XLSX produce functiocn:    
+        # Call XLSX produce functiocn:
         return True#self.action_extract(cr, uid, ids, context=context)
 
     def action_extract_reload_all(self, cr, uid, ids, context=None):
-        ''' Reload cost / revenut before launch normal procedure        
+        """ Reload cost / revenut before launch normal procedure
             1. First get data from ODOO product and update fields
             2. After override values from file CSV present
-        '''    
+        """
         product_pool = self.pool.get('product.product')
         csv_file = '/home/administrator/photo/xls/stock/costrevenue.csv'
         _logger.info('Import cost and revenue in product: %s' % csv_file)
-        
+
         # Before load original:
         product_ids = product_pool.search(cr, uid, [], context=context)
-        for product in product_pool.browse(cr, uid, product_ids, 
+        for product in product_pool.browse(cr, uid, product_ids,
                 context=context):
-                
-            # Store in new fields for fast search during report:    
+
+            # Store in new fields for fast search during report:
             data = {
-                'inv_first_supplier': 
+                'inv_first_supplier':
                     product.first_supplier_id.id \
-                        if product.first_supplier_id else False,        
-                'inv_revenue_account': 
+                        if product.first_supplier_id else False,
+                'inv_revenue_account':
                     product.property_account_income.account_ref \
                         if product.property_account_income else False,
-                'inv_cost_account': 
+                'inv_cost_account':
                     product.property_account_expense.account_ref \
                         if product.property_account_expense else False,
-                }                    
-            
+                }
+
             # Get also cost:
             cost = 0.0
             date = False
@@ -176,69 +176,69 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             if cost:
                 data['inv_cost_value'] = cost
             product_pool.write(cr, uid, product.id, data, context=context)
-            
+
         # Update with file:
         self.import_csv_inventory_cost_revenue(
             cr, uid, csv_file, context=context)
 
-        # Call XLSX produce functiocn:    
+        # Call XLSX produce functiocn:
         return self.action_extract(cr, uid, ids, context=context)
-        
+
     def action_extract(self, cr, uid, ids, context=None):
-        ''' Event for button done
-        '''
+        """ Event for button done
+        """
         # ---------------------------------------------------------------------
-        #                             UTILITY: 
+        #                             UTILITY:
         # ---------------------------------------------------------------------
         # Excel:
         def xls_write_row(WS, row, line, title=False):
-            ''' Write row in a file
-            '''
+            """ Write row in a file
+            """
             print 'Write sheet: %s' % title
-            
+
             if title: # data line
                 WS.write(row, 0, title)
                 col = 0
             else: # header line:
                 col = -1
-                
+
             for item in line:
                 col += 1
                 WS.write(row, col, item)
             return
-        
+
         def xls_sheet_write(WB, name, inventory, header):
-            ''' Add new sheet and write inventory data
+            """ Add new sheet and write inventory data
                 WB: Excel Workbook
                 name: Sheet name
                 inventory: database to write
                 header: title list
-            '''
+            """
             WS = WB.add_worksheet(name)
             xls_write_row(WS, 0, header)
-            
+
             row = 0
             for code in sorted(inventory):
                 row += 1
                 xls_write_row(WS, row, inventory[code], code)
             _logger.info('End extract %s sheet: %s' % (xls_file, name))
-            return            
+            return
 
         def xls_sheet_write_table(WB, name, value, title):
-            ''' Write a simple list on Excel file
+            """ Write a simple list on Excel file
                 WB: Excel workbook
                 name: Sheet name
                 value: dict with data
                 title: string for title
-            '''
+            """
             # Write name of sheet:
             WS = WB.add_worksheet(name)
-             
+
             # Write header:
             for col in range(0, len(title)):
                 WS.write(0, col, title[col])
-                
-            # Write data lines:    
+
+            # Write data lines:
             row = 0
             for item in sorted(value):
                 row += 1
@@ -246,50 +246,50 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 data = value[item]
                 for col in range(0, len(data)):
                     WS.write(row, col + 1, data[col])
-            return    
-        
+            return
+
         # ---------------------------------------------------------------------
         # BOM
         def load_bom_template(self, cr, uid, use_dynamic=False, context=None):
-            ''' Load template bom return code[:6] with element
+            """ Load template bom return code[:6] with element
                 use_dynamic: get also dynamic bom from template, instead
                    will use product dynamic bom
-            '''    
+            """
             res = {}
             product_pool = self.pool.get('product.product')
             product_ids = product_pool.search(cr, uid, [
                 ('bom_selection', '=', True),
                 ], context=context)
-            
-            # Dynamic BOM:    
+
+            # Dynamic BOM:
             if use_dynamic:
                 dynamic_bom = product.dynamic_bom_line_ids
             else:
                 dynamic_bom = ()
-                    
+
             for product in product_pool.browse(
                     cr, uid, product_ids, context=context):
-                res[product.default_code[:6].strip()] = (                    
-                    dynamic_bom, 
+                res[product.default_code[:6].strip()] = (
+                    dynamic_bom,
                     # Industrial:
-                    product_pool.get_cost_industrial_for_product(                         
+                    product_pool.get_cost_industrial_for_product(
                         cr, uid, [product.id], context=context),
                         )
             return res
-            
+
         def clean_float(value):
-            ''' Clean float value
-            '''    
-            try: 
+            """ Clean float value
+            """
+            try:
                 res = float(value)
                 return res
             except:
                 return 0.0
-        
+
         def not_in_inventory_selection(product, jumped, costs):
-            ''' Check if the product need to be used:
+            """ Check if the product need to be used:
                 Add in jumped list
-            '''
+            """
             ledger_selection = (
                 '37.00101', # Tessuto c/acquisti
                 #'37.00102', # Materie varie prime c/acquisti
@@ -297,7 +297,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 '37.00105', # Cartoni c/acquisti
                 '37.00106', # Cellophan c/acquisti
                 '37.00108', # Copriteste e pinze c/acquisti
-                
+
                 '37.00115', # Piani tavoli e basi c/acquisti XXX after 2017
                 )
 
@@ -310,42 +310,42 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             not_selected = product.inv_revenue_account not in ledger_selection\
                 and product.inv_cost_account not in ledger_selection\
                 and product.inv_first_supplier not in supplier_selection
-                
+
             if not_selected:
-                if product.default_code not in jumped: 
+                if product.default_code not in jumped:
                     # log jumped material (with useful information)
-                    jumped[product.default_code] = ( 
+                    jumped[product.default_code] = (
                         product.name,
                         product.inv_revenue_account,
                         product.inv_cost_account,
                         product.inv_first_supplier,
-                        get_cost(product, costs),            
+                        get_cost(product, costs),
                         )
-            return not_selected            
-        
+            return not_selected
+
         def get_cost(product, costs):
-            ''' Check cost for this product
-            '''
+            """ Check cost for this product
+            """
             # TODO write a better method
             default_code = product.default_code
             if default_code and default_code in costs and costs[default_code]:
                 if default_code == 'ANG22':
                     print default_code, costs[default_code]
                 return costs[default_code]
-            else:     
+            else:
                 if default_code == 'ANG22':
-                    print default_code, product.inv_cost_value or product.standard_price 
+                    print default_code, product.inv_cost_value or product.standard_price
                 #return product.standard_price
-                return product.inv_cost_value or product.standard_price 
+                return product.inv_cost_value or product.standard_price
 
-        def setup_materials(product, materials, costs, mm_total, 
+        def setup_materials(product, materials, costs, mm_total,
                 mm_code_unused):
-            ''' Utility for append product in material list (initial setup)
-            '''
+            """ Utility for append product in material list (initial setup)
+            """
             price = get_cost(product, costs)
             default_code = product.default_code
             extract_number = '0'
-            
+
             # Extra data for calc:
             if default_code[:2].upper() in (
                     'TE', 'TJ', 'TS', 'TX'):
@@ -354,7 +354,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     extract_number = default_code[6:9]
                     if not extract_number.isdigit():
                         extract_number = '0'
-                
+
             if default_code not in materials:
                 materials[default_code] = [
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -364,7 +364,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     product.inv_first_supplier,
                     price,
 
-                    # Totals:                    
+                    # Totals:
                     mm_total.get(default_code, 0.0), # IN
                     0.0, # OUT
                     mm_total.get(default_code, 0.0), # 31/12
@@ -372,34 +372,34 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     product.weight if product.is_pipe else 0.0,# pipe weight
                     int(extract_number),# extract number (for fabric)
                     ]
-                    
-            # Remove used code:        
+
+            # Remove used code:
             if default_code in mm_code_unused:
                 mm_code_unused.remove(default_code)
             return
-            
+
         def setup_materials_q(product, col, qty, materials, costs):
-            ''' Add data for product passed in right column with right cost
-            '''
+            """ Add data for product passed in right column with right cost
+            """
             price = get_cost(product, costs)
-            
+
             default_code = product.default_code
-                 
+
             # Add q:
             materials[default_code][col] += qty
-            
+
             # Add total TODO change cost value:
             materials[default_code][col + 12] += qty * price
 
             materials[default_code][29] -= qty # OUT
             materials[default_code][30] -= qty # 31/12
             return
-            
-        if context is None: 
-            context = {}    
+
+        if context is None:
+            context = {}
 
         # ---------------------------------------------------------------------
-        # Parameters:        
+        # Parameters:
         # ---------------------------------------------------------------------
         use_dynamic = False # Force tempate bom use
         code_part = 6
@@ -407,14 +407,14 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         xls_file = '/home/administrator/photo/xls/stock/inventory_%s.xlsx'
         xls_infile = '/home/administrator/photo/xls/stock/use_inv_%s.xlsx'
         mm_infile = '/home/administrator/photo/xls/stock/mori_fin_%s.csv'
-        
+
         start_row = 2 # first data row (start from 0)
-        
+
         # Read parameter from wizard:
         wiz_browse = self.browse(cr, uid, ids, context=context)[0]
         year = wiz_browse.year
 
-        # ---------------------------------------------------------------------            
+        # ---------------------------------------------------------------------
         # Load cost from order:
         # ---------------------------------------------------------------------
         _logger.info('Check cost for product')
@@ -425,23 +425,23 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         # Template bom:
         # ---------------------------------------------------------------------
         template_bom = load_bom_template(
-            self, cr, uid, use_dynamic, context=context)    
+            self, cr, uid, use_dynamic, context=context)
 
-        # ---------------------------------------------------------------------            
+        # ---------------------------------------------------------------------
         # XLS output file:
-        # ---------------------------------------------------------------------            
+        # ---------------------------------------------------------------------
         # Insert year in filename:
         xls_reload_file = xls_reload_file % year
         xls_file = xls_file % year
         xls_infile = xls_infile % year
         mm_infile = mm_infile % year
 
-        # ---------------------------------------------------------------------            
+        # ---------------------------------------------------------------------
         # Load MM input (BF, INV, FF):
-        # ---------------------------------------------------------------------            
+        # ---------------------------------------------------------------------
         _logger.info('Load MM file: %s' % mm_infile)
         mm_total = {}
-        
+
         i = 0
         for line in open(mm_infile, 'r'):
             i += 1
@@ -449,13 +449,13 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                 continue # jump first line
             line = line.strip()
             row = line.split(';')
-                        
+
             mode = row[0].strip()
             #date = row[6]
             default_code = row[9].strip()
             #um = row[11]
             qty = float(row[26].replace(',', '.'))
-            
+
             if mode in ('IN', 'BF'):
                 sign = +1
             elif mode in ('RF', ):
@@ -463,32 +463,32 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             else:
                 sign = +1
                 _logger.error('Move not found: %s' % mode)
-                     
-            if default_code in mm_total: 
+
+            if default_code in mm_total:
                 mm_total[default_code] += sign * qty
             else:
                 mm_total[default_code] = sign * qty
 
         mm_code_unused = mm_total.keys()
-        
+
         # Open XLS file:
         _logger.info('Create extract %s file' % xls_file)
         WB = xlsxwriter.Workbook(xls_file)
 
         # Header:
         header_product = [
-            'Codice', 'Gen.', 'Feb.', 'Mar.', 'Apr.', 'Mag.', 'Giu.', 'Lug.', 
+            'Codice', 'Gen.', 'Feb.', 'Mar.', 'Apr.', 'Mag.', 'Giu.', 'Lug.',
             'Ago.', 'Set.', 'Ott.', 'Nov.', 'Dic.',
             ]
         header = [
-            'Codice', 'Inv. iniz.', 'Gen.', 'Feb.', 'Mar.', 'Apr.', 
-            'Mag.', 'Giu.', 'Lug.', 'Ago.', 'Set.', 'Ott.', 'Nov.', 
+            'Codice', 'Inv. iniz.', 'Gen.', 'Feb.', 'Mar.', 'Apr.',
+            'Mag.', 'Giu.', 'Lug.', 'Ago.', 'Set.', 'Ott.', 'Nov.',
             'Dic.', 'Inv. fin.'
             ]
         material_product = [
-            'Codice', 'Gen.', 'Feb.', 'Mar.', 'Apr.', 'Mag.', 'Giu.', 'Lug.', 
+            'Codice', 'Gen.', 'Feb.', 'Mar.', 'Apr.', 'Mag.', 'Giu.', 'Lug.',
             'Ago.', 'Set.', 'Ott.', 'Nov.', 'Dic.',
-            'Gen.', 'Feb.', 'Mar.', 'Apr.', 'Mag.', 'Giu.', 'Lug.', 
+            'Gen.', 'Feb.', 'Mar.', 'Apr.', 'Mag.', 'Giu.', 'Lug.',
             'Ago.', 'Set.', 'Ott.', 'Nov.', 'Dic.',
             'Costo', 'Ricavo', 'Fornitore', 'Costo',
             'IN', 'OUT', 'INV 31/12', 'MM test', 'Volume', 'Altezza Tess.',
@@ -509,28 +509,28 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             #('invoice_id.state', '=', 'open'),
             ('invoice_id.type', '!=', 'out_refund'),
             ], context=context)
-                
-        # Database:    
+
+        # Database:
         inventory_product = {}
-        inventory = {}        
+        inventory = {}
         products = {}
-        _logger.info('Read %s invoice line' % len(line_ids))        
+        _logger.info('Read %s invoice line' % len(line_ids))
         for line in line_pool.browse(
                 cr, uid, line_ids, context=context):
             default_code = line.product_id.default_code
             if not default_code:
                 _logger.error('No default code')
-                continue                
+                continue
             parent_code = default_code[:code_part].strip()
-                                
+
             quantity = line.quantity
             date_invoice = line.invoice_id.date_invoice
-                        
+
             if default_code not in inventory_product:
                 inventory_product[default_code] = [
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ]
-                products[default_code] = line.product_id     
+                products[default_code] = line.product_id
             if parent_code not in inventory:
                 inventory[parent_code] = [
                     0, # Start inv.
@@ -538,26 +538,26 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     0, # End inv.
                     ]
             month = int(date_invoice[5:7])
-            inventory_product[default_code][month - 1] += quantity   
-            inventory[parent_code][month] += quantity   
+            inventory_product[default_code][month - 1] += quantity
+            inventory[parent_code][month] += quantity
 
         # Export in XLSX file:
-        xls_sheet_write(WB, '1. Vendite prodotti', inventory_product, 
+        xls_sheet_write(WB, '1. Vendite prodotti', inventory_product,
             header_product)
         xls_sheet_write(WB, '2. Vendite padre', inventory, header)
-        
+
         # ---------------------------------------------------------------------
         # B. Integrate unload inventory:
         # ---------------------------------------------------------------------
         _logger.info('Read inventory adjust file: %s' % xls_infile),
         # Open file:
         try:
-            # from xlrd.sheet import ctype_text   
+            # from xlrd.sheet import ctype_text
             WB_inv = xlrd.open_workbook(xls_infile)
             WS_inv = WB_inv.sheet_by_index(0)
         except:
             raise osv.except_osv(
-                _('Open file error'), 
+                _('Open file error'),
                 _('Cannot open file: %s' % xls_infile),
                 )
 
@@ -567,14 +567,14 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             if not parent_code: # end import
                 _logger.info('End import at line: %s' % i)
                 break
-            
+
             if parent_code not in inventory:
                 _logger.warning('Code not found: %s' % parent_code)
                 inventory[parent_code] = [
                     0, # Start inv.
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, # End inv.
-                    ]                    
+                    ]
 
             for col in range(1, 15):
                 inventory[parent_code][col - 1] += clean_float(row[col].value)
@@ -617,17 +617,17 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             for col in range(0, 12):
                 product_qty = inventory_product[default_code][col]
                 parent_qty = inventory[parent_code][col + 1]
-                
+
                 # 3 case:
                 if not parent_qty:
                     inventory_product[default_code][col] = 0.0
-                elif product_qty <= parent_qty: 
-                    inventory[parent_code][col + 1] -= product_qty                     
+                elif product_qty <= parent_qty:
+                    inventory[parent_code][col + 1] -= product_qty
                 else: # product qty > parent_qty
                     inventory_product[default_code][col] = parent_qty
                     inventory[parent_code][col + 1] = 0.0
         # Export in XLSX file:
-        xls_sheet_write(WB, '4. Correzione prodotti', inventory_product, 
+        xls_sheet_write(WB, '4. Correzione prodotti', inventory_product,
             header_product)
 
         # ---------------------------------------------------------------------
@@ -638,7 +638,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         no_bom6 = {}
         for default_code, unload_list in inventory_product.iteritems():
             _logger.info('Extract material for code: %s' % default_code)
-            
+
             # ------------------------------
             # Product data information used:
             # ------------------------------
@@ -653,7 +653,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             industrial_ids = {}
             dynamic_ids = []
             # TODO choose another template instead
-            
+
             if code6 in template_bom:
                 (dynamic_ids, industrial_ids) = template_bom[code6]
                 # TODO manage industrial
@@ -662,33 +662,33 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     no_bom6[code6] = []
                 if default_code not in no_bom6[code6]: # Log no bom product
                     no_bom6[code6].append(default_code)
-            
+
             # Use BOM from product instead of template bom
             if not use_dynamic:
                 dynamic_ids = product.dynamic_bom_line_ids
-                
+
             # Halfworked product:
-            half_line_ids = product.half_bom_ids # bom_ids            
-            
+            half_line_ids = product.half_bom_ids # bom_ids
+
             # -----------------------------------------------------------------
             # I. Raw material (Invoice direct sale for material):
             # -----------------------------------------------------------------
-            if not dynamic_ids and not half_line_ids:                
+            if not dynamic_ids and not half_line_ids:
                 if not_in_inventory_selection(# Not used:
                         product, jumped, costs):
                     continue # jump not used (update the list)!
-                    
+
                 # Add in inventory:
-                setup_materials(product, materials, costs, mm_total, 
+                setup_materials(product, materials, costs, mm_total,
                     mm_code_unused)
-                
+
                 # Loop on all period:
                 for col in range (0, 12):
                     product_qty = unload_list[col]
                     if not product_qty: # nothing to do, is empty
                         continue
-                        
-                    setup_materials_q(product, col, product_qty, materials, 
+
+                    setup_materials_q(product, col, product_qty, materials,
                         costs)
                 continue
             # -----------------------------------------------------------------
@@ -699,25 +699,25 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             for line in half_line_ids:
                 component = line.product_id
                 component_code = component.default_code
-                
+
                 # Component not used:
                 if not_in_inventory_selection(component, jumped, costs):
                     continue
 
                 # Add to inventory:
-                setup_materials(component, materials, costs, mm_total, 
+                setup_materials(component, materials, costs, mm_total,
                     mm_code_unused)
-                
+
                 # Loop on all period:
                 for col in range (0, 12):
                     product_qty = unload_list[col]
                     if not product_qty: # nothing to do, is empty
                         #_logger.info('Jumped 0: %s' % default_code)
                         continue
-                
+
                     setup_materials_q(
-                        component, col, 
-                        product_qty * line.product_qty, 
+                        component, col,
+                        product_qty * line.product_qty,
                         materials,
                         costs
                         )
@@ -741,14 +741,14 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                     for hw_line in component.half_bom_ids:
                         hw_product = hw_line.product_id
                         hw_product_code = hw_product.default_code
-                        
+
                         # Not used:
-                        if not_in_inventory_selection(hw_product, jumped, 
-                                costs):                                
+                        if not_in_inventory_selection(hw_product, jumped,
+                                costs):
                             continue # jump not used!
-                        
+
                         # Add to inventory:
-                        setup_materials(hw_product, materials, costs, mm_total, 
+                        setup_materials(hw_product, materials, costs, mm_total,
                             mm_code_unused)
 
                         for col in range (0, 12):
@@ -758,53 +758,53 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
                                 continue
 
                             setup_materials_q(
-                                hw_product, col, 
+                                hw_product, col,
                                 product_qty * hw_line.product_qty, # q.
                                 materials,
                                 costs,
                                 )
-                    continue # no other material        
+                    continue # no other material
 
                 # -------------------------------------------------------------
                 # b. Prime material in product explose:
                 # -------------------------------------------------------------
-                # Take material in first level                
+                # Take material in first level
                 if not_in_inventory_selection(component, jumped, costs):
                     continue # Not used jumped
-                                    
+
                 for col in range (0, 12):
                     product_qty = unload_list[col]
                     if not product_qty: # nothing to do, is empty
                         continue
-                        
+
                     if component_code not in materials: # Add to inventory:
-                        setup_materials(component, materials, costs, mm_total, 
+                        setup_materials(component, materials, costs, mm_total,
                             mm_code_unused)
                     setup_materials_q(
-                        component, col, 
-                        product_qty * line.product_qty, 
+                        component, col,
+                        product_qty * line.product_qty,
                         materials,
                         costs,
                         )
 
-        # ---------------------------------------------------------------------                
+        # ---------------------------------------------------------------------
         # Used materials
-        # ---------------------------------------------------------------------                
+        # ---------------------------------------------------------------------
         xls_sheet_write(
             WB, '5. Materiali utilizzati', materials, material_product)
-            
-        # ---------------------------------------------------------------------                
+
+        # ---------------------------------------------------------------------
         # Unused materials:
-        # ---------------------------------------------------------------------                
+        # ---------------------------------------------------------------------
         xls_sheet_write_table(
             WB, '6. Materiali saltati', jumped, (
-                'Codice materiale', 'Nome', 'Costo', 'Ricavo', 'Fornitore', 
+                'Codice materiale', 'Nome', 'Costo', 'Ricavo', 'Fornitore',
                 'Prezzo',
                 ))
 
-        # ---------------------------------------------------------------------                
+        # ---------------------------------------------------------------------
         # Write extra page for BOM not found from product template:
-        # ---------------------------------------------------------------------                
+        # ---------------------------------------------------------------------
         WS = WB.add_worksheet('7. Prodotti senza modello DB')
         row = 0
         WS.write(row, 0, 'Codice padre (template)')
@@ -814,9 +814,9 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             WS.write(row, 0, code6)
             WS.write(row, 1, ', '.join(no_bom6[code6]))
 
-        # ---------------------------------------------------------------------                
+        # ---------------------------------------------------------------------
         # Write extra page for Account total movement 2016
-        # ---------------------------------------------------------------------                
+        # ---------------------------------------------------------------------
         WS = WB.add_worksheet('8. Movimenti Mexal')
         row = 0
         WS.write(row, 0, 'Codice prodotto')
@@ -826,9 +826,9 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             WS.write(row, 0, code)
             WS.write(row, 1, mm_total[code])
 
-        # ---------------------------------------------------------------------                
+        # ---------------------------------------------------------------------
         # Write extra page for Account total movement 2016
-        # ---------------------------------------------------------------------                
+        # ---------------------------------------------------------------------
         WS = WB.add_worksheet('9. Prodotti non utilizzati ')
         row = 0
         WS.write(row, 0, 'Prodotti presenti in mexal non utilizzati')
@@ -839,12 +839,12 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             row += 1
             WS.write(row, 0, code)
             WS.write(row, 1, mm_total.get(code, '?'))
-                        
+
     _columns = {
         'year': fields.integer('Year', required=True),
         }
-        
+
     _defaults = {
         'year': lambda *x: int(datetime.now().strftime('%Y')),
-        }    
+        }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

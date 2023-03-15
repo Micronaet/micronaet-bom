@@ -642,7 +642,7 @@ class ProductProduct(orm.Model):
             'type': 'ir.actions.report.xml',
             'report_name': 'industrial_cost_bom_report',
             'datas': datas,
-            # 'context': context,
+            'context': context,
             }
 
     def open_single_report_with_dump(self, cr, uid, ids, context=None):
@@ -656,7 +656,7 @@ class ProductProduct(orm.Model):
             'type': 'ir.actions.report.xml',
             'report_name': 'industrial_cost_bom_report',
             'datas': datas,
-            # 'context': context,
+            'context': context,
             }
 
     def open_history_dump(self, cr, uid, ids, context=None):

@@ -18,6 +18,7 @@
 #
 ###############################################################################
 import os
+import pdb
 import sys
 import logging
 import openerp
@@ -38,6 +39,7 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+
 class StockMove(orm.Model):
     """ Model name: Stock move
     """
@@ -50,10 +52,13 @@ class StockMove(orm.Model):
         res = {}
         domain = []
 
+        from_date = datetime.now()
         line_ids = self.search(cr, uid, [
             ('state', '=', 'done'),
-            ('origin', '=ilike', 'OF%'),  # picking_id.origin
+            ('picking_id.origin', '=ilike', 'OF%'),
+            # ('origin', '=ilike', 'OF%'),  # not all origin present!
             ], context=context)
+
         for line in sorted(
                 self.browse(cr, uid, line_ids, context=context),
                 key=lambda x: x.picking_id.date,
@@ -67,5 +72,9 @@ class StockMove(orm.Model):
                 line.product_uom_qty,
                 line.price_unit,
                 )
-        _logger.info('Total purchase product: %s' % len(line_ids))
+        to_date = datetime.now()
+        gap = int((to_date - from_date).seconds / 60.0)
+        _logger.info('Total purchase product: %s [time %s]' % (
+            len(line_ids), gap))
+        pdb.set_trace()
         return res

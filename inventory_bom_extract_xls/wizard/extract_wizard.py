@@ -84,7 +84,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
     # Wizard button event:
     # --------------------
     def action_extract_reload(self, cr, uid, ids, context=None):
-        """ Reload cost / revenut before launch normal procedure
+        """ Reload cost / revenue before launch normal procedure
             1. First get data from ODOO product and update fields
             2. After override values from file CSV present
         """
@@ -130,14 +130,14 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
             product_pool.write(cr, uid, product.id, data, context=context)
 
         # Update with file:
-        #self.import_csv_inventory_cost_revenue(
+        # elf.import_csv_inventory_cost_revenue(
         #    cr, uid, csv_file, context=context)
 
-        # Call XLSX produce functiocn:
-        return True#self.action_extract(cr, uid, ids, context=context)
+        # Call XLSX produce function:
+        return True  # self.action_extract(cr, uid, ids, context=context)
 
     def action_extract_reload_all(self, cr, uid, ids, context=None):
-        """ Reload cost / revenut before launch normal procedure
+        """ Reload cost / revenue before launch normal procedure
             1. First get data from ODOO product and update fields
             2. After override values from file CSV present
         """
@@ -181,7 +181,7 @@ class ProductInventoryExtractXLSWizard(orm.TransientModel):
         self.import_csv_inventory_cost_revenue(
             cr, uid, csv_file, context=context)
 
-        # Call XLSX produce functiocn:
+        # Call XLSX produce function:
         return self.action_extract(cr, uid, ids, context=context)
 
     def action_extract(self, cr, uid, ids, context=None):

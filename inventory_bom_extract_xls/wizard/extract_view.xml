@@ -9,11 +9,11 @@
                 <form string="Wizard" version="7.0">
                    <header>
                        <button string="Cancel" special="cancel" />
-                       
-                       <button name="action_extract_reload" string="Reload ledger" type="object" icon="gtk-jump-to" />
+
+                       <button name="action_extract_reload" string="Reload ledger" type="object" icon="gtk-jump-to" confirm="Carico il codice conto nella anagrafica prodotto?" />
                        <button name="action_extract_reload_all" string="Extract (reload cost/revenue)" type="object" icon="gtk-jump-to" />
                        <button name="action_extract" string="Extract" type="object" icon="gtk-jump-to" class="oe_highlight" />
-                   </header>                   
+                   </header>
                    <group colspan="4" col="4">
                         <field name="year" />
                    </group>
@@ -28,10 +28,10 @@
           <field name="view_mode">form</field>
           <field name="target">new</field>
           <field name="view_id" ref="product_inventory_extract_xls_wizard_view"/>
-      </record>  
-      <menuitem 
-          parent="account.menu_finance_periodical_processing" 
-          id="menu_product_inventory_extract_xls_wizard" 
+      </record>
+      <menuitem
+          parent="account.menu_finance_periodical_processing"
+          id="menu_product_inventory_extract_xls_wizard"
           action="action_product_inventory_extract_xls_wizard"/>
     </data>
 </openerp>

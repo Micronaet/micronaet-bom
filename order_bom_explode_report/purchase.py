@@ -76,5 +76,4 @@ class StockMove(orm.Model):
         gap = int((to_date - from_date).seconds / 60.0)
         _logger.info('Total purchase product: %s [time %s]' % (
             len(line_ids), gap))
-        pdb.set_trace()
         return res

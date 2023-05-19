@@ -122,7 +122,7 @@ class MrpProductionXmlrpcAgent(orm.Model):
         """
         res = ''
         for c in value:
-            if ord(c) <127:
+            if ord(c) < 127:
                 res += c
             else:
                 res += '#'

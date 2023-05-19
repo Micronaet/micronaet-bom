@@ -344,7 +344,7 @@ class MrpProduction(orm.Model):
         if mp_mode == 'fabric':  # fabric
             fabric_list = (
                 'T3D', 'TES', 'TEX', 'TGT', 'TIO', 'TJO', 'TSK', 'TSQ', 'TWH',
-                'TWL', 'TWM', 'TXM', 'TXI', 'TXR',
+                'TWL', 'TWM', 'TXM', 'TXI', 'TXR', 'T4D',
                 )
             # Log selection:
             write_xls_line('selection', ['Codici tessuto'])

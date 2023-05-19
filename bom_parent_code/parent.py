@@ -30,9 +30,9 @@ from openerp import SUPERUSER_ID, api
 from openerp import tools
 from openerp.tools.translate import _
 from openerp.tools.float_utils import float_round as round
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
-    DEFAULT_SERVER_DATETIME_FORMAT, 
-    DATETIME_FORMATS_MAP, 
+from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DATETIME_FORMATS_MAP,
     float_compare)
 
 
@@ -40,7 +40,7 @@ _logger = logging.getLogger(__name__)
 
 class MRPBom(orm.Model):
     """ Model name: MRPBom
-    """    
+    """
     _inherit = 'mrp.bom'
 
     # EXTRA BLOCK -------------------------------------------------------------
@@ -50,20 +50,20 @@ class MRPBom(orm.Model):
         assert len(ids) == 1, 'Works only with one record a time'
 
         line_pool = self.pool.get('mrp.bom.line')
-        
+
         # Create rule in dynamic:
         bom_proxy = self.browse(cr, uid, ids, context=context)[0]
         structure = bom_proxy.product_id.structure_id
-        
+
         for line in bom_proxy.bom_line_ids:
             line_pool.create(cr, uid, {
                 'bom_id': structure.dynamic_bom_id.id,
                 'product_id': line.product_id.id,
                 'dynamic_mask': '%s%s' % (bom_proxy.product_id.code, '%'),
                 'product_qty': line.product_qty,
-                'product_uom': line.product_uom.id,                                
+                'product_uom': line.product_uom.id,
                 }, context=context)
-        
+
         # Move in to be remove category
         self.write(cr, uid, ids, {
             'bom_category': 'remove',
@@ -74,14 +74,14 @@ class MRPBom(orm.Model):
         ''' Loop button:
         '''
         product_pool = self.pool.get('product.product')
-        
+
         product_ids = self.search(cr, uid, [
             ('bom_category', '=', 'product')], context=context)
 
         # LOG operation (TODO remove)
         log_f = open(os.path.expanduser('~/bom.csv'), 'w')
 
-        empty_hw = []  
+        empty_hw = []
         mt_new = []
 
         for item in ids: #product_ids: # XXX ids:
@@ -89,17 +89,17 @@ class MRPBom(orm.Model):
                 cr, uid, [item], empty_hw, mt_new, context=context)
             self.write(cr, uid, item, {
                 'bom_category': 'done',
-                }, context=context) 
-        log_f.write('%s' % (empty_hw,))    
-        log_f.write('%s' % (mt_new,))    
-        log_f.close()        
-        return True    
-        
-    def migrate_assign_product_bom_product1(self, cr, uid, ids, 
+                }, context=context)
+        log_f.write('%s' % (empty_hw,))
+        log_f.write('%s' % (mt_new,))
+        log_f.close()
+        return True
+
+    def migrate_assign_product_bom_product1(self, cr, uid, ids,
             empty_hw, mt_new, context=None):
         ''' Migrate bom in dynamic way
             Create half work element
-            Create BOM 
+            Create BOM
             Create move in dynamic
         '''
         assert len(ids) == 1, 'Works only with one record a time'
@@ -110,18 +110,18 @@ class MRPBom(orm.Model):
         bom_proxy = self.browse(cr, uid, ids, context=context)[0]
 
         log = ''
-        
+
         try:
             dynamic_bom_id = \
                 bom_proxy.product_id.structure_id.dynamic_bom_id.id
             structure_id = bom_proxy.product_id.structure_id.id
         except:
             # no dynamic BOM
-            _logger.error('%s. No dynamic bom structure' % ( 
+            _logger.error('%s. No dynamic bom structure' % (
                 bom_proxy.id,
                 ))
             return
-                    
+
         # ---------------------------------------------------------------------
         # Create dynamic mask from code:
         # ---------------------------------------------------------------------
@@ -134,7 +134,7 @@ class MRPBom(orm.Model):
             }
         code_map = {
             #Parent:Tela
-            '005': '205',            
+            '005': '205',
             '014': '024',
             '023': '123',
             '025': '024', # Aggiunto oggi
@@ -169,10 +169,10 @@ class MRPBom(orm.Model):
             '935': '930',
             '936': '931',
             }
-            
+
         type_map = {
             'TES': 'TL',
-            'TEX': 'TL',            
+            'TEX': 'TL',
             # Non usati:
             'TXM': 'TL',
             'TWH': 'TL',
@@ -180,39 +180,40 @@ class MRPBom(orm.Model):
             'TJO': 'TL',
             'TIO': 'TL',
             'TWL': 'TL',
-            'TGT': 'TL',           
-            # Materassino: 
+            'TGT': 'TL',
+            # Materassino:
             'TSK': 'MT',
             'T3D': 'MT',
+            # 'T4D': 'MT',
             }
-             
+
         code6_map = {
-            # TODO 
+            # TODO
             #'TL127S': 'TL127PO'
             }
 
         crea_hw = {
-            #'014', '024', '025', '124', 
+            #'014', '024', '025', '124',
             # '230'
             '046': [('TL145', 'TEX150', 1.08), ('PO650', 'TEX165', 0.21)],
             '049': [('TL145', 'TEX150', 1.12), ('PO650', 'TEX165', 0.21)],
-            '149': [('TL145', 'TEX150', 1.12), ('PO650', 'TEX165', 0.21)],            
+            '149': [('TL145', 'TEX150', 1.12), ('PO650', 'TEX165', 0.21)],
             '050': [('TL038', 'TEX165', 2.3), ('PA601', 'TEX150', 0.4)],
             '051': [('TL038', 'TEX165', 2.3), ('PA601', 'TEX150', 0.4), ('PO651', 'TEX165', 0.22)],
             # TODO TX o PE
             '034': [('TL135', 'TESPOL150', 1.05), ('PA600', 'TESPOL165', 0.22)],
             '039': [('TL135', 'TEX150', 1.05), ('PA600', 'TEX165', 0.22)],
-            
+
             # 700
-            # 701            
-            
-            # 550 
-            # 552            
-            
+            # 701
+
+            # 550
+            # 552
+
             # 'G421': ['TLG420', 'PA600']
             }
-        created_hw = []    
-            
+        created_hw = []
+
         # XXX SOLO INDICATIVO PER FORMALIZZARE LE REGOLE:
         tessuto_con_doppione = [
             '014', # unire
@@ -225,7 +226,7 @@ class MRPBom(orm.Model):
             '046', # TL145 >, PO650 <
             '048',
             '049', # TL145 >, PO650 <
-            '050', # TL038 >, PA601 < 
+            '050', # TL038 >, PA601 <
             '051', # TL038 >, PA601 < (è 050) + PO651 0.22
             '052', #
             #'070', # Non più come 071
@@ -240,29 +241,29 @@ class MRPBom(orm.Model):
             '552', # Non più come 550
             '810', '900', '905',
             # 'G241', # ??? TLG420, PA600
-            ] 
-        
-        # Product and Halfworked    
+            ]
+
+        # Product and Halfworked
         direct_sale = {
             # Parasoli
-            '601': 'PA', 
-            '600': 'PA', 
+            '601': 'PA',
+            '600': 'PA',
             # Poggiatesta / Cuscino
-            '650': 'PO', 
-            '651': 'PO', 
-            '630': 'PO', 
+            '650': 'PO',
+            '651': 'PO',
+            '630': 'PO',
             '649': 'PO',
             # Supporti:
             '620': 'SU',
             }
-            
-        # Default code:    
-        default_code = bom_proxy.product_id.default_code        
+
+        # Default code:
+        default_code = bom_proxy.product_id.default_code
         if not default_code:
             _logger.error('ID %s. No product code' % bom_proxy.id)
-            return 
+            return
         default_code = default_code.upper()
-        
+
         # Mask for S or not S (same)
         if default_code[12:13] == 'S':
             dynamic_mask = default_code[:12] + '%'
@@ -271,15 +272,15 @@ class MRPBom(orm.Model):
 
         # ---------------------------------------------------------------------
         # Create TL element:
-        # ---------------------------------------------------------------------        
+        # ---------------------------------------------------------------------
         for line in bom_proxy.bom_line_ids:
             if default_code.startswith('MT'):
                 _logger.warning('Code %s. Jump MT' % (
                     default_code))
                 if default_code not in mt_new:
-                    mt_new.append(default_code)    
-                return 
-        
+                    mt_new.append(default_code)
+                return
+
             # Component code:
             component_code = line.product_id.default_code
             if not component_code:
@@ -287,10 +288,10 @@ class MRPBom(orm.Model):
                     default_code, line.id))
                 return
             component_code = component_code.upper()
-            
+
             # Type code:
             #type_code = 'TL'
-            
+
             # Parent code:
             parent = default_code[:3]
             if parent in direct_sale:
@@ -302,8 +303,8 @@ class MRPBom(orm.Model):
             elif parent in ('084', ):
                 type_code = 'PVC6OP'
                 parent_code = ''
-            else: 
-                # Default code:    
+            else:
+                # Default code:
                 parent_code = code_map.get(parent, parent)
                 type_code = type_map.get(component_code[:3], False)
 
@@ -311,27 +312,27 @@ class MRPBom(orm.Model):
                 _logger.error('Code %s.%s Non MT TL PO PA' % (
                     default_code, line.id))
                 return
-                            
+
             #Fabric code:
             if parent in ('810', '081', '085', '084') or parent in direct_sale:
                 fabric_code = ''
             else:
-                # Default code:                
+                # Default code:
                 if 'B' in default_code[4:6]:
                     fabric_code = default_code[3:6].replace('B', ' ')
-                else:    
+                else:
                     fabric_code = default_code[3:6]
 
-            # Color code        
+            # Color code
             if parent in direct_sale:
                 color_code = ''
-            else:    
+            else:
                 color_code = default_code[8:12].strip()
             if len(color_code) == 1:
                 _logger.error('Code %s.%s Colore 1 carattere %s' % (
                     default_code, line.id, component_code))
                 return
-            
+
             # TODO Decidere se creare il solo semilavorato oppure continuare
             HW_codes = []
 
@@ -339,7 +340,7 @@ class MRPBom(orm.Model):
                 if default_code in created_hw:
                     continue # only one
                 else:
-                    created_hw.append(default_code)    
+                    created_hw.append(default_code)
                 for hw, component, qty in crea_hw[parent]:
                     HW_code = '%s%s%s' % (
                         hw, fabric_code, color_code)
@@ -349,7 +350,7 @@ class MRPBom(orm.Model):
                     fabric_ids = product_pool.search(cr, uid, [
                         ('default_code', '=', fabric_product),
                         # TODO  halfworked?
-                        ], context=context)    
+                        ], context=context)
                     if fabric_ids:
                         fabric_id = fabric_ids[0]
                     else:
@@ -358,32 +359,32 @@ class MRPBom(orm.Model):
                             'default_code': fabric_product,
                             'uom_id': 8, # mt
                             'uos_id': 8, # mt
-                            'uom_po_id': 8, # mt                          
+                            'uom_po_id': 8, # mt
                             }, context=context)
                         _logger.warning('Create fabric: %s' % fabric_product)
 
                     fabric_proxy = product_pool.browse(
                         cr, uid, fabric_id, context=context)
-                            
+
                     HW_codes.append((
-                        HW_code, 
+                        HW_code,
                         fabric_proxy.id,
                         fabric_proxy.uom_id.id,
                         qty,
                         ))
 
                     if HW_code not in empty_hw:
-                        empty_hw.append(HW_code)                        
-            else:                
+                        empty_hw.append(HW_code)
+            else:
                 # Normal creation:
                 HW_codes = [
                     ('%s%s%s%s' % (
                         type_code or '??',
                         parent_code,
-                        fabric_code, 
+                        fabric_code,
                         color_code,
-                        ), 
-                    line.product_id.id, # fabric_id   
+                        ),
+                    line.product_id.id, # fabric_id
                     line.product_id.uom_id.id, # fabric_uom
                     line.product_qty,
                     )]
@@ -391,14 +392,14 @@ class MRPBom(orm.Model):
             for HW_code, fabric_id, fabric_uom, product_qty in HW_codes:
                 if parent in direct_sale: # use TL for PA and PO from Direct s.
                     category_id = categ_id.get('TL', False)
-                else:    
+                else:
                     category_id = categ_id.get(HW_code[:2], False)
-                    
+
                 if not category_id:
                     _logger.error('Code %s.%s No BOM categ. : %s' % (
                         default_code, line.id, HW_code))
-                    return            
-            
+                    return
+
                 component_ids = product_pool.search(cr, uid, [
                     ('default_code', '=', HW_code),
                     ('relative_type', '=', 'half'),
@@ -415,12 +416,12 @@ class MRPBom(orm.Model):
                     HW_id = product_pool.create(cr, uid, {
                         'name': HW_code,
                         'default_code': HW_code,
-                        'relative_type': 'half',       
+                        'relative_type': 'half',
                         'structure_id': structure_id,
                         'uom_id': 1, # XXX NR
                         'ean13_auto': False, # XXX
                         }, context=context)
-             
+
                 # -------------------------------------------------------------
                 # Create / Update fabric under HW component
                 # -------------------------------------------------------------
@@ -433,33 +434,33 @@ class MRPBom(orm.Model):
                         ('product_id', '=', fabric_id),
                         ('product_qty', '=', product_qty),
                         ], context=context)
-                    if not exist:    
+                    if not exist:
                         line_pool.create(cr, uid, {
                             # Link:
                             'bom_id': HW_proxy.half_bom_id.id, # bom link
                             'halfwork_id': HW_proxy.id, # product link
-                            
+
                             # Fabric data:
-                            'product_id': fabric_id, 
-                            'product_uom': fabric_uom, 
+                            'product_id': fabric_id,
+                            'product_uom': fabric_uom,
                             'type': line.type,
                             'product_qty': product_qty,
                             }, context=context)
-                else: # yet present        
+                else: # yet present
                     # Only first element
                     product_pool.create_product_half_bom(
                         cr, uid, [HW_id], context=context)
                     HW_proxy = product_pool.browse(
-                        cr, uid, HW_id, context=context)                
-                        
+                        cr, uid, HW_id, context=context)
+
                     line_pool.create(cr, uid, {
                         # Link:
                         'bom_id': HW_proxy.half_bom_id.id, # bom link
                         'halfwork_id': HW_proxy.id, # product link
-                        
+
                         # Fabric data:
-                        'product_id': fabric_id, 
-                        'product_uom': fabric_uom, 
+                        'product_id': fabric_id,
+                        'product_uom': fabric_uom,
                         'type': line.type,
                         'product_qty': product_qty,
                         }, context=context)
@@ -478,18 +479,18 @@ class MRPBom(orm.Model):
                         'bom_id': dynamic_bom_id,
                         'dynamic_mask': dynamic_mask,
                         'category_id': category_id,
-                        'product_id': HW_proxy.id, 
-                        'product_uom': HW_proxy.uom_id.id, 
+                        'product_id': HW_proxy.id,
+                        'product_uom': HW_proxy.uom_id.id,
                         'product_qty': 1, # always!
                         'type': 'normal',
                         }, context=context)
         return
 
     # EXTRA BLOCK -------------------------------------------------------------
-        
+
     def get_config_parameter_list(self, cr, uid, context=None):
-        ''' Read parameter: 
-        '''    
+        ''' Read parameter:
+        '''
         key = 'product.default.product.parent.bom'
         config_pool = self.pool.get('ir.config_parameter')
         config_ids = config_pool.search(cr, uid, [
@@ -499,51 +500,51 @@ class MRPBom(orm.Model):
             return []
         config_proxy = config_pool.browse(
             cr, uid, config_ids, context=context)[0]
-        return eval(config_proxy.value)    
-    
+        return eval(config_proxy.value)
+
     def assign_parent_bom(self, cr, uid, ids, context=None):
         ''' Assign bom depend on code format
-        '''    
+        '''
         bom_code_split = self.get_config_parameter_list(
             cr, uid, context=context)
         if not bom_code_split:
             raise osv.except_osv(
-                _('Error'), 
+                _('Error'),
                 _('Setup config paremeter!'))
-            
+
         bom_proxy = self.browse(cr, uid, ids, context=context)[0]
         default_code = bom_proxy.product_id.default_code
         if not default_code:
             raise osv.except_osv(
-                _('Error'), 
+                _('Error'),
                 _('No default code in product!'))
 
-        bom_ids = False        
-        for to in bom_code_split:  
+        bom_ids = False
+        for to in bom_code_split:
             if len(default_code) <= to:
                 continue
             partial = default_code[0:to]
             bom_ids = self.search(cr, uid, [
-                ('bom_category', '=', 'half'), 
+                ('bom_category', '=', 'half'),
                 ('product_id.default_code', '=', partial),
                 ], context=context)
             if bom_ids:
                 break
-                
+
         if not bom_ids:
             raise osv.except_osv(
-                _('Error'), 
+                _('Error'),
                 _('No default code in product!'))
-                
+
         if len(bom_ids) > 1:
             _logger.error('Found more parent bom!')
-                
+
         return self.write(cr, uid, ids, {
             'subparent_id': bom_ids[0],
-            }, context=context)        
-    
+            }, context=context)
+
     _columns = {
         'subparent_id': fields.many2one(
-            'mrp.bom', 'Sub parent bom'),        
+            'mrp.bom', 'Sub parent bom'),
         }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

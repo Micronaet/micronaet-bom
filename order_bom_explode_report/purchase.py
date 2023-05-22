@@ -46,9 +46,25 @@ class StockMove(orm.Model):
 
     _inherit = 'stock.move'
 
+    def _get_last_price_control_costs(self, product):
+        """ Return product requested last price
+        """
+        last_date = False
+        last_price = 0.0
+        for seller in product.seller_ids:
+            for price in seller.pricelist_ids:
+                if not last_date or last_date < price.date_quotation:
+                    last_price = price.price
+                    last_date = price.date_quotation
+        if last_price:
+            return last_price, last_date
+        else:
+            return 0.0, ''
+
     def _get_purchase_product_last_date(self, cr, uid, context=None):
         """ Generate database for last purchase
         """
+
         res = {}
         domain = []
 
@@ -66,11 +82,26 @@ class StockMove(orm.Model):
             product = line.product_id
             if not product or product.id in res:
                 continue
+
+            line_price = line.price_unit
+            if line_price:
+                # Read from OF purchase order line:
+                line_date = (line.picking_id.date or '')[:10]
+                line_uom = line.product_uom.name
+                line_qty = line.product_uom_qty
+            else:
+                # Read from product cost management:
+                line_price, line_date = self._get_last_price_control_costs(
+                    product)
+                line_uom = product.uom_id.name or ''
+                line_qty = '[NO OF!]'
+
+            # [acq. 2022-03-08 m 891.0: costo un. 3.338]
             res[product.id] = '[acq. %s %s %s: costo un. %s]' % (
-                (line.picking_id.date or '')[:10],
-                line.product_uom.name,
-                line.product_uom_qty,
-                line.price_unit,
+                line_date,
+                line_uom,
+                line_qty,
+                line_price,
                 )
         to_date = datetime.now()
         gap = int((to_date - from_date).seconds / 60.0)

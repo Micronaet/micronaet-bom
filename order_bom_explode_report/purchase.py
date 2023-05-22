@@ -94,7 +94,7 @@ class StockMove(orm.Model):
                 line_price, line_date = self._get_last_price_control_costs(
                     product)
                 line_uom = product.uom_id.name or ''
-                line_qty = '[NO OF!]'
+                line_qty = 'NO OF!'
 
             # [acq. 2022-03-08 m 891.0: costo un. 3.338]
             res[product.id] = '[acq. %s %s %s: costo un. %s]' % (

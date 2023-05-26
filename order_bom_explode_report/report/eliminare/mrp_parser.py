@@ -43,8 +43,11 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+default_days = 30
+
+
 class Parser(report_sxw.rml_parse):
-    default_days = 30
+    
     def __init__(self, cr, uid, name, context):        
         super(Parser, self).__init__(cr, uid, name, context)
         self.localcontext.update({
@@ -64,7 +67,7 @@ class Parser(report_sxw.rml_parse):
         if data is None:
             data = {}
             
-        days = data.get('days', self.default_days)
+        days = data.get('days', default_days)
             
         return _('Active production for %s days') % days
 
@@ -109,7 +112,7 @@ class Parser(report_sxw.rml_parse):
         # ---------------------------------------------------------------------        
         if data is None:
             data = {}
-        days = data.get('days', self.default_days)
+        days = data.get('days', default_days)
         first_supplier_id = data.get('first_supplier_id')
 
         # pool used:

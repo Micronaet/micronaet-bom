@@ -42,6 +42,8 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 _logger = logging.getLogger(__name__)
 
 
+default_days = 30
+
 class MrpBomInherit(orm.Model):
     """ Add master function here
     """
@@ -575,7 +577,6 @@ class MrpBomInherit(orm.Model):
 class Parser(report_sxw.rml_parse):
     """ Report for MRP Product
     """
-    # default_days = 30
 
     def __init__(self, cr, uid, name, context):
         super(Parser, self).__init__(cr, uid, name, context)
@@ -596,7 +597,7 @@ class Parser(report_sxw.rml_parse):
         if data is None:
             data = {}
 
-        days = data.get('days', self.default_days)
+        days = data.get('days', default_days)
 
         return _('Active production for %s days') % days
 

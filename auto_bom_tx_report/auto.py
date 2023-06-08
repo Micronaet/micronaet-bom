@@ -65,6 +65,12 @@ class ComponentStatusReportWizard(orm.TransientModel):
     """
     _inherit = 'component.status.report.wizard'
 
+    def integrate_stock_total_page_to_excel(
+            self, cr, uid, ids, filename, context=None):
+        """ Integrate stock page
+        """
+        return True
+
     # --------------------
     # Wizard button event:
     # --------------------
@@ -85,7 +91,7 @@ class ComponentStatusReportWizard(orm.TransientModel):
             'days': wiz_browse.days,
             'first_supplier_id': wiz_browse.first_supplier_id.id or False,
             # 'negative_start': wiz_browse.negative_start,
-            'type_id': False,  # TODO remove ex. wiz_browse.type_id.id or
+            'type_id': False,  # todo remove ex. wiz_browse.type_id.id or
             'with_type_ids':
                 [item.id for item in wiz_browse.with_type_ids],
             'without_type_ids':
@@ -104,6 +110,11 @@ class ComponentStatusReportWizard(orm.TransientModel):
         filename = mrp_pool.extract_mrp_production_report_xlsx(
             cr, uid, data=datas, context=context)
         _logger.info('Extracted file in %s' % filename)
+
+        # todo append stock page here!
+        _logger.info('Integrate stock page in %s' % filename)
+        self.integrate_stock_total_page_to_excel(
+            cr, uid, ids, filename, context=context)
 
         b64 = open(filename, 'rb').read().encode('base64')
         attachment_id = attachment_pool.create(cr, uid, {

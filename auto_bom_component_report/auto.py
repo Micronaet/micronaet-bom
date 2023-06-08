@@ -155,6 +155,11 @@ class MrpProduction(orm.Model):
             filename = mrp_pool.extract_mrp_production_report_xlsx(
                 cr, uid, data=datas, context=context)
             _logger.info('Extracted file in %s' % filename)
+
+            # Append stock page here:
+            _logger.info('Integrate stock page in %s' % filename)
+            self.integrate_stock_total_page_to_excel(filename)
+
             if 'component_logfile' in context:
                 logfile = context['component_logfile']
                 _logger.info('Send also log file: %s' % logfile)

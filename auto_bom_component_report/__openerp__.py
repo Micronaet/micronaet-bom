@@ -30,7 +30,7 @@
     'depends': [
         'base',
         'mrp',
-        'order_bom_explode_report', # report and wizard
+        'order_bom_explode_report',  # report and wizard
         ],
     'init_xml': [],
     'demo': [],

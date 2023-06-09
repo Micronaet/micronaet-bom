@@ -178,6 +178,8 @@ class PurchaseOrderXLSX(orm.Model):
         if context is None:
             context = {}
 
+        excluded_page = ['Non usati', 'Magazzino']
+
         # Pool used:
         product_pool = self.pool.get('product.product')
         line_pool = self.pool.get('purchase.order.xlsx.line')
@@ -185,7 +187,8 @@ class PurchaseOrderXLSX(orm.Model):
 
         inventory_db = {}
         inventory_ids = inventory_pool.search(cr, uid, [], context=context)
-        for item in inventory_pool.browse(cr, uid, inventory_ids,
+        for item in inventory_pool.browse(
+                cr, uid, inventory_ids,
                 context=context):
             inventory_db[item.name] = item.id
 
@@ -243,7 +246,7 @@ class PurchaseOrderXLSX(orm.Model):
         # ---------------------------------------------------------------------
         today = now[:10]
         for ws_name in WB.sheet_names():
-            if ws_name == 'Non usati':
+            if ws_name in excluded_page:
                 _logger.warning('Jump page: %s' % ws_name)
                 continue
 

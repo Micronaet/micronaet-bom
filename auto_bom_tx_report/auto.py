@@ -1069,8 +1069,8 @@ class MrpProduction(orm.Model):
                 cr, uid, group_id, context=context).users:
             partner_ids.append(user.partner_id.id)
 
-        thread_pool = self.pool.get('mail.thread')
-        thread_pool.message_post(cr, uid, False,
+        thread_pool.message_post(
+            cr, uid, False,
             type='email',
             body='Stato tessuti settimanale',
             subject='Invio automatico stato tessuto: %s' % (

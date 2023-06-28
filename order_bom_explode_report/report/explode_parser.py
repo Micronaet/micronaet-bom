@@ -137,7 +137,10 @@ class MrpProduction(orm.Model):
             if purchase is None:
                 purchase = {}
 
-            seller_last_cost = self.get_seller_last_cost(product)
+            purchase_cost = purchase.get(product.id, '')
+            if not purchase_cost:
+                purchase_cost = self.get_seller_last_cost(product)
+
             default_code = product.default_code or ''
             if default_code in y_axis:
                 return  # yet present (for component check)
@@ -160,7 +163,7 @@ class MrpProduction(orm.Model):
                 {},  # (HW that contain fabric) > fabric mode report
                 # XXX No more used, not deleted for extra position:
                 [0.0],  # Total for mt fabrics (fabric report)
-                purchase.get(product.id, '') or seller_last_cost,
+                purchase_cost or '',
                 product.inventory_category_id.name or '',
                 ]
             return

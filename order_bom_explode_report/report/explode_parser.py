@@ -88,7 +88,7 @@ class MrpProduction(orm.Model):
         """ Extract last price from seller cost
         """
         last_price = 0.0
-        last_date = False
+        last_date = ''
         try:
             for seller in product.seller_ids:
                 for pl in seller.pricelist_ids:
@@ -100,7 +100,7 @@ class MrpProduction(orm.Model):
                             last_price = pl.price
         except:
             _logger.error('Error checking price from check cost')
-        return last_price
+        return last_price, last_date
 
     # Moved here utility for call externally:
     def get_explode_report_object(self, cr, uid, data=None, context=None):
@@ -139,7 +139,11 @@ class MrpProduction(orm.Model):
 
             purchase_cost = purchase.get(product.id, '')
             if not purchase_cost:
-                purchase_cost = self.get_seller_last_cost(product)
+                purchase_price, purchase_date = self.get_seller_last_cost(product),
+                purchase_cost = '[Contr. costi data %s: costo un. %s]' % (
+                    purchase_date,
+                    purchase_price,
+                    )
 
             default_code = product.default_code or ''
             if default_code in y_axis:

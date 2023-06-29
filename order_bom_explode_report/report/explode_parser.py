@@ -140,7 +140,7 @@ class MrpProduction(orm.Model):
             purchase_cost = purchase.get(product.id, '')
             if not purchase_cost:
                 purchase_price, purchase_date = \
-                    self.get_seller_last_cost(product),
+                    self.get_seller_last_cost(product)
                 purchase_cost = '[Contr. costi data %s: costo un. %s]' % (
                     purchase_date,
                     purchase_price,

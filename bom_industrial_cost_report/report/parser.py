@@ -821,11 +821,12 @@ class ProductProduct(orm.Model):
         # ---------------------------------------------------------------------
         # Extract data from ODT master function:
         row = 0
+        records = self.report_get_objects_bom_industrial_cost(
+            cr, uid, datas=datas, context=context)
+        pdb.set_trace()
         for (r_min, r_max, r_error, r_components, r_extra1, r_extra2, r_index,
              r_total, product, r_parameter, r_total_text, pipe_data,
-             simulated_cost) in \
-                self.report_get_objects_bom_industrial_cost(
-                    cr, uid, datas=datas, context=context):
+             simulated_cost) in records:
             row += 1
 
             if r_max:

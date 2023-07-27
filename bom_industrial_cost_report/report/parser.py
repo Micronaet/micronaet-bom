@@ -823,11 +823,11 @@ class ProductProduct(orm.Model):
         row = 0
         records = self.report_get_objects_bom_industrial_cost(
             cr, uid, datas=datas, context=context)
-        pdb.set_trace()
         for (r_min, r_max, r_error, r_components, r_extra1, r_extra2, r_index,
              r_total, product, r_parameter, r_total_text, pipe_data,
-             simulated_cost) in records:
+             simulated_cost, simulated_unit) in records:
             row += 1
+            # Note: simulated_unit not used for now!
 
             if r_max:
                 simulated_rate = 100 * (simulated_cost - r_max) / r_max

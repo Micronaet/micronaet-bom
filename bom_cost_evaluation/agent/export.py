@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# ODOO (ex OpenERP) 
+# ODOO (ex OpenERP)
 # Open Source Management Solution
 # Copyright (C) 2001-2015 Micronaet S.r.l. (<http://www.micronaet.it>)
 # Developer: Nicola Riolini @thebrush (<https://it.linkedin.com/in/thebrush>)
@@ -12,7 +12,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
@@ -66,7 +66,7 @@ wf_lavoration = {
     'BARSED148': 0.1,
     'BR810': 0.1,
     'BRA035B': 0.1,
-    'DADGODR12,6-148': 0.1, #
+    'DADGODR12,6-148': 0.1,
     'DI037': 0.1,
     'DI037-038': 0.1,
     'DI045': 0.1,
@@ -1086,7 +1086,7 @@ cocin_product = {
     'TS931TX TJ': 'CO931',
     'TS931TX VB': 'CO931',
 }
- 
+
 # -----------------------------------------------------------------------------
 # Read configuration parameter:
 # -----------------------------------------------------------------------------
@@ -1106,7 +1106,7 @@ port = config.get('dbaccess', 'port')   # verify if it's necessary: getint
 # -----------------------------------------------------------------------------
 odoo = erppeek.Client(
     'http://%s:%s' % (
-        server, port), 
+        server, port),
     db=dbname,
     user=user,
     password=pwd,
@@ -1129,7 +1129,7 @@ product_ids = product_pool.search([
     ])
 cocin_db = {}
 for product in product_pool.browse(product_ids):
-    cocin_db[product.default_code] = product.bom_total_cost  
+    cocin_db[product.default_code] = product.bom_total_cost
 
 product_ids = product_pool.search([
     #('default_code', '=ilike', '005TX%'),
@@ -1144,14 +1144,14 @@ not_product_ids = product_pool.search([
 
 res = []
 for product in product_pool.browse(product_ids):
-    cost = product.bom_total_cost    
+    cost = product.bom_total_cost
     default_code = product.default_code or ''
-    
+
     # -------------------------------------------------------------------------
     # Force lavoration on cocin product:
     # -------------------------------------------------------------------------
     if default_code in cocin_product:
-        cocin_code = cocin_product[default_code]        
+        cocin_code = cocin_product[default_code]
         cocin_lavoration = cocin_db.get(cocin_code, 0.0)
     else:
         cocin_code = False
@@ -1173,9 +1173,8 @@ for product in product_pool.browse(product_ids):
     # Change temp product (TODO remove)
     # -------------------------------------------------------------------------
     if not cost and default_code in temp:
-        cost = temp[default_code] 
+        cost = temp[default_code]
     # -------------------------------------------------------------------------
-
 
     qty = product.mx_start_qty
     if product.inventory_category_id:
@@ -1186,11 +1185,11 @@ for product in product_pool.browse(product_ids):
     res.append((
         product.bom_cost_mode,
         category,
-        
+
         default_code,
         product.name,
         product.uom_id.name,
-        
+
         qty,
         cost,
         product.bom_template_id,
@@ -1210,8 +1209,8 @@ for product in product_pool.browse(product_ids):
 # Create WB:
 workbooks = {
     'final': ExcelWriter('./prodotti_finito.xlsx', verbose=True),
-    'half': ExcelWriter('./semilavorati.xlsx', verbose=True), 
-    'material': ExcelWriter('./materie_prime.xlsx', verbose=True), 
+    'half': ExcelWriter('./semilavorati.xlsx', verbose=True),
+    'material': ExcelWriter('./materie_prime.xlsx', verbose=True),
     }
 
 excel_format = {
@@ -1240,64 +1239,66 @@ excel_format = {
         'f_number_red': workbooks['material'].get_format('bg_red_number'),
         },
     }
-    
+
 # Counters:
 counters = {
     'final': {},
-    'half': {}, 
-    'material': {},     
+    'half': {},
+    'material': {},
     }
 
 totals = {
     'final': {},
-    'half': {}, 
-    'material': {},     
+    'half': {},
+    'material': {},
     }
+
 
 # -----------------------------------------------------------------------------
 # Utility:
 # -----------------------------------------------------------------------------
 def get_page(wb_name, ws_name, counters, excel_format):
-    ''' Get WS page or create if not present 
+    """ Get WS page or create if not present
         Add also header
         wb_name: Name of workbook (3 mode: final, half, material)
         ws_name: Sheet description
         counters: counter for 3 modes
         excel_format: format for 3 modes
-    '''
+    """
     if ws_name not in counters[wb_name]: # Create:
         # Add worksheet:
         workbooks[wb_name].create_worksheet(ws_name)
-        
+
         # Setup columns:
         workbooks[wb_name].column_width(ws_name, (
-            #15, 
-            15, 40, 20, 4,        
+            # 15,
+            15, 40, 20, 4,
             11, 11, 11,
             50, 5, 15, 15,
             ))
-            
+
         # Setup header title:
-        counters[wb_name][ws_name] = 2 # Current line        
+        counters[wb_name][ws_name] = 2 # Current line
         workbooks[wb_name].write_xls_line(
             ws_name, counters[wb_name][ws_name], (
-                #u'Catalogo', 
-                u'Codice', u'Name', u'Modello ind.', u'UM',            
-                u'Q.', u'Costo', u'Costo modello',                
+                #u'Catalogo',
+                u'Codice', u'Name', u'Modello ind.', u'UM',
+                u'Q.', u'Costo', u'Costo modello',
                 u'Dettaglio', u'Errore', u'Subtotale', u'Subtotale modello',
                 ), excel_format[wb_name]['f_header'])
         counters[wb_name][ws_name] += 1
         totals[wb_name][ws_name] = [0.0, 0.0] # Total page (normal, template)
-        
+
     return (
-        workbooks[wb_name], # WS
-        counters[wb_name][ws_name], # Counter
+        workbooks[wb_name],  # WS
+        counters[wb_name][ws_name],  # Counter
         )
+
 
 for product in sorted(res):
     wb_name = product[0]
     ws_name = product[1]
-    
+
     template = product[7]
     subtotal_bom = product[10]
     if template:
@@ -1315,8 +1316,8 @@ for product in sorted(res):
     else:
         text = excel_format[wb_name]['f_text']
         number = excel_format[wb_name]['f_number']
-        
-    Excel, row = get_page(wb_name, ws_name, counters, excel_format)    
+
+    Excel, row = get_page(wb_name, ws_name, counters, excel_format)
 
     Excel.write_xls_line(ws_name, row, (
         #product[1], # Category
@@ -1324,15 +1325,15 @@ for product in sorted(res):
         product[3], # Name
         template_name, # Template
         product[4], # UOM
-        
+
         (product[5], number), # stock qty
         (product[6], number), # unit cost
         (industrial, number), # industrial
-        
+
         product[8],
         'X' if product[9] else ' ',
         (subtotal_bom, number),
-        (subtotal_industrial, number),        
+        (subtotal_industrial, number),
         ), text)
     counters[wb_name][ws_name] += 1
     totals[wb_name][ws_name][0] += subtotal_bom or 0.0
@@ -1343,7 +1344,7 @@ for product in sorted(res):
 # -----------------------------------------------------------------------------
 ws_name = 'TOTALI'
 for wb_name in totals:
-    Excel = workbooks[wb_name]    
+    Excel = workbooks[wb_name]
     text = excel_format[wb_name]['f_text']
     number = excel_format[wb_name]['f_number']
 
@@ -1353,16 +1354,16 @@ for wb_name in totals:
     workbooks[wb_name].column_width(ws_name, (40, 15, 15))
     workbooks[wb_name].write_xls_line(
         ws_name, row, (
-            u'Categoria', u'Totale DB', u'Totale industriale'), 
+            u'Categoria', u'Totale DB', u'Totale industriale'),
             excel_format[wb_name]['f_header'])
-            
+
     for category in totals[wb_name]:
         row += 1
         subtotal_bom = totals[wb_name][category][0]
         subtotal_industrial = totals[wb_name][category][1]
         # Write total in Total page:
         Excel.write_xls_line(ws_name, row, (
-            category, 
+            category,
             (subtotal_bom, number),
             (subtotal_industrial, number),
             ), text)
@@ -1388,18 +1389,18 @@ Excel.column_width(ws_name, (30, 15, 40))
 Excel.write_xls_line(ws_name, row, (u'Categoria', u'Codice', u'Nome'))
 
 for product in sorted(
-        product_pool.browse(not_product_ids), 
+        product_pool.browse(not_product_ids),
         key=lambda x: (
-            x.inventory_category_id.name if x.inventory_category_id else '', 
+            x.inventory_category_id.name if x.inventory_category_id else '',
             x.default_code)):
     row += 1
     Excel.write_xls_line(ws_name, row, (
         product.inventory_category_id.name if product.inventory_category_id \
-            else 'NON ASSEGNATA', 
+            else 'NON ASSEGNATA',
         product.default_code or '',
         product.name,
         ))
-        
+
 del(Excel)
 del(workbooks['final'])
 del(workbooks['half'])

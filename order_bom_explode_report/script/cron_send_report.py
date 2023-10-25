@@ -78,6 +78,7 @@ to_address_list = [
     'matteo.salomoni@fiam.it',
     'laura.gasparini@fiam.it',
     'produzione@fiam.it',
+    'mattia.gussago@fiam.it',
 ]
 to_address = (','.join(to_address_list)).replace(' ', '')
 

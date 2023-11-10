@@ -381,7 +381,7 @@ class MrpBomIndustrialHistory(orm.Model):
         if always_report or gap_total > 0:
             return excel_pool.send_mail_to_group(
                 cr, uid,
-                'bom_industrial_cost_report.group_bom_cost_manager',
+                'bom_industrial_cost_report.group_margin_check_report',
                 'Confronto prezzi DB modello %s' % (
                     ('[PRESENTI GAP: %s!]' % gap_total) if
                     gap_total > 0

@@ -132,7 +132,6 @@ for pos, mode, move_ids in loop:
 # -----------------------------------------------------------------------------
 # Clean TSCAR TCAR data:
 # -----------------------------------------------------------------------------
-import pdb; pdb.set_trace()
 product_ids = product_pool.search([
     ('inventory_category_id.name', '=', 'Tessuti'),
     ])
@@ -146,12 +145,9 @@ for product in product_pool.browse(product_ids):
 # -----------------------------------------------------------------------------
 # Update product:
 # -----------------------------------------------------------------------------
-import pdb; pdb.set_trace()
 for product_id in product_update:
     tcar, tscar = product_update[product_id]
-
     print('ID: %s [SCAR %s] [TCAR %s]' % (product_id, tscar, tcar))
-
     product_pool.write([product_id], {
         'old_tscar': tscar,
         'old_tcar': tcar,

@@ -71,10 +71,10 @@ product_update = {}
 # MRP unload component:
 # -----------------------------------------------------------------------------
 
-pdb.set_trace()
 filename = '/tmp/mrp_last_year.xlsx'
+pdb.set_trace()
 mrp_unload = mrp_pool.schedule_unload_mrp_material_erpeek(
-    from_date, to_date, filename=filename)
+    from_date=from_date, to_date=to_date, filename=filename)
 
 pdb.set_trace()
 for product_id, unload in mrp_unload.iteritems():

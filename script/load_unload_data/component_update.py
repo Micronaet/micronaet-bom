@@ -80,8 +80,8 @@ odoo.context = {
         }}
 
 mrp_pool = odoo.model('mrp.production')
-# mrp_unload = mrp_pool.schedule_unload_mrp_material_erpeek()
 mrp_unload = mrp_pool.schedule_unload_mrp_material(from_date)
+pdb.set_trace()
 
 for product_id, unload in mrp_unload.iteritems():
     if product_id not in product_update:

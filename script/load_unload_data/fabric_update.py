@@ -70,7 +70,7 @@ product_update = {}
 # -----------------------------------------------------------------------------
 in_ids = move_pool.search([
     ('picking_id', '!=', False),
-    ('picking_id.origin', '=ilike', 'OF%'),
+    # ('picking_id.origin', '=ilike', 'OF%'),
     ('picking_id.date', '>=', '%s 00:00:00' % from_date),
     ('picking_id.date', '<=', '%s 23:59:59' % to_date),
     ('product_id.inventory_category_id.name', '=', 'Tessuti'),

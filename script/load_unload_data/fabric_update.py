@@ -155,7 +155,9 @@ for product_id in product_update:
 log_f = open('./fabric_result.csv', 'w')
 log_f.write('Codice|TSCAR|TCAR\n')
 for product in product_pool.browse(product_ids):
-    print('ID: %s [SCAR %s] [TCAR %s]' % (
+    log_f.write('%s|%s|%s\n' % (
         product.default_code,
-        product.tscar,
-        product.tcar))
+        product.old_tscar,
+        product.old_tcar),
+    )
+

@@ -76,10 +76,12 @@ filename = '/tmp/mrp_last_year.xlsx'
 mrp_unload = mrp_pool.schedule_unload_mrp_material_erpeek(
     from_date, to_date, filename=filename)
 
+pdb.set_trace()
 for product_id, unload in mrp_unload.iteritems():
     if product_id not in product_update:
         product_update[product_id] = [0.0, 0.0]  # Car, Scar
     product_update[product_id][1] += unload
+pdb.set_trace()
 
 # -----------------------------------------------------------------------------
 # Load TCAR / TSCAR:
@@ -151,9 +153,10 @@ for pos, mode, move_ids in loop:
 # Clean TSCAR TCAR data:
 # -----------------------------------------------------------------------------
 product_ids = product_pool.search([
-    ('inventory_category_id.name', '=', 'Tessuti'),
+    ('inventory_category_id.name', '!=', 'Tessuti'),
     ])
 
+pdb.set_trace()
 for product in product_pool.browse(product_ids):
     product_pool.write([product.id], {
         'old_tscar': 0.0,
@@ -163,6 +166,7 @@ for product in product_pool.browse(product_ids):
 # -----------------------------------------------------------------------------
 # Update product:
 # -----------------------------------------------------------------------------
+pdb.set_trace()
 for product_id in product_update:
     tcar, tscar = product_update[product_id]
     print('ID: %s [SCAR %s] [TCAR %s]' % (product_id, tscar, tcar))

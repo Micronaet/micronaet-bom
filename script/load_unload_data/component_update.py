@@ -61,9 +61,23 @@ odoo = erppeek.Client(
 picking_pool = odoo.model('stock.picking')
 move_pool = odoo.model('stock.move')
 product_pool = odoo.model('product.product')
+mrp_pool = odoo.model('mrp.production')
 
 log_f = open('./fabric_detail.csv', 'w')
 product_update = {}
+
+
+# -----------------------------------------------------------------------------
+# MRP unload component:
+# -----------------------------------------------------------------------------
+filename = 'mrp_last_year.xlsx'
+mrp_unload = mrp_pool.schedule_unload_mrp_material_erpeek(
+    from_date, to_date, filename=filename)
+
+for product_id, unload in mrp_unload.iteritems():
+    if product_id not in product_update:
+        product_update[product_id] = [0.0, 0.0]  # Car, Scar
+    product_update[product_id][1] += unload
 
 # -----------------------------------------------------------------------------
 # Load TCAR / TSCAR:
@@ -73,16 +87,17 @@ in_ids = move_pool.search([
     ('picking_id.origin', '=ilike', 'OF%'),
     ('picking_id.date', '>=', '%s 00:00:00' % from_date),
     ('picking_id.date', '<=', '%s 23:59:59' % to_date),
-    ('product_id.inventory_category_id.name', '=', 'Tessuti'),
+    # ('product_id.inventory_category_id.name', '=', 'Tessuti'),
     ('state', '=', 'done'),
     ])
 
+# Pipe unload
 out_ids = move_pool.search([
     ('picking_id', '!=', False),
-    ('picking_id.dep_mode', '=', 'cut'),
+    ('picking_id.dep_mode', '=', 'workshop'),
     ('picking_id.date', '>=', '%s 00:00:00' % from_date),
     ('picking_id.date', '<=', '%s 23:59:59' % to_date),
-    ('product_id.inventory_category_id.name', '=', 'Tessuti'),
+    ('product_id.inventory_category_id.name', '=', 'Tubi'),
     ('state', '=', 'done'),
     ])
 

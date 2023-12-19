@@ -92,7 +92,6 @@ loop = [
     (0, 'out', out_ids),
     ]
 
-import pdb; pdb.set_trace()
 log_f.write('Codcie|Modo|SCAR|CAR|Picking|Data|Note\n')
 for pos, mode, move_ids in loop:
     counter = 0

@@ -63,14 +63,12 @@ picking_pool = odoo.model('stock.picking')
 move_pool = odoo.model('stock.move')
 product_pool = odoo.model('product.product')
 
-log_f = open('./fabric_detail.csv', 'w')
+log_f = open('./component_detail.csv', 'w')
 product_update = {}
-
 
 # -----------------------------------------------------------------------------
 # MRP unload component:
 # -----------------------------------------------------------------------------
-
 filename = '/tmp/mrp_last_year.xlsx'
 odoo.context = {
     'run_force': {
@@ -83,13 +81,11 @@ odoo.context = {
 mrp_pool = odoo.model('mrp.production')
 mrp_unload_text = mrp_pool.schedule_unload_mrp_material(from_date)
 mrp_unload = pickle.loads(mrp_unload_text)
-pdb.set_trace()
 
 for product_id, unload in mrp_unload.iteritems():
     if product_id not in product_update:
         product_update[product_id] = [0.0, 0.0]  # Car, Scar
     product_update[product_id][1] += unload
-pdb.set_trace()
 
 # -----------------------------------------------------------------------------
 # Load TCAR / TSCAR:
@@ -164,7 +160,6 @@ product_ids = product_pool.search([
     ('inventory_category_id.name', '!=', 'Tessuti'),
     ])
 
-pdb.set_trace()
 for product in product_pool.browse(product_ids):
     product_pool.write([product.id], {
         'old_tscar': 0.0,
@@ -174,7 +169,6 @@ for product in product_pool.browse(product_ids):
 # -----------------------------------------------------------------------------
 # Update product:
 # -----------------------------------------------------------------------------
-pdb.set_trace()
 for product_id in product_update:
     tcar, tscar = product_update[product_id]
     print('ID: %s [SCAR %s] [TCAR %s]' % (product_id, tscar, tcar))
@@ -183,7 +177,7 @@ for product_id in product_update:
         'old_tcar': tcar,
         })
 
-log_f = open('./fabric_result.csv', 'w')
+log_f = open('./component_result.csv', 'w')
 log_f.write('Codice|TSCAR|TCAR\n')
 for product in product_pool.browse(product_ids):
     log_f.write('%s|%s|%s\n' % (

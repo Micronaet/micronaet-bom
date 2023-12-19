@@ -71,7 +71,6 @@ product_update = {}
 # -----------------------------------------------------------------------------
 
 filename = '/tmp/mrp_last_year.xlsx'
-pdb.set_trace()
 odoo.context = {
     'run_force': {
         'from_date': from_date,

@@ -134,6 +134,7 @@ for pos, mode, move_ids in loop:
 # -----------------------------------------------------------------------------
 # Clean TSCAR TCAR data:
 # -----------------------------------------------------------------------------
+pdb.set_trace()
 product_ids = product_pool.search([
     ('inventory_category_id.name', '=', 'Tessuti'),
     ])

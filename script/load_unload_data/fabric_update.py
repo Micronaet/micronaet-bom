@@ -158,4 +158,7 @@ for product_id in product_update:
         })
 
 for product in product_pool.browse(product_ids):
-    print('ID: %s [SCAR %s] [TCAR %s]' % (product.default_code, tscar, tcar))
+    print('ID: %s [SCAR %s] [TCAR %s]' % (
+        product.default_code,
+        product.tscar,
+        product.tcar))

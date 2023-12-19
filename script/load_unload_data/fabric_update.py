@@ -114,14 +114,16 @@ for pos, mode, move_ids in loop:
             pdb.set_trace()
         picking_name = '%s - %s' % (picking.name, picking.origin or '')
         if not default_code:
-            print('%s su %s [ERROR] %s' % (counter, total, default_code))
+            print('%s. %s su %s [ERROR] %s' % (
+                mode, counter, total, default_code))
             log_f.write('%s|%s|%s|%s|%s|%s|%s\n' % (
                 default_code, mode, tscar, tcar, picking_name, picking.date,
                 'ERROR'))
             log_f.flush()
             continue
 
-        print('%s su %s [INFO] %s' % (counter, total, default_code))
+        print('%s. %s su %s [INFO] %s' % (
+            mode, counter, total, default_code))
         log_f.write('%s|%s|%s|%s|%s|%s|%s\n' % (
             default_code, mode, tscar, tcar, picking_name, picking.date, 'OK'))
         log_f.flush()

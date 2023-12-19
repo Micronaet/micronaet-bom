@@ -20,6 +20,7 @@
 #
 ###############################################################################
 import os
+import pdb
 import sys
 import xlrd
 import erppeek
@@ -109,6 +110,8 @@ for pos, mode, move_ids in loop:
             tscar = quantity
 
         picking = move.picking_id
+        if picking.name == r'WH\IN\08685':
+            pdb.set_trace()
         picking_name = '%s - %s' % (picking.name, picking.origin or '')
         if not default_code:
             print('%s su %s [ERROR] %s' % (counter, total, default_code))

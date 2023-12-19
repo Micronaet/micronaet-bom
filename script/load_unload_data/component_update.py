@@ -25,6 +25,7 @@ import sys
 import xlrd
 import erppeek
 import ConfigParser
+import pickle
 
 
 # -----------------------------------------------------------------------------
@@ -80,7 +81,8 @@ odoo.context = {
         }}
 
 mrp_pool = odoo.model('mrp.production')
-mrp_unload = mrp_pool.schedule_unload_mrp_material(from_date)
+mrp_unload_text = mrp_pool.schedule_unload_mrp_material(from_date)
+mrp_unload = pickle.loads(mrp_unload_text)
 pdb.set_trace()
 
 for product_id, unload in mrp_unload.iteritems():

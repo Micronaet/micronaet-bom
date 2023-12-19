@@ -61,7 +61,7 @@ picking_pool = odoo.model('stock.picking')
 move_pool = odoo.model('stock.move')
 product_pool = odoo.model('product.product')
 
-log_f = open('./detail.csv', 'w')
+log_f = open('./fabric_detail.csv', 'w')
 product_update = {}
 
 # -----------------------------------------------------------------------------
@@ -92,7 +92,7 @@ loop = [
     (0, 'out', out_ids),
     ]
 
-log_f.write('Codcie|Modo|SCAR|CAR|Picking|Data|Note\n')
+log_f.write('Codice|Modo|SCAR|CAR|Picking|Data|Note\n')
 for pos, mode, move_ids in loop:
     counter = 0
     total = len(move_ids)
@@ -152,6 +152,8 @@ for product_id in product_update:
         'old_tcar': tcar,
         })
 
+log_f = open('./fabric_result.csv', 'w')
+log_f.write('Codice|TSCAR|TCAR\n')
 for product in product_pool.browse(product_ids):
     print('ID: %s [SCAR %s] [TCAR %s]' % (
         product.default_code,

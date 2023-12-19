@@ -76,7 +76,7 @@ in_ids = move_pool.search([
     ('product_id.inventory_category_id.name', '=', 'Tessuti'),
     ('state', '=', 'done'),
     ])
-for move in move_pool.browse(in_ids)
+for move in move_pool.browse(in_ids):
     picking = move.picking_id
     print(picking.name)
     if picking.name == r'WH\IN\08685':

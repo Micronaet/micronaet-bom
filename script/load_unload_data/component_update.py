@@ -61,7 +61,6 @@ odoo = erppeek.Client(
 picking_pool = odoo.model('stock.picking')
 move_pool = odoo.model('stock.move')
 product_pool = odoo.model('product.product')
-mrp_pool = odoo.model('mrp.production')
 
 log_f = open('./fabric_detail.csv', 'w')
 product_update = {}
@@ -73,8 +72,16 @@ product_update = {}
 
 filename = '/tmp/mrp_last_year.xlsx'
 pdb.set_trace()
-mrp_unload = mrp_pool.schedule_unload_mrp_material_erpeek(
-    from_date=from_date, to_date=to_date, filename=filename)
+odoo.context = {
+    'run_force': {
+        'from_date': from_date,
+        'to_date': to_date,
+        'filename': filename,
+        'update': False,  # Only dry run!
+        }}
+
+mrp_pool = odoo.model('mrp.production')
+mrp_unload = mrp_pool.schedule_unload_mrp_material_erpeek()
 
 pdb.set_trace()
 for product_id, unload in mrp_unload.iteritems():

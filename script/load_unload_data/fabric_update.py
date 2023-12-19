@@ -76,6 +76,12 @@ in_ids = move_pool.search([
     ('product_id.inventory_category_id.name', '=', 'Tessuti'),
     ('state', '=', 'done'),
     ])
+for move in move_pool.browse(in_ids)
+    picking = move.picking_id
+    print(picking.name)
+    if picking.name == r'WH\IN\08685':
+        pdb.set_trace()
+pdb.set_trace()
 
 out_ids = move_pool.search([
     ('picking_id', '!=', False),
@@ -110,8 +116,6 @@ for pos, mode, move_ids in loop:
             tscar = quantity
 
         picking = move.picking_id
-        if picking.name == r'WH\IN\08685':
-            pdb.set_trace()
         picking_name = '%s - %s' % (picking.name, picking.origin or '')
         if not default_code:
             print('%s. %s su %s [ERROR] %s' % (

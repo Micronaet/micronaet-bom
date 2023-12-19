@@ -139,8 +139,8 @@ product_ids = product_pool.search([
 
 for product in product_pool.browse(product_ids):
     product_pool.write([product.id], {
-        'tscar': 0.0,
-        'tcar': 0.0,
+        'old_tscar': 0.0,
+        'old_tcar': 0.0,
         })
 
 # -----------------------------------------------------------------------------
@@ -149,10 +149,10 @@ for product in product_pool.browse(product_ids):
 import pdb; pdb.set_trace()
 for product_id in product_update:
     tcar, tscar = product_update[product_id]
-    print('ID: %s [SCAR %s] [TCAR %S]' % (
-        product_id, tscar, tcar))
-    continue
+
+    print('ID: %s [SCAR %s] [TCAR %s]' % (product_id, tscar, tcar))
+
     product_pool.write([product_id], {
-        'tscar': tscar,
-        'tcar': tcar,
+        'old_tscar': tscar,
+        'old_tcar': tcar,
         })

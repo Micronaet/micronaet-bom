@@ -67,7 +67,7 @@ log_f = open('./component_detail.csv', 'w')
 product_update = {}
 
 # -----------------------------------------------------------------------------
-# MRP unload component:
+#                          MRP unload component:
 # -----------------------------------------------------------------------------
 filename = '/tmp/mrp_last_year.xlsx'
 odoo.context = {
@@ -151,7 +151,9 @@ for pos, mode, move_ids in loop:
         product_id = product.id
         if product_id not in product_update:
             product_update[product_id] = [0.0, 0.0]  # tcar, tscar
-        product_update[product_id][pos] += quantity
+
+        product_update[product_id][0] += tcar
+        product_update[product_id][1] += tscar
 
 # -----------------------------------------------------------------------------
 # Clean TSCAR TCAR data:

@@ -30,9 +30,9 @@ from openerp import SUPERUSER_ID, api
 from openerp import tools
 from openerp.tools.translate import _
 from openerp.tools.float_utils import float_round as round
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
-    DEFAULT_SERVER_DATETIME_FORMAT, 
-    DATETIME_FORMATS_MAP, 
+from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DATETIME_FORMATS_MAP,
     float_compare)
 
 
@@ -40,13 +40,13 @@ _logger = logging.getLogger(__name__)
 
 class MRPBom(orm.Model):
     """ Model name: MRP Bom
-    """    
+    """
     _inherit = 'mrp.bom'
 
-    def migrate_assign_product_bom_product_csv(self, cr, uid, ids, 
+    def migrate_assign_product_bom_product_csv(self, cr, uid, ids,
             context=None):
-        ''' Import halfworked wizard
-        '''
+        """ Import halfworked wizard
+        """
         assert len(ids) == 1, 'Works only with one record a time'
 
         # Pool used
@@ -54,19 +54,19 @@ class MRPBom(orm.Model):
         product_pool = self.pool.get('product.product')
 
         csv = open('/home/administrator/photo/hw.csv', 'r')
-        
+
         i = 0
-        #HW_codes = []
+        # HW_codes = []
         fabric_uom = 8 # m.
         structure_id = 1 # TODO needed?
-        
+
         for row in csv:
             i += 1
-            item = row.split('|')            
+            item = row.split('|')
             if len(item) != 7:
                 _logger.error('Different colums')
                 continue
-            
+
             # Read line parameter:
             hw_code = item[0].upper().strip()
             hw_name = item[1].strip()
@@ -74,7 +74,7 @@ class MRPBom(orm.Model):
             cmpt_code = item[2].upper().strip()
             cmpt_name = item[3].strip()
             cmpt_uom_id = item[4].strip()
-            
+
             product_qty = float(item[4].replace(',', '.'))
             cmpt_component_code = item[5].strip()
             category_id = int(item[6]) # always present?
@@ -85,9 +85,9 @@ class MRPBom(orm.Model):
                 fabric_id = fabric_ids[0]
                 if len(fabric_ids) > 1:
                     _logger.error('More than one fabric: %s' % fabric_code)
-            else: 
+            else:
                 _logger.error('Fabric not found!!!')
-                
+
             # Mask for S or not S (same)
             if default_code[12:13] == 'S':
                 dynamic_mask = default_code[:12] + '%'
@@ -100,7 +100,7 @@ class MRPBom(orm.Model):
             if not component_code:
                 _logger.error('%s Code component empty' % i)
                 continue
-            
+
             # TODO Decidere se creare il solo semilavorato oppure continuare
             #if component_code in HW_codes:
             #    _logger.error('%s Code component yet present: %s' % (
@@ -113,18 +113,18 @@ class MRPBom(orm.Model):
                 ], context=context)
 
             if component_ids:
-                _logger.warning('%s Code component yet present: %s' % (   
+                _logger.warning('%s Code component yet present: %s' % (
                     i, component_code))
-                # Update as half    
+                # Update as half
                 product_pool.write(cr, uid, component_ids, {
                     'relative_type': 'half',
-                    }, context=context)    
+                    }, context=context)
                 HW_id = component_ids[0]
             else:
                 HW_id = product_pool.create(cr, uid, {
                     'name': component_code,
                     'default_code': component_code,
-                    'relative_type': 'half',       
+                    'relative_type': 'half',
                     'structure_id': structure_id,
                     'uom_id': 1, # XXX NR
                     'ean13_auto': False,
@@ -132,8 +132,8 @@ class MRPBom(orm.Model):
 
             #HW_codes.append(component_code)
             HW_proxy = product_pool.browse(
-                cr, uid, HW_id, context=context)  
-         
+                cr, uid, HW_id, context=context)
+
             # TODO check yet present material:
             exist = line_pool.search(cr, uid, [
                 ('bom_id', '=', HW_proxy.half_bom_id.id),
@@ -141,25 +141,25 @@ class MRPBom(orm.Model):
                 ('product_id', '=', fabric_id),
                 ('product_qty', '=', product_qty),
                 ], context=context)
-            
+
             # Create HW Bom with button:
-            if exist: 
+            if exist:
                 _logger.warning('%s Esist: %s' % (i, fabric_code))
             else:
                 product_pool.create_product_half_bom(
                     cr, uid, [HW_id], context=context)
-                # Re-read record    
+                # Re-read record
                 HW_proxy = product_pool.browse(
-                    cr, uid, HW_id, context=context)                
-                    
+                    cr, uid, HW_id, context=context)
+
                 line_pool.create(cr, uid, {
                     # Link:
                     'bom_id': HW_proxy.half_bom_id.id, # bom link
                     'halfwork_id': HW_proxy.id, # product link
-                    
+
                     # Fabric data:
-                    'product_id': fabric_id, 
-                    'product_uom': fabric_uom, 
+                    'product_id': fabric_id,
+                    'product_uom': fabric_uom,
                     #'type': line.type,
                     'product_qty': product_qty,
                     }, context=context)
@@ -178,12 +178,12 @@ class MRPBom(orm.Model):
                     'bom_id': dynamic_bom_id,
                     'dynamic_mask': dynamic_mask,
                     'category_id': category_id,
-                    'product_id': HW_proxy.id, 
-                    'product_uom': HW_proxy.uom_id.id, 
+                    'product_id': HW_proxy.id,
+                    'product_uom': HW_proxy.uom_id.id,
                     'product_qty': 1, # always!
                     'type': 'normal',
                     }, context=context)
-                    
+
             # Mark old BOM as to remove:
             self.write(cr, uid, bom_id, {
                 'bom_category': 'remove',

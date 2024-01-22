@@ -43,8 +43,8 @@ class MRPBom(orm.Model):
     """
     _inherit = 'mrp.bom'
 
-    def migrate_assign_product_bom_product_csv(self, cr, uid, ids,
-            context=None):
+    def migrate_assign_product_bom_product_csv(
+            self, cr, uid, ids, context=None):
         """ Import halfworked wizard
         """
         assert len(ids) == 1, 'Works only with one record a time'
@@ -57,8 +57,8 @@ class MRPBom(orm.Model):
 
         i = 0
         # HW_codes = []
-        fabric_uom = 8 # m.
-        structure_id = 1 # TODO needed?
+        fabric_uom = 8  # m.
+        structure_id = 1  # TODO needed?
 
         for row in csv:
             i += 1
@@ -70,7 +70,7 @@ class MRPBom(orm.Model):
             # Read line parameter:
             hw_code = item[0].upper().strip()
             hw_name = item[1].strip()
-            hw_uom_id = 1 # XXX
+            hw_uom_id = 1  # XXX
             cmpt_code = item[2].upper().strip()
             cmpt_name = item[3].strip()
             cmpt_uom_id = item[4].strip()

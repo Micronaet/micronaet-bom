@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
-# ODOO (ex OpenERP) 
+# ODOO (ex OpenERP)
 # Open Source Management Solution
 # Copyright (C) 2001-2015 Micronaet S.r.l. (<http://www.micronaet.it>)
 # Developer: Nicola Riolini @thebrush (<https://it.linkedin.com/in/thebrush>)
@@ -12,7 +12,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
@@ -33,35 +33,35 @@ from dateutil.relativedelta import relativedelta
 from openerp import SUPERUSER_ID
 from openerp import tools
 from openerp.tools.translate import _
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT, 
-    DEFAULT_SERVER_DATETIME_FORMAT, 
-    DATETIME_FORMATS_MAP, 
+from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DATETIME_FORMATS_MAP,
     float_compare)
 
 
 _logger = logging.getLogger(__name__)
 
 class ProductInvoicedExtractXLSWizard(orm.TransientModel):
-    ''' Wizard for extracting invoiced wizard
-    '''
+    """ Wizard for extracting invoiced wizard
+    """
     _name = 'product.invoiced.extract.xls.wizard'
 
     # --------------------
     # Wizard button event:
     # --------------------
-    def get_product_cost(self, product):    
-        ''' Extract cost from product
-        '''
+    def get_product_cost(self, product):
+        """ Extract cost from product
+        """
         cost = 0.0
         date = False
-        
+
         # Cases iron:
         if product.is_pipe:
             cost = product.weight * product.pipe_material_id.last_price
             date = '/'
-        
+
         # Normal case (cost check):
-        else:   
+        else:
             for supplier in product.seller_ids:
                 for price in supplier.pricelist_ids:
                     if not price.is_active:
@@ -70,15 +70,15 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
                         date = price.date_quotation
                         cost = price.price
         return cost, date
-        
+
     def action_extract(self, cr, uid, ids, context=None):
-        ''' Event for button done
-        '''
-        if context is None: 
-            context = {}    
+        """ Event for button done
+        """
+        if context is None:
+            context = {}
 
         # ---------------------------------------------------------------------
-        # Parameters:        
+        # Parameters:
         # ---------------------------------------------------------------------
         WS_name = _('Distinte base')
 
@@ -90,25 +90,25 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
         from_date = wiz_browse.from_date
         to_date = wiz_browse.to_date
 
-        # ---------------------------------------------------------------------            
+        # ---------------------------------------------------------------------
         # Load list of product in invoice period
         # ---------------------------------------------------------------------
         line_ids = line_pool.search(cr, uid, [
             ('invoice_id.date_invoice', '>=', from_date),
             ('invoice_id.date_invoice', '<=', to_date),
-            
+
             ('invoice_id.state', 'not in', ('cancel', 'draft',)),
             ], context=context)
-        
+
         _logger.info('Load product list [Tot. lines: %s]' % len(line_ids))
         product_db = {}
         for line in line_pool.browse(cr, uid, line_ids, context=context):
             product = line.product_id
             if product in product_db:
                 continue # yet present
-            
+
             product_db[product] = sorted(
-                product.dynamic_bom_line_ids, 
+                product.dynamic_bom_line_ids,
                 key=lambda x: x.product_id.default_code,
                 )
 
@@ -117,7 +117,7 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Create worksheet:
         excel_pool.create_worksheet(WS_name)
-        
+
         # Load format:
         excel_pool.set_format()
         format_title = excel_pool.get_format('title')
@@ -129,9 +129,9 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
         format_number_green = excel_pool.get_format('number_green')
 
         excel_pool.column_width(WS_name, [20, 50, 10, 4, 130])
-        
+
         # Title:
-        row = 0        
+        row = 0
         excel_pool.row_height(WS_name, row, 40)
         excel_pool.write_xls_line(WS_name, row, ['''
             Elenco prodotti risultanti dalle vendite del periodo con 
@@ -147,21 +147,20 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
             'Nome',
             'Costo',
             'Tipo',
-            'Dettaglio distinta',                        
+            'Dettaglio distinta',
             ], default_format=format_header)
-        
-        
+
         # ---------------------------------------------------------------------
         # Sort element and create files:
-        # ---------------------------------------------------------------------        
+        # ---------------------------------------------------------------------
         cost_db = {} # database for not recalc cost of product
         for product in sorted(product_db, key=lambda x: (
                 1 if product_db[x] else 2, # before BOM element after no BOM
                 x.default_code, # Code sort
                 )):
-                
+
             row += 1
-            
+
             # Read fields:
             default_code = product.default_code
             name = product.name or ''
@@ -175,7 +174,7 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
                     if p1 not in cost_db:
                         cost_db[p1], date1 = self.get_product_cost(p1)
                     cost1 = cost_db[p1]
-                    
+
                     # TODO used cost db
                     if hw_bom:
                         bom += u'SL %s:\n' % p1.default_code
@@ -195,7 +194,7 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
                                 )
                             total += subtotal
                     else:
-                        subtotal = l1.product_qty * cost1 
+                        subtotal = l1.product_qty * cost1
                         bom += u'%s >> %s x %s€ (Data: %s) = %s€\n' % (
                             p1.default_code,
                             l1.product_qty,
@@ -206,24 +205,23 @@ class ProductInvoicedExtractXLSWizard(orm.TransientModel):
                         total += subtotal
             else:
                 if product.half_bom_ids:
-                    mode = 'SL'  
-                else:    
-                    mode = 'MP' 
+                    mode = 'SL'
+                else:
+                    mode = 'MP'
 
             excel_pool.write_xls_line(WS_name, row, [
                 product.default_code or '',
                 product.name or '',
                 (total, format_number),
                 (mode, format_center),
-                bom,                        
+                bom,
                 ], default_format=format_text)
-            
-        return excel_pool.return_attachment(cr, uid, WS_name, 
-            name_of_file='DB_prodotti_venduti.xlsx', version='8.0', php=True, 
+
+        return excel_pool.return_attachment(cr, uid, WS_name,
+            name_of_file='DB_prodotti_venduti.xlsx', version='8.0', php=True,
             context=context)
 
     _columns = {
         'from_date': fields.date('From date >=', required=True),
         'to_date': fields.date('To date <', required=True),
-        }        
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+        }

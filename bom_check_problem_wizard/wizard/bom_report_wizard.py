@@ -20,7 +20,6 @@
 #
 ###############################################################################
 
-
 import os
 import sys
 import logging
@@ -40,6 +39,7 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+
 class ProductProduct(orm.Model):
     """ Model name: ProductProduct
     """
@@ -53,23 +53,24 @@ class ProductProduct(orm.Model):
             'Data controllo DB', readonly=True),
         }
 
+
 class MrpBomCheckProblemWizard(orm.TransientModel):
-    ''' Wizard for
-    '''
+    """ Wizard for
+    """
     _name = 'mrp.bom.check.problem.wizard'
 
     # --------------------
     # Wizard button event:
     # --------------------
     def action_show_line_list(self, cr, uid, ids, context=None):
-        ''' Show list in tree view (product in bom)
-        '''
+        """ Show list in tree view (product in bom)
+        """
         # TODO
         return True
 
     def action_show_list(self, cr, uid, ids, context=None):
-        ''' Show list in tree view
-        '''
+        """ Show list in tree view
+        """
         product_pool = self.pool.get('product.product')
 
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
@@ -92,7 +93,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             'name': _('Product list'),
             'view_type': 'form',
             'view_mode': 'tree,form',
-            #'res_id': 1,
+            # 'res_id': 1,
             'res_model': 'product.product',
             'view_id': False,
             'views': [(False, 'tree'), (False, 'form')],
@@ -102,11 +103,10 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             'nodestroy': False,
             }
 
-
-    def excel_extract_bom_check(self, cr, uid, wizard, only_hw=False,
-            context=None):
-        ''' Report for excel
-        '''
+    def excel_extract_bom_check(
+            self, cr, uid, wizard, only_hw=False, context=None):
+        """ Report for excel
+        """
         # ---------------------------------------------------------------------
         # Parameters
         # ---------------------------------------------------------------------
@@ -128,8 +128,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         # Utility:
         # ---------------------------------------------------------------------
         def is_placeholder(product):
-            ''' Check if product is a placeholder
-            '''
+            """ Check if product is a placeholder
+            """
             return product.bom_placeholder or product.bom_alternative
 
         # ---------------------------------------------------------------------
@@ -181,8 +181,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 ('order_id.state', 'not in', ('draft', 'cancel', 'sent')),
                 ('order_id.date_order', '>=', reference_date)
                 ], context=context)
-            for line in sale_line_pool.browse(cr, uid, sale_line_ids,
-                    context=context):
+            for line in sale_line_pool.browse(
+                    cr, uid, sale_line_ids, context=context):
                 product = line.product_id
                 if product not in ordered_product:
                     ordered_product.append(product)
@@ -328,8 +328,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             # Create page with parent bom:
             # -----------------------------------------------------------------
-            for product in sorted(parents[parent],
-                    key=lambda x: x.default_code):
+            for product in sorted(
+                    parents[parent], key=lambda x: x.default_code):
                 if product == parent.product_id:
                     format_mode = cell_format['bg']['yellow']
                 elif product in ordered_product:
@@ -434,13 +434,12 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                         component.product_qty,
                         ], default_format=cell_format['text'], col=col)
 
-
         return excel_pool.return_attachment(
             cr, uid, 'BOM check', context=context)
 
     def action_print(self, cr, uid, ids, context=None):
-        ''' Event for button print
-        '''
+        """ Event for button print
+        """
         if context is None:
             context = {}
 
@@ -524,4 +523,3 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         'mode': lambda *x: 'order',
         'only': lambda *x: 'all',
         }
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

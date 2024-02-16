@@ -416,7 +416,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 # Add ODOO product link:
                 url = product_url % product_id
                 excel_pool.write_url(
-                    ws_name, row, 2, url, default_code, tip='')
+                    ws_name, row, 2, url, default_code or '?', tip='')
                 # Write line
                 excel_pool.write_xls_line(
                     ws_name, row, record, default_format=cell_format['text'])

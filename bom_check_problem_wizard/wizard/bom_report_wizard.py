@@ -248,8 +248,6 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             # Create sheet:
             # -----------------------------------------------------------------
             ws_name = parent_product.default_code or u''
-            if ws_name != '127':
-                continue
             if not ws_name:  # No product code so used ID
                 ws_name = u'ID %s' % parent_product.id
                 # Write error in "Note" page:

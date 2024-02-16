@@ -18,7 +18,7 @@
         <record model="ir.ui.view" id="view_mrp_bom_structure_category_form">
             <field name="name">mrp.bom.structure.category.tree</field>
             <field name="model">mrp.bom.structure.category</field>
-            <field name="arch" type="xml">            
+            <field name="arch" type="xml">
                 <form string="BOM structure category" version="7.0">
                     <sheet>
                         <group colspan="4" col="4">
@@ -28,7 +28,7 @@
                             <field name="department" />
                             <separator string="Note" colspan="4"/>
                             <field name="note" colspan="4" nolabel="1"/>
-                        </group>    
+                        </group>
                     </sheet>
                 </form>
             </field>
@@ -37,12 +37,12 @@
             <field name="name">mrp.bom.structure.category.search</field>
             <field name="model">mrp.bom.structure.category</field>
             <field name="arch" type="xml">
-                <search string="String" version="7.0">        
+                <search string="String" version="7.0">
                     <field name="name" />
                     <field name="type_id" />
                     <group expand="0" string="Group By...">
                         <filter name="group_type" string="Type" context="{'group_by': 'type_id'}"/>
-                    </group>                
+                    </group>
                 </search>
             </field>
         </record>
@@ -65,7 +65,7 @@
                     <field name="category_id" />
                 </xpath>
             </field>
-        </record>    
+        </record>
         <record model="ir.ui.view" id="view_mrp_bom_category_parent_form">
             <field name="name">mrp.bom.category.parent.form</field>
             <field name="model">mrp.bom</field>
@@ -77,8 +77,8 @@
                 </xpath>
             </field>
         </record>
-        
-        <!--mrp.bom-->
+
+        <!-- mrp.bom -->
         <record model="ir.ui.view" id="view_mrp_bom_dynamic_new_form">
             <field name="name">mrp.bom.dynamic.form</field>
             <field name="model">mrp.bom</field>
@@ -137,18 +137,18 @@
                 </field>
             </field>
         </record>
-        
+
         <!--mrp.bom.line-->
         <record model="ir.ui.view" id="view_mrp_bom_line_search">
             <field name="name">mrp.bom.line.search</field>
             <field name="model">mrp.bom.line</field>
             <field name="priority" eval="10" />
             <field name="arch" type="xml">
-                <search string="BOM line search" version="7.0">        
+                <search string="BOM line search" version="7.0">
                     <field name="bom_id" string="BOM"/>
                     <field name="product_id" string="Component" />
                     <field name="category_id" />
-                    <field name="dynamic_mask" />                    
+                    <field name="dynamic_mask" />
                     <!--<field name="dynamic_mask" string="Mask start with" filter_domain="[('dynamic_mask','ilike', self + '\%')]"/>-->
 
                     <filter name="mask_open" string="Open mask" domain="[('dynamic_mask','ilike','\%')]"/>
@@ -160,7 +160,7 @@
                         <filter name="group_bom" string="BOM" context="{'group_by': 'bom_id'}"/>
                         <filter name="group_category" string="Category" context="{'group_by': 'category_id'}"/>
                         <filter name="group_product" string="Product" context="{'group_by': 'product_id'}"/>
-                    </group>                
+                    </group>
                 </search>
             </field>
         </record>
@@ -169,7 +169,7 @@
             <field name="model">mrp.bom.line</field>
             <field name="priority" eval="50"/>
             <field name="arch" type="xml">
-                <tree string="String" editable="bottom" colors="red:dynamic_mask==False">       
+                <tree string="String" editable="bottom" colors="red:dynamic_mask==False">
                     <field name="bom_id" invisible="1"/>
                     <field name="product_id" /><!--onchange-->
                     <field name="category_id" />
@@ -182,7 +182,7 @@
                 </tree>
             </field>
         </record>
-        
+
         <!--product.product-->
         <record model="ir.ui.view" id="view_product_bom_dynamic_search">
             <field name="name">product.product.search</field>
@@ -192,11 +192,11 @@
                 <search string="Product and bom" version="7.0">
                     <field name="name" />
                     <field name="default_code" />
-                    
+
                     <filter name="no_parent_bom" string="No parent bom" domain="[('parent_bom_id','=',False)]"/>
                     <group expand="0" string="Group By...">
                         <filter name="group_parent_bom" string="Parent BOM" context="{'group_by': 'parent_bom_id'}"/>
-                    </group>                
+                    </group>
                 </search>
             </field>
         </record>
@@ -209,8 +209,8 @@
                     <header>
                         <button name="open_dynamic_bom" string="Dynamic BOM rule" type="object" attrs="{'invisible': [('structure_id','=',False)]}" />
                         <button name="open_current_dynamic_bom" string="Dynamic BOM" type="object" attrs="{'invisible': [('structure_id','=',False)]}" class="oe_highlight"/>
-                    </header>    
-                </xpath>                
+                    </header>
+                </xpath>
                 <field name="default_code" position="after">
                     <group name="placeholder_group">
                         <field name="bom_placeholder" />
@@ -219,14 +219,14 @@
                     </group>
                 </field>
             </field>
-        </record>        
+        </record>
 
         <record model="ir.ui.view" id="view_product_product_dynamic_bom_form">
             <field name="name">product.product.dynamic.bom.line.form</field>
             <field name="model">product.product</field>
             <field name="priority" eval="50" />
             <field name="arch" type="xml">
-                <form string="Product dynamic BOM" version="7.0">        
+                <form string="Product dynamic BOM" version="7.0">
                     <header>
                     </header>
                     <sheet>
@@ -260,11 +260,11 @@
                                             <field name="dynamic_mask" />
                                             <field name="product_qty" />
                                             <field name="product_uom" string="UOM" />
-                                        </group>    
-                                    </form>                                
+                                        </group>
+                                    </form>
                                 </field>
-                            </group>    
-                            
+                            </group>
+
                             <group col="4" colspan="2">
                                 <separator string="Parent BOM default" colspan="4"/>
                                 <field name="parent_bom_id" attrs="{'required': [('relative_type','=','parent')]}"/>
@@ -280,9 +280,9 @@
                                         <button name="open_halfwork_form" string="Open halfwork bom" icon="STOCK_JUSTIFY_FILL" type="object" attrs="{'invisible': [('relative_type','!=','half')]}"/>
                                     </tree>
                                 </field>
-                            </group>    
+                            </group>
                         </group>
-                    </sheet>        
+                    </sheet>
                 </form>
             </field>
         </record>
@@ -291,7 +291,7 @@
             <field name="model">product.product</field>
             <field name="priority" eval="50" />
             <field name="arch" type="xml">
-                <tree string="Product dynamic BOM" colors="red:structure_id==False">        
+                <tree string="Product dynamic BOM" colors="red:structure_id==False">
                     <field name="name" />
                     <field name="default_code" />
                     <field name="structure_id" />
@@ -309,27 +309,27 @@
             <field name="search_view_id" ref="view_product_bom_dynamic_search" />
             <field name="context">{'form_view_ref': 'bom_dynamic_structured.view_product_product_dynamic_bom_form'}</field>
             <field name="domain">[]</field>
-        </record>        
-        <menuitem 
-            parent="mrp.menu_mrp_product_form" 
-            id="menu_product_product_bom_line_dynamic" 
+        </record>
+        <menuitem
+            parent="mrp.menu_mrp_product_form"
+            id="menu_product_product_bom_line_dynamic"
             action="action_product_product_bom_line_dynamic"
             sequence="10"
             />
 
-        <menuitem 
-            parent="mrp.menu_mrp_product_form" 
-            id="menu_action_mrp_bom_structure_category_root" 
-            name="Category management"            
+        <menuitem
+            parent="mrp.menu_mrp_product_form"
+            id="menu_action_mrp_bom_structure_category_root"
+            name="Category management"
             sequence="20"
-            />           
-            <menuitem 
-                parent="menu_action_mrp_bom_structure_category_root" 
-                id="menu_action_mrp_bom_structure_category" 
+            />
+            <menuitem
+                parent="menu_action_mrp_bom_structure_category_root"
+                id="menu_action_mrp_bom_structure_category"
                 action="action_mrp_bom_structure_category"
                 sequence="20"
                 />
-        
+
     </data>
 </openerp>
 

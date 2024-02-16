@@ -318,7 +318,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 footer.append(u'')
 
                 width.append(16)
-                width.append(3)
+                width.append(4)
 
                 excel_pool.merge_cell(ws_name, [
                     header_row, (2 * pos) + extra_col,

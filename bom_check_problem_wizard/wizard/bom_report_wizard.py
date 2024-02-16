@@ -115,6 +115,9 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         check_order = True
         demo = False
         with_hw = True
+        product_url = r'http://192.168.1.181:18069/web#id=%s' \
+                      r'&view_type=form&model=product.product&menu_id=600&' \
+                      r'action=782'
 
         # Generate dynamic reference date (2 years)
         now = u'%s' % datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
@@ -245,6 +248,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             # Create sheet:
             # -----------------------------------------------------------------
             ws_name = parent_product.default_code or u''
+            if ws_name != '127':
+                continue
             if not ws_name:  # No product code so used ID
                 ws_name = u'ID %s' % parent_product.id
                 # Write error in "Note" page:
@@ -358,9 +363,12 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     format_mode = cell_format['bg']['green']
                 else:
                     format_mode = cell_format['text']
+                product_id = product.id
+                default_code = product.default_code or '?'
 
                 record = [
-                    (u'X' if product.dynamic_bom_checked else u'', format_mode),
+                    (u'X' if product.dynamic_bom_checked else u'',
+                     format_mode),
                     (u'X' if product in ordered_product else u'', format_mode),
                     (u'%s' % product.default_code, format_mode),
                     (u'%s' % product.name, format_mode),
@@ -406,6 +414,12 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                             hw.append(product)
 
                 row += 1
+
+                # Add ODOO product link:
+                url = product_url % product_id
+                excel_pool.write_url(
+                    ws_name, row, 2, url, default_code, tip='')
+                # Write line
                 excel_pool.write_xls_line(
                     ws_name, row, record, default_format=cell_format['text'])
 

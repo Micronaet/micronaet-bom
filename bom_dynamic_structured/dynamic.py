@@ -445,8 +445,8 @@ class MRPBomLine(orm.Model):
             'verniciatura'),
         'dynamic_mask': fields.char('Dynamic mask', size=20),
         'category_id': fields.many2one(
-            'mrp.bom.structure.category', 'Category'), # required=True
-        #'line_from': fields.selection([
+            'mrp.bom.structure.category', 'Category'),  # required=True
+        # 'line_from': fields.selection([
         #    ('default', 'Default parent'),
         #    ('rule', 'Dynamic rule'),
         #    ], 'From', readonly=True)

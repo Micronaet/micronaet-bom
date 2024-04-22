@@ -310,16 +310,16 @@ class PurchaseOrderXLSX(orm.Model):
                     # ---------------------------------------------------------
                     # Search supplier:
                     # ---------------------------------------------------------
-                    # 1. First supplier
-                    if product_proxy.first_supplier_id:
-                        partner_id = product_proxy.first_supplier_id.id
-
-                    # 2. Procurements:
-                    elif product_proxy.seller_ids:
+                    # 1. Procurements:
+                    if product_proxy.seller_ids:
                         partner_id = product_proxy.seller_ids[0].name.id
 
+                    # 2. First supplier
+                    elif product_proxy.first_supplier_id:
+                        partner_id = product_proxy.first_supplier_id.id
                     else:
                         partner_id = False
+
                 elif pos == 5:  # extra data update:
                     extra_data = {}
 

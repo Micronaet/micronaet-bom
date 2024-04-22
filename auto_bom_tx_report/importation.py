@@ -310,13 +310,14 @@ class PurchaseOrderXLSX(orm.Model):
                     # ---------------------------------------------------------
                     # Search supplier:
                     # ---------------------------------------------------------
-                    # 1. Procurements:
-                    if product_proxy.seller_ids:
+                    # 1. First supplier
+                    if product_proxy.first_supplier_id:
+                        partner_id = product_proxy.first_supplier_id.id
+
+                    # 2. Procurements:
+                    elif product_proxy.seller_ids:
                         partner_id = product_proxy.seller_ids[0].name.id
 
-                    # 2. First supplier
-                    elif product_proxy.first_supplier_id:
-                        partner_id = product_proxy.first_supplier_id.id
                     else:
                         partner_id = False
                 elif pos == 5:  # extra data update:
@@ -441,8 +442,9 @@ class PurchaseOrderXLSX(orm.Model):
     _defaults = {
        'name': lambda *a: _('Imported: %s') % datetime.now().strftime(
             DEFAULT_SERVER_DATE_FORMAT),
-        'mode': lambda *x: 'draft',
-        }
+       'mode': lambda *x: 'draft',
+       }
+
 
 class PurchaseOrderXLSXLine(orm.Model):
     """ Model name: PurchaseOrderXLSX Line
@@ -469,6 +471,7 @@ class PurchaseOrderXLSXLine(orm.Model):
             required=False),
         }
 
+
 class PurchaseOrder(orm.Model):
     """ Model name: PurchaseOrder
     """
@@ -480,6 +483,7 @@ class PurchaseOrder(orm.Model):
             'purchase.order.xlsx', 'Import record',
             required=False),
         }
+
 
 class PurchaseOrderXLSX(orm.Model):
     """ Model name: PurchaseOrderXLSX

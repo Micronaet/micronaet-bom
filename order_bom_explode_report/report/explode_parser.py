@@ -409,6 +409,12 @@ class MrpProduction(orm.Model):
         # Maybe removed:
         inventory_pos = get_position_season(get_date())  # for inventory mgmt.
         for product in product_proxy:  # XXX Product ordered for now
+            # TODO if no dynamic_bom_line_ids 
+            # add_x_item(y_axis, product, category, purchase_db)
+            # category = product.category_id.type_id.name if \
+            #     product.category_id and product.category_id.type_id else \
+            #     _('No category')
+            
             for item in product.dynamic_bom_line_ids:  # XXX All Semi-worked:
                 # todo Remove log:
 

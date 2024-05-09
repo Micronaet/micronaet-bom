@@ -1444,8 +1444,8 @@ class SaleOrderLine(orm.Model):
     """
     _inherit = 'sale.order.line'
 
-    def _get_check_material_status(self, cr, uid, ids, fields, args,
-            context=None):
+    def _get_check_material_status(
+            self, cr, uid, ids, fields, args, context=None):
         """ Fields function for calculate
         """
         res = {}
@@ -1457,20 +1457,20 @@ class SaleOrderLine(orm.Model):
             mrp_id = sol.mrp_id.id
             for material in sol.material_ids:
                 if material.stats_id.mrp_id.id != mrp_id:
-                    continue # production not linked to this MRP
+                    continue  # production not linked to this MRP
                 ready_qty = material.ready_qty
                 product_qty = material.product_qty
                 bom_qty = material.bom_qty
-                if ready_qty < product_qty: # material not all present
+                if ready_qty < product_qty:  # material not all present
                     # If one component non present ready is false:
                     res[sol.id]['material_ready'] = False
-                    material_max = ready_qty / bom_qty # TODO round(, 0)?
+                    material_max = ready_qty / bom_qty  # TODO round(, 0)?
 
                     # Max verification:
                     if material_max < res[sol.id]['material_max']:
                         res[sol.id]['material_max'] = material_max
                     if not material_max:
-                        break # next sol (0 is the bottom value!)
+                        break  # next sol (0 is the bottom value!)
         return res
 
     _columns = {
@@ -1484,4 +1484,3 @@ class SaleOrderLine(orm.Model):
             _get_check_material_status, method=True, multi=True,
             type='boolean', string='Ready', store=False),
         }
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

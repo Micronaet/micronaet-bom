@@ -147,10 +147,14 @@
                                         <field name="partner_id" readonly="1"/>
                                         <field name="default_code" readonly="1" />
                                         <field name="product_uom_qty" readonly="1" sum="total" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
-                                        <field name="material_max" readonly="1" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
-                                        <field name="material_ready" readonly="1" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
-                                        <field name="delivered_qty" readonly="1" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
-                                        <field name="working_qty" sum="total" readonly="1"/>
+                                        <field name="material_max" groups="mrp_direct_line.show_menuitem_mrp_mananger_line" string="Massimo per oggi"/> <!--readonly="1"-->
+
+                                        <!-- 09/05/2024 RIMOSSO PER ORA -->
+                                        <field name="material_ready" readonly="1" groups="mrp_direct_line.show_menuitem_mrp_mananger_line" invisible="1"/>
+                                        <field name="delivered_qty" readonly="1" groups="mrp_direct_line.show_menuitem_mrp_mananger_line" invisible="1"/>
+                                        <field name="working_qty" sum="total" readonly="1" string="Prodotti fino ad ora" invisible="1"/>
+                                        <!-- -->
+
                                         <button name="working_qty_is_done" string=">>" type="object" />
                                         <field name="product_uom_maked_sync_qty" sum="total"/>
                                         <field name="production_note" />

@@ -140,13 +140,14 @@
                                 <field name="working_ids" colspan="4" nolabel="1" >
                                     <tree colors="green:working_qty==0" editable="bottom" default_order="mrp_sequence">
                                         <!--Button for unlink-->
-                                        <!--<field name="working_sequence" widget="handle"/>-->
+                                        <!--<field name="working_sequence" widget="handle"/> is readonly in view!?!?!-->
                                         <!--<field name="working_sequence" />-->
                                         <button name="unplug_from_this_job" string="Scollega dal job" type="object" class="oe_highlight" icon="gtk-disconnect" attrs="{'invisible': [('working_qty', '=', 0)]}"/>
                                         <field name="mrp_sequence" invisible="1"/>
                                         <field name="partner_id" readonly="1"/>
                                         <field name="default_code" readonly="1" />
                                         <field name="product_uom_qty" readonly="1" sum="total" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
+                                        <field name="job_uom_qty" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
 
                                         <!-- 09/05/2024 RIMOSSO PER ORA -->
                                         <field name="material_max" groups="mrp_direct_line.show_menuitem_mrp_mananger_line" readonly="1" invisible="1"/>
@@ -158,18 +159,18 @@
                                         <button name="working_qty_is_done" string=">>" type="object" />
                                         <field name="product_uom_maked_sync_qty" sum="total"/>
                                         <field name="production_note" />
-                                        <button name="working_print_single_label" string="Print label" type="object" icon="STOCK_PRINT" groups="mrp_direct_line.show_menuitem_mrp_manager_print"/>
+                                        <button name="working_print_single_label" string="Stampa eticetta" type="object" icon="STOCK_PRINT" groups="mrp_direct_line.show_menuitem_mrp_manager_print"/>
                                     </tree>
                                 </field>
                             </group>
                         </page>
-                        <page string="Material" groups="mrp_direct_line.show_menuitem_mrp_mananger_line">
+                        <page string="Materiali" groups="mrp_direct_line.show_menuitem_mrp_mananger_line">
                             <group colspan="4" col="4">
-                                <separator string="Material" colspan="4"/>
+                                <separator string="Materiali" colspan="4"/>
                                     <group colspan="4" col="4">
                                         <button name="generate_material_planned_bom"
-                                                string="Generate material" type="object"
-                                                confirm="Regenerate operation will delete all marked ready q., confirm?"
+                                                string="Genera lista materiale" type="object"
+                                                confirm="Rigenero la lista dei materiali necessari? Eventuali conferme di approntamento verranno cancellate, confermi?"
                                                 icon="gtk-refresh" />
                                         <field name="material_ids" colspan="4" nolabel="1">
                                             <tree string="Material" editable="bottom" colors="red:ready_qty&lt;product_qty;green:ready_qty&gt;=product_qty">

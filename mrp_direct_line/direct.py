@@ -77,9 +77,11 @@ class MrpProduction(orm.Model):
     def create_new_job(self, cr, uid, ids, context=None):
         """" Open wizard for assign job
         """
+        model_pool = self.pool.get('ir.model.data')
+
         mrp_id = ids[0]
         mrp = self.browse(cr, uid, mrp_id, context=context)
-        model_pool = self.pool.get('ir.model.data')
+
         form_view_id = model_pool.get_object_reference(
             cr, uid,
             'mrp_direct_line', 'mrp_production_new_line_day_wizard_view')[1]
@@ -1483,4 +1485,5 @@ class SaleOrderLine(orm.Model):
         'material_ready': fields.function(
             _get_check_material_status, method=True, multi=True,
             type='boolean', string='Ready', store=False),
+        'job_uom_qty': fields.float('Forza q. job', digits=(10, 2)),
         }

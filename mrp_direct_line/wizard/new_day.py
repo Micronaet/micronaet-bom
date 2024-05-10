@@ -59,11 +59,23 @@ class CreateNewMrpLineDayWizard(orm.TransientModel):
         sol_pool = self.pool.get('sale.order.line')
 
         wiz_proxy = self.browse(cr, uid, ids, context=context)[0]
+        mrp_id = wiz_proxy.mrp_id.id
+
+        # Clean job forced:
+        update_ids = sol_pool.search(cr, uid, [
+            ('mrp_id', '=', mrp_id),
+            ('job_uom_qty', '>', 0),
+        ], context=context)
+        if update_ids:
+            _logger.warning('Cleaning %s lines' % len(update_ids))
+            sol_pool.write(cr, uid, update_ids, {
+                'job_uom_qty': 0.0,
+            }, context=context)
 
         # Create the statistic event mrp.production.stats
         stats_id = stats_pool.create(cr, uid, {
             'date': wiz_proxy.date,
-            'mrp_id': wiz_proxy.mrp_id.id,
+            'mrp_id': mrp_id,
             'workcenter_id': wiz_proxy.line_id.id,
             'total': 0,
             # 'working_done': False,
@@ -89,6 +101,7 @@ class CreateNewMrpLineDayWizard(orm.TransientModel):
             if remain <= 0:
                 continue  # no production
             sol_update.append((sol.id, remain))
+
         if sol_update:
             for item_id, remain in sol_update:
                 sol_pool.write(cr, uid, item_id, {

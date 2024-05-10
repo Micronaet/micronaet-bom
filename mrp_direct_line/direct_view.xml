@@ -147,6 +147,7 @@
                                         <field name="partner_id" readonly="1"/>
                                         <field name="default_code" readonly="1" />
                                         <field name="product_uom_qty" readonly="1" sum="total" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
+                                        <field name="mx_assigned_qty" readonly="1" sum="total_assigned" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
                                         <field name="job_uom_qty" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
 
                                         <!-- 09/05/2024 RIMOSSO PER ORA -->

@@ -6,14 +6,14 @@
             <field name="name">stock.picking.device.form</field>
             <field name="model">stock.picking.device</field>
             <field name="arch" type="xml">
-                <form string="Device" version="7.0">        
+                <form string="Device" version="7.0">
                     <sheet>
                         <group col="4" colspan="4">
                             <field name="name" />
                             <separator string="Note" colspan="4" />
                             <field name="note" colspan="4" nolabel="1" />
                         </group>
-                    </sheet>        
+                    </sheet>
                 </form>
             </field>
         </record>
@@ -21,7 +21,7 @@
             <field name="name">stock.picking.device.tree</field>
             <field name="model">stock.picking.device</field>
             <field name="arch" type="xml">
-                <tree string="Device" editable="bottom">        
+                <tree string="Device" editable="bottom">
                     <field name="name" />
                     <field name="note" />
                 </tree>
@@ -36,13 +36,13 @@
             <field name="context">{}</field>
             <field name="domain">[]</field>
         </record>
-        
+
         <record model="ir.ui.view" id="view_res_company_cl_sl_picking_ref_tree">
             <field name="name">res.company.form</field>
             <field name="model">res.company</field>
             <field name="priority" eval="50" />
             <field name="arch" type="xml">
-                <tree string="Picking setup" version="7.0" editable="bottom">        
+                <tree string="Picking setup" version="7.0" editable="bottom">
                     <field name="name" readonly="1" />
                     <field name="enable_mrp_lavoration" />
                     <field name="sl_mrp_lavoration_id" attrs="{'required': [('enable_mrp_lavoration','=',True)]}"/>
@@ -59,13 +59,13 @@
             <field name="context">{}</field>
             <field name="domain">[]</field>
         </record>
-        
+
         <record model="ir.ui.view" id="view_stock_picking_cl_form">
             <field name="name">stock.picking.cl.mrp.lavoration.form</field>
             <field name="model">stock.picking</field>
             <field name="priority" eval="50" />
             <field name="arch" type="xml">
-                <form string="String" version="7.0">        
+                <form string="String" version="7.0">
                     <header>
                         <button name="force_done" string="Done" type="object" attrs="{'invisible': [('state','=','done')]}" class="oe_highlight" />
                         <button name="force_draft" string="Unlock" type="object" attrs="{'invisible': [('state','=','draft')]}"/>
@@ -78,7 +78,7 @@
                             <field name="device_id" attrs="{'invisible': [('dep_mode','!=','workshop')]}"/>
                             <field name="workers" attrs="{'invisible': [('dep_mode','!=','workshop')]}"/>
                             <field name="dep_mode" invisible="1" />
-                            
+
                             <field name="total_work" widget="float_time" attrs="{'invisible': [('dep_mode','!=','workshop')]}" />
                             <field name="total_prepare" widget="float_time" attrs="{'invisible': [('dep_mode','!=','workshop')]}" />
                             <field name="total_stop" widget="float_time" attrs="{'invisible': [('dep_mode','!=','workshop')]}"/>
@@ -99,27 +99,27 @@
 		                                        <field name="product_uom" invisible="1"/>
 		                                        <field name="linked_sl_status" readonly="1" />
 		                                        <field name="name" invisible="1"/>
-		                                        <field name="date" invisible="1" />				                            
+		                                        <field name="date" invisible="1" />
 		                                        <field name="location_id" invisible="1" />
 		                                        <field name="location_dest_id" invisible="1" />
 		                                        <field name="invoice_state" invisible="1" />
 		                                        <field name="date_expected" invisible="1" />
-		                                        <field name="state" invisible="1" />				                            
+		                                        <field name="state" invisible="1" />
 		                                    </tree>
 		                                </field>
 		                            </group>
                                 </page>
                             </notebook>
                             <field name="linked_mrp_id" attrs="{'invisible': [('dep_mode','!=','cut')]}" domain="[('state', 'not in', ('cancel', 'done'))]"/>
-                            <button name="get_material_info_from_mrp" string="MRP info" type="object" attrs="{'invisible':[('linked_mrp_id','=',False)]}"/>                  
+                            <button name="get_material_info_from_mrp" string="MRP info" type="object" attrs="{'invisible':[('linked_mrp_id','=',False)]}"/>
                             <separator string="MRP info" colspan="4" attrs="{'invisible':[('linked_mrp_id','=',False)]}"/>
                             <field name="mrp_material_info" nolabel="1" colspan="4"  attrs="{'invisible':[('linked_mrp_id','=',False)]}" widget="html"/>
-                            
+
 		                    <separator string="Q. Magazzino" colspan="4"/>
 		                    <field name="sl_quants_ids" states="done" colspan="4" nolabel="1"/>
 		                    <field name="note" placeholder="Add lavoration internal note..." colspan="4" nolabel="1"/>
 			            </group>
-                    </sheet>        
+                    </sheet>
                 </form>
             </field>
         </record>
@@ -135,8 +135,8 @@
                     <field name="workers" />
                     <field name="total_work" />
                     <field name="total_prepare" />
-                    <field name="total_stop" />                    
-                    <field name="state" />                    
+                    <field name="total_stop" />
+                    <field name="state" />
                 </tree>
             </field>
         </record>
@@ -147,7 +147,7 @@
             <field name="inherit_id" ref="mrp.mrp_production_form_view" />
             <field name="arch" type="xml">
                 <xpath expr="//notebook/page[1]" position="after">
-                    <page string="Lavoration">
+                    <page string="Lavoration" invisible="1">
                         <field name="linked_picking_ids" context="{'default_dep_mode': 'cut','open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form'}">
                             <tree string="Cut">
                                 <field name="date" readonly="1"/>
@@ -157,9 +157,9 @@
                             </tree>
                         </field>
                     </page>
-                </xpath>                
+                </xpath>
             </field>
-        </record>    
+        </record>
 
         <record model="ir.actions.act_window" id="action_stock_picking_cl_tree">
             <field name="name">Lavoration workshop list (open)</field>
@@ -197,45 +197,45 @@
             <field name="context">{'default_dep_mode': 'cut','open_mrp_lavoration': True, 'form_view_ref': 'lavoration_cl_sl.view_stock_picking_cl_form'}</field>
             <field name="domain">[('dep_mode','=','cut')]</field>
         </record>
-        <menuitem 
-            parent="mrp.menu_mrp_manufacturing" 
-            id="menu_stock_picking_lavoration_area_root" 
+        <menuitem
+            parent="mrp.menu_mrp_manufacturing"
+            id="menu_stock_picking_lavoration_area_root"
             name="Lavoration area"
             sequence="40"/>
-        
-            <menuitem 
-                parent="menu_stock_picking_lavoration_area_root" 
-                id="menu_stock_picking_cl" 
+
+            <menuitem
+                parent="menu_stock_picking_lavoration_area_root"
+                id="menu_stock_picking_cl"
                 action="action_stock_picking_cl_tree"
                 sequence="10"/>
-                <menuitem 
-                    parent="menu_stock_picking_cl" 
-                    id="menu_stock_picking_cl_closed_tree" 
+                <menuitem
+                    parent="menu_stock_picking_cl"
+                    id="menu_stock_picking_cl_closed_tree"
                     action="action_stock_picking_cl_closed_tree"
                     sequence="10"/>
 
-            <menuitem 
-                parent="menu_stock_picking_lavoration_area_root" 
-                id="menu_stock_picking_cut_cl" 
+            <menuitem
+                parent="menu_stock_picking_lavoration_area_root"
+                id="menu_stock_picking_cut_cl"
                 action="action_stock_picking_cut_cl_tree"
                 sequence="20"/>
-                <menuitem 
-                    parent="menu_stock_picking_cut_cl" 
-                    id="menu_stock_picking_cut_cl_closed_tree" 
+                <menuitem
+                    parent="menu_stock_picking_cut_cl"
+                    id="menu_stock_picking_cut_cl_closed_tree"
                     action="action_stock_picking_cut_cl_closed_tree"
                     sequence="10"/>
 
-            <menuitem 
-                parent="menu_stock_picking_lavoration_area_root" 
-                id="menu_stock_picking_cl_configuration" 
+            <menuitem
+                parent="menu_stock_picking_lavoration_area_root"
+                id="menu_stock_picking_cl_configuration"
                 action="action_rec_company_parameter_tree"
                 sequence="90"/>
-                <menuitem 
-                    parent="menu_stock_picking_cl_configuration" 
-                    id="menu_open_stock_picking_device" 
+                <menuitem
+                    parent="menu_stock_picking_cl_configuration"
+                    id="menu_open_stock_picking_device"
                     action="action_open_stock_picking_device"/>
-                 
-        
+
+
     </data>
 </openerp>
 

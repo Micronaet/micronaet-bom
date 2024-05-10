@@ -145,6 +145,7 @@
                                         <button name="unplug_from_this_job" string="Scollega dal job" type="object" class="oe_highlight" icon="gtk-disconnect" attrs="{'invisible': [('working_qty', '=', 0)]}"/>
                                         <field name="mrp_sequence" invisible="1"/>
                                         <field name="partner_id" readonly="1"/>
+                                        <field name="order_id" readonly="1"/>
                                         <field name="default_code" readonly="1" />
                                         <field name="product_uom_qty" readonly="1" sum="total" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
                                         <field name="mx_assigned_qty" readonly="1" sum="total_assigned" groups="mrp_direct_line.show_menuitem_mrp_mananger_line"/>
@@ -157,7 +158,7 @@
                                         <field name="working_qty" sum="total" readonly="1" string="Prodotti fino ad ora" invisible="1"/>
                                         <!-- -->
 
-                                        <button name="working_qty_is_done" string=">>" type="object" />
+                                        <button name="working_qty_is_done" string=">>" type="object" attrs="{'invisible': [('job_uom_qty', '>', 0)]}" />
                                         <field name="product_uom_maked_sync_qty" sum="total"/>
                                         <field name="production_note" />
                                         <button name="working_print_single_label" string="Stampa eticetta" type="object" icon="STOCK_PRINT" groups="mrp_direct_line.show_menuitem_mrp_manager_print"/>

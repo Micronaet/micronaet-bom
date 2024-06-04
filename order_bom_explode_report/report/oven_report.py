@@ -131,7 +131,7 @@ class MrpProduction(orm.Model):
             deadline_month = deadline[5:7]
             deadline_ref = header_period.get(deadline_month)
             default_code = product.default_code or ''
-            color = default_code[7:9]
+            color = default_code[6:8]
             family = product.family_id.name or 'NON PRESENTE'
 
             log_record = [

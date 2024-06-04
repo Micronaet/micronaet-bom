@@ -145,7 +145,7 @@ class MrpProduction(orm.Model):
                 parent_bom.code or '',
                 default_code,
                 order.name,
-                deadline_ref,
+                deadline_month,
 
                 # Only for used:
                 '',  # OC
@@ -160,7 +160,6 @@ class MrpProduction(orm.Model):
 
             code2 = default_code[:2]
             code3 = default_code[:3]
-            excluded_code
             if code2 in excluded_code[2] or code3 in excluded_code[3]:
                 log_record[12] = 'Codice escluso'
                 continue

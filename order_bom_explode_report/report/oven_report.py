@@ -170,9 +170,9 @@ class MrpProduction(orm.Model):
 
             # todo manage better line of order closed:
             if line_closed or order_closed:
-                data['OC'] += line.product_uom_qty
-            else:
                 data['OC'] += data['D']  # Keep delivered as OC for reset
+            else:
+                data['OC'] += line.product_uom_qty
 
         pdb.set_trace()
         for color in master_data:   # Color loop

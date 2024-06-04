@@ -113,6 +113,7 @@ class MrpProduction(orm.Model):
             ], context=context)
 
         master_data = {}
+        log_data = []
         lines = len(line_ids)
         counter = 0
         for line in line_pool.browse(cr, uid, line_ids, context=context):
@@ -123,7 +124,7 @@ class MrpProduction(orm.Model):
                 ))
 
             # Readability:
-            # order = line.order_id
+            order = line.order_id
             product = line.product_id
             parent_bom = product.parent_bom_id
             deadline = line.date_deadline or ''
@@ -131,6 +132,24 @@ class MrpProduction(orm.Model):
             deadline_ref = header_period.get(deadline_month)
             default_code = product.default_code or ''
             color = default_code[7:9]
+            family = product.family_id.name or 'NON PRESENTE'
+
+            log_record = [
+                # Fixed:
+                color,
+                family,
+                parent_bom.code or '',
+                default_code,
+                order.name,
+
+                # Only for used:
+                '',  # OC
+                '',  # B
+                '',  # L
+                '',  # Del
+                '',  # Closed manually
+                False,  # Not used
+                ]
 
             # todo Write log record here!
             # or not deadline
@@ -138,8 +157,7 @@ class MrpProduction(orm.Model):
                 # Line not used
                 continue
 
-            family = product.family_id.name or 'NON PRESENTE'
-            # order_closed = order.mx_closed
+            order_closed = order.mx_closed
             line_closed = line.mx_closed
 
             if color not in master_data:
@@ -166,15 +184,28 @@ class MrpProduction(orm.Model):
             data = master_data[color][family][parent_bom][product][
                 deadline_ref]
 
-            data['B'] += line.product_uom_maked_sync_qty
-            data['LOCK'] += line.mx_assigned_qty
-            data['D'] += line.delivered_qty
+            b_qty = line.product_uom_maked_sync_qty
+            lock_qty = line.mx_assigned_qty
+            del_qty = line.delivered_qty
+            oc_qty = line.product_uom_qty
+
+            data['B'] += b_qty
+            data['LOCK'] += lock_qty
+            data['D'] += del_qty
 
             # todo manage better line of order closed:
-            if line_closed:  # or order_closed:
-                data['OC'] += data['D']  # Keep delivered as OC for reset
+            if line_closed or order_closed:
+                data['OC'] += del_qty  # Keep delivered as OC for reset
+                log_record[9] = True  # Closed manually
             else:
-                data['OC'] += line.product_uom_qty
+                data['OC'] += oc_qty
+
+            log_record[5] = oc_qty
+            log_record[6] = b_qty
+            log_record[7] = lock_qty
+            log_record[8] = del_qty
+            log_record[10] = True
+            log_data.append(log_record)
 
         for color in master_data:   # Color loop
             # -----------------------------------------------------------------
@@ -220,10 +251,50 @@ class MrpProduction(orm.Model):
                 excel_pool.write_xls_line(ws_name, row, record)
         excel_pool.save_file_as(excel_filename)
 
-        '''return excel_pool.return_attachment(
-            cr, uid, 'Stampa forno',
-            context=context)
-            '''
+        # Log file:
+        del(excel_pool)
+        excel_pool = self.pool.get('excel.writer')  # New
+
+        # ---------------------------------------------------------------------
+        #                            XLS Log file:
+        # ---------------------------------------------------------------------
+        now = datetime.now()
+        excel_filename = '/home/administrator/photo/log/oven/log_%s.xlsx' % (
+            str(now).replace('/', '_').replace(':', '.'),
+            )
+
+        _logger.warning('Excel: %s' % excel_filename)
+        header = [
+            'Colore',
+            'Famiglia',
+            'DB padre',
+            'Codice',
+            'OC',
+
+            'Ord',  # OC
+            'Blocc.',  # B
+            'Ass.',  # L
+            'Cons.',  # Del
+            'Chiuso',  # Closed manually
+            'Usato',  # Not used
+            ]
+        width = [
+            10, 12, 10, 10, 10,
+            5, 5, 5, 5,
+            5, 5,
+            ]
+
+        ws_name = 'Log'
+        excel_pool.create_worksheet(name=ws_name)
+        excel_pool.column_width(ws_name, width)
+
+        row = 0
+        excel_pool.write_xls_line(ws_name, row, header)
+
+        for record in log_record:
+            row += 1
+            excel_pool.write_xls_line(ws_name, row, record)
+        excel_pool.save_file_as(excel_filename)
         return True
 
 

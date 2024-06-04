@@ -60,7 +60,7 @@ class MrpProduction(orm.Model):
         # XLS Log file:
         # ---------------------------------------------------------------------
         now = datetime.now()
-        excel_filename = '/home/administrator/photo/log/oven_%s.xlsx' % (
+        excel_filename = '/home/administrator/photo/log/oven/oven_%s.xlsx' % (
             str(now).replace('/', '_').replace(':', '.'),
             )
 
@@ -110,7 +110,15 @@ class MrpProduction(orm.Model):
             ], context=context)
 
         master_data = {}
+        lines = len(line_ids)
+        counter = 0
         for line in line_pool.browse(cr, uid, line_ids, context=context):
+            counter += 1
+            if not(counter % 50):
+                _logger.info('Order line %s or %s' % (
+                    counter, lines,
+                ))
+
             # Readability:
             order = line.order_id
             product = line.product_id

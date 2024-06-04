@@ -148,22 +148,24 @@ class MrpProduction(orm.Model):
                 deadline_month,
 
                 # Only for used:
-                '',  # OC
-                '',  # B
-                '',  # L
-                '',  # Del
+                '',  # 6. OC
+                '',  # 7. B
+                '',  # 8. L
+                '',  # 9. Del
 
-                '',  # Closed manually
-                '',  # Used
-                '',  # Comment
+                '',  # 10. Closed manually
+                '',  # 11. Used
+                '',  # 12. Comment
                 ]
 
+            # Excluded code:
             code2 = default_code[:2]
             code3 = default_code[:3]
             if code2 in excluded_code[2] or code3 in excluded_code[3]:
                 log_record[12] = 'Codice escluso'
                 continue
 
+            # Data not present:
             # or not deadline (filtered as presen!)
             if not parent_bom or not default_code or not color:
                 # Line not used
@@ -211,6 +213,7 @@ class MrpProduction(orm.Model):
                 data['OC'] += del_qty  # Keep delivered as OC for reset
                 log_record[10] = 'X'  # Closed manually
                 log_record[11] = ''  # Not used in total
+                log_record[12] = 'Riga chiusa'  # Not used in total
             else:
                 data['OC'] += oc_qty
 
@@ -302,11 +305,13 @@ class MrpProduction(orm.Model):
             'Cons.',  # Del
             'Chiuso',  # Closed manually
             'Usato',  # Not used
+            'Commento',
             ]
         width = [
             10, 15, 12, 12, 15, 5,
             6, 6, 6, 6,
             6, 6,
+            40,
             ]
 
         ws_name = 'Log'

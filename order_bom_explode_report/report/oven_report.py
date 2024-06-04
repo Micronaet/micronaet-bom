@@ -257,7 +257,7 @@ class MrpProduction(orm.Model):
                         '',  # Parent BOM
                         '',  # Product
                     ]
-                    record.extend(total)
+                    record.extend([d if d else '' for d in total])
 
                     if not ws_name:
                         # -----------------------------------------------------

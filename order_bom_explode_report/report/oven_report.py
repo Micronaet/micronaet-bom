@@ -113,7 +113,6 @@ class MrpProduction(orm.Model):
         master_data = {}
         lines = len(line_ids)
         counter = 0
-        pdb.set_trace()
         for line in line_pool.browse(cr, uid, line_ids, context=context):
             counter += 1
             if not(counter % 50):
@@ -122,7 +121,7 @@ class MrpProduction(orm.Model):
                 ))
 
             # Readability:
-            order = line.order_id
+            # order = line.order_id
             product = line.product_id
             parent_bom = product.parent_bom_id
             deadline = line.date_deadline or ''
@@ -137,7 +136,7 @@ class MrpProduction(orm.Model):
                 continue
 
             family = product.family_id.name or 'NON PRESENTE'
-            order_closed = order.mx_closed
+            # order_closed = order.mx_closed
             line_closed = line.mx_closed
 
             if color not in master_data:
@@ -169,12 +168,11 @@ class MrpProduction(orm.Model):
             data['D'] += line.delivered_qty
 
             # todo manage better line of order closed:
-            if line_closed or order_closed:
+            if line_closed:  # or order_closed:
                 data['OC'] += data['D']  # Keep delivered as OC for reset
             else:
                 data['OC'] += line.product_uom_qty
 
-        pdb.set_trace()
         for color in master_data:   # Color loop
             ws_name = color
             excel_pool.create_worksheet(name=ws_name)

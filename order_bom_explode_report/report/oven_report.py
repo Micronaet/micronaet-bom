@@ -22,6 +22,7 @@
 #
 ##############################################################################
 import os
+import pdb
 import sys
 import logging
 import erppeek
@@ -112,6 +113,7 @@ class MrpProduction(orm.Model):
         master_data = {}
         lines = len(line_ids)
         counter = 0
+        pdb.set_trace()
         for line in line_pool.browse(cr, uid, line_ids, context=context):
             counter += 1
             if not(counter % 50):
@@ -126,15 +128,14 @@ class MrpProduction(orm.Model):
             deadline = line.date_deadline or ''
             deadline_month = deadline[5:7]
             deadline_ref = header_period.get(deadline_month)
+            default_code = product.default_code or ''
+            color = default_code[7:9]
 
             # todo Write log record here!
-            # Is a MRP product:
-            if not parent_bom or not deadline:
+            if not parent_bom or not deadline or not default_code or not color:
                 # Line not used
                 continue
 
-            default_code = product.default_code or ''
-            color = default_code[7:9]
             family = product.family_id.name or 'NON PRESENTE'
             order_closed = order.mx_closed
             line_closed = line.mx_closed
@@ -160,7 +161,19 @@ class MrpProduction(orm.Model):
                         'D': 0.0,  # Delivered
                         # 'REMAIN': 0.0,  # Remain TODO
                     }
+            data = master_data[color][family][parent_bom][product][
+                deadline_ref]
 
+            data['B'] += product.product_uom_maked_sync_qty
+            data['LOCK'] += product.mx_assigned_qty
+            data['D'] += product.delivered_qty
+
+            if line_closed or order_closed:
+                data['OC'] += product.product_uom_qty
+            else:
+                data['OC'] += data['D']  # Keep delivered as OC for reset
+
+        pdb.set_trace()
         for color in master_data:   # Color loop
             ws_name = color
             excel_pool.create_worksheet(name=ws_name)

@@ -238,17 +238,18 @@ class MrpProduction(orm.Model):
                                 data['B'] + data['LOCK'], data['D'])
                             total[deadline_ref] += todo  # remain to produce
 
-                # Write Family line:
-                record = [
-                    '',  # Mode
-                    family,
-                    '',  # Parent BOM
-                    '',  # Product
-                ]
-                record.extend(total)
+                if any(total):  # Only if data is present!
+                    # Write Family line:
+                    record = [
+                        '',  # Mode
+                        family,
+                        '',  # Parent BOM
+                        '',  # Product
+                    ]
+                    record.extend(total)
 
-                row += 1
-                excel_pool.write_xls_line(ws_name, row, record)
+                    row += 1
+                    excel_pool.write_xls_line(ws_name, row, record)
         excel_pool.save_file_as(excel_filename)
 
         # Log file:

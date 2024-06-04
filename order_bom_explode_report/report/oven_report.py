@@ -211,7 +211,7 @@ class MrpProduction(orm.Model):
         #                     Excel file with master data:
         # ---------------------------------------------------------------------
         for color in master_data:   # Color loop
-            ws_color = False  # Create after
+            ws_name = False  # Create after (if needed)
             for family in sorted(master_data[color]):
                 total = empty[:]
                 for parent_bom in sorted(
@@ -243,15 +243,14 @@ class MrpProduction(orm.Model):
                     ]
                     record.extend(total)
 
-                    if not ws_color:
+                    if not ws_name:
                         # -----------------------------------------------------
                         # New page in Excel (only if there's data):
                         # -----------------------------------------------------
-                        # WS setup:
+                        # WS setup new color page:
                         ws_name = color
                         excel_pool.create_worksheet(name=ws_name)
                         excel_pool.column_width(ws_name, width)
-
                         # Header:
                         row = 0
                         excel_pool.write_xls_line(color, row, header)

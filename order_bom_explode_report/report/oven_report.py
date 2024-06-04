@@ -295,6 +295,7 @@ class MrpProduction(orm.Model):
             'DB padre',
             'Codice',
             'OC',
+            'Mese',
 
             'Ord',  # OC
             'Blocc.',  # B
@@ -304,9 +305,9 @@ class MrpProduction(orm.Model):
             'Usato',  # Not used
             ]
         width = [
-            10, 12, 10, 10, 10,
-            5, 5, 5, 5,
-            5, 5,
+            10, 15, 12, 12, 15, 5,
+            6, 6, 6, 6,
+            6, 6,
             ]
 
         ws_name = 'Log'

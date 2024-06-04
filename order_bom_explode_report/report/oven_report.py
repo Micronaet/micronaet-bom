@@ -164,13 +164,13 @@ class MrpProduction(orm.Model):
             data = master_data[color][family][parent_bom][product][
                 deadline_ref]
 
-            data['B'] += product.product_uom_maked_sync_qty
-            data['LOCK'] += product.mx_assigned_qty
-            data['D'] += product.delivered_qty
+            data['B'] += line.product_uom_maked_sync_qty
+            data['LOCK'] += line.mx_assigned_qty
+            data['D'] += line.delivered_qty
 
             # todo manage better line of order closed:
             if line_closed or order_closed:
-                data['OC'] += product.product_uom_qty
+                data['OC'] += line.product_uom_qty
             else:
                 data['OC'] += data['D']  # Keep delivered as OC for reset
 

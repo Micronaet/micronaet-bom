@@ -46,7 +46,7 @@ class MrpProduction(orm.Model):
     """
     _inherit = 'mrp.production'
 
-    def get_oven_report(self, cr, uid, ids, context=None):
+    def get_oven_report(self, cr, uid, context=None):
         """ Generate Oven report
         """
         if context is None:

@@ -207,19 +207,11 @@ class MrpProduction(orm.Model):
             log_record[10] = True
             log_data.append(log_record)
 
+        # ---------------------------------------------------------------------
+        #                     Excel file with master data:
+        # ---------------------------------------------------------------------
         for color in master_data:   # Color loop
-            # -----------------------------------------------------------------
-            # New page in Excel:
-            # -----------------------------------------------------------------
-            # WS setup:
-            ws_name = color
-            excel_pool.create_worksheet(name=ws_name)
-            excel_pool.column_width(ws_name, width)
-
-            # Header:
-            row = 0
-            excel_pool.write_xls_line(color, row, header)
-
+            ws_color = False  # Create after
             for family in sorted(master_data[color]):
                 total = empty[:]
                 for parent_bom in sorted(
@@ -238,6 +230,9 @@ class MrpProduction(orm.Model):
                                 data['B'] + data['LOCK'], data['D'])
                             total[deadline_ref] += todo  # remain to produce
 
+                # -------------------------------------------------------------
+                # Write line
+                # -------------------------------------------------------------
                 if any(total):  # Only if data is present!
                     # Write Family line:
                     record = [
@@ -247,6 +242,19 @@ class MrpProduction(orm.Model):
                         '',  # Product
                     ]
                     record.extend(total)
+
+                    if not ws_color:
+                        # -----------------------------------------------------
+                        # New page in Excel (only if there's data):
+                        # -----------------------------------------------------
+                        # WS setup:
+                        ws_name = color
+                        excel_pool.create_worksheet(name=ws_name)
+                        excel_pool.column_width(ws_name, width)
+
+                        # Header:
+                        row = 0
+                        excel_pool.write_xls_line(color, row, header)
 
                     row += 1
                     excel_pool.write_xls_line(ws_name, row, record)

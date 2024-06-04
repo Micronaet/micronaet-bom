@@ -178,17 +178,15 @@ class MrpProduction(orm.Model):
             if color not in master_data:
                 master_data[color] = {}
 
-            if family not in master_data[color]:
-                master_data[color][family] = {}
+            key = (family, parent_bom)
+            if key not in master_data[color]:
+                master_data[color][key] = {}
 
-            if parent_bom not in master_data[color][family]:
-                master_data[color][family][parent_bom] = {}
-
-            if product not in master_data[color][family][parent_bom]:
-                master_data[color][family][parent_bom][product] = {}
+            if product not in master_data[color][key]:
+                master_data[color][key][product] = {}
             if deadline_ref not in master_data[color][
-                    family][parent_bom][product]:
-                master_data[color][family][parent_bom][product][
+                    key][product]:
+                master_data[color][key][product][
                     deadline_ref] = {
                         'OC': 0.0,  # Order
                         'B': 0.0,  # MRP
@@ -196,8 +194,7 @@ class MrpProduction(orm.Model):
                         'D': 0.0,  # Delivered
                         # 'REMAIN': 0.0,  # Remain TODO
                     }
-            data = master_data[color][family][parent_bom][product][
-                deadline_ref]
+            data = master_data[color][key][product][deadline_ref]
 
             b_qty = line.product_uom_maked_sync_qty
             lock_qty = line.mx_assigned_qty
@@ -230,23 +227,23 @@ class MrpProduction(orm.Model):
         for color in master_data:   # Color loop
             ws_name = False  # Create after (if needed)
             row = 0
-            for family in sorted(master_data[color]):
+            for key in sorted(master_data[color]):
+                family, parent_bom = key
+                code = parent_bom.code
                 total = empty[:]
-                for parent_bom in sorted(
-                        master_data[color][family],
-                        key=lambda p: (p.code or '')):
-                    code = parent_bom.code
-                    for product in sorted(
-                            master_data[color][family][parent_bom],
-                            key=lambda p: (p.default_code or '')):
-                        for deadline_ref in master_data[color][
-                                family][parent_bom][product]:
-                            data = master_data[color][family][
-                                parent_bom][product][deadline_ref]
-                            oc = data['OC']
-                            todo = oc - max(
-                                data['B'] + data['LOCK'], data['D'])
-                            total[deadline_ref] += todo  # remain to produce
+                for product in sorted(
+                        master_data[color][family][parent_bom],
+                        key=lambda p: (p.default_code or '')):
+
+                    # Month total columns:
+                    for deadline_ref in master_data[color][
+                            family][parent_bom][product]:
+                        data = master_data[color][family][
+                            parent_bom][product][deadline_ref]
+                        oc = data['OC']
+                        todo = oc - max(
+                            data['B'] + data['LOCK'], data['D'])
+                        total[deadline_ref] += todo  # remain to produce
 
                 # -------------------------------------------------------------
                 # Write line
@@ -256,7 +253,7 @@ class MrpProduction(orm.Model):
                     record = [
                         '',  # Mode
                         family,
-                        '',  # Parent BOM
+                        code,
                         '',  # Product
                     ]
                     record.extend([(d or '') for d in total])

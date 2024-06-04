@@ -68,6 +68,8 @@ class MrpProduction(orm.Model):
         _logger.warning('Excel: %s' % excel_filename)
         header = [
             'Riga', 'Famiglia', 'DB padre', 'Prodotto',
+            '09', '10', '11', '12', '01', '02', '03', '04', '05', '06',
+            '07', '08',
             ]
         header_period = {
             '09': 0, '10': 1, '11': 2, '12': 3,
@@ -187,8 +189,8 @@ class MrpProduction(orm.Model):
             row = 0
             excel_pool.write_xls_line(color, row, header)
 
-            total = empty[:]
             for family in sorted(master_data[color]):
+                total = empty[:]
                 for parent_bom in sorted(
                         master_data[color][family],
                         key=lambda p: (p.code or '')):

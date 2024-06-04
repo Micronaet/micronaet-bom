@@ -259,9 +259,11 @@ class MrpProduction(orm.Model):
         #                            XLS Log file:
         # ---------------------------------------------------------------------
         now = datetime.now()
-        excel_filename = '/home/administrator/photo/log/oven/log_%s.xlsx' % (
-            str(now).replace('/', '_').replace(':', '.'),
-            )
+        excel_filename = \
+            '/home/administrator/photo/log/oven/log/' \
+            'oven_%s.xlsx' % (
+                str(now).replace('/', '_').replace(':', '.'),
+                )
 
         _logger.warning('Excel: %s' % excel_filename)
         header = [
@@ -291,7 +293,7 @@ class MrpProduction(orm.Model):
         row = 0
         excel_pool.write_xls_line(ws_name, row, header)
 
-        for record in log_record:
+        for record in log_data:
             row += 1
             excel_pool.write_xls_line(ws_name, row, record)
         excel_pool.save_file_as(excel_filename)

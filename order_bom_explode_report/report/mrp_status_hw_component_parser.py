@@ -48,6 +48,7 @@ class Parser(report_sxw.rml_parse):
     """ Pipe Tubi Telaio report
     """
     default_days = 30
+
     def __init__(self, cr, uid, name, context):
         super(Parser, self).__init__(cr, uid, name, context)
         self.localcontext.update({
@@ -118,9 +119,9 @@ class Parser(report_sxw.rml_parse):
                         # 'B' # B total
                         # 'Delivery') # BC
                         # Quantity for accounting:
-                        'Remain to MRP', # OC
-                        'Ready', # B net
-                        'Stock', # Stock
+                        'Remain to MRP',  # OC
+                        'Ready',  # B net
+                        'Stock',  # Stock
                         # Calculated data
                         'TODO',
                         # Check
@@ -236,7 +237,7 @@ class Parser(report_sxw.rml_parse):
 
         _logger.warning('Reference date for HW: %s' % reference_date)
 
-        # TODO manage day range
+        # todo manage day range
         if days:
             limit_date = '%s 23:59:59' % (
                 datetime.now() + timedelta(days=days)).strftime(
@@ -271,14 +272,14 @@ class Parser(report_sxw.rml_parse):
             order_ids.append(data['simulation_order_ids'])
 
         for order in sale_pool.browse(cr, uid, order_ids, context=context):
-            for line in order.order_line: # order line
+            for line in order.order_line:  # order line
                 # Reset log:
                 extra['code_check'] = extra['stock_check'] = ''
 
                 if line.mx_closed:
                     continue
 
-                product = line.product_id # readability
+                product = line.product_id  # readability
                 default_code = product.default_code
                 if not default_code:
                     extra['code_check'] = 'no product code'
@@ -319,7 +320,7 @@ class Parser(report_sxw.rml_parse):
                 # Stock check (use stock qty only once!):
                 # ---------------------------------------
                 if default_code not in stock_used:
-                    extra['stock_check'] += 'used' # XXX +=?
+                    extra['stock_check'] += 'used'  # XXX +=?
                     stock_used.append(default_code)
                     stock_net = product.mx_net_qty
                     # Check negative stock for highlight:
@@ -330,7 +331,7 @@ class Parser(report_sxw.rml_parse):
                     parent_todo[parent][1] += stock_net
                 else:
                     extra['stock_check'] += 'not used'  # XXX +=?
-                    stock_net = 0.0 # no used
+                    stock_net = 0.0  # no used
 
                 # ---------------
                 # Check negative:
@@ -338,15 +339,15 @@ class Parser(report_sxw.rml_parse):
                 # Use utility function:
                 (oc_remain, not_delivered) = \
                     company_pool.mrp_order_line_to_produce_assigned(line)
-                    # company_pool.mrp_order_line_to_produce(line)
+                # company_pool.mrp_order_line_to_produce(line)
                 parent_todo[parent][2] += oc_remain
-                # TODO oc_remain must be checked with stock_net here!!!!!!!!!!
+                # todo oc_remain must be checked with stock_net here!!!!!!!!!!!
                 parent_todo[parent][5] += not_delivered
 
                 # -------------------------------------------------------------
                 # Populate halfwork database:
                 # -------------------------------------------------------------
-                todo = oc_remain # XXX - stock_net + not_delivered
+                todo = oc_remain  # XXX - stock_net + not_delivered
 
                 # Log line operation:
                 log_line(self, [
@@ -384,7 +385,7 @@ class Parser(report_sxw.rml_parse):
                     if halfwork not in hws:  # halfwork browse obj
                         hws[halfwork] = [
                             0.0,  # 0. Needed
-                            halfwork.mx_net_qty,  # 1. Net (after - MRP) # TODO remove MRP ?
+                            halfwork.mx_net_qty,  # 1. Net (after - MRP) # todo remove MRP ?
                             {},  # 2. # compt (HW could be diff. depend on BOM)
                             # XXX No OF
                             ]
@@ -412,7 +413,7 @@ class Parser(report_sxw.rml_parse):
             for sol in mrp.order_line_ids:
                 product = sol.product_id
                 qty_maked = sol.product_uom_maked_sync_qty
-                # TODO better use dynamic_bom_line_ids ?
+                # todo better use dynamic_bom_line_ids ?
                 # check existence
                 # Log product extract as MRP
                 log_line(self, (
@@ -429,13 +430,13 @@ class Parser(report_sxw.rml_parse):
 
                     hw_q = qty_maked * hw.product_qty
                     hws[halfwork][1] -= hw_q  # - MRP # TODO check same problem
-                    # TODO check if is bouble - MRP!!!
+                    # TODO check if is double - MRP!!!
 
         # TODO generate here component database for pipes (from hws):
         check_used = []
         for halfwork, record in hws.iteritems():
-            real_needed = record[0] - record[1] # proposed net (- stock)
-            if real_needed < 0: # if negative HW, no Pipe requests
+            real_needed = record[0] - record[1]  # proposed net (- stock)
+            if real_needed < 0:  # if negative HW, no Pipe requests
                 needed = 0
             else:
                 needed = real_needed
@@ -471,10 +472,10 @@ class Parser(report_sxw.rml_parse):
         empty_B = ['' for n in range(0, 6)]  # halfwork 6
         empty_C = ['' for n in range(0, 10)]  # component 9
 
-        # TODO remove use cmpt_present instead:
-        hw_present = [] # for highlight only first total in report (for orders)
+        # todo remove use cmpt_present instead:
+        hw_present = []  # for highlight only first total in report, for orders
 
-        cmpt_present = [] # for remove double orders
+        cmpt_present = []  # for remove double orders
 
         # ---------------------------------------------------------------------
         # List of all pipes present
@@ -502,7 +503,7 @@ class Parser(report_sxw.rml_parse):
                 int(record[2]),  # XXX ex.: - record[1] + record[5], # 4. todo
                 record[3],  # 5. tot. negative stock (for green-red light)
                 record[4],  # 6. tot. no bom (for green-red light)
-                # TODO
+                # todo
                 ]
 
             if not record[0]: # parent bom present:
@@ -517,7 +518,7 @@ class Parser(report_sxw.rml_parse):
                     key=lambda x: x.product_id.default_code,
                     ):
                 if not hw.product_id in hws: # hw in the list selection
-                    continue # not in selected list create before
+                    continue  # not in selected list create before
 
                 if parent_first:
                     parent_first = False
@@ -537,7 +538,7 @@ class Parser(report_sxw.rml_parse):
                 if proposed_hw < 0:
                     proposed_hw = 0
                 data_B = [
-                    hw_data[2].get((parent, halfwork), '?'), # total
+                    hw_data[2].get((parent, halfwork), '?'),  # total
                     halfwork.default_code,  # hw code
                     int(round(hw_data[0])),  # Todo halfwork
                     int(round(hw_data[1])),  # Stock
@@ -600,7 +601,7 @@ class Parser(report_sxw.rml_parse):
                         real_proposed if real_proposed != proposed else '',
                         ])
 
-                if hw_first: # no cmpt data (not in loop)
+                if hw_first:  # no cmpt data (not in loop)
                     res.append(data_A + data_B + empty_C)
         _logger.warning('Total pipes: %s' % len(self.pipe_ids))
 

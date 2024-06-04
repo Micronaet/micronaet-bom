@@ -124,24 +124,14 @@ class SaleOrderLine(orm.Model):
         """ Unplug line from job
         """
         line = self.browse(cr, uid, ids, context=context)[0]
-        """if not line.working_qty or \
-            line.working_qty == line.product_uom_maked_sync_qty:"""
-        # Unplug
+
+        # Unplug from job
         return self.write(cr, uid, ids, {
             'working_line_id': False,
             'working_qty': 0.0,
             'working_ready': False,
         }, context=context)
-        """
-        else:
-            # Not unpluggable (TODO needed?)
-            raise osv.except_osv(
-                _('Errore'),
-                _('Riga non scollegabile ha caricato il magazzino, '
-                  'Se è stato fatto per sbaglio ripristinare il corretto'
-                  'carico di produzione come quello iniziale!'),
-                )
-        """
+
     def working_qty_is_done(self, cr, uid, ids, context=None):
         """ Set as done this line for the job
         """
@@ -150,7 +140,8 @@ class SaleOrderLine(orm.Model):
             'working_qty': 0,
             'sync_state': 'sync',
             'product_uom_maked_sync_qty':
-                current_proxy.product_uom_maked_sync_qty + current_proxy.working_qty,
+                current_proxy.product_uom_maked_sync_qty +
+                current_proxy.working_qty,
             }, context=context)
 
     def working_mpr_is_ready(self, cr, uid, ids, context=None):
@@ -171,8 +162,9 @@ class SaleOrderLine(orm.Model):
             'mrp.production.stats', 'Working on'),
         'working_sequence': fields.integer('Working seq.'),
         'working_qty': fields.integer('Working q.'),
-        'working_done': fields.boolean('Done'),  # TODO remove > test working_qty
-        'working_ready': fields.boolean('Ready for input',
+        'working_done': fields.boolean('Done'),  # todo remove > test working_qty
+        'working_ready': fields.boolean(
+            'Ready for input',
             help='Line component are ready in line position'),
         }
 
@@ -1058,7 +1050,8 @@ class MrpProductionStat(orm.Model):
                         </table>''') % (
                             image_base64,
                             _('<p class="fg_red">ETICHETTA PERSONALIZZATA</p>')
-                            if line.partner_id.has_custom_label else _('<p>ETICHETTA MAGAZZINO</p>'),
+                            if line.partner_id.has_custom_label else _(
+                                '<p>ETICHETTA MAGAZZINO</p>'),
                             note_text,
                             )
 
@@ -1113,7 +1106,7 @@ class MrpProductionStat(orm.Model):
     # Button event:
     # -------------------------------------------------------------------------
     def generate_material_planned_bom(self, cr, uid, ids, context=None):
-        """ Generate material list for working product in lavoration
+        """ Generate material list for working product in job
         """
         material_pool = self.pool.get('mrp.production.stats.material')
 
@@ -1124,14 +1117,16 @@ class MrpProductionStat(orm.Model):
         material_pool.unlink(cr, uid, material_ids, context=context)
 
         for line in stats_proxy.working_ids:
+            working_qty = line.working_qty
+
             for material in line.product_id.dynamic_bom_line_ids:
                 product = material.product_id
                 if not material.category_id.show_ready:
                     continue  # jump category not in show ready status
 
-                product_qty = material.product_qty * line.working_qty
+                product_qty = material.product_qty * working_qty
                 if not product_qty:
-                    continue # no q. no line
+                    continue  # no q. no line
                 material_pool.create(cr, uid, {
                     'stats_id': ids[0],
                     'sol_id': line.id,

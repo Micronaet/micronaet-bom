@@ -229,17 +229,16 @@ class MrpProduction(orm.Model):
             row = 0
             for key in sorted(master_data[color]):
                 family, parent_bom = key
-                code = parent_bom.code
+                code = parent_bom.code or 'NO CODE'
+
                 total = empty[:]
                 for product in sorted(
-                        master_data[color][family][parent_bom],
+                        master_data[color][key],
                         key=lambda p: (p.default_code or '')):
 
                     # Month total columns:
-                    for deadline_ref in master_data[color][
-                            family][parent_bom][product]:
-                        data = master_data[color][family][
-                            parent_bom][product][deadline_ref]
+                    for deadline_ref in master_data[color][key][product]:
+                        data = master_data[color][key][product][deadline_ref]
                         oc = data['OC']
                         todo = oc - max(
                             data['B'] + data['LOCK'], data['D'])

@@ -168,6 +168,7 @@ class MrpProduction(orm.Model):
             data['LOCK'] += product.mx_assigned_qty
             data['D'] += product.delivered_qty
 
+            # todo manage better line of order closed:
             if line_closed or order_closed:
                 data['OC'] += product.product_uom_qty
             else:

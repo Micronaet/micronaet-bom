@@ -131,7 +131,8 @@ class MrpProduction(orm.Model):
             color = default_code[7:9]
 
             # todo Write log record here!
-            if not parent_bom or not deadline or not default_code or not color:
+            # or not deadline
+            if not parent_bom or not default_code or not color:
                 # Line not used
                 continue
 
@@ -174,11 +175,15 @@ class MrpProduction(orm.Model):
                 data['OC'] += line.product_uom_qty
 
         for color in master_data:   # Color loop
+            # -----------------------------------------------------------------
+            # New page in Excel:
+            # -----------------------------------------------------------------
+            # WS setup:
             ws_name = color
             excel_pool.create_worksheet(name=ws_name)
             excel_pool.column_width(ws_name, width)
 
-            # Header
+            # Header:
             row = 0
             excel_pool.write_xls_line(color, row, header)
 
@@ -211,7 +216,7 @@ class MrpProduction(orm.Model):
 
                 row += 1
                 excel_pool.write_xls_line(ws_name, row, record)
-            excel_pool.save_file_as(excel_filename)
+        excel_pool.save_file_as(excel_filename)
 
         '''return excel_pool.return_attachment(
             cr, uid, 'Stampa forno',

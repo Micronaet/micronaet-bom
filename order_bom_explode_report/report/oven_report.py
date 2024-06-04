@@ -145,6 +145,7 @@ class MrpProduction(orm.Model):
                 parent_bom.code or '',
                 default_code,
                 order.name,
+                deadline_ref,
 
                 # Only for used:
                 '',  # OC
@@ -161,13 +162,13 @@ class MrpProduction(orm.Model):
             code3 = default_code[:3]
             excluded_code
             if code2 in excluded_code[2] or code3 in excluded_code[3]:
-                log_record[11] = 'Codice escluso'
+                log_record[12] = 'Codice escluso'
                 continue
 
             # or not deadline (filtered as presen!)
             if not parent_bom or not default_code or not color:
                 # Line not used
-                log_record[11] = 'Riga non di MRP (colore, BOM, codice)'
+                log_record[12] = 'Riga non di MRP (colore, BOM, codice)'
                 continue
 
             order_closed = order.mx_closed
@@ -209,15 +210,16 @@ class MrpProduction(orm.Model):
             # todo manage better line of order closed:
             if line_closed or order_closed:
                 data['OC'] += del_qty  # Keep delivered as OC for reset
-                log_record[9] = 'X'  # Closed manually
+                log_record[10] = 'X'  # Closed manually
+                log_record[11] = ''  # Not used in total
             else:
                 data['OC'] += oc_qty
 
-            log_record[5] = oc_qty
-            log_record[6] = b_qty
-            log_record[7] = lock_qty
-            log_record[8] = del_qty
-            log_record[10] = 'X'
+            log_record[6] = oc_qty
+            log_record[7] = b_qty
+            log_record[8] = lock_qty
+            log_record[9] = del_qty
+            log_record[11] = 'X'
             log_data.append(log_record)
 
         # ---------------------------------------------------------------------
@@ -225,6 +227,7 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         for color in master_data:   # Color loop
             ws_name = False  # Create after (if needed)
+            row = 0
             for family in sorted(master_data[color]):
                 total = empty[:]
                 for parent_bom in sorted(
@@ -264,8 +267,7 @@ class MrpProduction(orm.Model):
                         ws_name = color
                         excel_pool.create_worksheet(name=ws_name)
                         excel_pool.column_width(ws_name, width)
-                        # Header:
-                        row = 0
+                        # Header (row 0):
                         excel_pool.write_xls_line(color, row, header)
 
                     row += 1

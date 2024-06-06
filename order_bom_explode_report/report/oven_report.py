@@ -152,24 +152,25 @@ class MrpProduction(orm.Model):
                 '',  # 7. B
                 '',  # 8. L
                 '',  # 9. Del
+                '',  # 10. todo
 
-                '',  # 10. Closed manually
-                '',  # 11. Used
-                '',  # 12. Comment
+                '',  # 11. Closed manually
+                '',  # 12. Used
+                '',  # 13. Comment
                 ]
 
             # Excluded code:
             code2 = default_code[:2]
             code3 = default_code[:3]
             if code2 in excluded_code[2] or code3 in excluded_code[3]:
-                log_record[12] = 'Codice escluso'
+                log_record[13] = 'Codice escluso'
                 continue
 
             # Data not present:
             # or not deadline (filtered as presen!)
             if not parent_bom or not default_code or not color:
                 # Line not used
-                log_record[12] = 'Riga non di MRP (colore, BOM, codice)'
+                log_record[13] = 'Riga non di MRP (colore, BOM, codice)'
                 continue
 
             order_closed = order.mx_closed
@@ -200,25 +201,29 @@ class MrpProduction(orm.Model):
             lock_qty = line.mx_assigned_qty
             del_qty = line.delivered_qty
             oc_qty = line.product_uom_qty
+            todo_qty = oc_qty - max(lock_qty + lock_qty, del_qty)
 
             data['B'] += b_qty
             data['LOCK'] += lock_qty
             data['D'] += del_qty
-
-            # todo manage better line of order closed:
-            # if line_closed or order_closed:
-            # data['OC'] += del_qty  # Keep delivered as OC for reset
-            log_record[10] = 'X'  # Closed manually
-            log_record[11] = ''  # Not used in total
-            log_record[12] = 'Riga chiusa'  # Not used in total
-            # else:
             data['OC'] += oc_qty
+            data['TODO'] = todo_qty
 
+            # Update log record:
             log_record[6] = oc_qty
             log_record[7] = b_qty
             log_record[8] = lock_qty
             log_record[9] = del_qty
-            log_record[11] = 'X'
+
+            if line_closed or order_closed:
+                log_record[11] = 'X'  # Closed manually
+                log_record[12] = 'X'  # Not used in total
+                log_record[13] = 'Riga chiusa'  # Not used in total
+                todo_qty = 0  # Removed TODO q!
+            else:
+                log_record[12] = ''  # Used in total
+            log_record[10] = todo_qty
+            # todo possible free q. if B > delivered!
             log_data.append(log_record)
 
         # ---------------------------------------------------------------------
@@ -239,10 +244,10 @@ class MrpProduction(orm.Model):
                     # Month total columns:
                     for deadline_ref in master_data[color][key][product]:
                         data = master_data[color][key][product][deadline_ref]
-                        oc = data['OC']
-                        todo = oc - max(
-                            data['B'] + data['LOCK'], data['D'])
-                        total[deadline_ref] += todo  # remain to produce
+                        # oc = data['OC']
+                        # todo = oc - max(
+                        #    data['B'] + data['LOCK'], data['D'])
+                        total[deadline_ref] += data['TODO']
 
                 # -------------------------------------------------------------
                 # Write line

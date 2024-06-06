@@ -226,7 +226,8 @@ class MrpProduction(orm.Model):
             log_record[9] = del_qty
 
             if line_closed or order_closed:
-                log_record[11] = 'X'  # Closed manually
+                if oc_qty != del_qty:
+                    log_record[11] = 'X'  # Forced closed manually
                 log_record[12] = ''  # Used in total
                 log_record[13] = 'Riga chiusa'  # Not used in total
                 todo_qty = 0  # Removed TODO q!
@@ -286,6 +287,9 @@ class MrpProduction(orm.Model):
                         excel_pool.column_width(ws_name, width)
                         # Header (row 0):
                         excel_pool.write_xls_line(color, row, header)
+                        excel_pool.autofilter(
+                            ws_name, row, 0, row, len(header) - 1)
+                        excel_pool.freeze_panes(ws_name, 1, 4)
 
                     row += 1
                     excel_pool.write_xls_line(ws_name, row, record)
@@ -320,7 +324,7 @@ class MrpProduction(orm.Model):
             'Cons.',  # Del
             'Da fare',  # TODO
 
-            'Chiuso',  # Closed manually
+            'Forzato',  # Closed manually
             'Usato',  # used
             'Commento',
             ]
@@ -336,6 +340,9 @@ class MrpProduction(orm.Model):
 
         row = 0
         excel_pool.write_xls_line(ws_name, row, header)
+        excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
+        excel_pool.freeze_panes(ws_name, 1, 4)
+
 
         for record in log_data:
             row += 1

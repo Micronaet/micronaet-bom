@@ -196,7 +196,7 @@ class MrpProduction(orm.Model):
                         'B': 0.0,  # MRP
                         'LOCK': 0.0,  # Locked
                         'D': 0.0,  # Delivered
-                        # 'REMAIN': 0.0,  # Remain TODO
+                        'TODO': 0.0,  # TODO
                     }
             data = master_data[color][key][product][deadline_ref]
 

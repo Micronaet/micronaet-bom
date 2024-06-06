@@ -307,15 +307,16 @@ class MrpProduction(orm.Model):
             'Blocc.',  # B
             'Ass.',  # L
             'Cons.',  # Del
+            'Da fare',  # TODO
+
             'Chiuso',  # Closed manually
             'Usato',  # Not used
             'Commento',
             ]
         width = [
             10, 15, 12, 12, 15, 5,
-            6, 6, 6, 6,
-            6, 6,
-            40,
+            6, 6, 6, 6, 6,
+            6, 6, 40,
             ]
 
         ws_name = 'Log'

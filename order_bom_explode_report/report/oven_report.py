@@ -104,12 +104,15 @@ class MrpProduction(orm.Model):
             ('date_deadline', '>=', period_from),
             ('date_deadline', '<=', period_to),
 
+            # todo filter removing closed for speed up calc?
+            # now it's only for log purposes
+            # ('order_id.mx_closed', '=', False),  # order open
+            # ('mx_closed', '=', False),  # line open
+
             # ('order_id.pricelist_order', '=', False),
             # remove no parcels product:
             # ('product_id.exclude_parcels', '=', False),
 
-            # ('order_id.mx_closed', '=', False),  # order open
-            # ('mx_closed', '=', False),  # line open
 
             # ('order_id.forecasted_production_id', '!=', False),
             # ('order_id.forecasted_production_id.state', 'not in',

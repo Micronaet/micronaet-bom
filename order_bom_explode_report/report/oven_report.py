@@ -152,13 +152,13 @@ class MrpProduction(orm.Model):
 
                 # Only for used:
                 '',  # 6. OC
-                '',  # 7. B
-                '',  # 8. L
-                '',  # 9. Del
-                '',  # 10. todo
+                '',  # 7. MRP
+                '',  # 8. Locked
+                '',  # 9. Delivered
+                '',  # 10. TODO
 
-                '',  # 11. Closed manually
-                '',  # 12. Used
+                '',  # 11. Forced closed manually
+                '',  # 12. Used in report
                 '',  # 13. Comment
                 ]
 
@@ -207,7 +207,7 @@ class MrpProduction(orm.Model):
             lock_qty = line.mx_assigned_qty
             del_qty = line.delivered_qty
             oc_qty = line.product_uom_qty
-            todo_qty = oc_qty - max(lock_qty + lock_qty, del_qty)
+            todo_qty = oc_qty - max(b_qty + lock_qty, del_qty)
 
             # -----------------------------------------------------------------
             # Update total for this key:

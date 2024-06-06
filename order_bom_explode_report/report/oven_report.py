@@ -200,19 +200,26 @@ class MrpProduction(orm.Model):
                     }
             data = master_data[color][key][product][deadline_ref]
 
+            # -----------------------------------------------------------------
+            # Read data from line:
+            # -----------------------------------------------------------------
             b_qty = line.product_uom_maked_sync_qty
             lock_qty = line.mx_assigned_qty
             del_qty = line.delivered_qty
             oc_qty = line.product_uom_qty
             todo_qty = oc_qty - max(lock_qty + lock_qty, del_qty)
 
+            # -----------------------------------------------------------------
+            # Update total for this key:
+            # -----------------------------------------------------------------
             data['B'] += b_qty
             data['LOCK'] += lock_qty
             data['D'] += del_qty
             data['OC'] += oc_qty
-            data['TODO'] = todo_qty
 
+            # -----------------------------------------------------------------
             # Update log record:
+            # -----------------------------------------------------------------
             log_record[6] = oc_qty
             log_record[7] = b_qty
             log_record[8] = lock_qty
@@ -220,12 +227,16 @@ class MrpProduction(orm.Model):
 
             if line_closed or order_closed:
                 log_record[11] = 'X'  # Closed manually
-                log_record[12] = 'X'  # Not used in total
+                log_record[12] = ''  # Used in total
                 log_record[13] = 'Riga chiusa'  # Not used in total
                 todo_qty = 0  # Removed TODO q!
             else:
-                log_record[12] = ''  # Used in total
+                log_record[12] = 'X'  # Used in total
+
+            # TODO qty updated here:
             log_record[10] = todo_qty
+            data['TODO'] += todo_qty
+
             # todo possible free q. if B > delivered!
             log_data.append(log_record)
 
@@ -310,7 +321,7 @@ class MrpProduction(orm.Model):
             'Da fare',  # TODO
 
             'Chiuso',  # Closed manually
-            'Usato',  # Not used
+            'Usato',  # used
             'Commento',
             ]
         width = [

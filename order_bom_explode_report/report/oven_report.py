@@ -206,13 +206,13 @@ class MrpProduction(orm.Model):
             data['D'] += del_qty
 
             # todo manage better line of order closed:
-            if line_closed or order_closed:
-                data['OC'] += del_qty  # Keep delivered as OC for reset
-                log_record[10] = 'X'  # Closed manually
-                log_record[11] = ''  # Not used in total
-                log_record[12] = 'Riga chiusa'  # Not used in total
-            else:
-                data['OC'] += oc_qty
+            # if line_closed or order_closed:
+            data['OC'] += del_qty  # Keep delivered as OC for reset
+            log_record[10] = 'X'  # Closed manually
+            log_record[11] = ''  # Not used in total
+            log_record[12] = 'Riga chiusa'  # Not used in total
+            # else:
+            #    data['OC'] += oc_qty
 
             log_record[6] = oc_qty
             log_record[7] = b_qty

@@ -406,13 +406,13 @@ class MrpProduction(orm.Model):
         # =====================================================================
         # Create Job:  todo remove after!
         # =====================================================================
-        pdb.set_trace()
         ctx = context.copy()
         for created_at in oven_data:
             # New document every change data:
             ctx['force_data'] = {
                 'created_at': created_at
                 }
+            _logger.info('Create Job for data: %s' % created_at)
             for color in oven_data[created_at]:
                 for parent_bom in  oven_data[created_at][color]:
                     b_qty = oven_data[created_at][color][parent_bom]
@@ -424,7 +424,7 @@ class MrpProduction(orm.Model):
 
             # Generate Job with passed reference:
             job_pool.generate_oven_job_all(cr, uid, [], context=ctx)
-            break  # Just for test
+            break  # todo Just for test
         # =====================================================================
         return True
 

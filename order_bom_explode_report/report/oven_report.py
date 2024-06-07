@@ -116,7 +116,7 @@ class MrpProduction(orm.Model):
 
         _logger.warning('Excel: %s' % excel_filename)
         header = [
-            'Riga', 'Famiglia', 'DB padre', 'Prodotto',
+            'BOM ID', 'Famiglia', 'DB padre', 'Fatti', 'Pend.',
             '09', '10', '11', '12', '01', '02', '03', '04', '05', '06',
             '07', '08',
             ]
@@ -127,7 +127,7 @@ class MrpProduction(orm.Model):
             }
         fixed_col = len(header)
         empty = [0.0 for i in range(len(header_period))]
-        width = [5, 15, 10, 15]
+        width = [5, 15, 10, 5, 5]
         width.extend([5 for i in range(len(header_period))])
 
         # Search open order:
@@ -335,6 +335,7 @@ class MrpProduction(orm.Model):
             row = 0
             for key in sorted(master_data[color]):
                 family, parent_bom = key
+                parent_bom_id = parent_bom.id
                 code = parent_bom.code or 'NO CODE'
 
                 total = empty[:]
@@ -355,11 +356,14 @@ class MrpProduction(orm.Model):
                 # -------------------------------------------------------------
                 if any(total):  # Only if data is present!
                     # Write Family line:
+                    stock_key = color, parent_bom_id
+                    stock_total = oven_data.get(stock_key, (0.0, 0.0))
                     record = [
-                        '',  # Mode
+                        parent_bom.id,
                         family,
                         code,
-                        '',  # Product
+                        stock_total[0] - stock_total[1],  # Oven completed
+                        stock_total[1],  # Oven pending
                     ]
                     record.extend([(d or '') for d in total])
 
@@ -375,8 +379,8 @@ class MrpProduction(orm.Model):
                         excel_pool.write_xls_line(color, row, header)
                         excel_pool.autofilter(
                             ws_name, row, 0, row, len(header) - 1)
-                        excel_pool.freeze_panes(ws_name, 1, 4)
-
+                        excel_pool.freeze_panes(ws_name, 1, 5)
+                        excel_pool.column_hidden(ws_name, [0])
                     row += 1
                     excel_pool.write_xls_line(ws_name, row, record)
         excel_pool.save_file_as(excel_filename)

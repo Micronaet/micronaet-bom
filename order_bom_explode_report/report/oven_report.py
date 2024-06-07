@@ -260,7 +260,9 @@ class MrpProduction(orm.Model):
 
             # need_qty = oc_qty - max(b_qty + lock_qty, del_qty)
             # Need is order - delivered or order - assigned (max of this):
-            need_qty = oc_qty - max(lock_qty, del_qty)
+            # Remove case delivered > OC
+            need_qty = max(
+                0, oc_qty - max(lock_qty, del_qty))
 
             # -----------------------------------------------------------------
             # Check oven total for cover this line:
@@ -270,10 +272,7 @@ class MrpProduction(orm.Model):
                 stock_key, (0.0, 0.0))[0]  # Available for cover OC qty
             if stock_qty > need_qty:  # Over available
                 todo_qty = 0.0  # No need
-                try:
-                    preload_stock[stock_key][0] -= need_qty  # Remove used qty
-                except:
-                    pdb.set_trace()
+                preload_stock[stock_key][0] -= need_qty  # Remove used qty
             elif stock_qty > 0.0:  # Partially covered (stock present):
                 todo_qty = need_qty - stock_qty  # Use remain
                 preload_stock[stock_key][0] = 0  # Remove used qty

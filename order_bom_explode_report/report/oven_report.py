@@ -162,6 +162,10 @@ class MrpProduction(orm.Model):
                 '',  # 13. Comment
                 ]
 
+            if not color.strip():
+                log_record[13] = 'Senza colore (grezzo)'
+                continue
+
             # Excluded code:
             code2 = default_code[:2]
             code3 = default_code[:3]

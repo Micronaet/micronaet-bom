@@ -57,6 +57,13 @@ class MrpProduction(orm.Model):
         line_pool = self.pool.get('sale.order.line')
         excel_pool = self.pool.get('excel.writer')
 
+        # =====================================================================
+        # todo Oven preload (remove after!)
+        job_pool = self.pool.get('industria.job')
+        oven_pool = self.pool.get('mrp.production.oven.selected')
+        oven_data = {}
+        # =====================================================================
+
         excluded_code = {
             2: ('TL', 'TS', 'MT', 'MS', 'PO'),
             3: ('CUS', ),
@@ -213,6 +220,23 @@ class MrpProduction(orm.Model):
             oc_qty = line.product_uom_qty
             todo_qty = oc_qty - max(b_qty + lock_qty, del_qty)
 
+            # =================================================================
+            # todo oven part (to remove!)
+            # =================================================================
+            # Oven Job date (first of month if not present):
+            created_at = '%s-01' % (deadline or '2023-09-01')[:7]
+            if created_at not in oven_data:
+                oven_data[created_at] = {}
+
+            if color not in oven_data[created_at]:
+                oven_data[created_at][color] = {}
+
+            if parent_bom not in oven_data[created_at][color]:
+                oven_data[created_at][color][parent_bom] = 0
+
+            oven_data[created_at][color][parent_bom] += b_qty
+            # =================================================================
+
             # -----------------------------------------------------------------
             # Update total for this key:
             # -----------------------------------------------------------------
@@ -347,11 +371,34 @@ class MrpProduction(orm.Model):
         excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
         excel_pool.freeze_panes(ws_name, 1, 4)
 
-
         for record in log_data:
             row += 1
             excel_pool.write_xls_line(ws_name, row, record)
         excel_pool.save_file_as(excel_filename)
+
+        # =====================================================================
+        # Create Job:  todo remove after!
+        # =====================================================================
+        pdb.set_trace()
+        ctx = context.copy()
+        for created_at in oven_data:
+            # New document every change data:
+            ctx['force_data'] = {
+                'created_at': created_at
+                }
+            for color in oven_data[created_at]:
+                for parent_bom in  oven_data[created_at][color]:
+                    b_qty = oven_data[created_at][color][parent_bom]
+                    oven_pool.create(cr, uid, {
+                        'total': b_qty,
+                        'bom_id': parent_bom.id,
+                        'color_code': color,
+                    }, context=context)
+
+            # Generate Job with passed reference:
+            job_pool.generate_oven_job_all(cr, uid, [], context=ctx)
+            break  # Just for test
+        # =====================================================================
         return True
 
 

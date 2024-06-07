@@ -60,7 +60,7 @@ class MrpProduction(orm.Model):
 
         excluded_code = {
             2: ('TL', 'TS', 'MT', 'MS', 'PO'),
-            3: ('CUS', ),
+            3: ('CUS', 'SET', 'CIN', '649', '650'),
         }
 
         # Period range for documents
@@ -205,17 +205,17 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             # Remove unneeded data:
             # -----------------------------------------------------------------
-            # 1. No color:
-            if not color.strip():
-                log_record[13] = 'Senza colore (grezzo)'
-                log_data.append(log_record)
-                continue
-
-            # 2. Excluded code:
+            # 1. Excluded code:
             code2 = default_code[:2]
             code3 = default_code[:3]
             if code2 in excluded_code[2] or code3 in excluded_code[3]:
                 log_record[13] = 'Codice escluso'
+                log_data.append(log_record)
+                continue
+
+            # 2. No color:
+            if not color.strip():
+                log_record[13] = 'Senza colore (no forno)'
                 log_data.append(log_record)
                 continue
 

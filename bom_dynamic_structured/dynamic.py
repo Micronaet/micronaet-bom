@@ -278,6 +278,7 @@ class ProductProduct(orm.Model):
             string='Dynamic BOM line', readonly=True, store=False),
         }
 
+
 class MRPBomLine(orm.Model):
     """ Model name: MRP Bom line
     """
@@ -292,8 +293,8 @@ class MRPBomLine(orm.Model):
 
         line_proxy = self.browse(cr, uid, ids, context=context)[0]
         bom_id = line_proxy.product_id.half_bom_id.id
-        #model_pool = self.pool.get('ir.model.data')
-        #view_id = model_pool.get_object_reference('module_name', 'view_name')[1]
+        # model_pool = self.pool.get('ir.model.data')
+        # view_id = model_pool.get_object_reference('module_name', 'view_name')[1]
 
         return {
             'type': 'ir.actions.act_window',
@@ -364,7 +365,7 @@ class MRPBomLine(orm.Model):
     def product_use_this_mask(self, cr, uid, ids, context=None):
         """ Check product that work with this rule
         """
-        #XXX  Used also for all product search (not only button event!)
+        # XXX  Used also for all product search (not only button event!)
         where = ''
         for line_proxy in self.browse(cr, uid, ids, context=context):
             if not line_proxy.dynamic_mask:
@@ -393,11 +394,13 @@ class MRPBomLine(orm.Model):
                 )
 
         model_pool = self.pool.get('ir.model.data')
-        form_view_id = model_pool.get_object_reference(cr, uid,
+        form_view_id = model_pool.get_object_reference(
+            cr, uid,
             'bom_dynamic_structured',
             'view_product_product_dynamic_bom_form',
             )[1]
-        tree_view_id = model_pool.get_object_reference(cr, uid,
+        tree_view_id = model_pool.get_object_reference(
+            cr, uid,
             'bom_dynamic_structured',
             'view_product_product_dynamic_bom_tree',
             )[1]

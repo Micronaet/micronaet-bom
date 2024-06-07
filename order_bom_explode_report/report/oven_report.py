@@ -84,28 +84,28 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         # Preload Oven Jobs (cover order need!):
         # ---------------------------------------------------------------------
-        '''
         preload_ids = preload_pool.search(cr, uid, [
             ('job_id.created_at', '>=', '%s 00:00:00' % period_from),
             ('job_id.created_at', '<=', '%s 23:59:59' % period_to),
             ('job_id.state', '!=', 'ERROR'),
         ], context=context)
 
-        preload_data = {}
+        preload_stock = {}
+        _logger.info('Loading %s Job done' % len(preload_ids))
         for preload in preload_pool.browse(
                 cr, uid, preload_ids, context=context):
             key = preload.color_code, preload.bom_id.id
             state = preload.job_id.state
-            if key not in preload_data:
-                preload_data[key] = [
+            if key not in preload_stock:
+                preload_stock[key] = [
                     0.0,  # COMPLETED, DRAFT, RUNNING >> All!
                     0.0,  # Pending
                 ]
             total = preload.total
             if state != 'COMPLETED':  # Not done
-                preload_data[1] += total
-            preload_data[0] += total
-        '''
+                preload_stock[1] += total
+            preload_stock[0] += total
+
         # ---------------------------------------------------------------------
         # XLS Log file:
         # ---------------------------------------------------------------------
@@ -151,12 +151,14 @@ class MrpProduction(orm.Model):
             # ('order_id.forecasted_production_id', '!=', False),
             # ('order_id.forecasted_production_id.state', 'not in',
             # ('done', 'cancel')),
-            ], context=context)
+            ], order='date_deadline', context=context)
 
         master_data = {}
         log_data = []
         lines = len(line_ids)
         counter = 0
+
+        # Order by Deadline (if empty use last date?):
         for line in line_pool.browse(cr, uid, line_ids, context=context):
             counter += 1
             if not(counter % 50):
@@ -220,6 +222,7 @@ class MrpProduction(orm.Model):
             if color not in master_data:
                 master_data[color] = {}
 
+            # Key for record organization:
             key = (family, parent_bom)
             if key not in master_data[color]:
                 master_data[color][key] = {}
@@ -228,15 +231,17 @@ class MrpProduction(orm.Model):
                 master_data[color][key][product] = {}
             if deadline_ref not in master_data[color][
                     key][product]:
-                master_data[color][key][product][
-                    deadline_ref] = {
-                        'OC': 0.0,  # Order
-                        'B': 0.0,  # MRP
-                        'LOCK': 0.0,  # Locked
-                        'D': 0.0,  # Delivered
-                        'TODO': 0.0,  # TODO
+                master_data[color][key][product][deadline_ref] = {
+                    'OC': 0.0,  # Order
+                    'B': 0.0,  # MRP
+                    'LOCK': 0.0,  # Locked
+                    'D': 0.0,  # Delivered
+                    'TODO': 0.0,  # TODO
                     }
             data = master_data[color][key][product][deadline_ref]
+
+            # For assign oven q.!
+            stock_key = color, parent_bom.id
 
             # -----------------------------------------------------------------
             # Read data from line:
@@ -245,7 +250,20 @@ class MrpProduction(orm.Model):
             lock_qty = line.mx_assigned_qty
             del_qty = line.delivered_qty
             oc_qty = line.product_uom_qty
-            todo_qty = oc_qty - max(b_qty + lock_qty, del_qty)
+
+            # need_qty = oc_qty - max(b_qty + lock_qty, del_qty)
+            need_qty = oc_qty - max(lock_qty, del_qty)
+            stock_qty = preload_stock.get(
+                stock_key,
+                (0.0, 0.0))[0]  # Available for cover OC qty
+            if stock_qty >= need_qty:  # Over available
+                todo_qty = 0.0  # No need
+                preload_stock[key][0] -= need_qty  # Remove used qty
+            elif stock_qty > 0:  # Partially covered:
+                todo_qty = need_qty - stock_qty  # Use remain
+                preload_stock[key][0] = 0  # Remove used qty
+            else:
+                todo_qty = need_qty  # All
 
             # =================================================================
             # todo oven part (to remove!)
@@ -258,10 +276,11 @@ class MrpProduction(orm.Model):
             if color not in oven_data[created_at]:
                 oven_data[created_at][color] = {}
 
-            if parent_bom not in oven_data[created_at][color]:
-                oven_data[created_at][color][parent_bom] = 0
+            parent_bom_id = parent_bom.id
+            if parent_bom_id not in oven_data[created_at][color]:
+                oven_data[created_at][color][parent_bom_id] = 0
 
-            oven_data[created_at][color][parent_bom] += b_qty
+            oven_data[created_at][color][parent_bom_id] += b_qty
             # =================================================================
 
             # -----------------------------------------------------------------
@@ -406,6 +425,13 @@ class MrpProduction(orm.Model):
         # =====================================================================
         # Create Job:  todo remove after!
         # =====================================================================
+        import pickle
+        pickle.dump(
+            oven_data,
+            open('/home/administrator/photo/log/oven/log/oven.pickle', 'wb'),
+        )
+
+        '''    
         ctx = context.copy()
         for created_at in oven_data:
             # New document every change data:
@@ -414,17 +440,17 @@ class MrpProduction(orm.Model):
                 }
             _logger.info('Create Job for data: %s' % created_at)
             for color in oven_data[created_at]:
-                for parent_bom in oven_data[created_at][color]:
+                for parent_bom_id in oven_data[created_at][color]:
                     b_qty = oven_data[created_at][color][parent_bom]
                     oven_pool.create(cr, uid, {
                         'total': b_qty,
-                        'bom_id': parent_bom.id,
+                        'bom_id': parent_bom_id,
                         'color_code': color,
                     }, context=context)
 
             # Generate Job with passed reference:
-            job_pool.generate_oven_job_all(cr, uid, [], context=ctx)
-            break  # todo Just for test
+             job_pool.generate_oven_job_all(cr, uid, [], context=ctx)
+         '''
         # =====================================================================
         return True
 

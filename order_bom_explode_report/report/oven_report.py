@@ -56,6 +56,23 @@ class MrpProduction(orm.Model):
         # Pool used:
         line_pool = self.pool.get('sale.order.line')
         excel_pool = self.pool.get('excel.writer')
+        preload_pool = self.pool.get('mrp.production.oven.selected')
+
+        excluded_code = {
+            2: ('TL', 'TS', 'MT', 'MS', 'PO'),
+            3: ('CUS', ),
+        }
+
+        # Period range for documents
+        now = datetime.now()
+        month = now.month
+        year = now.year
+        if month >= 9:
+            period_from = '%s-09-01' % year
+            period_to = '%s-08-31' % (year + 1)
+        else:
+            period_from = '%s-09-01' % (year - 1)
+            period_to = '%s-08-31' % year
 
         # =====================================================================
         # todo Oven preload (remove after!)
@@ -64,10 +81,31 @@ class MrpProduction(orm.Model):
         oven_data = {}
         # =====================================================================
 
-        excluded_code = {
-            2: ('TL', 'TS', 'MT', 'MS', 'PO'),
-            3: ('CUS', ),
-        }
+        # ---------------------------------------------------------------------
+        # Preload Oven Jobs (cover order need!):
+        # ---------------------------------------------------------------------
+        '''
+        preload_ids = preload_pool.search(cr, uid, [
+            ('job_id.created_at', '>=', '%s 00:00:00' % period_from),
+            ('job_id.created_at', '<=', '%s 23:59:59' % period_to),
+            ('job_id.state', '!=', 'ERROR'),
+        ], context=context)
+
+        preload_data = {}
+        for preload in preload_pool.browse(
+                cr, uid, preload_ids, context=context):
+            key = preload.color_code, preload.bom_id.id
+            state = preload.job_id.state
+            if key not in preload_data:
+                preload_data[key] = [
+                    0.0,  # COMPLETED, DRAFT, RUNNING >> All!
+                    0.0,  # Pending
+                ]
+            total = preload.total
+            if state != 'COMPLETED':  # Not done
+                preload_data[1] += total
+            preload_data[0] += total
+        '''
         # ---------------------------------------------------------------------
         # XLS Log file:
         # ---------------------------------------------------------------------
@@ -91,17 +129,6 @@ class MrpProduction(orm.Model):
         empty = [0.0 for i in range(len(header_period))]
         width = [5, 15, 10, 15]
         width.extend([5 for i in range(len(header_period))])
-
-        # Period range for documents
-        now = datetime.now()
-        month = now.month
-        year = now.year
-        if month >= 9:
-            period_from = '%s-09-01' % year
-            period_to = '%s-08-31' % (year + 1)
-        else:
-            period_from = '%s-09-01' % (year - 1)
-            period_to = '%s-08-31' % year
 
         # Search open order:
         line_ids = line_pool.search(cr, uid, [

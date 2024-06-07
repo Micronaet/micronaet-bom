@@ -107,7 +107,7 @@ class MrpProduction(orm.Model):
             preload_stock[0] += total
 
         # ---------------------------------------------------------------------
-        # XLS Log file:
+        #                          XLS Data file:
         # ---------------------------------------------------------------------
         now = datetime.now()
         excel_filename = '/home/administrator/photo/log/oven/oven_%s.xlsx' % (
@@ -166,7 +166,9 @@ class MrpProduction(orm.Model):
                     counter, lines,
                 ))
 
+            # -----------------------------------------------------------------
             # Readability:
+            # -----------------------------------------------------------------
             order = line.order_id
             product = line.product_id
             parent_bom = product.parent_bom_id
@@ -176,6 +178,8 @@ class MrpProduction(orm.Model):
             default_code = product.default_code or ''
             color = default_code[6:8]
             family = product.family_id.name or 'NON PRESENTE'
+            order_closed = order.mx_closed
+            line_closed = line.mx_closed
 
             log_record = [
                 # Fixed:
@@ -198,37 +202,43 @@ class MrpProduction(orm.Model):
                 '',  # 13. Comment
                 ]
 
+            # -----------------------------------------------------------------
+            # Remove unneeded data:
+            # -----------------------------------------------------------------
+            # 1. No color:
             if not color.strip():
                 log_record[13] = 'Senza colore (grezzo)'
+                log_data.append(log_record)
                 continue
 
-            # Excluded code:
+            # 2. Excluded code:
             code2 = default_code[:2]
             code3 = default_code[:3]
             if code2 in excluded_code[2] or code3 in excluded_code[3]:
                 log_record[13] = 'Codice escluso'
+                log_data.append(log_record)
                 continue
 
-            # Data not present:
-            # or not deadline (filtered as presen!)
+            # 3. Mandatory data not present or not deadline filtered as present
             if not parent_bom or not default_code or not color:
                 # Line not used
                 log_record[13] = 'Riga non di MRP (colore, BOM, codice)'
+                log_data.append(log_record)
                 continue
 
-            order_closed = order.mx_closed
-            line_closed = line.mx_closed
-
+            # -----------------------------------------------------------------
+            #                          COLLECT DATA:
+            # -----------------------------------------------------------------
             if color not in master_data:
                 master_data[color] = {}
 
             # Key for record organization:
-            key = (family, parent_bom)
+            key = family, parent_bom
             if key not in master_data[color]:
                 master_data[color][key] = {}
 
             if product not in master_data[color][key]:
-                master_data[color][key][product] = {}
+                master_data[color][key][product] = {}  # todo remove product?
             if deadline_ref not in master_data[color][
                     key][product]:
                 master_data[color][key][product][deadline_ref] = {
@@ -240,23 +250,25 @@ class MrpProduction(orm.Model):
                     }
             data = master_data[color][key][product][deadline_ref]
 
-            # For assign oven q.!
-            stock_key = color, parent_bom.id
-
             # -----------------------------------------------------------------
             # Read data from line:
             # -----------------------------------------------------------------
+            oc_qty = line.product_uom_qty
             b_qty = line.product_uom_maked_sync_qty
             lock_qty = line.mx_assigned_qty
             del_qty = line.delivered_qty
-            oc_qty = line.product_uom_qty
 
             # need_qty = oc_qty - max(b_qty + lock_qty, del_qty)
+            # Need is order - delivered or order - assigned (max of this):
             need_qty = oc_qty - max(lock_qty, del_qty)
+
+            # -----------------------------------------------------------------
+            # Check oven total for cover this line:
+            # -----------------------------------------------------------------
+            stock_key = color, parent_bom.id
             stock_qty = preload_stock.get(
-                stock_key,
-                (0.0, 0.0))[0]  # Available for cover OC qty
-            if stock_qty >= need_qty:  # Over available
+                stock_key, (0.0, 0.0))[0]  # Available for cover OC qty
+            if stock_qty > need_qty:  # Over available
                 todo_qty = 0.0  # No need
                 preload_stock[key][0] -= need_qty  # Remove used qty
             elif stock_qty > 0:  # Partially covered:

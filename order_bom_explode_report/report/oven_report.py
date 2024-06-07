@@ -60,7 +60,7 @@ class MrpProduction(orm.Model):
 
         excluded_code = {
             2: ('TL', 'TS', 'MT', 'MS', 'PO'),
-            3: ('CUS', 'SET', 'CIN'),
+            3: ('CUS', 'SET', 'CIN', 'BRA'),
         }
 
         # Period range for documents

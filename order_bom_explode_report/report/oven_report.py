@@ -459,11 +459,12 @@ class MrpProduction(orm.Model):
             for color in oven_data[created_at]:
                 for parent_bom_id in oven_data[created_at][color]:
                     b_qty = oven_data[created_at][color][parent_bom_id]
-                    oven_pool.create(cr, uid, {
-                        'total': b_qty,
-                        'bom_id': parent_bom_id,
-                        'color_code': color,
-                    }, context=context)
+                    if b_qty > 0:
+                        oven_pool.create(cr, uid, {
+                            'total': b_qty,
+                            'bom_id': parent_bom_id,
+                            'color_code': color,
+                        }, context=context)
 
             # Generate Job with passed reference:
             oven_pool.generate_oven_job_all(cr, uid, [], context=ctx)

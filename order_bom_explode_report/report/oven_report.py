@@ -419,10 +419,7 @@ class MrpProduction(orm.Model):
             # Last updated: (TODO qty updated here)
             # -----------------------------------------------------------------
             # Clean oven stock with real used qty:
-            try:
-                preload_stock[stock_key][0] -= used_stock
-            except:
-                pdb.set_trace()
+            preload_stock[stock_key][0] -= used_stock
 
             log_record[11] = used_stock
 

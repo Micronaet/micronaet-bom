@@ -467,7 +467,7 @@ class MrpProduction(orm.Model):
                     }, context=context)
 
             # Generate Job with passed reference:
-             job_pool.generate_oven_job_all(cr, uid, [], context=ctx)
+            job_pool.generate_oven_job_all(cr, uid, [], context=ctx)
         # =====================================================================
         return True
 

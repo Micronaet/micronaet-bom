@@ -278,7 +278,7 @@ class MrpProduction(orm.Model):
             stock_key = color, parent_bom  # Key
             if stock_key not in preload_stock:
                 # Use an empty record to remove much IF clause!:
-                preload_stock[stock_key] = (0.0, 0.0)
+                preload_stock[stock_key] = [0.0, 0.0]
 
             # Read if there's oven movement
             stock_qty = preload_stock[stock_key][0]

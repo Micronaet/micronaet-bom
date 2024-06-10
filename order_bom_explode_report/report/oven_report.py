@@ -97,8 +97,8 @@ class MrpProduction(orm.Model):
         _logger.info('Loading %s Job done' % len(preload_ids))
         for preload in preload_pool.browse(
                 cr, uid, preload_ids, context=context):
-            key = preload.color_code, preload.bom_id.id
             state = preload.job_id.state
+            key = preload.color_code, preload.bom_id
             if key not in preload_stock:
                 preload_stock[key] = [
                     0.0,  # COMPLETED, DRAFT, RUNNING >> All!
@@ -275,7 +275,7 @@ class MrpProduction(orm.Model):
             # B. Pre clean phase 1
             # -----------------------------------------------------------------
             # Check oven stock if covered B qty and clean all real data!
-            stock_key = color, parent_bom.id  # Key
+            stock_key = color, parent_bom  # Key
             if stock_key not in preload_stock:
                 # Use an empty record to remove much IF clause!:
                 preload_stock[stock_key] = (0.0, 0.0)
@@ -390,7 +390,7 @@ class MrpProduction(orm.Model):
             row = 0
             for key in sorted(master_data[color]):
                 family, parent_bom = key
-                parent_bom_id = parent_bom.id
+                # parent_bom_id = parent_bom.id
                 code = parent_bom.code or 'NO CODE'
 
                 total = empty[:]
@@ -411,7 +411,7 @@ class MrpProduction(orm.Model):
                 # -------------------------------------------------------------
                 if any(total):  # Only if data is present!
                     # Write Family line:
-                    stock_key = color, parent_bom_id
+                    stock_key = color, parent_bom
                     stock_total = preload_stock.get(stock_key, (0.0, 0.0))
                     record = [
                         parent_bom.id,
@@ -473,6 +473,7 @@ class MrpProduction(orm.Model):
             'Forzato',  # Closed manually
             'Usato',  # used
             'Commento',
+
             ]
         width = [
             10, 15, 12, 12, 15, 5,
@@ -492,6 +493,39 @@ class MrpProduction(orm.Model):
         for record in log_data:
             row += 1
             excel_pool.write_xls_line(ws_name, row, record)
+
+        header = [
+            'Colore',
+            'DB padre',
+            'Fatti',
+            'Pendenti',
+            ]
+        width = [
+            20, 30, 5, 5,
+            ]
+
+        ws_name = 'Forno'
+        excel_pool.create_worksheet(name=ws_name)
+        excel_pool.column_width(ws_name, width)
+
+        row = 0
+        excel_pool.write_xls_line(ws_name, row, header)
+        excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
+        excel_pool.freeze_panes(ws_name, 1, 2)
+
+        for key in preload_stock:
+            row += 1
+            done, pending = preload_stock[key]
+            color, parent_bom = key
+            record = [
+                color,
+                parent_bom.code or parent_bom.name,
+                done,
+                pending,
+            ]
+            excel_pool.write_xls_line(ws_name, row, record)
+
+        # Save log file:
         excel_pool.save_file_as(excel_filename)
 
         # =====================================================================

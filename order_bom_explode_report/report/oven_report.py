@@ -58,8 +58,12 @@ class MrpProduction(orm.Model):
         preload_pool = self.pool.get('mrp.production.oven.selected')
 
         excluded_code = {
-            2: ('TL', 'TS', 'MT', 'MS', 'PO'),
-            3: ('CUS', 'SET', 'CIN', 'BRA'),
+            2: (
+                'TL', 'TS', 'MT', 'MS', 'PO'),
+            3: (
+                'CUS', 'SET', 'CIN', 'BRA',
+                '230', '935',  # Wood
+                ),
         }
 
         # Period range for documents
@@ -90,7 +94,7 @@ class MrpProduction(orm.Model):
             ('job_id.created_at', '>=', '%s 00:00:00' % period_from),
             ('job_id.created_at', '<=', '%s 23:59:59' % period_to),
             ('job_id.state', '!=', 'ERROR'),
-        ], context=context)
+            ], context=context)
 
         preload_stock = {}
         _logger.info('Loading %s Job done' % len(preload_ids))

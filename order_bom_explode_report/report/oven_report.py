@@ -106,8 +106,8 @@ class MrpProduction(orm.Model):
                 ]
             total = preload.total
             if state != 'COMPLETED':  # Not done
-                preload_stock[1] += total
-            preload_stock[0] += total
+                preload_stock[key][1] += total
+            preload_stock[key][0] += total
 
         # ---------------------------------------------------------------------
         #                          XLS Data file:

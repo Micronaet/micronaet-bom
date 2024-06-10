@@ -449,7 +449,7 @@ class MrpProduction(orm.Model):
             open('/home/administrator/photo/log/oven/log/oven.pickle', 'wb'),
         )
 
-        '''    
+        pdb.set_trace()
         ctx = context.copy()
         for created_at in oven_data:
             # New document every change data:
@@ -468,7 +468,6 @@ class MrpProduction(orm.Model):
 
             # Generate Job with passed reference:
              job_pool.generate_oven_job_all(cr, uid, [], context=ctx)
-         '''
         # =====================================================================
         return True
 

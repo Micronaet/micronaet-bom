@@ -74,12 +74,15 @@ class MrpProduction(orm.Model):
             period_from = '%s-09-01' % (year - 1)
             period_to = '%s-08-31' % year
 
+        '''
         # =====================================================================
-        # todo Oven preload (remove after!)
+        # Oven preload Job done or pending
+        # =====================================================================
         job_pool = self.pool.get('industria.job')
         oven_pool = self.pool.get('mrp.production.oven.selected')
         oven_data = {}
         # =====================================================================
+        '''
 
         # ---------------------------------------------------------------------
         # Preload Oven Jobs (cover order need!):
@@ -196,10 +199,11 @@ class MrpProduction(orm.Model):
                 '',  # 8. Locked
                 '',  # 9. Delivered
                 '',  # 10. TODO
+                '',  # 11. Used stock
 
-                '',  # 11. Forced closed manually
-                '',  # 12. Used in report
-                '',  # 13. Comment
+                '',  # 12. Forced closed manually
+                '',  # 13. Used in report
+                '',  # 14. Comment
                 ]
 
             # -----------------------------------------------------------------
@@ -209,20 +213,20 @@ class MrpProduction(orm.Model):
             code2 = default_code[:2]
             code3 = default_code[:3]
             if code2 in excluded_code[2] or code3 in excluded_code[3]:
-                log_record[13] = 'Codice escluso'
+                log_record[14] = 'Codice escluso'
                 log_data.append(log_record)
                 continue
 
             # 2. No color:
             if not color.strip():
-                log_record[13] = 'Senza colore (no forno)'
+                log_record[14] = 'Senza colore (no forno)'
                 log_data.append(log_record)
                 continue
 
             # 3. Mandatory data not present or not deadline filtered as present
             if not parent_bom or not default_code or not color:
                 # Line not used
-                log_record[13] = 'Riga non di MRP (colore, BOM, codice)'
+                log_record[14] = 'Riga non di MRP (colore, BOM, codice)'
                 log_data.append(log_record)
                 continue
 
@@ -241,6 +245,7 @@ class MrpProduction(orm.Model):
                 master_data[color][key][product] = {}  # todo remove product?
             if deadline_ref not in master_data[color][
                     key][product]:
+                # Total record data:
                 master_data[color][key][product][deadline_ref] = {
                     'OC': 0.0,  # Order
                     'B': 0.0,  # MRP
@@ -251,34 +256,70 @@ class MrpProduction(orm.Model):
             data = master_data[color][key][product][deadline_ref]
 
             # -----------------------------------------------------------------
-            # Read data from line:
+            # A. Read data from line:
             # -----------------------------------------------------------------
             oc_qty = line.product_uom_qty
             b_qty = line.product_uom_maked_sync_qty
             lock_qty = line.mx_assigned_qty
             del_qty = line.delivered_qty
 
-            # need_qty = oc_qty - max(b_qty + lock_qty, del_qty)
-            # Need is order - delivered or order - assigned (max of this):
-            # Remove case delivered > OC
+            # Used after for total operation
+            original = {
+                'oc': oc_qty,
+                'mrp': b_qty,
+                'assigned': lock_qty,
+                'delivered': del_qty,
+            }
+
+            # -----------------------------------------------------------------
+            # B. Pre clean phase 1
+            # -----------------------------------------------------------------
+            # Check oven stock if covered B qty and clean all real data!
+            stock_key = color, parent_bom.id  # Key
+            if stock_key not in preload_stock:
+                # Use an empty record to remove much IF clause!:
+                preload_stock[stock_key] = (0.0, 0.0)
+
+            # Read if there's oven movement
+            stock_qty = preload_stock[stock_key][0]
+
+            # Available for cover OC qty (DONE and PENDING!)
+            if stock_qty > b_qty:  # Full covered
+                clean_qty = b_qty
+            elif stock_qty > 0.0:  # Partially covered
+                clean_qty = stock_qty
+            else:  # Not covered
+                clean_qty = 0.0
+
+            # Clean qty (if present) cover only MRP (if present):
+            if clean_qty:
+                # Clean procedure:
+                preload_stock[stock_key][0] -= clean_qty
+                stock_qty = preload_stock[stock_key][0]  # New stock qty
+                oc_qty = max(0.0, oc_qty - clean_qty)
+                b_qty = max(0.0, b_qty - clean_qty)
+                del_qty = max(0.0, del_qty - clean_qty)
+
+            # -----------------------------------------------------------------
+            # C. Clean Oven data with pre cleaned changing:
+            # -----------------------------------------------------------------
             need_qty = max(
-                0, oc_qty - max(lock_qty, del_qty))
+                0.0, oc_qty - max(b_qty + lock_qty, del_qty))
 
-            # -----------------------------------------------------------------
-            # Check oven total for cover this line:
-            # -----------------------------------------------------------------
-            stock_key = color, parent_bom.id
-            stock_qty = preload_stock.get(
-                stock_key, (0.0, 0.0))[0]  # Available for cover OC qty
-            if stock_qty > need_qty:  # Over available
-                todo_qty = 0.0  # No need
-                preload_stock[stock_key][0] -= need_qty  # Remove used qty
-            elif stock_qty > 0.0:  # Partially covered (stock present):
+            # Check again oven total for cover this line:
+            if stock_qty > need_qty:  # 1. All covered
+                todo_qty = 0.0  # No need Oven operation
+                used_stock = need_qty  # used only need
+                # preload_stock[stock_key][0] -= need_qty  # Remove used qty
+            elif stock_qty > 0.0:  # 2. Partially covered (stock present):
                 todo_qty = need_qty - stock_qty  # Use remain
-                preload_stock[stock_key][0] = 0  # Remove used qty
+                used_stock = stock_qty  # used all remain
+                # preload_stock[stock_key][0] = 0  # Remove used qty
             else:
-                todo_qty = need_qty  # All
+                todo_qty = need_qty  # 3. All in oven
+                used_stock = 0  # Not used stock
 
+            '''
             # =================================================================
             # todo oven part (to remove!)
             # =================================================================
@@ -295,35 +336,47 @@ class MrpProduction(orm.Model):
                 oven_data[created_at][color][parent_bom_id] = 0
 
             oven_data[created_at][color][parent_bom_id] += b_qty
+            '''
             # =================================================================
 
             # -----------------------------------------------------------------
             # Update total for this key:
             # -----------------------------------------------------------------
-            data['B'] += b_qty
-            data['LOCK'] += lock_qty
-            data['D'] += del_qty
-            data['OC'] += oc_qty
+            data['OC'] += original['oc']  # oc_qty
+            data['B'] += original['mrp']  # b_qty
+            data['LOCK'] += original['assigned']  # lock_qty
+            data['D'] += original['delivered']  # del_qty
 
             # -----------------------------------------------------------------
             # Update log record:
             # -----------------------------------------------------------------
-            log_record[6] = oc_qty
-            log_record[7] = b_qty
-            log_record[8] = lock_qty
-            log_record[9] = del_qty
+            log_record[6] = original['oc']  # oc_qty
+            log_record[7] = original['mrp']  # b_qty
+            log_record[8] = original['assigned']  # lock_qty
+            log_record[9] = original['delivered']  # del_qty
 
+            # todo correct in this position? (before instead of using stock?)
             if line_closed or order_closed:
                 if oc_qty != del_qty:
-                    log_record[11] = 'X'  # Forced closed manually
-                log_record[12] = ''  # Used in total
-                log_record[13] = 'Riga chiusa'  # Not used in total
+                    log_record[12] = 'X'  # Forced closed manually
+                    used_stock = 0.0  # Not used stock for this line
+                log_record[13] = ''  # Used in total
+                log_record[14] = 'Riga chiusa'  # Not used in total
                 todo_qty = 0  # Removed TODO q!
             else:
-                log_record[12] = 'X'  # Used in total
+                log_record[13] = 'X'  # Used in total
 
-            # TODO qty updated here:
+            # -----------------------------------------------------------------
+            # Last updated: (TODO qty updated here)
+            # -----------------------------------------------------------------
+            # Clean oven stock with real used qty:
+            preload_stock[stock_key][0] -= used_stock
+            log_record[11] = used_stock
+
+            # Log real need:
             log_record[10] = todo_qty
+
+            # Master report with real need:
             data['TODO'] += todo_qty
 
             # todo possible free q. if B > delivered!
@@ -359,7 +412,7 @@ class MrpProduction(orm.Model):
                 if any(total):  # Only if data is present!
                     # Write Family line:
                     stock_key = color, parent_bom_id
-                    stock_total = oven_data.get(stock_key, (0.0, 0.0))
+                    stock_total = preload_stock.get(stock_key, (0.0, 0.0))
                     record = [
                         parent_bom.id,
                         family,
@@ -415,6 +468,7 @@ class MrpProduction(orm.Model):
             'Ass.',  # L
             'Cons.',  # Del
             'Da fare',  # TODO
+            'Usato forno',  # Used stock oven production
 
             'Forzato',  # Closed manually
             'Usato',  # used
@@ -422,7 +476,7 @@ class MrpProduction(orm.Model):
             ]
         width = [
             10, 15, 12, 12, 15, 5,
-            6, 6, 6, 6, 6,
+            6, 6, 6, 6, 6, 6,
             6, 6, 40,
             ]
 
@@ -443,6 +497,7 @@ class MrpProduction(orm.Model):
         # =====================================================================
         # Create Job:  todo remove after!
         # =====================================================================
+        '''
         import pickle
         pickle.dump(
             oven_data,
@@ -469,6 +524,7 @@ class MrpProduction(orm.Model):
             # Generate Job with passed reference:
             oven_pool.generate_oven_job_all(cr, uid, [], context=ctx)
         # =====================================================================
+        '''
         return True
 
 

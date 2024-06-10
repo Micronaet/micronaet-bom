@@ -55,7 +55,6 @@ class MrpProduction(orm.Model):
 
         # Pool used:
         line_pool = self.pool.get('sale.order.line')
-        excel_pool = self.pool.get('excel.writer')
         preload_pool = self.pool.get('mrp.production.oven.selected')
 
         excluded_code = {
@@ -110,12 +109,62 @@ class MrpProduction(orm.Model):
             preload_stock[key][0] += total
 
         # ---------------------------------------------------------------------
+        #                            XLS Log file:
+        # ---------------------------------------------------------------------
+        path = '/home/administrator/photo/log/oven'
+        now = datetime.now()
+        now_text = str(now).replace('/', '_').replace(':', '.')
+
+        excel_pool = self.pool.get('excel.writer')
+        excel_filename = os.path.join(
+            path,
+            '1.Stock_Status_Oven_%s.xlsx' % (
+                now_text,
+                ))
+
+        # Stock status from Season Job
+        header = [
+            'Colore',
+            'DB padre',
+            'Fatti',
+            'Pendenti',
+            ]
+        width = [
+            20, 30, 5, 5,
+            ]
+
+        ws_name = 'Forno'
+        excel_pool.create_worksheet(name=ws_name)
+        excel_pool.column_width(ws_name, width)
+
+        row = 0
+        excel_pool.write_xls_line(ws_name, row, header)
+        excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
+        excel_pool.freeze_panes(ws_name, 1, 2)
+
+        for key in preload_stock:
+            row += 1
+            done, pending = preload_stock[key]
+            color, parent_bom = key
+            record = [
+                color,
+                parent_bom.code or parent_bom.name,
+                done,
+                pending,
+            ]
+            excel_pool.write_xls_line(ws_name, row, record)
+        excel_pool.save_file_as(excel_filename)
+        del(excel_pool)
+
+        # ---------------------------------------------------------------------
         #                          XLS Data file:
         # ---------------------------------------------------------------------
-        now = datetime.now()
-        excel_filename = '/home/administrator/photo/log/oven/oven_%s.xlsx' % (
-            str(now).replace('/', '_').replace(':', '.'),
-            )
+        excel_pool = self.pool.get('excel.writer')
+        excel_filename = os.path.join(
+            path,
+            '0.MRP_Oven_%s.xlsx' % (
+                now_text,
+                ))
 
         _logger.warning('Excel: %s' % excel_filename)
         header = [
@@ -444,19 +493,17 @@ class MrpProduction(orm.Model):
                     excel_pool.write_xls_line(ws_name, row, record)
         excel_pool.save_file_as(excel_filename)
 
-        # Log file:
-        del(excel_pool)
-        excel_pool = self.pool.get('excel.writer')  # New
-
         # ---------------------------------------------------------------------
         #                            XLS Log file:
         # ---------------------------------------------------------------------
-        now = datetime.now()
-        excel_filename = \
-            '/home/administrator/photo/log/oven/log/' \
-            'oven_%s.xlsx' % (
-                str(now).replace('/', '_').replace(':', '.'),
-                )
+        # Log file:
+        del(excel_pool)
+        excel_pool = self.pool.get('excel.writer')  # New
+        excel_filename = os.path.join(
+            path,
+            '2.Log_MRP_Oven_%s.xlsx' % (
+                now_text,
+                ))
 
         _logger.warning('Excel: %s' % excel_filename)
         header = [
@@ -496,37 +543,6 @@ class MrpProduction(orm.Model):
 
         for record in log_data:
             row += 1
-            excel_pool.write_xls_line(ws_name, row, record)
-
-        header = [
-            'Colore',
-            'DB padre',
-            'Fatti',
-            'Pendenti',
-            ]
-        width = [
-            20, 30, 5, 5,
-            ]
-
-        ws_name = 'Forno'
-        excel_pool.create_worksheet(name=ws_name)
-        excel_pool.column_width(ws_name, width)
-
-        row = 0
-        excel_pool.write_xls_line(ws_name, row, header)
-        excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
-        excel_pool.freeze_panes(ws_name, 1, 2)
-
-        for key in preload_stock:
-            row += 1
-            done, pending = preload_stock[key]
-            color, parent_bom = key
-            record = [
-                color,
-                parent_bom.code or parent_bom.name,
-                done,
-                pending,
-            ]
             excel_pool.write_xls_line(ws_name, row, record)
 
         # Save log file:

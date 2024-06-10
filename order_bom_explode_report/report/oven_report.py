@@ -459,7 +459,7 @@ class MrpProduction(orm.Model):
             _logger.info('Create Job for data: %s' % created_at)
             for color in oven_data[created_at]:
                 for parent_bom_id in oven_data[created_at][color]:
-                    b_qty = oven_data[created_at][color][parent_bom]
+                    b_qty = oven_data[created_at][color][parent_bom_id]
                     oven_pool.create(cr, uid, {
                         'total': b_qty,
                         'bom_id': parent_bom_id,

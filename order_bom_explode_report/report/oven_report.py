@@ -103,7 +103,7 @@ class MrpProduction(orm.Model):
                 preload_stock[key] = [
                     0.0,  # COMPLETED, DRAFT, RUNNING >> All!
                     0.0,  # Pending
-                ]
+                    ]
             total = preload.total
             if state != 'COMPLETED':  # Not done
                 preload_stock[key][1] += total

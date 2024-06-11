@@ -130,6 +130,9 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
                 for color in negative_data:
                     for bom_id in negative_data[color]:
                         quantity = negative_data[color][bom_id]
+                        _logger.info('Color %s bom %s: %s' % (
+                            color, bom_id, quantity,
+                        ))
 
         # if error:
         _logger.info('Imported: %s' % filename)

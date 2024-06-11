@@ -96,11 +96,14 @@ class MrpProduction(orm.Model):
                 oven_stock[key] = [
                     0.0,  # COMPLETED, DRAFT, RUNNING >> All!
                     0.0,  # Pending
+                    0.0,  # Not used (only for log)
                     ]
             total = job_line.total
             if state != 'COMPLETED':  # Pending
                 oven_stock[key][1] += total
-            oven_stock[key][0] += total  # Done
+            # Same:
+            oven_stock[key][0] += total  # Done (used)
+            oven_stock[key][2] += total  # Done (not used)
 
         # ---------------------------------------------------------------------
         #                            XLS Log file:
@@ -116,8 +119,9 @@ class MrpProduction(orm.Model):
         header = [
             'Colore',
             'DB padre',
-            'Totali',  # Done + Pending
+            'Residuo',  # Done + Pending (all job) - used
             'Pendenti',
+            'Totale',  # Done + Pending (all Job)
             ]
         width = [
             20, 30, 5, 5,
@@ -134,13 +138,14 @@ class MrpProduction(orm.Model):
 
         for key in oven_stock:
             row += 1
-            done, pending = oven_stock[key]
+            done, pending, done_all = oven_stock[key]
             color, parent_bom = key
             record = [
                 color,
                 u'%s' % (parent_bom.code or parent_bom.name),
                 done,
                 pending,
+                done_all,
             ]
             excel_pool.write_xls_line(ws_name, row, record)
         excel_pool.save_file_as(excel_filename)

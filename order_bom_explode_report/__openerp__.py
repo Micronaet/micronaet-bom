@@ -54,6 +54,7 @@
         'bom_explode_view.xml',
         'report/explode_report.xml',
         'wizard/report_component_status.xml',
+        'wizard/import_oven_view.xml',
         'scheduler.xml',
         ],
     'active': False,

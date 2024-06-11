@@ -278,7 +278,7 @@ class MrpProduction(orm.Model):
             oven_key = color, parent_bom  # Key
             if oven_key not in oven_stock:
                 # Use an empty record to remove much IF clause!:
-                oven_stock[oven_key] = [0.0, 0.0]
+                oven_stock[oven_key] = [0.0, 0.0, 0.0]
 
             # Read if there's oven movement
             oven_qty = oven_stock[oven_key][0]

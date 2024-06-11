@@ -68,18 +68,7 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Parameters:
         # ---------------------------------------------------------------------
-        error = ''
-        row_start = 0
-        '''
-        month_current = datetime.now().month
-        year_current = datetime.now().year
-        if month_current in [9, 10, 11, 12]:
-            year_a = year_current
-            year_b = year_current + 1
-        else:  # 1 > 8
-            year_a = year_current - 1
-            year_b = year_current
-        '''
+        row_start = 1
 
         # ---------------------------------------------------------------------
         # Load force name (for web publish)
@@ -96,24 +85,51 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Loop on all pages:
         # ---------------------------------------------------------------------
-        for ws_name in wb.sheet_names():
-            color = ws_name
-            ws = wb.sheet_by_name(ws_name)
-            _logger.warning('Read page: %s' % ws_name)
+        error = ''
+        negative_data = {}
+        if wizard.mode == 'negative':
+            for ws_name in wb.sheet_names():
+                color = ws_name
+                ws = wb.sheet_by_name(ws_name)
+                _logger.warning('Read page: %s' % ws_name)
 
-            error = ''
-            for row in range(row_start, ws.nrows):
-                try:
+                error = ''
+                for row in range(row_start, ws.nrows):
+                    try:
+                        bom_id = int(ws.cell(row, 0).value)
+                    except:
+                        _logger.error('Not line %s' % row)
+                        continue
+                    try:
+                        bom = bom_pool.browse(cr, uid, bom_id, context=context)
+                    except:
+                        error += 'Color %s BOM ID %s: Not preset BOM ID' % (
+                            color, bom_id)
+                    key = color, bom_id
+
+                    # Read data:
                     bom_id = int(ws.cell(row, 0).value)
-                except:
-                    _logger.error('Not line %s' % row)
-                    continue
-                try:
-                    bom = bom_pool.browse(cr, uid, bom_id, context=context)
-                except:
-                    error += 'Color %s BOM ID %s: Not preset BOM ID' % (
-                        color, bom_id)
-                key = color, bom_id
+                    try:
+                        quantity = int(ws.cell(row, 3).value)
+
+                        # Collect data for job if negative:
+                        if quantity < 0:
+                            if color not in negative_data:
+                                negative_data[color] = {}
+                            if bom_id not in negative_data[color]:
+                                negative_data[color][bom_id] = 0.0
+                            negative_data[color][bom_id] -= quantity
+
+                    except:
+                        _logger.error('Page %s - Row %s: Not a number' % (
+                            color, row))
+
+                # -------------------------------------------------------------
+                # Generate Job and confirm:
+                # -------------------------------------------------------------
+                for color in negative_data:
+                    for bom_id in negative_data[color]:
+                        quantity = negative_data[color][bom_id]
 
         # if error:
         _logger.info('Imported: %s' % filename)

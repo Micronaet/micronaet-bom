@@ -18,6 +18,7 @@
 #
 ###############################################################################
 import os
+import pdb
 import sys
 import logging
 import xlrd
@@ -47,11 +48,10 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
         # Pool used:
         bom_pool = self.pool.get('mrp.bom')
 
-        wizard = self.browse(cr, uid, ids, context=context)[0]
-
         # ---------------------------------------------------------------------
         # Save file passed:
         # ---------------------------------------------------------------------
+        wizard = self.browse(cr, uid, ids, context=context)[0]
         if not wizard.file:
             raise osv.except_osv(
                 _('No file:'),
@@ -70,6 +70,7 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
         # ---------------------------------------------------------------------
         error = ''
         row_start = 0
+        '''
         month_current = datetime.now().month
         year_current = datetime.now().year
         if month_current in [9, 10, 11, 12]:
@@ -78,12 +79,14 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
         else:  # 1 > 8
             year_a = year_current - 1
             year_b = year_current
+        '''
 
         # ---------------------------------------------------------------------
         # Load force name (for web publish)
         # ---------------------------------------------------------------------
+        pdb.set_trace()
         try:
-            WB = xlrd.open_workbook(filename)
+            wb = xlrd.open_workbook(filename)
         except:
             raise osv.except_osv(
                 _('Error XLSX'),
@@ -93,31 +96,28 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Loop on all pages:
         # ---------------------------------------------------------------------
-        today = now_text[:10]
-        for ws_name in WB.sheet_names():
+        for ws_name in wb.sheet_names():
             color = ws_name
-            WS = WB.sheet_by_name(ws_name)
+            ws = wb.sheet_by_name(ws_name)
             _logger.warning('Read page: %s' % ws_name)
 
-            pos = -1
-            jump_empty = True
             error = ''
-            for row in range(row_start, WS.nrows):
-                if jump_empty:  # Jump only first line
-                    jump_empty = False
+            for row in range(row_start, ws.nrows):
+                try:
+                    bom_id = int(ws.cell(row, 0).value)
+                except:
+                    _logger.error('Not line %s' % row)
                     continue
+                try:
+                    bom = bom_pool.browse(cr, uid, bom_id, context=context)
+                except:
+                    error += 'Color %s BOM ID %s: Not preset BOM ID' % (
+                        color, bom_id)
+                key = color, bom_id
 
-                pos += 1
-                if pos == 1:
-                    default_code = WS.cell(row, 0).value
-                    _logger.info('Find material: %s' % default_code)
-
+        # if error:
         _logger.info('Imported: %s' % filename)
-        return self.write(cr, uid, ids, {
-            'mode': 'imported',
-            'file': False,  # reset file for clean database!
-            'error': error,
-            }, context=context)
+        return True
 
     _columns = {
         'file': fields.binary('XLSX file', filters=None),
@@ -131,5 +131,3 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
     _defaults = {
        'mode': lambda *x: 'job',
        }
-
-

@@ -105,51 +105,8 @@ class MrpProduction(orm.Model):
             oven_stock[key][0] += total  # Done (used)
             oven_stock[key][2] += total  # Done (not used)
 
-        # ---------------------------------------------------------------------
-        #                            XLS Log file:
-        # ---------------------------------------------------------------------
         path = '/home/administrator/photo/log/oven'
         now_text = str(now).replace('/', '_').replace(':', '.')
-
-        excel_pool = self.pool.get('excel.writer')
-        excel_filename = os.path.join(
-            path, '1.Stock_Status_Oven_%s.xlsx' % now_text)
-
-        # Stock status from Season Job
-        header = [
-            'Colore',
-            'DB padre',
-            'Residuo',  # Done + Pending (all job) - used
-            'Pendenti',
-            'Totale',  # Done + Pending (all Job)
-            ]
-        width = [
-            20, 30, 5, 5,
-            ]
-
-        ws_name = 'Magazzino Forno'
-        excel_pool.create_worksheet(name=ws_name)
-        excel_pool.column_width(ws_name, width)
-
-        row = 0
-        excel_pool.write_xls_line(ws_name, row, header)
-        excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
-        excel_pool.freeze_panes(ws_name, 1, 2)
-
-        for key in oven_stock:
-            row += 1
-            done, pending, done_all = oven_stock[key]
-            color, parent_bom = key
-            record = [
-                color,
-                u'%s' % (parent_bom.code or parent_bom.name),
-                done,
-                pending,
-                done_all,
-            ]
-            excel_pool.write_xls_line(ws_name, row, record)
-        excel_pool.save_file_as(excel_filename)
-        del excel_pool
 
         # ---------------------------------------------------------------------
         #                          XLS Data file:
@@ -493,4 +450,48 @@ class MrpProduction(orm.Model):
 
         # Save log file:
         excel_pool.save_file_as(excel_filename)
+
+        # ---------------------------------------------------------------------
+        #                            XLS Log file:
+        # ---------------------------------------------------------------------
+        del excel_pool
+        excel_pool = self.pool.get('excel.writer')
+        excel_filename = os.path.join(
+            path, '1.Stock_Status_Oven_%s.xlsx' % now_text)
+
+        # Stock status from Season Job
+        header = [
+            'Colore',
+            'DB padre',
+            'Residuo',  # Done + Pending (all job) - used
+            'Pendenti',
+            'Totale',  # Done + Pending (all Job)
+            ]
+        width = [
+            20, 30, 5, 5,
+            ]
+
+        ws_name = 'Magazzino Forno'
+        excel_pool.create_worksheet(name=ws_name)
+        excel_pool.column_width(ws_name, width)
+
+        row = 0
+        excel_pool.write_xls_line(ws_name, row, header)
+        excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
+        excel_pool.freeze_panes(ws_name, 1, 2)
+
+        for key in oven_stock:
+            row += 1
+            done, pending, done_all = oven_stock[key]
+            color, parent_bom = key
+            record = [
+                color,
+                u'%s' % (parent_bom.code or parent_bom.name),
+                done,
+                pending,
+                done_all,
+            ]
+            excel_pool.write_xls_line(ws_name, row, record)
+        excel_pool.save_file_as(excel_filename)
+        del excel_pool
         return True

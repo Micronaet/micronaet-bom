@@ -120,10 +120,7 @@ class MrpProduction(orm.Model):
 
         excel_pool = self.pool.get('excel.writer')
         excel_filename = os.path.join(
-            path,
-            '1.Stock_Status_Oven_%s.xlsx' % (
-                now_text,
-                ))
+            path, '1.Stock_Status_Oven_%s.xlsx' % now_text)
 
         # Stock status from Season Job
         header = [
@@ -151,7 +148,7 @@ class MrpProduction(orm.Model):
             color, parent_bom = key
             record = [
                 color,
-                parent_bom.code or parent_bom.name,
+                u'%s' % (parent_bom.code or parent_bom.name),
                 done,
                 pending,
             ]
@@ -164,10 +161,7 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         excel_pool = self.pool.get('excel.writer')  # New report
         excel_filename = os.path.join(
-            path,
-            '0.MRP_Oven_%s.xlsx' % (
-                now_text,
-                ))
+            path, '0.MRP_Oven_%s.xlsx' % now_text)
 
         _logger.warning('Excel: %s' % excel_filename)
         header = [
@@ -481,10 +475,7 @@ class MrpProduction(orm.Model):
         del excel_pool
         excel_pool = self.pool.get('excel.writer')  # New report
         excel_filename = os.path.join(
-            path,
-            '2.Log_MRP_Oven_%s.xlsx' % (
-                now_text,
-                ))
+            path, '2.Log_MRP_Oven_%s.xlsx' % now_text)
 
         _logger.warning('Excel: %s' % excel_filename)
         header = [

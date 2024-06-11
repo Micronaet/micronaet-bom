@@ -493,5 +493,4 @@ class MrpProduction(orm.Model):
             ]
             excel_pool.write_xls_line(ws_name, row, record)
         excel_pool.save_file_as(excel_filename)
-        del excel_pool
         return True

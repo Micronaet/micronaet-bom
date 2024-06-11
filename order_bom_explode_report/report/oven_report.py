@@ -96,27 +96,26 @@ class MrpProduction(orm.Model):
             ('job_id.state', '!=', 'ERROR'),
             ], context=context)
 
-        preload_stock = {}
+        oven_stock = {}
         _logger.info('Loading %s Job done' % len(preload_ids))
-        for preload in preload_pool.browse(
+        for job_line in preload_pool.browse(
                 cr, uid, preload_ids, context=context):
-            state = preload.job_id.state
-            key = preload.color_code, preload.bom_id
-            if key not in preload_stock:
-                preload_stock[key] = [
+            state = job_line.job_id.state
+            key = job_line.color_code, job_line.bom_id
+            if key not in oven_stock:
+                oven_stock[key] = [
                     0.0,  # COMPLETED, DRAFT, RUNNING >> All!
                     0.0,  # Pending
                     ]
-            total = preload.total
-            if state != 'COMPLETED':  # Not done
-                preload_stock[key][1] += total
-            preload_stock[key][0] += total
+            total = job_line.total
+            if state != 'COMPLETED':  # Pending
+                oven_stock[key][1] += total
+            oven_stock[key][0] += total  # Done
 
         # ---------------------------------------------------------------------
         #                            XLS Log file:
         # ---------------------------------------------------------------------
         path = '/home/administrator/photo/log/oven'
-        now = datetime.now()
         now_text = str(now).replace('/', '_').replace(':', '.')
 
         excel_pool = self.pool.get('excel.writer')
@@ -130,14 +129,14 @@ class MrpProduction(orm.Model):
         header = [
             'Colore',
             'DB padre',
-            'Fatti',
+            'Totali',  # Done + Pending
             'Pendenti',
             ]
         width = [
             20, 30, 5, 5,
             ]
 
-        ws_name = 'Forno'
+        ws_name = 'Magazzino Forno'
         excel_pool.create_worksheet(name=ws_name)
         excel_pool.column_width(ws_name, width)
 
@@ -146,9 +145,9 @@ class MrpProduction(orm.Model):
         excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
         excel_pool.freeze_panes(ws_name, 1, 2)
 
-        for key in preload_stock:
+        for key in oven_stock:
             row += 1
-            done, pending = preload_stock[key]
+            done, pending = oven_stock[key]
             color, parent_bom = key
             record = [
                 color,
@@ -158,12 +157,12 @@ class MrpProduction(orm.Model):
             ]
             excel_pool.write_xls_line(ws_name, row, record)
         excel_pool.save_file_as(excel_filename)
-        del(excel_pool)
+        del excel_pool
 
         # ---------------------------------------------------------------------
         #                          XLS Data file:
         # ---------------------------------------------------------------------
-        excel_pool = self.pool.get('excel.writer')
+        excel_pool = self.pool.get('excel.writer')  # New report
         excel_filename = os.path.join(
             path,
             '0.MRP_Oven_%s.xlsx' % (
@@ -172,7 +171,8 @@ class MrpProduction(orm.Model):
 
         _logger.warning('Excel: %s' % excel_filename)
         header = [
-            'BOM ID', 'Famiglia', 'DB padre', 'Fatti', 'Pend.',
+            'BOM ID', 'Famiglia', 'DB padre',
+            'Dispo netta', 'Pend.',  # Dai Job (dispo netta, da fare)
             '09', '10', '11', '12', '01', '02', '03', '04', '05', '06',
             '07', '08',
             ]
@@ -183,7 +183,10 @@ class MrpProduction(orm.Model):
             }
         fixed_col = len(header)
         empty = [0.0 for i in range(len(header_period))]
-        width = [5, 15, 10, 5, 5]
+        width = [
+            5, 15, 10,
+            8, 8,
+            ]
         width.extend([5 for i in range(len(header_period))])
 
         # Search open order:
@@ -209,12 +212,12 @@ class MrpProduction(orm.Model):
             # ('done', 'cancel')),
             ], order='date_deadline', context=context)
 
-        master_data = {}
-        log_data = []
-        lines = len(line_ids)
-        counter = 0
+        oven_report = {}
+        log_report = []
+        lines = len(line_ids)  # OC lines
 
         # Order by Deadline (if empty use last date?):
+        counter = 0
         for line in line_pool.browse(cr, uid, line_ids, context=context):
             counter += 1
             if not(counter % 50):
@@ -223,7 +226,7 @@ class MrpProduction(orm.Model):
                 ))
 
             # -----------------------------------------------------------------
-            # Readability:
+            #                           Readability:
             # -----------------------------------------------------------------
             order = line.order_id
             product = line.product_id
@@ -232,11 +235,14 @@ class MrpProduction(orm.Model):
             deadline_month = deadline[5:7]
             deadline_ref = header_period.get(deadline_month)
             default_code = product.default_code or ''
-            color = default_code[6:8]
+            color = default_code[6:8].strip()
             family = product.family_id.name or 'NON PRESENTE'
             order_closed = order.mx_closed
             line_closed = line.mx_closed
 
+            # -----------------------------------------------------------------
+            # Log record
+            # -----------------------------------------------------------------
             log_record = [
                 # Fixed:
                 color,
@@ -246,7 +252,7 @@ class MrpProduction(orm.Model):
                 order.name,
                 deadline_month,
 
-                # Only for used:
+                # Only for used line:
                 '',  # 6. OC
                 '',  # 7. MRP
                 '',  # 8. Locked
@@ -260,117 +266,119 @@ class MrpProduction(orm.Model):
                 ]
 
             # -----------------------------------------------------------------
-            # Remove unneeded data:
+            # Remove not needed data:
             # -----------------------------------------------------------------
             # 1. Excluded code:
             code2 = default_code[:2]
             code3 = default_code[:3]
             if code2 in excluded_code[2] or code3 in excluded_code[3]:
                 log_record[14] = 'Codice escluso'
-                log_data.append(log_record)
+                log_report.append(log_record)
                 continue
 
             # 2. No color:
-            if not color.strip():
+            if not color:
                 log_record[14] = 'Senza colore (no forno)'
-                log_data.append(log_record)
+                log_report.append(log_record)
                 continue
 
             # 3. Mandatory data not present or not deadline filtered as present
             if not parent_bom or not default_code or not color:
                 # Line not used
                 log_record[14] = 'Riga non di MRP (colore, BOM, codice)'
-                log_data.append(log_record)
+                log_report.append(log_record)
                 continue
 
             # -----------------------------------------------------------------
             #                          COLLECT DATA:
             # -----------------------------------------------------------------
-            if color not in master_data:
-                master_data[color] = {}
+            if color not in oven_report:
+                oven_report[color] = {}
 
             # Key for record organization:
             key = family, parent_bom
-            if key not in master_data[color]:
-                master_data[color][key] = {}
+            if key not in oven_report[color]:
+                oven_report[color][key] = {}
 
-            if product not in master_data[color][key]:
-                master_data[color][key][product] = {}  # todo remove product?
-            if deadline_ref not in master_data[color][
+            # todo remove product?:
+            if product not in oven_report[color][key]:
+                oven_report[color][key][product] = {}
+
+            if deadline_ref not in oven_report[color][
                     key][product]:
                 # Total record data:
-                master_data[color][key][product][deadline_ref] = {
-                    'OC': 0.0,  # Order
-                    'B': 0.0,  # MRP
-                    'LOCK': 0.0,  # Locked
-                    'D': 0.0,  # Delivered
-                    'TODO': 0.0,  # TODO
-                    }
-            data = master_data[color][key][product][deadline_ref]
+                oven_report[color][key][product][deadline_ref] = 0.0
 
             # -----------------------------------------------------------------
             # A. Read data from line:
             # -----------------------------------------------------------------
             oc_qty = line.product_uom_qty
-            b_qty = line.product_uom_maked_sync_qty
+            mrp_qty = line.product_uom_maked_sync_qty
             lock_qty = line.mx_assigned_qty
-            del_qty = line.delivered_qty
+            out_qty = line.delivered_qty
 
             # Used after for total operation
             original = {
                 'oc': oc_qty,
-                'mrp': b_qty,
+                'mrp': mrp_qty,
                 'assigned': lock_qty,
-                'delivered': del_qty,
+                'delivered': out_qty,
             }
 
             # -----------------------------------------------------------------
             # B. Pre clean phase 1
             # -----------------------------------------------------------------
             # Check oven stock if covered B qty and clean all real data!
-            stock_key = color, parent_bom  # Key
-            if stock_key not in preload_stock:
+            oven_key = color, parent_bom  # Key
+            if oven_key not in oven_stock:
                 # Use an empty record to remove much IF clause!:
-                preload_stock[stock_key] = [0.0, 0.0]
+                oven_stock[oven_key] = [0.0, 0.0]
 
             # Read if there's oven movement
-            stock_qty = preload_stock[stock_key][0]
+            oven_qty = oven_stock[oven_key][0]
 
             # Available for cover OC qty (DONE and PENDING!)
-            if stock_qty > b_qty:  # Full covered
-                clean_qty = b_qty
-            elif stock_qty > 0.0:  # Partially covered
-                clean_qty = stock_qty
-            else:  # Not covered
-                clean_qty = 0.0
+            if mrp_qty > 0:
+                # New stock available for cover:
+                oven_stock[oven_key][0] -= mrp_qty  # could be negative!
+                oven_qty = oven_stock[oven_key][0]  # Read again after update
 
-            # Clean qty (if present) cover only MRP (if present):
-            if clean_qty:
-                # Clean procedure:
-                preload_stock[stock_key][0] -= clean_qty
-                stock_qty = preload_stock[stock_key][0]  # New stock qty
-                oc_qty = max(0.0, oc_qty - clean_qty)
-                b_qty = max(0.0, b_qty - clean_qty)
-                del_qty = max(0.0, del_qty - clean_qty)
+                # Clean OC line procedure:
+                oc_qty = max(0.0, oc_qty - mrp_qty)
+                mrp_qty = 0.0
+                out_qty = max(0.0, out_qty - mrp_qty)
 
             # -----------------------------------------------------------------
             # C. Clean Oven data with pre cleaned changing:
             # -----------------------------------------------------------------
-            need_qty = max(
-                0.0, oc_qty - max(b_qty + lock_qty, del_qty))
+            need_qty = oc_qty - max(lock_qty, out_qty)
 
-            # Check again oven total for cover this line:
-            if stock_qty > need_qty:  # 1. All covered
-                todo_qty = 0.0  # No need Oven operation
-                used_stock = need_qty  # used only need
-                # preload_stock[stock_key][0] -= need_qty  # Remove used qty
-            elif stock_qty > 0.0:  # 2. Partially covered (stock present):
-                todo_qty = need_qty - stock_qty  # Use remain
-                used_stock = stock_qty  # used all remain
-                # preload_stock[stock_key][0] = 0  # Remove used qty
+            # Have q. need to cover:
+            if need_qty > 0:
+                if oven_qty > need_qty:  # 1. All covered
+                    report_qty = 0.0  # All need covered
+                    oven_used_qty = need_qty  # Used need qty from stock
+                elif oven_qty > 0.0:  # 2. Partially covered (stock present):
+                    report_qty = need_qty - oven_qty  # Use remain
+                    oven_used_qty = oven_qty  # used all remain
+                else:  # Oven is <= 0
+                    report_qty = need_qty  # 3. All in oven report
+                    oven_used_qty = 0.0  # Not used stock
+            else:  # No need for this line so no report and no oven used:
+                report_qty = oven_used_qty = 0.0
+
+            # Lines marked as closed:
+            if line_closed or order_closed:
+                # Forced line (closed without totally delivered):
+                if oc_qty != out_qty:
+                    log_record[12] = 'X'  # Forced closed manually
+                    oven_used_qty = 0.0  # Not used stock for this line
+
+                log_record[13] = ''  # Used in total
+                log_record[14] = 'Riga chiusa'  # Not used in total
+                report_qty = 0  # Removed TODO q!
             else:
-                todo_qty = need_qty  # 3. All in oven
-                used_stock = 0  # Not used stock
+                log_record[13] = 'X'  # Used in total
 
             '''
             # =================================================================
@@ -388,91 +396,63 @@ class MrpProduction(orm.Model):
             if parent_bom_id not in oven_data[created_at][color]:
                 oven_data[created_at][color][parent_bom_id] = 0
 
-            oven_data[created_at][color][parent_bom_id] += b_qty
+            data[created_at][color][parent_bom_id] += mrp_qty
             '''
             # =================================================================
-
-            # -----------------------------------------------------------------
-            # Update total for this key:
-            # -----------------------------------------------------------------
-            data['OC'] += original['oc']  # oc_qty
-            data['B'] += original['mrp']  # b_qty
-            data['LOCK'] += original['assigned']  # lock_qty
-            data['D'] += original['delivered']  # del_qty
-
-            # -----------------------------------------------------------------
-            # Update log record:
-            # -----------------------------------------------------------------
-            log_record[6] = original['oc']  # oc_qty
-            log_record[7] = original['mrp']  # b_qty
-            log_record[8] = original['assigned']  # lock_qty
-            log_record[9] = original['delivered']  # del_qty
-
-            # todo correct in this position? (before instead of using stock?)
-            if line_closed or order_closed:
-                if oc_qty != del_qty:
-                    log_record[12] = 'X'  # Forced closed manually
-                    used_stock = 0.0  # Not used stock for this line
-                log_record[13] = ''  # Used in total
-                log_record[14] = 'Riga chiusa'  # Not used in total
-                todo_qty = 0  # Removed TODO q!
-            else:
-                log_record[13] = 'X'  # Used in total
 
             # -----------------------------------------------------------------
             # Last updated: (TODO qty updated here)
             # -----------------------------------------------------------------
             # Clean oven stock with real used qty:
-            preload_stock[stock_key][0] -= used_stock
+            oven_stock[oven_key][0] -= oven_used_qty
 
-            log_record[11] = used_stock
+            # Oven repord data (for cell):
+            oven_report[color][key][product][deadline_ref] += report_qty
 
-            # Log real need:
-            log_record[10] = todo_qty
-
-            # Master report with real need:
-            data['TODO'] += todo_qty
-
-            # todo possible free q. if B > delivered!
-            log_data.append(log_record)
+            # -----------------------------------------------------------------
+            # Update log record:
+            # -----------------------------------------------------------------
+            log_record[6] = original['oc']  # oc_qty
+            log_record[7] = original['mrp']  # mrp_qty
+            log_record[8] = original['assigned']  # lock_qty
+            log_record[9] = original['delivered']  # out_qty
+            log_record[10] = report_qty  # Log real need:
+            log_record[11] = oven_used_qty
+            log_report.append(log_record)
 
         # ---------------------------------------------------------------------
         #                     Excel file with master data:
         # ---------------------------------------------------------------------
-        for color in master_data:   # Color loop
+        for color in oven_report:   # Color loop
             ws_name = False  # Create after (if needed)
             row = 0
-            for key in sorted(master_data[color]):
+            for key in sorted(oven_report[color]):
                 family, parent_bom = key
-                # parent_bom_id = parent_bom.id
                 code = parent_bom.code or 'NO CODE'
-
                 total = empty[:]
                 for product in sorted(
-                        master_data[color][key],
+                        oven_report[color][key],
                         key=lambda p: (p.default_code or '')):
 
                     # Month total columns:
-                    for deadline_ref in master_data[color][key][product]:
-                        data = master_data[color][key][product][deadline_ref]
-                        # oc = data['OC']
-                        # todo = oc - max(
-                        #    data['B'] + data['LOCK'], data['D'])
-                        total[deadline_ref] += data['TODO']
+                    for deadline_ref in oven_report[color][key][product]:
+                        total[deadline_ref] += \
+                            oven_report[color][key][product][deadline_ref]
 
                 # -------------------------------------------------------------
                 # Write line
                 # -------------------------------------------------------------
                 if any(total):  # Only if data is present!
                     # Write Family line:
-                    stock_key = color, parent_bom
-                    stock_total = preload_stock.get(stock_key, (0.0, 0.0))
+                    oven_key = color, parent_bom
+                    oven_total = oven_stock[oven_key]  # Always present here
+                    # .get(oven_key, (0.0, 0.0))
                     record = [
                         parent_bom.id,
                         family,
                         code,
-                        stock_total[0] - stock_total[1],  # Oven completed
-                        stock_total[1],  # Oven pending
+                        oven_total[0],   # - oven_total[1],  # Oven remain
+                        oven_total[1],  # Oven pending
                     ]
                     record.extend([(d or '') for d in total])
 
@@ -498,8 +478,8 @@ class MrpProduction(orm.Model):
         #                            XLS Log file:
         # ---------------------------------------------------------------------
         # Log file:
-        del(excel_pool)
-        excel_pool = self.pool.get('excel.writer')  # New
+        del excel_pool
+        excel_pool = self.pool.get('excel.writer')  # New report
         excel_filename = os.path.join(
             path,
             '2.Log_MRP_Oven_%s.xlsx' % (
@@ -525,7 +505,6 @@ class MrpProduction(orm.Model):
             'Forzato',  # Closed manually
             'Usato',  # used
             'Commento',
-
             ]
         width = [
             10, 15, 12, 12, 15, 5,
@@ -542,7 +521,7 @@ class MrpProduction(orm.Model):
         excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
         excel_pool.freeze_panes(ws_name, 1, 4)
 
-        for record in log_data:
+        for record in log_report:
             row += 1
             excel_pool.write_xls_line(ws_name, row, record)
 
@@ -568,10 +547,10 @@ class MrpProduction(orm.Model):
             _logger.info('Create Job for data: %s' % created_at)
             for color in oven_data[created_at]:
                 for parent_bom_id in oven_data[created_at][color]:
-                    b_qty = oven_data[created_at][color][parent_bom_id]
-                    if b_qty > 0:
+                    mrp_qty = oven_data[created_at][color][parent_bom_id]
+                    if mrp_qty > 0:
                         oven_pool.create(cr, uid, {
-                            'total': b_qty,
+                            'total': mrp_qty,
                             'bom_id': parent_bom_id,
                             'color_code': color,
                         }, context=context)
@@ -581,5 +560,3 @@ class MrpProduction(orm.Model):
         # =====================================================================
         '''
         return True
-
-

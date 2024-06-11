@@ -77,16 +77,6 @@ class MrpProduction(orm.Model):
             period_from = '%s-09-01' % (year - 1)
             period_to = '%s-08-31' % year
 
-        '''
-        # =====================================================================
-        # Oven preload Job done or pending
-        # =====================================================================
-        job_pool = self.pool.get('industria.job')
-        oven_pool = self.pool.get('mrp.production.oven.selected')
-        oven_data = {}
-        # =====================================================================
-        '''
-
         # ---------------------------------------------------------------------
         # Preload Oven Jobs (cover order need!):
         # ---------------------------------------------------------------------
@@ -374,26 +364,6 @@ class MrpProduction(orm.Model):
             else:
                 log_record[13] = 'X'  # Used in total
 
-            '''
-            # =================================================================
-            # todo oven part (to remove!)
-            # =================================================================
-            # Oven Job date (first of month if not present):
-            created_at = '%s-01' % (deadline or '2023-09-01')[:7]
-            if created_at not in oven_data:
-                oven_data[created_at] = {}
-
-            if color not in oven_data[created_at]:
-                oven_data[created_at][color] = {}
-
-            parent_bom_id = parent_bom.id
-            if parent_bom_id not in oven_data[created_at][color]:
-                oven_data[created_at][color][parent_bom_id] = 0
-
-            data[created_at][color][parent_bom_id] += mrp_qty
-            '''
-            # =================================================================
-
             # -----------------------------------------------------------------
             # Last updated: (TODO qty updated here)
             # -----------------------------------------------------------------
@@ -518,36 +488,4 @@ class MrpProduction(orm.Model):
 
         # Save log file:
         excel_pool.save_file_as(excel_filename)
-
-        # =====================================================================
-        # Create Job:  todo remove after!
-        # =====================================================================
-        '''
-        import pickle
-        pickle.dump(
-            oven_data,
-            open('/home/administrator/photo/log/oven/log/oven.pickle', 'wb'),
-        )
-
-        ctx = context.copy()
-        for created_at in oven_data:
-            # New document every change data:
-            ctx['force_data'] = {
-                'created_at': created_at
-                }
-            _logger.info('Create Job for data: %s' % created_at)
-            for color in oven_data[created_at]:
-                for parent_bom_id in oven_data[created_at][color]:
-                    mrp_qty = oven_data[created_at][color][parent_bom_id]
-                    if mrp_qty > 0:
-                        oven_pool.create(cr, uid, {
-                            'total': mrp_qty,
-                            'bom_id': parent_bom_id,
-                            'color_code': color,
-                        }, context=context)
-
-            # Generate Job with passed reference:
-            oven_pool.generate_oven_job_all(cr, uid, [], context=ctx)
-        # =====================================================================
-        '''
         return True

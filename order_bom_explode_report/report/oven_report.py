@@ -426,9 +426,11 @@ class MrpProduction(orm.Model):
                         excel_pool.column_width(ws_name, width)
                         excel_pool.write_xls_line(
                             color, row, header, format_mode['header'])
+
+                        # Filter fixed columns:
                         excel_pool.autofilter(
-                            ws_name, row, 0, row, len(header) - 1)
-                        excel_pool.freeze_panes(ws_name, 1, 5)
+                            ws_name, row, 0, row, fixed_col - 1)
+                        excel_pool.freeze_panes(ws_name, 1, fixed_col)
                         excel_pool.column_hidden(ws_name, [0])
 
                     # ---------------------------------------------------------

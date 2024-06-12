@@ -125,12 +125,12 @@ class MrpProduction(orm.Model):
             '03', '', '04', '', '05', '', '06', '', '07', '', '08', '',
             ]
         header_period = {
-            '09': 0, '10': 2, '11': 4, '12': 6,
-            '01': 8, '02': 10, '03': 12, '04': 14, '05': 16, '06': 18,
-            '07': 20, '08': 22,
+            '09': 0, '10': 1, '11': 2, '12': 3,
+            '01': 4, '02': 5, '03': 6, '04': 7, '05': 8, '06': 9,
+            '07': 10, '08': 11,
             }
         fixed_col = len(header)
-        dynamic_col = 2 * len(header_period)
+        dynamic_col = len(header_period)
 
         empty = [0.0 for i in range(dynamic_col)]
 
@@ -413,15 +413,13 @@ class MrpProduction(orm.Model):
 
                                 'bg': {
                                     'red': excel_pool.get_format(
-                                        'bg_red'),
+                                        'bg_red_number'),
                                     'blue': excel_pool.get_format(
-                                        'bg_blue'),
+                                        'bg_blue_number'),
                                     'yellow': excel_pool.get_format(
-                                        'bg_yellow'),
+                                        'bg_yellow_number'),
                                     'green': excel_pool.get_format(
-                                        'bg_green'),
-                                    'header_blue': excel_pool.get_format(
-                                        'bg_blue_number_bold'),
+                                        'bg_green_number'),
                                 },
                             }
 
@@ -429,19 +427,13 @@ class MrpProduction(orm.Model):
                     # Write data:
                     # ---------------------------------------------------------
                     # Clean and format empty box:
-                    for position in range(dynamic_col):
-                        if not position % 2:  # Data cell (even position)
-                            total[position] = total[position] or ''
-                        else:  # Input cell (odd position)
-                            if total[position - 1] != '':
-                                total[position] = (
-                                    '', format_mode['bg']['green'])
-                            else:
-                                total[position] = (
-                                    '', format_mode['bg']['yellow'])
-
-                    # Extend record:
-                    record.extend(total)
+                    for item in total:
+                        value = item or ''
+                        record.append(value)
+                        if value:
+                            record.append(('', format_mode['bg']['green']))
+                        else:
+                            record.append(('', format_mode['bg']['yellow']))
 
                     row += 1
                     excel_pool.write_xls_line(ws_name, row, record)

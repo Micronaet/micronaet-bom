@@ -502,14 +502,13 @@ class MrpProduction(orm.Model):
 
         # Stock status from Season Job
         header = [
-            'Colore',
-            'DB padre',
+            'Colore', 'DB padre',
             'Residuo',  # Done + Pending (all job) - used
-            'Pendenti',
+            'Pendenti',  # Pending, Working
             'Totale',  # Done + Pending (all Job)
             ]
         width = [
-            20, 30, 5, 5,
+            20, 30, 5, 5, 5,
             ]
 
         ws_name = 'Magazzino Forno'

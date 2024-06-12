@@ -125,7 +125,7 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         excel_pool = self.pool.get('excel.writer')  # New report
         excel_filename = os.path.join(
-            path, '0.MRP_Oven_%s.xlsx' % now_text)
+            path, '0.MRP_Oven_%s%s.xlsx' % ('all_' if all else '', now_text))
 
         _logger.warning('Excel: %s' % excel_filename)
         header = [

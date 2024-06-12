@@ -67,6 +67,7 @@ class MrpProduction(orm.Model):
         }
 
         # Period range for documents
+        gap = 0.000001
         now = datetime.now()
         month = now.month
         year = now.year
@@ -429,15 +430,15 @@ class MrpProduction(orm.Model):
                     # ---------------------------------------------------------
                     # Clean and format empty box:
                     for position in range(dynamic_col):
-                        if not position % 2:  # Data cell
+                        if not position % 2:  # Data cell (even position)
                             total[position] = total[position] or ''
-                        else:  # Input cell
-                            if total[position - 1] > 0:
-                                total[position] = \
-                                    '', format_mode['bg']['green']
+                        else:  # Input cell (odd position)
+                            if total[position - 1] > gap:
+                                total[position] = (
+                                    '', format_mode['bg']['green'])
                             else:
-                                total[position] = \
-                                    '', format_mode['bg']['yellow']
+                                total[position] = (
+                                    '', format_mode['bg']['yellow'])
 
                     # Extend record:
                     record.extend(total)

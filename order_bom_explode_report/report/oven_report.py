@@ -148,7 +148,8 @@ class MrpProduction(orm.Model):
             5, 15, 10,
             8, 8,
             ]
-        width.extend([5 for i in range(dynamic_col)])
+        # Double extend for month + input cell:
+        width.extend([7 for i in 2 * range(dynamic_col)])
 
         # Search open order:
         line_ids = line_pool.search(cr, uid, [
@@ -261,12 +262,7 @@ class MrpProduction(orm.Model):
             if key not in oven_report[color]:
                 oven_report[color][key] = {}
 
-            # todo remove product?:
-            if product not in oven_report[color][key]:
-                oven_report[color][key][product] = {}
-
-            if deadline_ref not in oven_report[color][
-                    key][product]:
+            if deadline_ref not in oven_report[color][key]:
                 # Total record data:
                 oven_report[color][key][product][deadline_ref] = 0.0
 
@@ -348,7 +344,7 @@ class MrpProduction(orm.Model):
             oven_stock[oven_key][0] -= oven_used_qty
 
             # Oven record data (for cell):
-            oven_report[color][key][product][deadline_ref] += report_qty
+            oven_report[color][key][deadline_ref] += report_qty
 
             # -----------------------------------------------------------------
             # Update log record:
@@ -365,21 +361,20 @@ class MrpProduction(orm.Model):
         #                     Excel file with master data:
         # ---------------------------------------------------------------------
         format_mode = {}
-        for color in oven_report:  # Color loop
+        # Color loop:
+        for color in oven_report:
             ws_name = False  # Create after (if needed)
             row = 0
+            # Key: Family, Parent BOM Loop:
             for key in sorted(oven_report[color]):
                 family, parent_bom = key
                 code = parent_bom.code or 'NO CODE'
                 total = empty[:]
-                for product in sorted(
-                        oven_report[color][key],
-                        key=lambda p: (p.default_code or '')):
 
-                    # Month total columns:
-                    for deadline_ref in oven_report[color][key][product]:
-                        total[deadline_ref] += \
-                            oven_report[color][key][product][deadline_ref]
+                # Deadline Month Loop (total):
+                for deadline_ref in oven_report[color][key]:
+                    total[deadline_ref] += \
+                        oven_report[color][key][deadline_ref]
 
                 # -------------------------------------------------------------
                 # Write line if data present:

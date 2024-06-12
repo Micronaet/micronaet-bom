@@ -97,15 +97,16 @@ class MrpProduction(orm.Model):
             if key not in oven_stock:
                 oven_stock[key] = [
                     0.0,  # COMPLETED, DRAFT, RUNNING >> All!
-                    0.0,  # Pending
-                    0.0,  # Not used (only for log)
+                    0.0,  # Pending DRAFT
+                    0.0,  # All but not used (only for log)
                     ]
             total = job_line.total
+
+            # Same field:
+            oven_stock[key][0] += total  # Done (used for cover)
             if state != 'COMPLETED':  # Pending
                 oven_stock[key][1] += total
-            # Same:
-            oven_stock[key][0] += total  # Done (used)
-            oven_stock[key][2] += total  # Done (not used)
+            oven_stock[key][2] += total  # Done (not used for cover)
 
         # path = '/home/administrator/photo/log/oven'
         path = os.path.expanduser('~/NAS/industria40/Report/Oven')
@@ -114,6 +115,7 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         #                          XLS Data file:
         # ---------------------------------------------------------------------
+        parameters = {'width': 300, }
         excel_pool = self.pool.get('excel.writer')  # New report
         excel_filename = os.path.join(
             path, '0.MRP_Oven_%s_%s.xlsx' % (
@@ -122,7 +124,9 @@ class MrpProduction(orm.Model):
         _logger.warning('Excel: %s' % excel_filename)
         header = [
             'BOM ID', 'Famiglia', 'DB padre', 'Dati',
-            'Dispo netta', 'Pend.',  # Dai Job (dispo netta, da fare)
+            'F. dispo',
+            'F. pend.',  # Dai Job (dispo netta, da fare)
+            'F. totali',  # From start of season
             ]
         fixed_col = len(header)
         header.extend([
@@ -140,7 +144,7 @@ class MrpProduction(orm.Model):
         empty = [0.0 for i in range(dynamic_col)]
         width = [
             5, 25, 12, 12,
-            10, 10,
+            10, 10, 10,
             ]
         # Double extend for month + input cell:
         width.extend([7 for i in range(2 * dynamic_col)])
@@ -385,7 +389,8 @@ class MrpProduction(orm.Model):
                         code,
                         'Presenti' if has_data else 'Assenti',
                         oven_total[0],  # - oven_total[1],  # Oven remain
-                        oven_total[1],  # Oven pending
+                        oven_total[1],  # Oven pending (draft or working job)
+                        oven_total[2],  # Done this season (all)
                     ]
 
                     if not ws_name:
@@ -421,6 +426,31 @@ class MrpProduction(orm.Model):
                         excel_pool.column_width(ws_name, width)
                         excel_pool.write_xls_line(
                             color, row, header, format_mode['header'])
+
+                        # -----------------------------------------------------
+                        # Add comment in last 3 fixed columns:
+                        # -----------------------------------------------------
+                        excel_pool.write_comment(
+                            ws_name, row, fixed_col - 3,
+                            'Produzione disponibile del forno calcolata'
+                            ' da inizio stagione (considerando anche quelli '
+                            ' ancora da fare), pulita dei prodotto usati'
+                            ' durante le produzioni presenti in ERP.',
+                            parameters=parameters)
+                        excel_pool.write_comment(
+                            ws_name, row, fixed_col - 2,
+                            'Totale produzione che risulta pendente nei '
+                            'job (da inviare al forno o in lavorazione). '
+                            'Ai fini del calcolo viene comunque considerata '
+                            'come fatta e utilizzabile per coprire le '
+                            'eventuali esigenze',
+                            parameters=parameters)
+                        excel_pool.write_comment(
+                            ws_name, row, fixed_col - 1,
+                            'Totale produzione del forno da inizio stagione '
+                            'ad oggi, conteggindo come fatti anche quei pezzi'
+                            ' nei job a bozza o pendenti.',
+                            parameters=parameters)
 
                         # Filter fixed columns:
                         excel_pool.autofilter(

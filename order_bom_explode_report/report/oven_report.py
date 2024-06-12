@@ -146,8 +146,8 @@ class MrpProduction(orm.Model):
         empty = [0.0 for i in range(dynamic_col)]
 
         width = [
-            5, 15, 10,
-            8, 8,
+            5, 25, 12,
+            10, 10,
             ]
         # Double extend for month + input cell:
         width.extend([7 for i in 2 * range(dynamic_col)])
@@ -400,13 +400,6 @@ class MrpProduction(orm.Model):
                         # WS setup new color page:
                         ws_name = color
                         excel_pool.create_worksheet(name=ws_name)
-                        excel_pool.column_width(ws_name, width)
-                        # Header (row 0):
-                        excel_pool.write_xls_line(color, row, header)
-                        excel_pool.autofilter(
-                            ws_name, row, 0, row, len(header) - 1)
-                        excel_pool.freeze_panes(ws_name, 1, 5)
-                        excel_pool.column_hidden(ws_name, [0])
 
                         # Setup format:
                         excel_pool.set_format()
@@ -428,6 +421,15 @@ class MrpProduction(orm.Model):
                                         'bg_green_number'),
                                 },
                             }
+
+                        # Header (row 0):
+                        excel_pool.column_width(ws_name, width)
+                        excel_pool.write_xls_line(
+                            color, row, header, format_mode['header'])
+                        excel_pool.autofilter(
+                            ws_name, row, 0, row, len(header) - 1)
+                        excel_pool.freeze_panes(ws_name, 1, 5)
+                        excel_pool.column_hidden(ws_name, [0])
 
                     # ---------------------------------------------------------
                     # Write data:

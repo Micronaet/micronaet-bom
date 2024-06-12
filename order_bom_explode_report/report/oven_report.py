@@ -47,6 +47,15 @@ class MrpProduction(orm.Model):
     """
     _inherit = 'mrp.production'
 
+    def get_oven_report_all(self, cr, uid, context=None):
+        """ Generate Oven report all lines
+        """
+        if context is None:
+            context = {}
+        ctx = context.copy()
+        ctx['force_print_all'] = True
+        return self.get_oven_report(cr, uid, context=ctx)
+
     def get_oven_report(self, cr, uid, context=None):
         """ Generate Oven report
         """
@@ -58,7 +67,7 @@ class MrpProduction(orm.Model):
         preload_pool = self.pool.get('mrp.production.oven.selected')
 
         # Parameters:
-        print_all = True
+        print_all = context.get('force_print_all')
         excluded_code = {
             2: (
                 'TL', 'TS', 'MT', 'MS', 'PO'),

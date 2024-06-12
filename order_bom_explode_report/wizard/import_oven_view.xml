@@ -9,8 +9,9 @@
                 <form string="Import order" version="7.0">
                    <header>
                        <button string="Cancel" special="cancel" />
-                       <button name="action_get_oven_report" string="Esporta MRP per forno" type="object" icon="gtk-print" class="oe_highlight" assert="Esporto lo stato del forno in Sharepoint, confermi (ci vuole 5 / 10 min)?"/>
-                       <button name="action_import_with_update" string="Carica file" type="object" icon="gtk-jump-to" class="oe_highlight" assert="Carico il file, controllare bene la modalità usata, confermi?"/>
+                       <button name="get_oven_report_all" string="Report Forno (Tutto)" type="object" icon="gtk-print" class="oe_highlight" confirm="Esporto lo stato del forno completo in Sharepoint, confermi (tempo 5 / 10 min)?"/>
+                       <button name="action_get_oven_report" string="Report Forno (Movimentati)" type="object" icon="gtk-print" class="oe_highlight" confirm="Esporto lo stato del forno in Sharepoint, confermi (tempo 5 / 10 min)?"/>
+                       <button name="action_import_with_update" string="Carica file" type="object" icon="gtk-jump-to" class="oe_highlight" confirm="Carico il file, controllare bene la modalità usata, confermi?"/>
                    </header>
                    <group colspan="4" col="4">
                         <field name="file" colspan="4" />

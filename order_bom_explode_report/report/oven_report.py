@@ -121,27 +121,29 @@ class MrpProduction(orm.Model):
 
         _logger.warning('Excel: %s' % excel_filename)
         header = [
-            'BOM ID', 'Famiglia', 'DB padre',
+            'BOM ID', 'Famiglia', 'DB padre', 'Dati',
             'Dispo netta', 'Pend.',  # Dai Job (dispo netta, da fare)
+            ]
+        fixed_col = len(header)
+        header.extend([
             '09', '', '10', '', '11', '', '12', '', '01', '', '02', '',
             '03', '', '04', '', '05', '', '06', '', '07', '', '08', '',
-            ]
+            ])
+
+        # Convert dict:
         header_period = {
             '09': 0, '10': 1, '11': 2, '12': 3,
             '01': 4, '02': 5, '03': 6, '04': 7, '05': 8, '06': 9,
             '07': 10, '08': 11,
             }
-        fixed_col = len(header)
         dynamic_col = len(header_period)
-
         empty = [0.0 for i in range(dynamic_col)]
-
         width = [
-            5, 25, 12,
+            5, 25, 12, 12,
             10, 10,
             ]
         # Double extend for month + input cell:
-        width.extend([7 for i in 2 * range(dynamic_col)])
+        width.extend([7 for i in range(2 * dynamic_col)])
 
         # Search open order:
         line_ids = line_pool.search(cr, uid, [
@@ -371,7 +373,8 @@ class MrpProduction(orm.Model):
                 # -------------------------------------------------------------
                 # Write line if data present:
                 # -------------------------------------------------------------
-                if print_all or any(total):  # Only if data is present!
+                has_data = any(total)
+                if print_all or has_data:  # Only if data is present!
                     # Write Family line:
                     oven_key = color, parent_bom
                     oven_total = oven_stock[oven_key]  # Always present here
@@ -380,6 +383,7 @@ class MrpProduction(orm.Model):
                         parent_bom.id,
                         family,
                         code,
+                        'Presenti' if has_data else 'Assenti',
                         oven_total[0],  # - oven_total[1],  # Oven remain
                         oven_total[1],  # Oven pending
                     ]

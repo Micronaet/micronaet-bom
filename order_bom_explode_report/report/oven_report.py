@@ -433,7 +433,7 @@ class MrpProduction(orm.Model):
                         if not position % 2:  # Data cell (even position)
                             total[position] = total[position] or ''
                         else:  # Input cell (odd position)
-                            if total[position - 1] > gap:
+                            if total[position - 1] != '':
                                 total[position] = (
                                     '', format_mode['bg']['green'])
                             else:

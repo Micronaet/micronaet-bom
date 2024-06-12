@@ -39,6 +39,13 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
     """
     _name = 'industria.import.oven.report.xlsx'
 
+    def action_get_oven_report(self, cr, uid, ids, context=None):
+        """ Generate report
+        """
+        mrp_pool = self.pool.get('mrp.production')
+        return mrp_pool.get_oven_report(cr, uid, ids, context=context)
+
+
     def action_import_with_update(self, cr, uid, ids, context=None):
         """ Event for button done force update lead lot
         """

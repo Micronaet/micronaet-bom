@@ -106,7 +106,7 @@ class MrpProduction(orm.Model):
             oven_stock[key][2] += total  # Done (not used)
 
         # path = '/home/administrator/photo/log/oven'
-        path = os.path.expanduer('~/NAS/industria40/Report/Oven')
+        path = os.path.expanduser('~/NAS/industria40/Report/Oven')
         now_text = str(now).replace('/', '_').replace(':', '.')
 
         # ---------------------------------------------------------------------

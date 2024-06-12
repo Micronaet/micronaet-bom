@@ -105,7 +105,8 @@ class MrpProduction(orm.Model):
             oven_stock[key][0] += total  # Done (used)
             oven_stock[key][2] += total  # Done (not used)
 
-        path = '/home/administrator/photo/log/oven'
+        # path = '/home/administrator/photo/log/oven'
+        path = os.path.expanduer('~/NAS/industria40/Report/Oven')
         now_text = str(now).replace('/', '_').replace(':', '.')
 
         # ---------------------------------------------------------------------
@@ -119,21 +120,21 @@ class MrpProduction(orm.Model):
         header = [
             'BOM ID', 'Famiglia', 'DB padre',
             'Dispo netta', 'Pend.',  # Dai Job (dispo netta, da fare)
-            '09', '10', '11', '12', '01', '02', '03', '04', '05', '06',
-            '07', '08',
+            '09', '', '10', '', '11', '', '12', '', '01', '', '02', '',
+            '03', '', '04', '', '05', '', '06', '', '07', '', '08', '',
             ]
         header_period = {
-            '09': 0, '10': 1, '11': 2, '12': 3,
-            '01': 4, '02': 5, '03': 6, '04': 7, '05': 8, '06': 9,
-            '07': 10, '08': 11,
+            '09': 0, '10': 2, '11': 4, '12': 6,
+            '01': 8, '02': 10, '03': 12, '04': 14, '05': 16, '06': 18,
+            '07': 20, '08': 22,
             }
         fixed_col = len(header)
-        empty = [0.0 for i in range(len(header_period))]
+        empty = [0.0 for i in range(2 * len(header_period))]
         width = [
             5, 15, 10,
             8, 8,
             ]
-        width.extend([5 for i in range(len(header_period))])
+        width.extend([5 for i in range(2 * len(header_period))])
 
         # Search open order:
         line_ids = line_pool.search(cr, uid, [
@@ -332,7 +333,7 @@ class MrpProduction(orm.Model):
             # Clean oven stock with real used qty:
             oven_stock[oven_key][0] -= oven_used_qty
 
-            # Oven repord data (for cell):
+            # Oven record data (for cell):
             oven_report[color][key][product][deadline_ref] += report_qty
 
             # -----------------------------------------------------------------
@@ -349,6 +350,7 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         #                     Excel file with master data:
         # ---------------------------------------------------------------------
+        format_mode = {}
         for color in oven_report:   # Color loop
             ws_name = False  # Create after (if needed)
             row = 0
@@ -380,7 +382,6 @@ class MrpProduction(orm.Model):
                         oven_total[0],   # - oven_total[1],  # Oven remain
                         oven_total[1],  # Oven pending
                     ]
-                    record.extend([(d or '') for d in total])
 
                     if not ws_name:
                         # -----------------------------------------------------
@@ -396,6 +397,39 @@ class MrpProduction(orm.Model):
                             ws_name, row, 0, row, len(header) - 1)
                         excel_pool.freeze_panes(ws_name, 1, 5)
                         excel_pool.column_hidden(ws_name, [0])
+
+                        # Setup format:
+                        excel_pool.set_format()
+                        if not format_mode:
+                            format_mode = {
+                                'title': excel_pool.get_format('title'),
+                                'header': excel_pool.get_format('header'),
+                                'text': excel_pool.get_format('text'),
+                                'number': excel_pool.get_format('number'),
+
+                                'bg': {
+                                    'red': excel_pool.get_format(
+                                        'bg_red'),
+                                    'blue': excel_pool.get_format(
+                                        'bg_blue'),
+                                    'yellow': excel_pool.get_format(
+                                        'bg_yellow'),
+                                    'green': excel_pool.get_format(
+                                        'bg_green'),
+                                    'header_blue': excel_pool.get_format(
+                                        'bg_blue_number_bold'),
+                                },
+                            }
+                    # ---------------------------------------------------------
+                    # Write data:
+                    # ---------------------------------------------------------
+                    # Clean and format empty box:
+                    for position in range(1, 24, 2):
+                        total[position] = ('', format_mode['title']),
+
+                    # Extend record:
+                    record.extend([(d or '') for d in total])
+
                     row += 1
                     excel_pool.write_xls_line(ws_name, row, record)
         excel_pool.save_file_as(excel_filename)

@@ -264,7 +264,7 @@ class MrpProduction(orm.Model):
 
             if deadline_ref not in oven_report[color][key]:
                 # Total record data:
-                oven_report[color][key][product][deadline_ref] = 0.0
+                oven_report[color][key][deadline_ref] = 0.0
 
             # -----------------------------------------------------------------
             # A. Read data from line:

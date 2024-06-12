@@ -57,6 +57,8 @@ class MrpProduction(orm.Model):
         line_pool = self.pool.get('sale.order.line')
         preload_pool = self.pool.get('mrp.production.oven.selected')
 
+        # Parameters:
+        print_all = True
         excluded_code = {
             2: (
                 'TL', 'TS', 'MT', 'MS', 'PO'),
@@ -67,7 +69,6 @@ class MrpProduction(orm.Model):
         }
 
         # Period range for documents
-        gap = 0.000001
         now = datetime.now()
         month = now.month
         year = now.year
@@ -355,7 +356,7 @@ class MrpProduction(orm.Model):
         #                     Excel file with master data:
         # ---------------------------------------------------------------------
         format_mode = {}
-        for color in oven_report:   # Color loop
+        for color in oven_report:  # Color loop
             ws_name = False  # Create after (if needed)
             row = 0
             for key in sorted(oven_report[color]):
@@ -372,9 +373,9 @@ class MrpProduction(orm.Model):
                             oven_report[color][key][product][deadline_ref]
 
                 # -------------------------------------------------------------
-                # Write line
+                # Write line if data present:
                 # -------------------------------------------------------------
-                if any(total):  # Only if data is present!
+                if print_all or any(total):  # Only if data is present!
                     # Write Family line:
                     oven_key = color, parent_bom
                     oven_total = oven_stock[oven_key]  # Always present here
@@ -383,7 +384,7 @@ class MrpProduction(orm.Model):
                         parent_bom.id,
                         family,
                         code,
-                        oven_total[0],   # - oven_total[1],  # Oven remain
+                        oven_total[0],  # - oven_total[1],  # Oven remain
                         oven_total[1],  # Oven pending
                     ]
 

@@ -113,8 +113,8 @@ class MrpProduction(orm.Model):
         #                          XLS Data file:
         # ---------------------------------------------------------------------
         excel_pool = self.pool.get('excel.writer')  # New report
-        excel_filename = os.path.join(
-            path, '0.MRP_Oven_%s.xlsx' % now_text)
+        excel_filename = os.path.join(path, '0.MRP_Oven_TODO.xlsx')
+        # path, '0.MRP_Oven_%s.xlsx' % now_text)
 
         _logger.warning('Excel: %s' % excel_filename)
         header = [
@@ -447,8 +447,8 @@ class MrpProduction(orm.Model):
         # Log file:
         del excel_pool
         excel_pool = self.pool.get('excel.writer')  # New report
-        excel_filename = os.path.join(
-            path, '2.Log_MRP_Oven_%s.xlsx' % now_text)
+        excel_filename = os.path.join(path, '2.MRP_Oven_log.xlsx')
+        #    path, '2.Log_MRP_Oven_%s.xlsx' % now_text)
 
         _logger.warning('Excel: %s' % excel_filename)
         header = [
@@ -497,8 +497,8 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         del excel_pool
         excel_pool = self.pool.get('excel.writer')
-        excel_filename = os.path.join(
-            path, '1.Stock_Status_Oven_%s.xlsx' % now_text)
+        excel_filename = os.path.join(path, '1.MRP_Oven_Stock.xlsx')
+        #   path, '1.Stock_Status_Oven_%s.xlsx' % now_text)
 
         # Stock status from Season Job
         header = [

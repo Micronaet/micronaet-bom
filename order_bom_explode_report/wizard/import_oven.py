@@ -43,7 +43,7 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
         """ Generate report
         """
         mrp_pool = self.pool.get('mrp.production')
-        return mrp_pool.get_oven_report(cr, uid, ids, context=context)
+        return mrp_pool.get_oven_report(cr, uid, context=context)
 
 
     def action_import_with_update(self, cr, uid, ids, context=None):

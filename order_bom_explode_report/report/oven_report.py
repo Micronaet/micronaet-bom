@@ -47,15 +47,6 @@ class MrpProduction(orm.Model):
     """
     _inherit = 'mrp.production'
 
-    def get_oven_report_all(self, cr, uid, context=None):
-        """ Generate Oven report all lines
-        """
-        if context is None:
-            context = {}
-        ctx = context.copy()
-        ctx['force_print_all'] = True
-        return self.get_oven_report(cr, uid, context=ctx)
-
     def get_oven_report(self, cr, uid, context=None):
         """ Generate Oven report
         """

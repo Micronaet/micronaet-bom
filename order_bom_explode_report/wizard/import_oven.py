@@ -45,6 +45,17 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
         mrp_pool = self.pool.get('mrp.production')
         return mrp_pool.get_oven_report(cr, uid, context=context)
 
+    def get_oven_report_all(self, cr, uid, ids, context=None):
+        """ Generate Oven report all lines
+        """
+        mrp_pool = self.pool.get('mrp.production')
+
+        if context is None:
+            context = {}
+        ctx = context.copy()
+        ctx['force_print_all'] = True
+        return mrp_pool.get_oven_report(cr, uid, context=ctx)
+
     def action_import_with_update(self, cr, uid, ids, context=None):
         """ Event for button done force update lead lot
         """

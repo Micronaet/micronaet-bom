@@ -129,12 +129,15 @@ class MrpProduction(orm.Model):
             '07': 20, '08': 22,
             }
         fixed_col = len(header)
-        empty = [0.0 for i in range(2 * len(header_period))]
+        dynamic_col = 2 * len(header_period)
+
+        empty = [0.0 for i in range(dynamic_col)]
+
         width = [
             5, 15, 10,
             8, 8,
             ]
-        width.extend([5 for i in range(2 * len(header_period))])
+        width.extend([5 for i in range(dynamic_col)])
 
         # Search open order:
         line_ids = line_pool.search(cr, uid, [
@@ -420,15 +423,19 @@ class MrpProduction(orm.Model):
                                         'bg_blue_number_bold'),
                                 },
                             }
+
                     # ---------------------------------------------------------
                     # Write data:
                     # ---------------------------------------------------------
                     # Clean and format empty box:
-                    for position in range(1, 24, 2):
-                        total[position] = ('', format_mode['title']),
+                    for position in range(dynamic_col):
+                        if not position % 2:  # Data cell
+                            total[position] = total[position] or ''
+                        else:  # Input cell
+                            total[position] = '', format_mode['bg']['blue']
 
                     # Extend record:
-                    record.extend([(d or '') for d in total])
+                    record.extend(total)
 
                     row += 1
                     excel_pool.write_xls_line(ws_name, row, record)

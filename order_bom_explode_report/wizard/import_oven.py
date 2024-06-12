@@ -129,7 +129,7 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
                     # Read data:
                     bom_id = int(ws.cell(row, 0).value)
                     try:
-                        quantity = int(ws.cell(row, 3).value)
+                        quantity = int(ws.cell(row, 4).value)
 
                         # Collect data for job if negative:
                         if quantity < 0:
@@ -149,7 +149,7 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
             year_1 = '2023'
             year_2 = '2024'
             ctx = context.copy()
-            created_at = '%s-09-01' % year_1 # Create start of season
+            created_at = '%s-09-01' % year_1  # Create start of season
             ctx['force_data'] = {
                 'created_at': created_at
                 }

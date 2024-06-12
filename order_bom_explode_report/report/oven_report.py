@@ -432,7 +432,12 @@ class MrpProduction(orm.Model):
                         if not position % 2:  # Data cell
                             total[position] = total[position] or ''
                         else:  # Input cell
-                            total[position] = '', format_mode['bg']['blue']
+                            if total[position - 1] > 0:
+                                total[position] = \
+                                    '', format_mode['bg']['green']
+                            else:
+                                total[position] = \
+                                    '', format_mode['bg']['yellow']
 
                     # Extend record:
                     record.extend(total)

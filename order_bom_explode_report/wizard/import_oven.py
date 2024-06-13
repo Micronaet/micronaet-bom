@@ -77,8 +77,11 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
                 _('Please pass a XLSX file for import order'),
                 )
         b64_file = base64.decodestring(wizard.file)
-        now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-        now_text = str(now).replace(':', '_').replace('-', '_')
+
+        # Save in temp:
+        now = datetime.now()
+        now_text = now.strftime(DEFAULT_SERVER_DATETIME_FORMAT).replace(
+            ':', '_').replace('-', '_')
         filename = '/tmp/oven_%s.xlsx' % now_text
         f = open(filename, 'wb')
         f.write(b64_file)
@@ -103,6 +106,7 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Loop on all pages:
         # ---------------------------------------------------------------------
+        pdb.set_trace()
         error = ''
         negative_data = {}
         if wizard.mode == 'negative':
@@ -145,14 +149,20 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
             # -----------------------------------------------------------------
             # Generate Job and confirm:
             # -----------------------------------------------------------------
-            year_1 = '2023'
-            year_2 = '2024'
+            if now.month < 9:
+                year_1 = now.year
+                year_2 = year_1 - 1
+            else:
+                year_2 = now.year
+                year_1 = year_2 + 1
+
             ctx = context.copy()
             created_at = '%s-09-01' % year_1  # Create start of season
-            ctx['force_data'] = {
-                'created_at': created_at
+            ctx['force_header'] = {
+                'created_at': created_at,
+                'state': 'COMPLETED',
                 }
-
+            pdb.set_trace()
             for color in negative_data:
                 # Create pending lined for this color:
                 for bom_id in negative_data[color]:

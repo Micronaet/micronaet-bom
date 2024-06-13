@@ -148,15 +148,16 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
             # -----------------------------------------------------------------
             # Generate Job and confirm:
             # -----------------------------------------------------------------
-            if now.month < 9:
-                year_1 = now.year
-                year_2 = year_1 - 1
+            this_year = now.year
+            if now.month >= 9:
+                year_1 = this_year
+                year_2 = this_year + 1
             else:
-                year_2 = now.year
-                year_1 = year_2 + 1
+                year_2 = this_year + 1
+                year_1 = this_year
 
             ctx = context.copy()
-            created_at = '%s-09-01' % year_1  # Create start of season
+            created_at = '%s-09-15 09:00:00' % year_1  # Create start of season
             ctx['force_header'] = {
                 'created_at': created_at,
                 'state': 'COMPLETED',

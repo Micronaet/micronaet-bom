@@ -106,7 +106,6 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Loop on all pages:
         # ---------------------------------------------------------------------
-        pdb.set_trace()
         error = ''
         negative_data = {}
         if wizard.mode == 'negative':
@@ -162,7 +161,7 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
                 'created_at': created_at,
                 'state': 'COMPLETED',
                 }
-            pdb.set_trace()
+
             for color in negative_data:
                 # Create pending lined for this color:
                 for bom_id in negative_data[color]:

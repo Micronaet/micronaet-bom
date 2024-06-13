@@ -153,8 +153,8 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
                 year_1 = this_year
                 year_2 = this_year + 1
             else:
-                year_2 = this_year + 1
-                year_1 = this_year
+                year_1 = this_year - 1
+                year_2 = this_year
 
             ctx = context.copy()
             created_at = '%s-09-15 09:00:00' % year_1  # Create start of season

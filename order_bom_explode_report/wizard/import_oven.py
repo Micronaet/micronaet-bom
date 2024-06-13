@@ -92,7 +92,6 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
         # ---------------------------------------------------------------------
         # Load force name (for web publish)
         # ---------------------------------------------------------------------
-        pdb.set_trace()
         try:
             wb = xlrd.open_workbook(filename)
         except:

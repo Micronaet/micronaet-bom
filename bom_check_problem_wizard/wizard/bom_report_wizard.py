@@ -488,8 +488,11 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 'Confronto_%s_%s.xlsx' % (mode, now),
                 )
             _logger.info('Saving %s file ...' % excel_filename)
-            excel_pool.save_file_as(excel_filename)
-            pdb.set_trace()
+            try:
+                pdb.set_trace()
+                excel_pool.save_file_as(excel_filename)
+            except:
+                pass
             '''
             result = excel_pool.save_file_as(excel_filename)
             

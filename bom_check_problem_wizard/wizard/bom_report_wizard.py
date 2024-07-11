@@ -118,6 +118,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         product_url = r'http://192.168.1.181:18069/web#id=%s' \
                       r'&view_type=form&model=product.product&menu_id=600&' \
                       r'action=782'
+        share_folder = os.path.expanduser('~/NAS/industria40/Report/Oven')
 
         # Generate dynamic reference date (2 years)
         now = u'%s' % datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
@@ -474,10 +475,24 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                         component.product_qty,
                         ], default_format=cell_format['text'], col=col)
 
-        return excel_pool.return_attachment(
-            cr, uid, 'BOM check',
-            # name_of_file='confronto_db.xlsx', version='8.0',  # php=True,
-            context=context)
+        if share_folder:
+            now = str(datetime.now())[:19].replace(
+                ':', '_').replace('/', '_').replace(' ', '_')
+            if only_hw:
+                mode = 'Semilavorati'
+            else:
+                mode = 'Prodotti'
+            excel_filename = os.path.join(
+                share_folder,
+                'Confronto_%_%s.xslx' % (mode, now,),
+            )
+            excel_pool.save_file_as(excel_filename)
+
+        else:  # Not used for now
+            return excel_pool.return_attachment(
+                cr, uid, 'BOM check',
+                # name_of_file='confronto_db.xlsx', version='8.0',  # php=True,
+                context=context)
 
     def action_print(self, cr, uid, ids, context=None):
         """ Event for button print

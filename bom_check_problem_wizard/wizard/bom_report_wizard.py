@@ -25,6 +25,7 @@ import pdb
 import sys
 import logging
 import openerp
+import shutil
 import openerp.addons.decimal_precision as dp
 from openerp.osv import fields, osv, expression, orm
 from datetime import datetime, timedelta
@@ -488,11 +489,14 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 )
             _logger.info('Saving %s file ...' % excel_filename)
             pdb.set_trace()
-            try:
-                result = excel_pool.save_file_as(excel_filename)
-            except:
+            result = excel_pool.save_file_as(excel_filename)
+            if type(result) == tuple:
                 pdb.set_trace()
+                del excel_pool
+                origin, destination = result
+                shutil.move(origin, destination)
             return excel_filename
+
         else:  # Not used for now
             return excel_pool.return_attachment(
                 cr, uid, 'BOM check',

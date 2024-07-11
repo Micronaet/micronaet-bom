@@ -484,7 +484,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 mode = 'Prodotti'
             excel_filename = os.path.join(
                 share_folder,
-                'Confronto_%_%s.xslx' % (mode, now,),
+                'Confronto_%s_%s.xslx' % (mode, now,),
             )
             excel_pool.save_file_as(excel_filename)
 

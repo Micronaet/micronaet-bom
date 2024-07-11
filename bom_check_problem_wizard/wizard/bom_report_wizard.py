@@ -242,6 +242,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
 
         # todo needed?
         page_error = []
+        page_created = []
         for parent in sorted(
                 parents, key=lambda x: x.product_id.default_code):
             parent_product = parent.product_id
@@ -263,16 +264,16 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             _logger.warning(u'New page: %s' % ws_name)
             version = 1
             while True:
-                try:
-                    excel_pool.create_worksheet(ws_name)
-                    break  # Created so exit
-                except:
+                if ws_name in page_created:  # Generate page-version
                     page_error.append(ws_name)
                     _logger.error(
                         u'Cannot create %s sheet, use yet created' % ws_name)
-                    ws_name = u'%s vers. %s' % (
-                        ws_name, version
-                    )
+                    ws_name = u'%s vers. %s' % (ws_name, version)
+                    continue
+
+                excel_pool.create_worksheet(ws_name)
+                page_created.append(ws_name)
+                break  # Created (so exit)
 
             header = [
                 u'OK', u'Venduto', u'Prodotto', u'Nome', u'Pz',

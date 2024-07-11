@@ -489,7 +489,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             _logger.info('Saving %s file ...' % excel_filename)
             pdb.set_trace()
             excel_pool.save_file_as(excel_filename)
-
+            return excel_filename
         else:  # Not used for now
             return excel_pool.return_attachment(
                 cr, uid, 'BOM check',

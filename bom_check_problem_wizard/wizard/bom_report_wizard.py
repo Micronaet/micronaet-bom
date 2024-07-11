@@ -118,7 +118,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         product_url = r'http://192.168.1.181:18069/web#id=%s' \
                       r'&view_type=form&model=product.product&menu_id=600&' \
                       r'action=782'
-        share_folder = os.path.expanduser('~/NAS/industria40/Report/Oven')
+        share_folder = os.path.expanduser('~/NAS/industria40/Report/Distinte')
 
         # Generate dynamic reference date (2 years)
         now = u'%s' % datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)

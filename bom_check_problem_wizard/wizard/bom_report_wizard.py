@@ -483,6 +483,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 mode = 'Semilavorati'
             else:
                 mode = 'Prodotti'
+
             excel_filename = os.path.join(
                 share_folder,
                 'Confronto_%s_%s.xlsx' % (mode, now),
@@ -490,7 +491,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             _logger.info('Saving %s file ...' % excel_filename)
             try:
                 pdb.set_trace()
-                excel_pool.save_file_as(excel_filename)
+                result = excel_pool.save_file_as(excel_filename)
             except:
                 pass
             '''

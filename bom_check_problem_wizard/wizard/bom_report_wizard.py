@@ -552,8 +552,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             ('pipe', 'Pipe in Halfworked'),
             ('line', 'Product presence bom'),
             ('not_product', 'Excluded product'),
-            ('excel', 'Excel check'),
-            ('excel_hw', 'Excel semilavorati'),
+            ('excel', 'Excel check (Sharepoint)'),
+            ('excel_hw', 'Excel semilavorati (Sharepoint)'),
             ], 'Report mode', required=True),
 
         'from_order': fields.boolean('From order'),

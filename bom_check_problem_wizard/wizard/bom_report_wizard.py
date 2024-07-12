@@ -343,7 +343,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 u'Elenco DB con padre: %s - %s' % (
                     ws_name, parent_product.name),
                 ], default_format=cell_format['title'])
-            excel_pool.freeze_panes(ws_name, 2, 5)
+            excel_pool.freeze_panes(ws_name, 2, extra_col)
 
             # -----------------------------------------------------------------
             # Header:
@@ -356,8 +356,12 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             # -----------------------------------------------------------------
             # Create page with parent bom:
             # -----------------------------------------------------------------
+            products = parents[parent]
             for product in sorted(
-                    parents[parent], key=lambda x: x.default_code):
+                    products, key=lambda x: (
+                        (x.default_code or '')[12:13] == 'S',  # Single
+                        x.default_code or '',  # Code
+                        )):
                 if product == parent.product_id:
                     format_mode = cell_format['bg']['yellow']
                 elif product in ordered_product:
@@ -380,8 +384,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 # -------------------------------------------------------------
                 # Color check:
                 # -------------------------------------------------------------
-                product_color = default_code[8:12]
-                color_text = 'P {}'.format(product_color)
+                product_color = default_code[8:12].strip()
+                color_text = 'Prod. {} >> '.format(product_color)
                 check_color_format = cell_format['bg']['green']
 
                 record = [
@@ -401,8 +405,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     component_code = (product.default_code or '').upper()
                     category = line.category_id.name
                     if category in ('Telo', 'Poggiatesta', ):
-                        category_color = component_code[10:14]
-                        color_text = '- [{}] {}'.format(
+                        category_color = component_code[10:14].strip()
+                        color_text += ' [{}] {}'.format(
                             category, category_color)
                         if category_color != product_color:
                             check_color_format = cell_format['bg']['red']

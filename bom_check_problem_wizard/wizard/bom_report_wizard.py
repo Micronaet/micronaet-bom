@@ -276,12 +276,12 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 break  # Created (so exit)
 
             header = [
-                u'OK', u'Venduto', u'Single',
+                u'OK', u'Venduto', u'Single', u'Soft',
                 u'Prodotto', u'Nome', u'Pz', u'Colori',
                 ]
             footer = []
             width = [
-                3, 6, 5, 12, 40, 4, 15,
+                3, 6, 5, 5, 12, 40, 4, 15,
                 ]
 
             extra_col = len(header)
@@ -378,6 +378,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 # -------------------------------------------------------------
                 q_x_pack = int(product.q_x_pack)
                 is_single = default_code[12:13] == 'S'
+                is_soft = default_code[3:4] == 'S'
                 if not q_x_pack or (is_single and q_x_pack != 1):
                     check_single_color = cell_format['bg']['red']
                 else:
@@ -395,6 +396,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                      format_mode),
                     (u'X' if product in ordered_product else u'', format_mode),
                     (u'X' if is_single else u'', format_mode),
+                    (u'X' if is_soft else u'', format_mode),
                     (u'%s' % product.default_code, format_mode),
                     (u'%s' % product.name, format_mode),
                     (u'%s' % q_x_pack, check_single_color),

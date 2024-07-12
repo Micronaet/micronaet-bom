@@ -406,7 +406,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     component_code = (product.default_code or '').upper()
                     category = line.category_id.name
                     if not is_placeholder_product and category in (
-                            'Telo', 'Poggiatesta'):
+                            'Telo', 'Poggiatesta', 'Materassino'):
                         category_color = component_code[8:12].strip()
                         color_text += ' [{}] "{}"'.format(
                             category, category_color)

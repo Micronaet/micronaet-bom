@@ -276,11 +276,12 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 break  # Created (so exit)
 
             header = [
-                u'OK', u'Venduto', u'Prodotto', u'Nome', u'Pz', u'Colori',
+                u'OK', u'Venduto', u'Single',
+                u'Prodotto', u'Nome', u'Pz', u'Colori',
                 ]
             footer = []
             width = [
-                3, 6, 12, 40, 4, 15,
+                3, 6, 5, 12, 40, 4, 15,
                 ]
 
             extra_col = len(header)
@@ -352,6 +353,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
             excel_pool.write_xls_line(
                 ws_name, row, header, default_format=cell_format['header'])
             excel_pool.row_height(ws_name, [row], height=30)
+            excel_pool.autofilter(ws_name, row, 0, row, extra_col - 1)
 
             # -----------------------------------------------------------------
             # Create page with parent bom:
@@ -392,6 +394,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     (u'X' if product.dynamic_bom_checked else u'',
                      format_mode),
                     (u'X' if product in ordered_product else u'', format_mode),
+                    (u'X' if is_single else u'', format_mode),
                     (u'%s' % product.default_code, format_mode),
                     (u'%s' % product.name, format_mode),
                     (u'%s' % q_x_pack, check_single_color),

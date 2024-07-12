@@ -385,7 +385,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 # Color check:
                 # -------------------------------------------------------------
                 product_color = default_code[8:12].strip()
-                color_text = 'Prod. {} >> '.format(product_color)
+                color_text = 'Prod. "{}" >> '.format(product_color)
                 check_color_format = cell_format['bg']['green']
 
                 record = [
@@ -405,8 +405,8 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     component_code = (product.default_code or '').upper()
                     category = line.category_id.name
                     if category in ('Telo', 'Poggiatesta', ):
-                        category_color = component_code[10:14].strip()
-                        color_text += ' [{}] {}'.format(
+                        category_color = component_code[8:12].strip()
+                        color_text += ' [{}] "{}"'.format(
                             category, category_color)
                         if category_color != product_color:
                             check_color_format = cell_format['bg']['red']

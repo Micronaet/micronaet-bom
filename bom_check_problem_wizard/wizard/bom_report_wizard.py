@@ -392,11 +392,12 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 check_color_format = cell_format['bg']['green']
 
                 record = [
-                    (u'X' if product.dynamic_bom_checked else u'',
+                    (u'S' if product.dynamic_bom_checked else u'N',
                      format_mode),
-                    (u'X' if product in ordered_product else u'', format_mode),
-                    (u'X' if is_single else u'', format_mode),
-                    (u'X' if is_soft else u'', format_mode),
+                    (u'S' if product in ordered_product else u'N',
+                     format_mode),
+                    (u'S' if is_single else u'N', format_mode),
+                    (u'S' if is_soft else u'N', format_mode),
                     (u'%s' % product.default_code, format_mode),
                     (u'%s' % product.name, format_mode),
                     (u'%s' % q_x_pack, check_single_color),

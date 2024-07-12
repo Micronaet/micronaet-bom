@@ -402,9 +402,11 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
 
                 for line in product.dynamic_bom_line_ids:
                     product = line.product_id
+                    is_placeholder_product = is_placeholder(product)
                     component_code = (product.default_code or '').upper()
                     category = line.category_id.name
-                    if category in ('Telo', 'Poggiatesta', ):
+                    if not is_placeholder_product and category in (
+                            'Telo', 'Poggiatesta'):
                         category_color = component_code[8:12].strip()
                         color_text += ' [{}] "{}"'.format(
                             category, category_color)
@@ -422,7 +424,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     col = category_db[category][0]
 
                     cell_text = u'%s' % product.default_code
-                    if is_placeholder(product):
+                    if is_placeholder_product:
                         record[col] = (
                             cell_text, cell_format['bg']['red'])
                     elif product == category_db[category][2]:

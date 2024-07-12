@@ -457,7 +457,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 # Add ODOO product link:
                 url = product_url % product_id
                 excel_pool.write_url(
-                    ws_name, row, 2, url, default_code or '?', tip='')
+                    ws_name, row, 4, url, default_code or '?', tip='')
 
                 # Update color check:
                 record[extra_col - 1] = (color_text, check_color_format)

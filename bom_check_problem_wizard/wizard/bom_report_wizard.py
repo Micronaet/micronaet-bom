@@ -205,7 +205,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
         ws_note_name = u'Note'
         excel_pool.create_worksheet(ws_note_name)
 
-        excel_pool.set_format()
+        excel_pool.set_format()  # number_format='#.###0'
         cell_format = {
             'title': excel_pool.get_format('title'),
             'header': excel_pool.get_format('header'),

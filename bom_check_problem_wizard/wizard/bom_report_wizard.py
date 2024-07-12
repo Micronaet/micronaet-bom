@@ -276,11 +276,11 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 break  # Created (so exit)
 
             header = [
-                u'OK', u'Venduto', u'Prodotto', u'Nome', u'Pz',
+                u'OK', u'Venduto', u'Prodotto', u'Nome', u'Pz', u'Colori',
                 ]
             footer = []
             width = [
-                3, 6, 12, 40, 4,
+                3, 6, 12, 40, 4, 15,
                 ]
 
             extra_col = len(header)
@@ -365,7 +365,24 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 else:
                     format_mode = cell_format['text']
                 product_id = product.id
-                default_code = product.default_code or '?'
+                default_code = (product.default_code or '?').upper()
+
+                # -------------------------------------------------------------
+                # Single check:
+                # -------------------------------------------------------------
+                q_x_pack = int(product.q_x_pack)
+                is_single = default_code[12:13] == 'S'
+                if is_single and q_x_pack != 1:
+                    check_single_color = cell_format['bg']['red']
+                else:
+                    check_single_color = cell_format['bg']['green']
+
+                # -------------------------------------------------------------
+                # Color check:
+                # -------------------------------------------------------------
+                product_color = default_code[8:12]
+                color_text = 'P {}'.format(product_color)
+                check_color_format = cell_format['bg']['green']
 
                 record = [
                     (u'X' if product.dynamic_bom_checked else u'',
@@ -373,14 +390,23 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                     (u'X' if product in ordered_product else u'', format_mode),
                     (u'%s' % product.default_code, format_mode),
                     (u'%s' % product.name, format_mode),
-                    (u'%s' % int(product.q_x_pack), format_mode),
+                    (u'%s' % q_x_pack, check_single_color),
+                    '',   # Color (updated after)
                     ]
                 record.extend(['' for i in range(0, 2 * pos)])
                 record.append('')  # Note
 
                 for line in product.dynamic_bom_line_ids:
                     product = line.product_id
+                    component_code = (product.default_code or '').upper()
                     category = line.category_id.name
+                    if category in ('Telo', 'Poggiatesta', ):
+                        category_color = component_code[10:14]
+                        color_text = '- [{}] {}'.format(
+                            category, category_color)
+                        if category_color != product_color:
+                            check_color_format = cell_format['bg']['red']
+
                     qty = line.product_qty
                     # Jump category in dynamic rules not found!
                     if category not in category_db:
@@ -420,6 +446,10 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 url = product_url % product_id
                 excel_pool.write_url(
                     ws_name, row, 2, url, default_code or '?', tip='')
+
+                # Update color check:
+                record[extra_col - 1] = (color_text, check_color_format)
+
                 # Write line
                 excel_pool.write_xls_line(
                     ws_name, row, record, default_format=cell_format['text'])
@@ -490,22 +520,7 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 'Confronto_%s_%s.xlsx' % (mode, now),
                 )
             _logger.info('Saving %s file ...' % excel_filename)
-            try:
-                result = excel_pool.save_file_as(excel_filename)
-            except:
-                pass
-            '''
-            result = excel_pool.save_file_as(excel_filename)
-            
-            if type(result) == tuple:
-                pdb.set_trace()
-                try:
-                    del excel_pool
-                    origin, destination = result
-                    shutil.move(origin, destination)
-                except:
-                    _logger.error(str(sys.exc_info()))
-            '''
+            excel_pool.save_file_as(excel_filename)
             return excel_filename
 
         else:  # Not used for now

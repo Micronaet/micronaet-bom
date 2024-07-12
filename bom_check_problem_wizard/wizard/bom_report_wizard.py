@@ -376,10 +376,12 @@ class MrpBomCheckProblemWizard(orm.TransientModel):
                 # -------------------------------------------------------------
                 q_x_pack = int(product.q_x_pack)
                 is_single = default_code[12:13] == 'S'
-                if is_single and q_x_pack != 1:
+                if not q_x_pack:
                     check_single_color = cell_format['bg']['red']
-                else:
+                elif is_single and q_x_pack == 1:
                     check_single_color = cell_format['bg']['green']
+                else:
+                    check_single_color = cell_format['bg']['red']
 
                 # -------------------------------------------------------------
                 # Color check:

@@ -20,6 +20,7 @@
 #
 ###############################################################################
 import os
+import pdb
 import sys
 import xlrd
 import erppeek
@@ -142,11 +143,11 @@ for product in product_pool.browse(product_ids):
 # Update product:
 # -----------------------------------------------------------------------------
 print('Update TSCAR TCAR in all Tessuti')
+pdb.set_trace()
 for product_id in product_update:
     tcar, tscar = product_update[product_id]
-    print('ID: %s [SCAR %s] [TCAR %S]' % (
-        product_id, tscar, tcar))
-    continue
+    # print('ID: %s [SCAR %s] [TCAR %S]' % (product_id, tscar, tcar))
+
     product_pool.write([product_id], {
         'tscar': tscar,
         'tcar': tcar,

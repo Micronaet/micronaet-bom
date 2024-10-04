@@ -35,7 +35,7 @@ to_date = '2024-08-31'
 # -----------------------------------------------------------------------------
 # Read configuration parameter:
 # -----------------------------------------------------------------------------
-cfg_file = os.path.expanduser('../openerp.cfg')
+cfg_file = os.path.expanduser('../openerp.fia')
 
 config = ConfigParser.ConfigParser()
 config.read([cfg_file])
@@ -98,7 +98,7 @@ for pos, mode, move_ids in loop:
         counter += 1
         product = move.product_id
         default_code = (product.default_code or '').upper()
-        quantity = move.product_qty        
+        quantity = move.product_qty
         picking = move.picking_id
         if not picking:
             print('%s su %s [WARNING] Mode %s no picking' % (
@@ -128,7 +128,7 @@ for pos, mode, move_ids in loop:
 # Clean TSCAR TCAR data:
 # -----------------------------------------------------------------------------
 print('Clean TSCAR TCAR in all Tessuti')
-product_pool.search([
+product_ids = product_pool.search([
     ('inventory_category_id.name', '=', 'Tessuti'),
     ])
 

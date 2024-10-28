@@ -140,7 +140,7 @@ for product in product_pool.browse(product_ids):
         })
 
 # -----------------------------------------------------------------------------
-# Update product:
+# Update product:invent
 # -----------------------------------------------------------------------------
 print('Update TSCAR TCAR in all Tessuti')
 for product_id in product_update:

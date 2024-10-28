@@ -73,9 +73,9 @@ fullname = bom.report_mrp_status_component_excel_file()
 # -----------------------------------------------------------------------------
 filename = 'MRP Fattibili.xlsx'
 to_address_list = [
-    'roberto.gatti@fiam.it',
-    'nicola.riolini@gmail.com',
-    'matteo.salomoni@fiam.it',
+    # 'roberto.gatti@fiam.it',
+    # 'nicola.riolini@gmail.com',
+    # 'matteo.salomoni@fiam.it',
     'laura.gasparini@fiam.it',
     'produzione@fiam.it',
     'mattia.gussago@fiam.it',

@@ -507,4 +507,4 @@ class Parser(report_sxw.rml_parse):
         user_pool.set_no_inventory_status(
             cr, uid, value=previous_status, context=context)            
         return res
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+        

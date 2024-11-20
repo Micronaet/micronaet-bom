@@ -13,10 +13,10 @@
                        <button name="action_get_oven_report" string="Report Forno (Movimentati)" type="object" icon="gtk-print" class="oe_highlight" confirm="Esporto lo stato del forno in Sharepoint, confermi (tempo 5 / 10 min)?"/>
                    </header>
                    <group colspan="4" col="4">
-                        <field name="file" colspan="4" />
-
                         <field name="created_at" />
                         <field name="mode" />
+
+                        <field name="file" colspan="4" />
 
                         <separator string="Errore:" colspan="4" attrs="{'invisible': [('error','=',False)]}"/>
                         <field name="error" colspan="4" nolabel="1" attrs="{'invisible': [('error','=',False)]}"/>

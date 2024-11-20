@@ -188,7 +188,6 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
             'created_at': created_at,
         }
 
-        pdb.set_trace()
         for color in new_job_data:
             # Create pending lined for this color:
             for bom_id in new_job_data[color]:

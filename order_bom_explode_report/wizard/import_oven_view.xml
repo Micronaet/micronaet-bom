@@ -15,13 +15,16 @@
                    <group colspan="4" col="4">
                         <field name="file" colspan="4" />
 
-                        <field name="mode"  />
-                       <button name="action_import_with_update" string="Carica file" type="object" icon="gtk-jump-to" class="oe_highlight" confirm="Carico il file, controllare bene la modalità usata, confermi?"/>
+                        <field name="created_at" />
+                        <field name="mode" />
 
-                        <separator string="Errore:" colspan="4"  attrs="{'invisible': [('error','=',False)]}"/>
-                        <field name="error" colspan="4" nolabel="1"  attrs="{'invisible': [('error','=',False)]}"/>
+                        <separator string="Errore:" colspan="4" attrs="{'invisible': [('error','=',False)]}"/>
+                        <field name="error" colspan="4" nolabel="1" attrs="{'invisible': [('error','=',False)]}"/>
                    </group>
                 </form>
+                <footer>
+                    <button name="action_import_with_update" string="Carica file" type="object" icon="gtk-jump-to" class="oe_highlight" confirm="Carico il file, controllare bene la modalità usata, confermi?"/>
+                </footer>
             </field>
         </record>
         <record model="ir.actions.act_window" id="action_industria_import_oven_report_xlsx">

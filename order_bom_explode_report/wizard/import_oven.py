@@ -64,13 +64,15 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
 
         # Pool used:
         bom_pool = self.pool.get('mrp.bom')
-        job_pool = self.pool.get('industria.job')
+        # job_pool = self.pool.get('industria.job')
         oven_pool = self.pool.get('mrp.production.oven.selected')
 
         # ---------------------------------------------------------------------
         # Save file passed:
         # ---------------------------------------------------------------------
         wizard = self.browse(cr, uid, ids, context=context)[0]
+        created_at = wizard.created_at
+
         if not wizard.file:
             raise osv.except_osv(
                 _('No file:'),
@@ -91,6 +93,20 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
         # Parameters:
         # ---------------------------------------------------------------------
         row_start = 1
+        col_header = {
+            8: '09',
+            10: '10',
+            12: '11',
+            14: '12',
+            16: '01',
+            18: '02',
+            20: '03',
+            22: '04',
+            24: '05',
+            26: '06',
+            28: '07',
+            30: '08',
+        }
 
         # ---------------------------------------------------------------------
         # Load force name (for web publish)
@@ -107,73 +123,84 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
         # Loop on all pages:
         # ---------------------------------------------------------------------
         error = ''
-        negative_data = {}
-        if wizard.mode == 'negative':
-            for ws_name in wb.sheet_names():
-                color = ws_name
-                ws = wb.sheet_by_name(ws_name)
-                _logger.warning('Read page: %s' % ws_name)
+        new_job_data = {}
+        for ws_name in wb.sheet_names():
+            color = ws_name
+            ws = wb.sheet_by_name(ws_name)
+            _logger.warning('Read page: %s' % ws_name)
 
-                error = ''
-                for row in range(row_start, ws.nrows):
-                    try:
-                        bom_id = int(ws.cell(row, 0).value)
-                    except:
-                        _logger.error('Not line %s' % row)
-                        continue
-                    try:
-                        bom = bom_pool.browse(cr, uid, bom_id, context=context)
-                    except:
-                        error += 'Color %s BOM ID %s: Not preset BOM ID' % (
-                            color, bom_id)
-                    key = color, bom_id
-
-                    # Read data:
+            error = ''
+            for row in range(row_start, ws.nrows):
+                try:
                     bom_id = int(ws.cell(row, 0).value)
-                    try:
-                        quantity = int(ws.cell(row, 4).value)
+                except:
+                    _logger.error('Not line %s' % row)
+                    continue
+                try:
+                    bom = bom_pool.browse(cr, uid, bom_id, context=context)
+                except:
+                    error += 'Color %s BOM ID %s: Not preset BOM ID' % (
+                        color, bom_id)
+                key = color, bom_id
+
+                # Read data:
+                bom_id = int(ws.cell(row, 0).value)
+                try:
+                    # ---------------------------------------------------------
+                    # Set negative as zero (mode 1)
+                    # ---------------------------------------------------------
+                    if wizard.mode == 'negative':
+                        status_quantity = int(ws.cell(row, 4).value)
 
                         # Collect data for job if negative:
-                        if quantity < 0:
-                            if color not in negative_data:
-                                negative_data[color] = {}
-                            if bom_id not in negative_data[color]:
-                                negative_data[color][bom_id] = 0.0
-                            negative_data[color][bom_id] -= quantity
+                        if status_quantity < 0:
+                            if color not in new_job_data:
+                                new_job_data[color] = {}
 
-                    except:
-                        _logger.error('Page %s - Row %s: Not a number' % (
-                            color, row))
+                            if bom_id not in new_job_data[color]:
+                                new_job_data[color][bom_id] = 0.0
+                            new_job_data[color][bom_id] -= status_quantity
+
+                    # ---------------------------------------------------------
+                    # Set data in correct month:
+                    # ---------------------------------------------------------
+                    else:
+                        for col in col_header:
+                            quantity = int(ws.cell(row, col).value)
+                            if quantity > 0:
+                                if color not in new_job_data:
+                                    new_job_data[color] = {}
+                                if bom_id not in new_job_data[color]:
+                                    new_job_data[color][bom_id] = 0.0
+                                new_job_data[color][bom_id] += quantity
+                except:
+                    _logger.error('Page %s - Row %s: Not a number' % (
+                        color, row))
 
             # -----------------------------------------------------------------
             # Generate Job and confirm:
             # -----------------------------------------------------------------
-            this_year = now.year
-            if now.month >= 9:
-                year_1 = this_year
-                year_2 = this_year + 1
-            else:
-                year_1 = this_year - 1
-                year_2 = this_year
-
             ctx = context.copy()
-            created_at = '%s-09-15 09:00:00' % year_1  # Create start of season
             ctx['force_header'] = {
-                'created_at': created_at,
                 'state': 'COMPLETED',
-                }
+                'created_at': created_at,
+            }
 
-            for color in negative_data:
+            for color in new_job_data:
                 # Create pending lined for this color:
-                for bom_id in negative_data[color]:
-                    quantity = negative_data[color][bom_id]
+                for bom_id in new_job_data[color]:
+                    quantity = new_job_data[color][bom_id]
                     if quantity > 0:
                         oven_pool.create(cr, uid, {
                             'total': quantity,
                             'bom_id': bom_id,
                             'color_code': color,
                         }, context=context)
-                _logger.info('Generate Job for pending lines: %s' % created_at)
+
+                # -------------------------------------------------------------
+                # Generate Job for this create at date:
+                # -------------------------------------------------------------
+                _logger.info('Generate Job pending lines: %s' % created_at)
                 oven_pool.generate_oven_job_all(cr, uid, [], context=ctx)
 
         # if error:
@@ -181,6 +208,8 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
         return True
 
     _columns = {
+        'created_at': fields.binary(
+            'Data Job', help='Data di creazione per i nuovi job'),
         'file': fields.binary('XLSX file', filters=None),
         'mode': fields.selection([
             ('negative', 'Parifica negativi'),

@@ -9,22 +9,23 @@
                 <form string="Import order" version="7.0">
                    <header>
                        <button string="Cancel" special="cancel" />
-                       <button name="get_oven_report_all" string="Report Forno (Tutto)" type="object" icon="gtk-print" class="oe_highlight" confirm="Esporto lo stato del forno completo in Sharepoint, confermi (tempo 5 / 10 min)?"/>
-                       <button name="action_get_oven_report" string="Report Forno (Movimentati)" type="object" icon="gtk-print" class="oe_highlight" confirm="Esporto lo stato del forno in Sharepoint, confermi (tempo 5 / 10 min)?"/>
                    </header>
                    <group colspan="4" col="4">
-                        <field name="created_at" />
-                        <field name="mode" />
+                       <separator string="FASE 1. Esportazione:" colspan="4" />
+                       <button name="get_oven_report_all" string="Report Forno (Tutto)" type="object" icon="gtk-print" class="oe_highlight" confirm="Esporto lo stato del forno completo in Sharepoint, confermi (tempo 5 / 10 min)?"/>
+                       <button name="action_get_oven_report" string="Report Forno (Movimentati)" type="object" icon="gtk-print" class="oe_highlight" confirm="Esporto lo stato del forno in Sharepoint, confermi (tempo 5 / 10 min)?"/>
 
-                        <field name="file" colspan="4" />
+                       <separator string="FASE 2. Importazione:" colspan="4" />
+                       <field name="created_at" />
+                       <field name="mode" />
 
-                        <separator string="Errore:" colspan="4" attrs="{'invisible': [('error','=',False)]}"/>
-                        <field name="error" colspan="4" nolabel="1" attrs="{'invisible': [('error','=',False)]}"/>
+                       <field name="file" colspan="4" />
+                       <button name="action_import_with_update" string="Carica file" type="object" icon="gtk-jump-to" class="oe_highlight" confirm="Carico il file, controllare bene la modalità usata, confermi?"/>
+
+                       <separator string="Errore:" colspan="4" attrs="{'invisible': [('error','=',False)]}"/>
+                       <field name="error" colspan="4" nolabel="1" attrs="{'invisible': [('error','=',False)]}"/>
                    </group>
                 </form>
-                <footer>
-                    <button name="action_import_with_update" string="Carica file" type="object" icon="gtk-jump-to" class="oe_highlight" confirm="Carico il file, controllare bene la modalità usata, confermi?"/>
-                </footer>
             </field>
         </record>
         <record model="ir.actions.act_window" id="action_industria_import_oven_report_xlsx">

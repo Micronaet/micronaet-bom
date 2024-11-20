@@ -137,6 +137,7 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
                 except:
                     _logger.error('Not line %s' % row)
                     continue
+
                 try:
                     bom = bom_pool.browse(cr, uid, bom_id, context=context)
                 except:
@@ -168,7 +169,7 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
                     else:
                         for col in col_header:
                             quantity = int(ws.cell(row, col).value)
-                            if quantity > 0:
+                            if quantity > 0.0:
                                 if color not in new_job_data:
                                     new_job_data[color] = {}
                                 if bom_id not in new_job_data[color]:
@@ -186,6 +187,7 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
                 'state': 'COMPLETED',
                 'created_at': created_at,
             }
+
             pdb.set_trace()
             for color in new_job_data:
                 # Create pending lined for this color:

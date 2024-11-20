@@ -26,7 +26,8 @@ import base64
 from openerp.osv import fields, osv, expression, orm
 from datetime import datetime, timedelta
 from openerp.tools.translate import _
-from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
+from openerp.tools import (
+    DEFAULT_SERVER_DATE_FORMAT,
     DEFAULT_SERVER_DATETIME_FORMAT,
     DATETIME_FORMATS_MAP,
     float_compare)
@@ -185,7 +186,7 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
                 'state': 'COMPLETED',
                 'created_at': created_at,
             }
-
+            pdb.set_trace()
             for color in new_job_data:
                 # Create pending lined for this color:
                 for bom_id in new_job_data[color]:

@@ -111,6 +111,7 @@ class MrpProduction(orm.Model):
 
         # path = '/home/administrator/photo/log/oven'
         path = os.path.expanduser('~/NAS/industria40/Report/Oven')
+        path_log = os.path.expanduser('~/NAS/industria40/Report/Oven/log')
         now_text = str(now).replace('/', '_').replace(':', '.')
 
         # ---------------------------------------------------------------------
@@ -482,7 +483,7 @@ class MrpProduction(orm.Model):
         del excel_pool
         excel_pool = self.pool.get('excel.writer')  # New report
         excel_filename = os.path.join(
-            path, '2.MRP_Oven_Log_%s.xlsx' % now_text)
+            path_log, '2.MRP_Oven_Log_%s.xlsx' % now_text)
 
         _logger.warning('Excel: %s' % excel_filename)
         header = [
@@ -532,7 +533,7 @@ class MrpProduction(orm.Model):
         del excel_pool
         excel_pool = self.pool.get('excel.writer')
         excel_filename = os.path.join(
-            path, '1.MRP_Oven_Stock_Status_%s.xlsx' % now_text)
+            path_log, '1.MRP_Oven_Stock_Status_%s.xlsx' % now_text)
 
         # Stock status from Season Job
         header = [

@@ -179,32 +179,32 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
                     _logger.error('Page %s - Row %s: Not a number' % (
                         color, row))
 
-            # -----------------------------------------------------------------
-            # Generate Job and confirm:
-            # -----------------------------------------------------------------
-            ctx = context.copy()
-            ctx['force_header'] = {
-                # 'state': 'COMPLETED',
-                'created_at': created_at,
-            }
+        # ---------------------------------------------------------------------
+        # Generate Job and confirm:
+        # ---------------------------------------------------------------------
+        ctx = context.copy()
+        ctx['force_header'] = {
+            # 'state': 'COMPLETED',
+            'created_at': created_at,
+        }
 
-            pdb.set_trace()
-            for color in new_job_data:
-                # Create pending lined for this color:
-                for bom_id in new_job_data[color]:
-                    quantity = new_job_data[color][bom_id]
-                    if quantity > 0:
-                        oven_pool.create(cr, uid, {
-                            'total': quantity,
-                            'bom_id': bom_id,
-                            'color_code': color,
-                        }, context=context)
+        pdb.set_trace()
+        for color in new_job_data:
+            # Create pending lined for this color:
+            for bom_id in new_job_data[color]:
+                quantity = new_job_data[color][bom_id]
+                if quantity > 0:
+                    oven_pool.create(cr, uid, {
+                        'total': quantity,
+                        'bom_id': bom_id,
+                        'color_code': color,
+                    }, context=context)
 
-                # -------------------------------------------------------------
-                # Generate Job for this create at date:
-                # -------------------------------------------------------------
-                _logger.info('Generate Job pending lines: %s' % created_at)
-                oven_pool.generate_oven_job_all(cr, uid, [], context=ctx)
+            # -----------------------------------------------------------------
+            # Generate Job for this create at date:
+            # -----------------------------------------------------------------
+            _logger.info('Generate Job pending lines: %s' % created_at)
+            oven_pool.generate_oven_job_all(cr, uid, [], context=ctx)
 
         # if error:
         _logger.info('Imported: %s' % filename)

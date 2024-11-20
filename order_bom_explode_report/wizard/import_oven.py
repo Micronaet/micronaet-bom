@@ -208,7 +208,7 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
         return True
 
     _columns = {
-        'created_at': fields.binary(
+        'created_at': fields.datetime(
             'Data Job', help='Data di creazione per i nuovi job'),
         'file': fields.binary('XLSX file', filters=None),
         'mode': fields.selection([

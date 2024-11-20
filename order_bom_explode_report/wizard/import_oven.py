@@ -184,7 +184,7 @@ class IndustriaImportOvenReportXlsx(orm.TransientModel):
             # -----------------------------------------------------------------
             ctx = context.copy()
             ctx['force_header'] = {
-                'state': 'COMPLETED',
+                # 'state': 'COMPLETED',
                 'created_at': created_at,
             }
 

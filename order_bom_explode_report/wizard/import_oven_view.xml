@@ -12,8 +12,8 @@
                    </header>
                    <group colspan="4" col="4">
                        <separator string="FASE 1. Esportazione:" colspan="4" />
-                       <button name="get_oven_report_all" string="Report Forno (Tutto)" type="object" icon="gtk-print" class="oe_highlight" confirm="Esporto lo stato del forno completo in Sharepoint, confermi (tempo 5 / 10 min)?"/>
-                       <button name="action_get_oven_report" string="Report Forno (Movimentati)" type="object" icon="gtk-print" class="oe_highlight" confirm="Esporto lo stato del forno in Sharepoint, confermi (tempo 5 / 10 min)?"/>
+                       <button name="get_oven_report_all" string="Report Forno (Tutto)" type="object" icon="gtk-print" class="oe_highlight" confirm="Esporto lo stato del forno completo in Sharepoint, confermi (tempo 5 / 10 min)?" colspan="2"/>
+                       <button name="action_get_oven_report" string="Report Forno (Movimentati)" type="object" icon="gtk-print" class="oe_highlight" confirm="Esporto lo stato del forno in Sharepoint, confermi (tempo 5 / 10 min)?" colspan="2"/>
 
                        <separator string="FASE 2. Importazione:" colspan="4" />
                        <field name="created_at" />

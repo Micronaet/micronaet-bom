@@ -61,10 +61,11 @@ class MrpProduction(orm.Model):
         print_all = context.get('force_print_all')
         excluded_code = {
             2: (
-                'TL', 'TS', 'MT', 'MS', 'PO'),
+                'TC', 'TL', 'TS', 'MT', 'MS', 'PO'),
             3: (
                 'CUS', 'SET', 'CIN', 'BRA',
-                '230', '935',  # Wood
+                '230',
+                '900', '901', '931', '935',  # Wood
                 ),
         }
 

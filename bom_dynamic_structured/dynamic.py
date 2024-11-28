@@ -38,6 +38,14 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
 
 _logger = logging.getLogger(__name__)
 
+
+class MrpProductionInherit(orm.Model):
+    """ Model name: Change order
+    """
+    _inherit = 'mrp.production'
+    _order = 'date_planned desc, name'
+
+
 class MrpBomCategoryStructureCategoryType(orm.Model):
     """ Model name: Mrp Bom Category structure type
     """
@@ -51,6 +59,7 @@ class MrpBomCategoryStructureCategoryType(orm.Model):
             help='Category type for ordering purpose'),
         'note': fields.text('Note'),
         }
+
 
 class MrpBomCategoryStructureCategory(orm.Model):
     """ Model name: Mrp Bom Category structure
@@ -461,7 +470,6 @@ class MRPBom(orm.Model):
     """
 
     _inherit = 'mrp.bom'
-    _order = 'date_planned desc, name'
 
     # Button event:
     def open_bom_dynamic_lines(self, cr, uid, ids, context=None):
@@ -494,12 +502,13 @@ class MRPBom(orm.Model):
             }
 
     _columns = {
-        'structure_id': fields.many2one('structure.structure', 'Structure',
+        'structure_id': fields.many2one(
+            'structure.structure', 'Structure',
             help='Structure reference'),
-        'min_optional': fields.integer('Min. Optional',
+        'min_optional': fields.integer(
+            'Min. Optional',
             help='Min number of optional placeholdeer element'),
-        'max_optional': fields.integer('Max. Optional',
+        'max_optional': fields.integer(
+            'Max. Optional',
             help='Max number of optional placeholdeer element'),
         }
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

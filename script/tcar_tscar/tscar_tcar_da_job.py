@@ -124,7 +124,8 @@ for pos, mode, move_ids in loop:
             product_update[product_id] = [0.0, 0.0]  # tcar, tscar
         product_update[product_id][pos] += quantity
 
-
+print('Continua se vuoi aggiornare')
+pdb.set_trace()
 # -----------------------------------------------------------------------------
 # Clean TSCAR TCAR data:
 # -----------------------------------------------------------------------------

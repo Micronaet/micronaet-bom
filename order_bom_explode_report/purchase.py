@@ -97,12 +97,16 @@ class StockMove(orm.Model):
                 line_qty = 'NO OF!'
 
             # [acq. 2022-03-08 m 891.0: costo un. 3.338]
-            res[product.id] = '[acq. %s %s %s: costo un. %s]' % (
-                line_date,
-                line_uom,
-                line_qty,
-                line_price,
-                )
+            res[product.id] = \
+                'CAR %s - SCAR %s ' \
+                '[acq. %s %s %s: costo un. %s]' % (
+                    product.old_tcar or 0,
+                    product.old_tscar or 0,
+                    line_date,
+                    line_uom,
+                    line_qty,
+                    line_price,
+                    )
         to_date = datetime.now()
         gap = int((to_date - from_date).seconds / 60.0)
         _logger.info('Total purchase product: %s [time %s]' % (

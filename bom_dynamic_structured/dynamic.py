@@ -46,6 +46,7 @@ class MrpProductionInherit(orm.Model):
     _order = 'date_planned desc, name'
 
 
+
 class MrpBomCategoryStructureCategoryType(orm.Model):
     """ Model name: Mrp Bom Category structure type
     """
@@ -55,7 +56,8 @@ class MrpBomCategoryStructureCategoryType(orm.Model):
     _order = 'name'
 
     _columns = {
-        'name': fields.char('Category type', size=40, required=True,
+        'name': fields.char(
+            'Category type', size=40, required=True,
             help='Category type for ordering purpose'),
         'note': fields.text('Note'),
         }
@@ -70,10 +72,11 @@ class MrpBomCategoryStructureCategory(orm.Model):
     _order = 'name'
 
     _columns = {
-        'name': fields.char('Category element', size=40, required=True,
+        'name': fields.char(
+            'Category element', size=40, required=True,
             help='Category element (for BOM structure)'),
         'type_id': fields.many2one(
-            'mrp.bom.structure.category.type', 'Type'),# required=True),
+            'mrp.bom.structure.category.type', 'Type'), # required=True),
         'important': fields.boolean('Important'),
         'department': fields.selection([
             ('cut', 'Cut'),

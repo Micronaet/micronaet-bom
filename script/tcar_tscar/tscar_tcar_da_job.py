@@ -136,8 +136,8 @@ product_ids = product_pool.search([
 
 for product in product_pool.browse(product_ids):
     product_pool.write([product.id], {
-        'tscar': 0.0,
-        'tcar': 0.0,
+        'old_tscar': 0.0,
+        'old_tcar': 0.0,
         })
 
 # -----------------------------------------------------------------------------
@@ -149,6 +149,6 @@ for product_id in product_update:
     # print('ID: %s [SCAR %s] [TCAR %S]' % (product_id, tscar, tcar))
 
     product_pool.write([product_id], {
-        'tcar': tcar,
-        'tscar': tscar,
+        'old_tcar': tcar,
+        'old_tscar': tscar,
         })

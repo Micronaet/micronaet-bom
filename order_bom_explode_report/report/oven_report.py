@@ -201,6 +201,7 @@ class MrpProduction(orm.Model):
             family = product.family_id.name or 'NON PRESENTE'
             order_closed = order.mx_closed
             line_closed = line.mx_closed
+            mrp = line.mrp_id
 
             # -----------------------------------------------------------------
             # Log record

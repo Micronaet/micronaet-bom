@@ -455,11 +455,13 @@ class MRPBomLine(orm.Model):
         #    ], 'From', readonly=True)
         }
 
+
 class MRPBom(orm.Model):
     """ Model name: MRP Bom new bom_line_ids
     """
 
     _inherit = 'mrp.bom'
+    _order = 'date_planned desc, name'
 
     # Button event:
     def open_bom_dynamic_lines(self, cr, uid, ids, context=None):
@@ -467,12 +469,14 @@ class MRPBom(orm.Model):
         """
         assert len(ids) == 1, 'Works only with one record a time'
         model_pool = self.pool.get('ir.model.data')
-        tree_view_id = model_pool.get_object_reference(cr, uid,
+        tree_view_id = model_pool.get_object_reference(
+            cr, uid,
             'bom_dynamic_structured', 'view_mrp_bom_line_dynamic_tree')[1]
-        search_view_id = model_pool.get_object_reference(cr, uid,
-           'bom_dynamic_structured',
-           'view_mrp_bom_line_search',
-           )[1]
+        search_view_id = model_pool.get_object_reference(
+            cr, uid,
+            'bom_dynamic_structured',
+            'view_mrp_bom_line_search',
+            )[1]
 
         return {
             'type': 'ir.actions.act_window',

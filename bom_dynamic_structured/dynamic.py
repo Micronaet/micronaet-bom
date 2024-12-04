@@ -46,7 +46,6 @@ class MrpProductionInherit(orm.Model):
     _order = 'date_planned desc, name'
 
 
-
 class MrpBomCategoryStructureCategoryType(orm.Model):
     """ Model name: Mrp Bom Category structure type
     """
@@ -277,12 +276,15 @@ class ProductProduct(orm.Model):
         return res
 
     _columns = {
-        'bom_placeholder': fields.boolean('BOM placeholder',
+        'bom_placeholder': fields.boolean(
+            'BOM placeholder',
             help='Mandatory fields for BOM, now not present!'),
-        'bom_placeholder_rule': fields.char('BOM placeholder rule', size=80,
+        'bom_placeholder_rule': fields.char(
+            'BOM placeholder rule', size=80,
             help='Mandatory if respect rule, es.: '
-                'default_code[3:4].upper()=="S"'),
-        'bom_alternative': fields.boolean('BOM alternative',
+                 'default_code[3:4].upper()=="S"'),
+        'bom_alternative': fields.boolean(
+            'BOM alternative',
             help='Not mandatory but often present, alternative to other!'),
         'dynamic_bom_line_ids': fields.function(
             _get_dynamic_bom_line_ids, method=True,

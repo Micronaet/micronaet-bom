@@ -123,7 +123,7 @@ class MrpProduction(orm.Model):
         excel_filename = os.path.join(
             path, '0.MRP_Oven_%s_%s.xlsx' % (
                 'all' if print_all else 'remain', now_text))
-
+        data_filename = excel_filename
         _logger.warning('Excel: %s' % excel_filename)
         header = [
             'BOM ID', 'Famiglia', 'DB padre', 'Dati',
@@ -476,14 +476,14 @@ class MrpProduction(orm.Model):
 
                     row += 1
                     excel_pool.write_xls_line(ws_name, row, record)
-        # excel_pool.save_file_as(excel_filename)
-        # del excel_pool
+        excel_pool.save_file_as(excel_filename)
 
         # ---------------------------------------------------------------------
         #                            XLS Log file:
         # ---------------------------------------------------------------------
         # Log file:
-        excel_pool_log = self.pool.get('excel.writer')  # New report
+        del excel_pool
+        excel_pool = self.pool.get('excel.writer')  # New report
         excel_filename = os.path.join(
             path_log, '2.MRP_Oven_Log_%s.xlsx' % now_text)
 
@@ -514,26 +514,26 @@ class MrpProduction(orm.Model):
             ]
 
         ws_name = 'Log'
-        excel_pool_log.create_worksheet(name=ws_name)
-        excel_pool_log.column_width(ws_name, width)
+        excel_pool.create_worksheet(name=ws_name)
+        excel_pool.column_width(ws_name, width)
 
         row = 0
-        excel_pool_log.write_xls_line(ws_name, row, header)
-        excel_pool_log.autofilter(ws_name, row, 0, row, len(header) - 1)
-        excel_pool_log.freeze_panes(ws_name, 1, 4)
+        excel_pool.write_xls_line(ws_name, row, header)
+        excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
+        excel_pool.freeze_panes(ws_name, 1, 4)
 
         for record in log_report:
             row += 1
-            excel_pool_log.write_xls_line(ws_name, row, record)
+            excel_pool.write_xls_line(ws_name, row, record)
 
         # Save log file:
-        excel_pool_log.save_file_as(excel_filename)
+        excel_pool.save_file_as(excel_filename)
 
         # ---------------------------------------------------------------------
         #                            XLS Log file:
         # ---------------------------------------------------------------------
-        del excel_pool_log
-        excel_pool_log = self.pool.get('excel.writer')
+        del excel_pool
+        excel_pool = self.pool.get('excel.writer')
         excel_filename = os.path.join(
             path_log, '1.MRP_Oven_Stock_Status_%s.xlsx' % now_text)
 
@@ -549,13 +549,13 @@ class MrpProduction(orm.Model):
             ]
 
         ws_name = 'Magazzino Forno'
-        excel_pool_log.create_worksheet(name=ws_name)
-        excel_pool_log.column_width(ws_name, width)
+        excel_pool.create_worksheet(name=ws_name)
+        excel_pool.column_width(ws_name, width)
 
         row = 0
-        excel_pool_log.write_xls_line(ws_name, row, header)
-        excel_pool_log.autofilter(ws_name, row, 0, row, len(header) - 1)
-        excel_pool_log.freeze_panes(ws_name, 1, 2)
+        excel_pool.write_xls_line(ws_name, row, header)
+        excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
+        excel_pool.freeze_panes(ws_name, 1, 2)
 
         for key in oven_stock:
             row += 1
@@ -568,8 +568,37 @@ class MrpProduction(orm.Model):
                 pending,
                 done_all,
             ]
-            excel_pool_log.write_xls_line(ws_name, row, record)
-        excel_pool_log.save_file_as(excel_filename)
+            excel_pool.write_xls_line(ws_name, row, record)
+        excel_pool.save_file_as(excel_filename)
 
-        return excel_pool.return_attachment(
-            cr, uid, 'Stato forno', context=context)
+        # ---------------------------------------------------------------------
+        # Return master data file:
+        # ---------------------------------------------------------------------
+        # Pool used:
+        attachment_pool = self.pool.get('ir.attachment')
+
+        try:
+            b64 = open(data_filename, 'rb').read().encode('base64')
+        except:
+            _logger.error(_('Cannot return file: %s') % data_filename)
+            raise osv.except_osv(
+                _('Report error'),
+                _('Cannot return file: %s') % data_filename,
+            )
+
+        attachment_id = attachment_pool.create(cr, uid, {
+            'name': 'File Forno',
+            'datas_fname': data_filename,
+            'type': 'binary',
+            'datas': b64,
+            'partner_id': 1,
+            'res_model': 'res.partner',
+            'res_id': 1,
+        }, context=context)
+
+        return {
+            'type': 'ir.actions.act_url',
+            'url': '/web/binary/saveas?model=ir.attachment&field=datas&'
+                   'filename_field=datas_fname&id=%s' % attachment_id,
+            'target': 'self',
+        }

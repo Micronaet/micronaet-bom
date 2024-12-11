@@ -57,6 +57,20 @@ class MrpProduction(orm.Model):
         line_pool = self.pool.get('sale.order.line')
         preload_pool = self.pool.get('mrp.production.oven.selected')
 
+        # ---------------------------------------------------------------------
+        # Clean empty seletion:
+        # ---------------------------------------------------------------------
+        clean_ids = preload_pool.search(cr, uid, [
+            ('from_date', '=', False),
+        ], context=context)
+        if clean_ids:
+            _logger.warning('Cleaning zobie selected record: {}'.format(
+                len(clean_ids),
+            ))
+            preload_pool.unlink(cr, uid, clean_ids, context=context)
+        else:
+            _logger.info('No zombie selected record present')
+
         # Parameters:
         print_all = context.get('force_print_all')
         excluded_code = {

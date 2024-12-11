@@ -58,7 +58,7 @@ class MrpProduction(orm.Model):
         preload_pool = self.pool.get('mrp.production.oven.selected')
 
         # ---------------------------------------------------------------------
-        # Clean empty seletion:
+        # Clean empty selection:
         # ---------------------------------------------------------------------
         clean_ids = preload_pool.search(cr, uid, [
             ('from_date', '=', False),

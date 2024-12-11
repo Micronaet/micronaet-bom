@@ -120,11 +120,10 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         parameters = {'width': 300, }
         excel_pool = self.pool.get('excel.writer')  # New report
-        excel_filename = os.path.join(
+        data_filename = os.path.join(
             path, '0.MRP_Oven_%s_%s.xlsx' % (
                 'all' if print_all else 'remain', now_text))
-        data_filename = excel_filename
-        _logger.warning('Excel: %s' % excel_filename)
+        _logger.warning('Excel: %s' % data_filename)
         header = [
             'BOM ID', 'Famiglia', 'DB padre', 'Dati',
             'F. dispo',
@@ -476,7 +475,7 @@ class MrpProduction(orm.Model):
 
                     row += 1
                     excel_pool.write_xls_line(ws_name, row, record)
-        excel_pool.save_file_as(excel_filename)
+        excel_pool.save_file_as(data_filename)
 
         # ---------------------------------------------------------------------
         #                            XLS Log file:
@@ -588,7 +587,7 @@ class MrpProduction(orm.Model):
 
         attachment_id = attachment_pool.create(cr, uid, {
             'name': 'File Forno',
-            'datas_fname': data_filename,
+            'datas_fname': os.path.basename(data_filename),
             'type': 'binary',
             'datas': b64,
             'partner_id': 1,

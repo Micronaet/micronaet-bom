@@ -110,7 +110,8 @@ class MrpProduction(orm.Model):
             oven_stock[key][2] += total  # Done (not used for cover)
 
         # path = '/home/administrator/photo/log/oven'
-        path = os.path.expanduser('~/NAS/industria40/Report/Oven')
+        # path = os.path.expanduser('~/NAS/industria40/Report/Oven')
+        path = '/tmp'  # instead of path
         path_log = os.path.expanduser('~/NAS/industria40/Report/Oven/log')
         now_text = str(now).replace('/', '_').replace(':', '.')
 
@@ -475,14 +476,14 @@ class MrpProduction(orm.Model):
 
                     row += 1
                     excel_pool.write_xls_line(ws_name, row, record)
-        excel_pool.save_file_as(excel_filename)
+        # excel_pool.save_file_as(excel_filename)
+        # del excel_pool
 
         # ---------------------------------------------------------------------
         #                            XLS Log file:
         # ---------------------------------------------------------------------
         # Log file:
-        del excel_pool
-        excel_pool = self.pool.get('excel.writer')  # New report
+        excel_pool_log = self.pool.get('excel.writer')  # New report
         excel_filename = os.path.join(
             path_log, '2.MRP_Oven_Log_%s.xlsx' % now_text)
 
@@ -513,26 +514,26 @@ class MrpProduction(orm.Model):
             ]
 
         ws_name = 'Log'
-        excel_pool.create_worksheet(name=ws_name)
-        excel_pool.column_width(ws_name, width)
+        excel_pool_log.create_worksheet(name=ws_name)
+        excel_pool_log.column_width(ws_name, width)
 
         row = 0
-        excel_pool.write_xls_line(ws_name, row, header)
-        excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
-        excel_pool.freeze_panes(ws_name, 1, 4)
+        excel_pool_log.write_xls_line(ws_name, row, header)
+        excel_pool_log.autofilter(ws_name, row, 0, row, len(header) - 1)
+        excel_pool_log.freeze_panes(ws_name, 1, 4)
 
         for record in log_report:
             row += 1
-            excel_pool.write_xls_line(ws_name, row, record)
+            excel_pool_log.write_xls_line(ws_name, row, record)
 
         # Save log file:
-        excel_pool.save_file_as(excel_filename)
+        excel_pool_log.save_file_as(excel_filename)
 
         # ---------------------------------------------------------------------
         #                            XLS Log file:
         # ---------------------------------------------------------------------
-        del excel_pool
-        excel_pool = self.pool.get('excel.writer')
+        del excel_pool_log
+        excel_pool_log = self.pool.get('excel.writer')
         excel_filename = os.path.join(
             path_log, '1.MRP_Oven_Stock_Status_%s.xlsx' % now_text)
 
@@ -548,13 +549,13 @@ class MrpProduction(orm.Model):
             ]
 
         ws_name = 'Magazzino Forno'
-        excel_pool.create_worksheet(name=ws_name)
-        excel_pool.column_width(ws_name, width)
+        excel_pool_log.create_worksheet(name=ws_name)
+        excel_pool_log.column_width(ws_name, width)
 
         row = 0
-        excel_pool.write_xls_line(ws_name, row, header)
-        excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
-        excel_pool.freeze_panes(ws_name, 1, 2)
+        excel_pool_log.write_xls_line(ws_name, row, header)
+        excel_pool_log.autofilter(ws_name, row, 0, row, len(header) - 1)
+        excel_pool_log.freeze_panes(ws_name, 1, 2)
 
         for key in oven_stock:
             row += 1
@@ -567,6 +568,8 @@ class MrpProduction(orm.Model):
                 pending,
                 done_all,
             ]
-            excel_pool.write_xls_line(ws_name, row, record)
-        excel_pool.save_file_as(excel_filename)
-        return True
+            excel_pool_log.write_xls_line(ws_name, row, record)
+        excel_pool_log.save_file_as(excel_filename)
+
+        return excel_pool.return_attachment(
+            cr, uid, 'Stato forno', context=context)

@@ -267,6 +267,7 @@ class PurchaseOrderXLSX(orm.Model):
                     # Read product code:
                     # ---------------------------------------------------------
                     default_code = WS.cell(row, 0).value
+                    default_code = WS.cell(row, 0).value
                     _logger.info('Find material: %s' % default_code)
 
                     product_id = False

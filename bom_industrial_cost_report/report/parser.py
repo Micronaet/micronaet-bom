@@ -805,6 +805,7 @@ class ProductProduct(orm.Model):
             _('Max'),
             _('Simul.'),
             _('Simul. %'),
+            _('Max x 5'),
             _('Costo (anag.)'),
 
             _('Marg. A'),
@@ -844,6 +845,7 @@ class ProductProduct(orm.Model):
                 r_max,
                 simulated_cost,
                 simulated_rate,
+                r_max * 5.0,
                 product.standard_price,
 
                 # Revenue:

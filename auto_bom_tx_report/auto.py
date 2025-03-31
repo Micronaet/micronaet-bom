@@ -829,7 +829,7 @@ class MrpProduction(orm.Model):
                     line6[14][1] = get_xls_format('bg_red')
                 elif order_total < o.report_minimum_qty:
                     line6[14][1] = get_xls_format('bg_yellow')
-                line6[0].append(get_xls_format('text_grey'))
+                line6[0].append(get_xls_format('text_black'))
 
                 write_xls_list_line(WS, row, line6)
 

@@ -67,14 +67,11 @@ class ComponentStatusReportWizard(orm.TransientModel):
             'first_supplier_id': wiz_browse.first_supplier_id.id or False,
             # 'negative_start': wiz_browse.negative_start,
             'type_id': False,  # TODO remove ex. wiz_browse.type_id.id or
-            'with_type_ids':
-                [item.id for item in wiz_browse.with_type_ids],
-            'without_type_ids':
-                [item.id for item in wiz_browse.without_type_ids],
+            'with_type_ids': [item.id for item in wiz_browse.with_type_ids],
+            'without_type_ids': [item.id for item in wiz_browse.without_type_ids],
             'with_deadline': wiz_browse.with_deadline,
             'only_negative': wiz_browse.only_negative,
-            'exclude_inventory_category':
-                wiz_browse.exclude_inventory_category,
+            'exclude_inventory_category': wiz_browse.exclude_inventory_category,
             # Report setup:
             # 'model': 'mrp.production',
             # 'active_id': False,
@@ -82,15 +79,13 @@ class ComponentStatusReportWizard(orm.TransientModel):
             # 'context': context,
             }
 
-        filename = mrp_pool.extract_mrp_production_report_xlsx(
-            cr, uid, data=datas, context=context)
+        filename = mrp_pool.extract_mrp_production_report_xlsx(cr, uid, data=datas, context=context)
         _logger.info('Extracted file in %s' % filename)
 
         b64 = open(filename, 'rb').read().encode('base64')
         attachment_id = attachment_pool.create(cr, uid, {
             'name': 'Stato componenti',
-            'datas_fname':
-                'stato_componenti_materiali_%s.xlsx' % wiz_browse.mode,
+            'datas_fname': 'stato_componenti_materiali_%s.xlsx' % wiz_browse.mode,
             'type': 'binary',
             'datas': b64,
             'partner_id': 1,
@@ -100,8 +95,8 @@ class ComponentStatusReportWizard(orm.TransientModel):
 
         return {
             'type': 'ir.actions.act_url',
-            'url': '/web/binary/saveas?model=ir.attachment&field=datas&'
-                   'filename_field=datas_fname&id=%s' % attachment_id,
+            'url': '/web/binary/saveas?model=ir.attachment&field=datas&filename_field=datas_fname&id=%s' %
+                   attachment_id,
             'target': 'self',
             }
 
@@ -152,8 +147,7 @@ class MrpProduction(orm.Model):
         now = now.replace('-', '_').replace(':', '.')
         logfile = False
         if mode == 'xlsx':
-            filename = mrp_pool.extract_mrp_production_report_xlsx(
-                cr, uid, data=datas, context=context)
+            filename = mrp_pool.extract_mrp_production_report_xlsx(cr, uid, data=datas, context=context)
             _logger.info('Extracted file in %s' % filename)
 
             # Append stock page here:
@@ -163,6 +157,11 @@ class MrpProduction(orm.Model):
             if 'component_logfile' in context:
                 logfile = context['component_logfile']
                 _logger.info('Send also log file: %s' % logfile)
+
+                # Create dump file form filename
+
+                # Import with PSQL command (or cr)
+
             else:
                 _logger.error('Not sent log file')
 
@@ -179,11 +178,9 @@ class MrpProduction(orm.Model):
 
             try:
                 result, extension = openerp.report.render_report(
-                    cr, uid, [mrp_id], 'stock_status_explode_report',
-                    datas, context)
+                    cr, uid, [mrp_id], 'stock_status_explode_report', datas, context)
             except:
-                _logger.error('Error generation component report [%s]' % (
-                    sys.exc_info(),))
+                _logger.error('Error generation component report [%s]' % (sys.exc_info(),))
                 return False
 
         # ---------------------------------------------------------------------
@@ -220,9 +217,7 @@ class MrpProduction(orm.Model):
             cr, uid, False,
             type='email',
             body='Stato componenti settimanale',
-            subject='Invio automatico stato componenti: %s' % (
-                datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT),
-                ),
+            subject='Invio automatico stato componenti: %s' % (datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT), ),
             partner_ids=[(6, 0, partner_ids)],
             attachments=attachments,
             context=context,

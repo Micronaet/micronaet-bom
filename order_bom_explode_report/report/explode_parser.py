@@ -279,8 +279,7 @@ class MrpProduction(orm.Model):
         with_type_ids = data.get('with_type_ids', [])
         without_type_ids = data.get('without_type_ids', [])
         only_negative = data.get('only_negative', False)
-        exclude_inventory_category = data.get(
-            'exclude_inventory_category', False)
+        exclude_inventory_category = data.get('exclude_inventory_category', False)
 
         # ---------------------------------------------------------------------
         # Exclude marked "no report" inventory category:
@@ -309,9 +308,7 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         now = '%s' % datetime.now()
         xls_log = '/home/administrator/photo/log/report_explode_%s_%s.xlsx' % (
-            mode,
-            now.replace('/', '_').replace(':', '.'),
-            )
+            mode, now.replace('/', '_').replace(':', '.'))
         # Save in context if if will be used after:
         context['component_logfile'] = xls_log
 
@@ -364,14 +361,12 @@ class MrpProduction(orm.Model):
 
         # Get purchase information:
         _logger.info('Start get purchase information (date)')
-        purchase_db = move_pool._get_purchase_product_last_date(
-            cr, uid, context=context)
+        purchase_db = move_pool._get_purchase_product_last_date(cr, uid, context=context)
 
         # ADD all fabrics in axis before all check:
         if mp_mode == 'fabric':  # fabric
             fabric_list = (
-                'T3D', 'TES', 'TEX', 'TGT', 'TIO', 'TJO', 'TSK', 'TSQ', 'TWH',
-                'TWL', 'TWM', 'TXM', 'TXI', 'TXR', 'T4D',
+                'T3D', 'TES', 'TEX', 'TGT', 'TIO', 'TJO', 'TSK', 'TSQ', 'TWH', 'TWL', 'TWM', 'TXM', 'TXI', 'TXR', 'T4D',
                 )
             # Log selection:
             write_xls_line('selection', ['Codici tessuto'])
@@ -450,8 +445,7 @@ class MrpProduction(orm.Model):
                         continue  # Jump not supplier present
 
                     category = item.category_id.type_id.name if \
-                        item.category_id and item.category_id.type_id else \
-                        _('No category')
+                        item.category_id and item.category_id.type_id else _('No category')
                     add_x_item(y_axis, item, category, purchase_db)
                 elif mode == 'component' and not half_bom_ids:  # comp. in BOM
                     # 10/01/2018 restore supplier filter on recent_supplier_id
@@ -459,12 +453,10 @@ class MrpProduction(orm.Model):
                                 item.product_id.recent_supplier_id.id:
                         continue  # Jump not supplier present
 
-                    if mp_mode == 'fabric' and item.product_id.id not in \
-                            fabric_ids:  # jump not fabric
+                    if mp_mode == 'fabric' and item.product_id.id not in fabric_ids:  # jump not fabric
                         continue
-                    category = item.category_id.type_id.name if \
-                        item.category_id and item.category_id.type_id else \
-                        _('No category')
+                    category = item.category_id.type_id.name if (
+                            item.category_id and item.category_id.type_id) else _('No category')
                     # todo write category as component mode (pipe / fabric)
                     add_x_item(y_axis, item, category, purchase_db)
                 elif mode == 'component':  # >>> component HW and component BOM

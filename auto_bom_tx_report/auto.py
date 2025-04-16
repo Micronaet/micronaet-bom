@@ -176,8 +176,7 @@ class MrpProduction(orm.Model):
         return res
 
     # todo MOVE IN MODULE? used also from component auto report
-    def extract_mrp_production_report_xlsx(
-            self, cr, uid, data=None, context=None):
+    def extract_mrp_production_report_xlsx(self, cr, uid, data=None, context=None):
         """ Extract data from report and put in excel mode
         """
         # ---------------------------------------------------------------------
@@ -418,8 +417,7 @@ class MrpProduction(orm.Model):
             # -----------------------------------------------------------------
             # Extract element from line:
             # -----------------------------------------------------------------
-            (inv, tcar, tscar, mm, oc, of, sal, o, category, hw, hw_total,
-                purchase, inventory_category) = line
+            (inv, tcar, tscar, mm, oc, of, sal, o, category, hw, hw_total, purchase, inventory_category) = line
 
             # 1. Hide not active product:
             if not o.active:
@@ -883,8 +881,7 @@ class MrpProduction(orm.Model):
 
         # Current month cell:
         convert_month = {
-            1: 5, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10, 7: 11, 8: 12,
-            9: 1, 10: 2, 11: 3, 12: 4,
+            1: 5, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10, 7: 11, 8: 12, 9: 1, 10: 2, 11: 3, 12: 4,
             }
         self.current_day_cell = convert_month[datetime.now().month]
 
@@ -991,6 +988,7 @@ class MrpProduction(orm.Model):
             context = {
                 'lang': 'it_IT',
                 }
+
         # Prepare data selection filter (as wizard):
         datas = {
             # Report setup:
@@ -1038,8 +1036,7 @@ class MrpProduction(orm.Model):
                 return False
             attachments = [('Completo_%s.odt' % now, result)]
         elif mode == 'xlsx':
-            filename = self.extract_mrp_production_report_xlsx(
-                cr, uid, data=datas, context=context)
+            filename = self.extract_mrp_production_report_xlsx(cr, uid, data=datas, context=context)
 
             # Append stock page here:
             _logger.info('Integrate stock page in %s' % filename)
@@ -1059,8 +1056,7 @@ class MrpProduction(orm.Model):
         group_pool = self.pool.get('res.groups')
         model_pool = self.pool.get('ir.model.data')
         thread_pool = self.pool.get('mail.thread')
-        group_id = model_pool.get_object_reference(
-            cr, uid, 'textilene_status', 'group_textilene_admin')[1]
+        group_id = model_pool.get_object_reference(cr, uid, 'textilene_status', 'group_textilene_admin')[1]
         partner_ids = []
         for user in group_pool.browse(
                 cr, uid, group_id, context=context).users:
@@ -1070,9 +1066,7 @@ class MrpProduction(orm.Model):
             cr, uid, False,
             type='email',
             body='Stato tessuti settimanale',
-            subject='Invio automatico stato tessuto: %s' % (
-                datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT),
-                ),
+            subject='Invio automatico stato tessuto: %s' % (datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT), ),
             partner_ids=[(6, 0, partner_ids)],
             attachments=attachments,
             context=context,

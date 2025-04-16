@@ -36,6 +36,8 @@
     'demo': [],
     'data': [
         'security/xml_groups.xml',
+        # 'security/ir.model.access.csv',
+
         'wizard_xls.xml',
 
         'scheduler.xml',

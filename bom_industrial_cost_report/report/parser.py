@@ -822,8 +822,7 @@ class ProductProduct(orm.Model):
         # ---------------------------------------------------------------------
         # Extract data from ODT master function:
         row = 0
-        records = self.report_get_objects_bom_industrial_cost(
-            cr, uid, datas=datas, context=context)
+        records = self.report_get_objects_bom_industrial_cost(cr, uid, datas=datas, context=context)
         for (r_min, r_max, r_error, r_components, r_extra1, r_extra2, r_index,
              r_total, product, r_parameter, r_total_text, pipe_data,
              simulated_cost, simulated_unit) in records:
@@ -924,8 +923,7 @@ class ProductProduct(orm.Model):
 
         return sorted(objects, key=lambda o: o.default_code)
 
-    def report_get_objects_bom_industrial_cost(
-            self, cr, uid, datas=None, context=None):
+    def report_get_objects_bom_industrial_cost(self, cr, uid, datas=None, context=None):
         """ Report action for generate database used (both ODT and XLSX export)
         """
         def get_simulated(value, supplier, product, simulation_db):
@@ -936,8 +934,7 @@ class ProductProduct(orm.Model):
                 rule_supplier = param.supplier_id
                 start = param.name
 
-                if rule_supplier == supplier or (
-                        start and default_code.startswith(start)):
+                if rule_supplier == supplier or (start and default_code.startswith(start)):
                     if param.mode == 'rate':
                         value *= (100.0 + param.value) / 100.0
                     elif param.mode == 'fixed':
@@ -982,16 +979,13 @@ class ProductProduct(orm.Model):
         # ---------------------------------------------------------------------
         pipe_price_history = {}
         pipe_price_pool = self.pool.get('product.pipe.material.history')
-        pipe_price_ids = pipe_price_pool.search(
-            cr, uid, [], context=context)
-        for pipe_price in pipe_price_pool.browse(
-                cr, uid, pipe_price_ids, context=context):
+        pipe_price_ids = pipe_price_pool.search(cr, uid, [], context=context)
+        for pipe_price in pipe_price_pool.browse(cr, uid, pipe_price_ids, context=context):
             material = pipe_price.material_id
             material_id = material.id
             if material_id not in pipe_price_history:
                 pipe_price_history[material_id] = {}
-            pipe_price_history[material_id][pipe_price.year] = \
-                pipe_price.last_price
+            pipe_price_history[material_id][pipe_price.year] = pipe_price.last_price
 
         # ---------------------------------------------------------------------
         # Context parameters:
@@ -1019,8 +1013,7 @@ class ProductProduct(orm.Model):
         # Json compare history saved version just for compare with original
         # locked
         if json_history:
-            _logger.warning('Status BOM will saved in Dump data (%s)!' %
-                            json_history)
+            _logger.warning('Status BOM will saved in Dump data (%s)!' % json_history)
         else:
             _logger.warning('Status BOM Dump data not saved!')
 
@@ -1055,11 +1048,8 @@ class ProductProduct(orm.Model):
                     cr, uid, history_ids, context=context),
                     key=lambda x: x.date_quotation or x.write_date,
                     reverse=True):
-                date_quotation = history.date_quotation or \
-                    history.write_date[:10]
-                if not date_quotation or \
-                        date_quotation < from_date or \
-                        date_quotation > to_date:
+                date_quotation = history.date_quotation or history.write_date[:10]
+                if not date_quotation or date_quotation < from_date or date_quotation > to_date:
                     continue  # External date or not present
 
                 product = history.pricelist_id.product_id
@@ -1083,13 +1073,10 @@ class ProductProduct(orm.Model):
         selected_product = self._report_industrial_get_objects(
             cr, uid, data=datas, context=context)
         if selected_product:
-            margin_a = \
-                selected_product[0].company_id.industrial_margin_a
-            margin_b = \
-                selected_product[0].company_id.industrial_margin_b
+            margin_a = selected_product[0].company_id.industrial_margin_a
+            margin_b = selected_product[0].company_id.industrial_margin_b
             # todo manage extra:
-            margin_extra = \
-                selected_product[0].company_id.industrial_margin_extra
+            margin_extra = selected_product[0].company_id.industrial_margin_extra
 
             # Min date limit:
             if from_date:
@@ -1221,28 +1208,21 @@ class ProductProduct(orm.Model):
                                         reference_year)
                                 else:
                                     # Use last price in material:
-                                    pipe_price = \
-                                        cmpt.product_id.pipe_material_id.\
-                                            last_price
+                                    pipe_price = cmpt.product_id.pipe_material_id.last_price
 
-                                min_value = max_value = \
-                                    pipe_price * cmpt.product_id.weight
+                                min_value = max_value = pipe_price * cmpt.product_id.weight
                                 # Total pipe weight:
-                                q_pipe = item.product_qty * cmpt.product_qty *\
-                                    cmpt.product_id.weight
+                                q_pipe = item.product_qty * cmpt.product_qty * cmpt.product_id.weight
 
                                 pipe_simulated_unit = get_simulated(
-                                    pipe_price, supplier_max, cmpt.product_id,
-                                    simulation_db)
+                                    pipe_price, supplier_max, cmpt.product_id, simulation_db)
                                 simulated_cost = q_pipe * pipe_simulated_unit
 
                                 data[11][0] += q_pipe
                                 data[11][1] += q_pipe * pipe_price
 
                             # todo manage as pipe?
-                            red_price = \
-                                not cmpt.product_id.bom_industrial_no_price \
-                                and not max_value
+                            red_price = not cmpt.product_id.bom_industrial_no_price and not max_value
                             if cmpt.product_id.bom_industrial_no_price:
                                 min_value = max_value = 0.0  # no price in BOM
 
@@ -1539,6 +1519,5 @@ class Parser(report_sxw.rml_parse):
 
         product_pool = self.pool.get('product.product')
 
-        return product_pool.report_get_objects_bom_industrial_cost(
-            cr, uid, datas=datas, context=context)
+        return product_pool.report_get_objects_bom_industrial_cost(cr, uid, datas=datas, context=context)
 

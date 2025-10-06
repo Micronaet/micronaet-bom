@@ -133,8 +133,7 @@ class ProductProduct(orm.Model):
             _logger.error('Empty code: %s' % value)
         return res
 
-    def report_get_objects_bom_industrial_cost(
-            self, cr, uid, datas=None, context=None):
+    def report_get_objects_bom_industrial_cost(self, cr, uid, datas=None, context=None):
         """ Integration report
         """
         if context is None:
@@ -148,9 +147,7 @@ class ProductProduct(orm.Model):
         #    'model': 'product.product',
         #    'wizard': True,
         #   }
-        res = super(
-            ProductProduct, self).report_get_objects_bom_industrial_cost(
-                cr, uid, datas=datas, context=context)
+        res = super(ProductProduct, self).report_get_objects_bom_industrial_cost(cr, uid, datas=datas, context=context)
         _logger.info('Start reporting...')
         # removed
         return res

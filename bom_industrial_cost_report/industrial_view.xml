@@ -176,15 +176,29 @@
              <field name="name">mrp.bom.industrial.cost.line.form</field>
              <field name="model">mrp.bom.industrial.cost.line</field>
              <field name="arch" type="xml">
-                 <form string="Cost filter">
-                     <field name="cost_id" />
-                     <field name="name" />
-                     <field name="product_id" />
-                     <field name="last_cost" />
-                     <field name="last_date" />
-                     <field name="qty" />
-                     <field name="uom_id" />
-                     <!--<field name="cost" />-->
+                 <form string="Cost filter" version="7.0">
+                     <header>
+                         <button name="check_verified_button" string="Verificato ora" type="object" attrs="{'invisible': [('check_verified','=',True)]}" groups="bom_industrial_cost_report.group_bom_cost_history_manager" icon="STOCK_APPLY"/>
+                         <button name="check_verified_clean_button" string="Non verificato" type="object" attrs="{'invisible': [('check_verified','=',False)]}" confirm="Attenzione, verranno cancellati i dati di una eventuale precedente verifica, confermi?" groups="bom_industrial_cost_report.group_bom_cost_history_manager" icon="gtk-undo"/>
+                     </header>
+                     <sheet>
+                         <group col="4" colspan="4">
+                             <field name="cost_id" />
+                             <field name="name" />
+                             <field name="product_id" />
+                             <field name="last_cost" />
+                             <field name="last_date" />
+                             <field name="qty" />
+                             <field name="uom_id" />
+                             <!--<field name="cost" />-->
+
+                             <field name="check_verified" readonly="1" groups="bom_industrial_cost_report.group_bom_cost_history_manager" invisible="1"/>
+                             <field name="check_user_id" readonly="1" groups="bom_industrial_cost_report.group_bom_cost_history_manager" />
+                             <field name="check_timestamp" readonly="1" groups="bom_industrial_cost_report.group_bom_cost_history_manager" />
+                             <field name="check_note" groups="bom_industrial_cost_report.group_bom_cost_history_manager" />
+
+                         </group>
+                     </sheet>
                  </form>
              </field>
          </record>
@@ -205,6 +219,8 @@
                          <filter name="group_cost" string="Cost" context="{'group_by': 'cost_id'}"/>
                          <filter name="group_product" string="Prodotto" context="{'group_by': 'product_id'}"/>
                          <filter name="group_check_verified" string="Controllo" context="{'group_by': 'check_verified'}"/>
+                         <filter name="group_check_user_id" string="Utente controllo" context="{'group_by': 'check_user_id'}"/>
+                         <filter name="group_check_timestamp" string="Data controllo" context="{'group_by': 'check_timestamp'}"/>
                      </group>
                  </search>
              </field>

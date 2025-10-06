@@ -237,7 +237,7 @@ class MrpBomIndustrialCostLine(orm.Model):
 
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Prodotti selezionati dalla maschera {}'.format(name)),
+            'name': _('Prodotti selezionati dalla maschera "{}"'.format(mask)),
             'view_type': 'form',
             'view_mode': 'tree,form',
             # 'res_id': 1,

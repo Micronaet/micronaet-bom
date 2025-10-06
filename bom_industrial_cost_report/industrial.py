@@ -228,10 +228,28 @@ class MrpBomIndustrialCostLine(orm.Model):
     def touched_product_with_mask(self, cr, uid, ids, context=None):
         """ Touched product with mask
         """
-        cost = self.browse(cr, uid, ids, context=context)[0]
-        mask = cost.name
+        product_pool = self.pool.get('product.product')
 
-        return True
+        record = self.browse(cr, uid, ids, context=context)[0]
+        mask = record.name
+        product_ids = product_pool.search(cr, uid, [
+            ('default_code', '=ilike', mask)], context=context)
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Prodotti selezionati dalla maschera {}'.format(name)),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            # 'res_id': 1,
+            'res_model': 'product.product',
+            #'view_id': view_id, # False
+            'views': [(False, 'tree'), (False, 'form')],
+            'domain': [('id', 'in', product_ids)],
+            'context': context,
+            'target': 'current', # 'new'
+            'nodestroy': False,
+            }
+
 
     def check_verified_button(self, cr, uid, ids, context=None):
         """ Checked operation

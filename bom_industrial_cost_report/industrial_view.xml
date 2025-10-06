@@ -150,7 +150,7 @@
              <field name="name">mrp.bom.industrial.cost.line.tree</field>
              <field name="model">mrp.bom.industrial.cost.line</field>
              <field name="arch" type="xml">
-                 <tree string="Cost filter" editable="bottom">
+                 <tree string="Cost filter" editable="bottom" colors="green: check_verified == True">
                      <field name="cost_id" invisible="context.get('is_embedded', False)"/>
                      <field name="name" />
                      <field name="product_id" />

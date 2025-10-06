@@ -45,8 +45,8 @@ class ProductProduct(orm.Model):
     
     # Button events:
     def used_in_bom(self, cr, uid, ids, context=None):
-        ''' Product check bom
-        '''
+        """ Product check bom
+        """
         line_pool = self.pool.get('mrp.bom.line')
         bom_pool = self.pool.get('mrp.bom')
         
@@ -88,5 +88,3 @@ class ProductProduct(orm.Model):
     _defaults = {
        'relative_type': lambda *x: 'none',
        }
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

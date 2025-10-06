@@ -160,13 +160,13 @@
                      <field name="uom_id" />
                      <!--<field name="cost" />-->
 
-                     <button name="check_verified_button" string="Verificato ora" type="object" attrs="{'invisible': [('check_verified','=',True)]}"/>
-                     <button name="check_verified_clean_button" string="Non verificato" type="object" attrs="{'invisible': [('check_verified','=',False)]}" confirm="Attenzione, verranno cancellati i dati di una eventuale precedente verifica, confermi?"/>
+                     <button name="check_verified_button" string="Verificato ora" type="object" attrs="{'invisible': [('check_verified','=',True)]}" groups="bom_industrial_cost_report.group_bom_cost_history_manager" />
+                     <button name="check_verified_clean_button" string="Non verificato" type="object" attrs="{'invisible': [('check_verified','=',False)]}" confirm="Attenzione, verranno cancellati i dati di una eventuale precedente verifica, confermi?" groups="bom_industrial_cost_report.group_bom_cost_history_manager" />
 
-                     <field name="check_verified" readonly="1"/>
-                     <field name="check_user_id" readonly="1"/>
-                     <field name="check_timestamp" readonly="1" />
-                     <field name="check_note" />
+                     <field name="check_verified" readonly="1" groups="bom_industrial_cost_report.group_bom_cost_history_manager" />
+                     <field name="check_user_id" readonly="1" groups="bom_industrial_cost_report.group_bom_cost_history_manager" />
+                     <field name="check_timestamp" readonly="1" groups="bom_industrial_cost_report.group_bom_cost_history_manager" />
+                     <field name="check_note" groups="bom_industrial_cost_report.group_bom_cost_history_manager" />
                  </tree>
              </field>
          </record>

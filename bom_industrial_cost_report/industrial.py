@@ -624,6 +624,40 @@ class ProductProduct(orm.Model):
     # -------------------------------------------------------------------------
     # Utility function:
     # -------------------------------------------------------------------------
+    def bom_user_see_price_in_report(self, cr, uid, context=None):
+        """ User can see price in DB report
+            Check if the user has the group group_cost_in_report in his group list
+
+            :param cr: Cursor del database.
+            :param uid: ID dell'utente che esegue l'operazione.
+            # :param user_id: ID dell'utente da controllare.
+            # :param xml_group_ref: XML ID del gruppo (es. 'base.group_user').
+            :param context: Dizionario di contesto opzionale.
+
+            @return: True se l'utente appartiene al gruppo, False altrimenti.
+        """
+        xml_group_ref = 'bom_industrial_cost_report.group_cost_in_report'
+        user_id = uid
+
+        if not user_id or not xml_group_ref:
+            return False
+
+        # 1. Group ID from XML ID:
+        try:
+            group_id = self.pool.get('ir.model.data').get_object_reference(
+                cr, uid, xml_group_ref.split('.')[0], xml_group_ref.split('.')[1]
+            )[1]
+        except ValueError:
+            return False
+
+        if not group_id:
+            return False
+
+        # Check group id in user groups:
+        user_obj = self.pool.get('res.users')
+        user = user_obj.browse(cr, uid, user_id, context=context)
+        return group_id in user.groups_id.ids
+
     def get_cost_industrial_for_product_xmlrpc(self, cr, uid, ids,
             context=None):
         """ Procedure for return via XMLRLC call

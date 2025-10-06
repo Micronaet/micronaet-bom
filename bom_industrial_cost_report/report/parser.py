@@ -863,8 +863,7 @@ class ProductProduct(orm.Model):
             for table in (r_extra1, r_extra2):
                 for item, details, time_qty in table:
                     if time_qty:
-                        industrial_cost[cost_db[item.cost_id.name]] = \
-                            '%s (T. %s)' % (details, time_qty)
+                        industrial_cost[cost_db[item.cost_id.name]] = '%s (T. %s)' % (details, time_qty)
                     else:
                         industrial_cost[cost_db[item.cost_id.name]] = details
 

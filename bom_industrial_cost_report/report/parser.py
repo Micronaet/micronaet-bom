@@ -824,8 +824,7 @@ class ProductProduct(orm.Model):
         row = 0
         records = self.report_get_objects_bom_industrial_cost(cr, uid, datas=datas, context=context)
         for (r_min, r_max, r_error, r_components, r_extra1, r_extra2, r_index,
-             r_total, product, r_parameter, r_total_text, pipe_data,
-             simulated_cost, simulated_unit) in records:
+             r_total, product, r_parameter, r_total_text, pipe_data, simulated_cost, simulated_unit) in records:
             row += 1
             # Note: simulated_unit not used for now!
 
@@ -965,13 +964,13 @@ class ProductProduct(orm.Model):
         # Parameters in datas dictionary:
         # ---------------------------------------------------------------------
         dump_pool = self.pool.get('product.product.bom.dump')
+        history_pool = self.pool.get('pricelist.partnerinfo.history')
 
         # Load simulation parameter list (mask and price)
         simulation_db = []
         simulation_pool = self.pool.get('mrp.bom.industrial.simulation')
         simulation_ids = simulation_pool.search(cr, uid, [], context=context)
-        for simulation in simulation_pool.browse(
-                cr, uid, simulation_ids, context=context):
+        for simulation in simulation_pool.browse(cr, uid, simulation_ids, context=context):
             simulation_db.append(simulation)
 
         # ---------------------------------------------------------------------
@@ -998,8 +997,7 @@ class ProductProduct(orm.Model):
             _logger.warning('No product price updated!')
 
         # 2. Need update current price
-        update_current_industrial = datas.get(
-            'update_current_industrial', False)
+        update_current_industrial = datas.get('update_current_industrial', False)
         if update_current_industrial:
             _logger.warning('Product price current will be updated!')
         else:
@@ -1024,8 +1022,7 @@ class ProductProduct(orm.Model):
         _logger.warning('Reference year for pipe price: %s' % reference_year)
 
         old_date = 730  # days parameter
-        old_component_date = str(
-            datetime.now() - timedelta(days=old_date))[:10]
+        old_component_date = str(datetime.now() - timedelta(days=old_date))[:10]
         # todo in old BOM use to_date as start?
 
         # ---------------------------------------------------------------------
@@ -1033,21 +1030,17 @@ class ProductProduct(orm.Model):
         # ---------------------------------------------------------------------
         history_db = {}
         if to_date:
-            _logger.warning(
-                'Max date mode so read also history: %s!' % to_date)
+            _logger.warning('Max date mode so read also history: %s!' % to_date)
 
             # Load history database not empty with range passed:
-            history_pool = self.pool.get('pricelist.partnerinfo.history')
             history_ids = history_pool.search(cr, uid, [
                 # ('date_quotation', '>=', from_date),
                 # ('date_quotation', '<=', to_date),
                 ('price', '>', 0),
                 ], context=context)
 
-            for history in sorted(history_pool.browse(
-                    cr, uid, history_ids, context=context),
-                    key=lambda x: x.date_quotation or x.write_date,
-                    reverse=True):
+            for history in sorted(history_pool.browse(cr, uid, history_ids, context=context),
+                    key=lambda x: x.date_quotation or x.write_date, reverse=True):
                 date_quotation = history.date_quotation or history.write_date[:10]
                 if not date_quotation or date_quotation < from_date or date_quotation > to_date:
                     continue  # External date or not present
@@ -1149,8 +1142,7 @@ class ProductProduct(orm.Model):
                         # Manage 3 level BOM:
                         # -----------------------------------------------------
                         if master_cmpt.product_id.half_bom_ids:
-                            extra_reference = ' [%s]' % (
-                                master_cmpt.product_id.default_code)
+                            extra_reference = ' [%s]' % master_cmpt.product_id.default_code
                             cmpt_loop = master_cmpt.product_id.half_bom_ids
                         else:
                             extra_reference = ''
@@ -1164,17 +1156,13 @@ class ProductProduct(orm.Model):
                             # Simulation:
                             # -------------------------------------------------
                             # Retrieve used data:
-                            (min_value, max_value, price_ids, supplier_min,
-                             supplier_max, date_quotation) = get_pricelist(
-                                cmpt.product_id, from_date, to_date,
-                                history_db)
+                            (min_value, max_value, price_ids, supplier_min, supplier_max, date_quotation) = (
+                                get_pricelist(cmpt.product_id, from_date, to_date, history_db))
 
                             # -------------------------------------------------
                             # Simulation data:
                             # -------------------------------------------------
-                            simulated_unit = get_simulated(
-                                max_value, supplier_max, cmpt.product_id,
-                                simulation_db)
+                            simulated_unit = get_simulated(max_value, supplier_max, cmpt.product_id, simulation_db)
                             simulated_cost = cmpt_q * simulated_unit
                             price_detail = get_price_detail(price_ids)
 
@@ -1377,8 +1365,7 @@ class ProductProduct(orm.Model):
             data[6] = {  # Index
                 _('component'): data[1],  # used max:
                 }
-            for cost, item in self.get_cost_industrial_for_product(
-                    cr, uid, [product.id], context=context).iteritems():
+            for cost, item in self.get_cost_industrial_for_product(cr, uid, [product.id], context=context).iteritems():
 
                 # Index total:
                 if cost.type not in data[6]:
@@ -1488,7 +1475,6 @@ class ProductProduct(orm.Model):
         for product_id, record in update_after:
             self.write(cr, uid, product_id, record, context=context)
         return res
-
 
 class Parser(report_sxw.rml_parse):
     def __init__(self, cr, uid, name, context):

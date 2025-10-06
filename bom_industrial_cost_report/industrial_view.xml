@@ -197,9 +197,14 @@
                      <field name="cost_id" />
                      <field name="product_id" string="Codice prodotto" filter_domain="[('product_id.default_code','ilike',self)]"/>
                      <!--<filter name="cost_0" string="No cost" domain="[('cost','=',0)]"/>-->
+
+                     <filter name="check_verified_on" string="Controllati" domain="[('check_verified','=',True)]"/>
+                     <filter name="check_verified_on" string="Non Controllati" domain="[('check_verified','=',False)]"/>
+
                      <group expand="0" string="Group By...">
                          <filter name="group_cost" string="Cost" context="{'group_by': 'cost_id'}"/>
                          <filter name="group_product" string="Prodotto" context="{'group_by': 'product_id'}"/>
+                         <filter name="group_check_verified" string="Controllo" context="{'group_by': 'check_verified'}"/>
                      </group>
                  </search>
              </field>

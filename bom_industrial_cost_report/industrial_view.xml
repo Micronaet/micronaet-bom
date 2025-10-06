@@ -153,6 +153,7 @@
                  <tree string="Cost filter" editable="bottom" colors="green: check_verified == True">
                      <field name="cost_id" invisible="context.get('is_embedded', False)"/>
                      <field name="name" />
+                     <button name="touched_product_with_mask" string="Prodotti toccati dalla regola" type="object" groups="bom_industrial_cost_report.group_bom_cost_history_manager" icon="gtk-justify-fill" />
                      <field name="product_id" />
                      <field name="last_cost" />
                      <field name="last_date" />
@@ -160,10 +161,10 @@
                      <field name="uom_id" />
                      <!--<field name="cost" />-->
 
-                     <button name="check_verified_button" string="Verificato ora" type="object" attrs="{'invisible': [('check_verified','=',True)]}" groups="bom_industrial_cost_report.group_bom_cost_history_manager" />
-                     <button name="check_verified_clean_button" string="Non verificato" type="object" attrs="{'invisible': [('check_verified','=',False)]}" confirm="Attenzione, verranno cancellati i dati di una eventuale precedente verifica, confermi?" groups="bom_industrial_cost_report.group_bom_cost_history_manager" />
+                     <button name="check_verified_button" string="Verificato ora" type="object" attrs="{'invisible': [('check_verified','=',True)]}" groups="bom_industrial_cost_report.group_bom_cost_history_manager" icon="STOCK_APPLY"/>
+                     <button name="check_verified_clean_button" string="Non verificato" type="object" attrs="{'invisible': [('check_verified','=',False)]}" confirm="Attenzione, verranno cancellati i dati di una eventuale precedente verifica, confermi?" groups="bom_industrial_cost_report.group_bom_cost_history_manager" icon="gtk-undo"/>
 
-                     <field name="check_verified" readonly="1" groups="bom_industrial_cost_report.group_bom_cost_history_manager" />
+                     <field name="check_verified" readonly="1" groups="bom_industrial_cost_report.group_bom_cost_history_manager" invisible="1"/>
                      <field name="check_user_id" readonly="1" groups="bom_industrial_cost_report.group_bom_cost_history_manager" />
                      <field name="check_timestamp" readonly="1" groups="bom_industrial_cost_report.group_bom_cost_history_manager" />
                      <field name="check_note" groups="bom_industrial_cost_report.group_bom_cost_history_manager" />

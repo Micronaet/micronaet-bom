@@ -225,6 +225,14 @@ class MrpBomIndustrialCostLine(orm.Model):
                         res[line.id]['last_date'] = date_quotation
         return res
 
+    def touched_product_with_mask(self, cr, uid, ids, context=None):
+        """ Touched product with mask
+        """
+        cost = self.browse(cr, uid, ids, context=context)[0]
+        mask = cost.name
+
+        return True
+
     def check_verified_button(self, cr, uid, ids, context=None):
         """ Checked operation
         """

@@ -21,8 +21,8 @@ import os
 import sys
 import logging
 import openerp
-import openerp.netsvc as netsvc
-import openerp.addons.decimal_precision as dp
+# import openerp.netsvc as netsvc
+# import openerp.addons.decimal_precision as dp
 from openerp.osv import fields, osv, expression, orm
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -225,28 +225,47 @@ class MrpBomIndustrialCostLine(orm.Model):
                         res[line.id]['last_date'] = date_quotation
         return res
 
+    def check_verified_button(self, cr, uid, ids, context=None):
+        """ Checked operation
+        """
+        return self.write(cr, uid, ids, {
+            'check_user_id': uid,
+            'check_timestamp': datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            # 'check_note': '',
+            'check_verified': True,
+        }, context=context)
+
+    def check_verified_clean_button(self, cr, uid, ids, context=None):
+        """ Checked operation clean data
+        """
+        return self.write(cr, uid, ids, {
+            'check_user_id': False,
+            'check_timestamp': False,
+            'check_note': False,
+            'check_verified': False,
+        }, context=context)
+
     _columns = {
         'name': fields.char(
-            'Mask', size=64, required=True,
-            help='Mask for code, use % for all, _ for replace one char'),
+            'Mask', size=64, required=True, help='Mask for code, use % for all, _ for replace one char'),
         'product_id': fields.many2one('product.product', 'Prodotto'),
         'uom_id': fields.related(
-            'product_id', 'uom_id',
-            type='many2one', relation='product.uom',
-            string='UM', readonly=True),
-        'cost_id': fields.many2one(
-            'mrp.bom.industrial.cost', 'Cost'),
+            'product_id', 'uom_id', type='many2one', relation='product.uom', string='UM', readonly=True),
+        'cost_id': fields.many2one('mrp.bom.industrial.cost', 'Cost'),
         'qty': fields.float('Q.', digits=(16, 3), required=True),
 
         # Get product cost info:
         'last_cost': fields.function(
-            _get_last_cost_info, method=True,
-            type='float', string='Costo ultimo',
+            _get_last_cost_info, method=True, type='float', string='Costo ultimo',
             store=False, multi=True, readonly=True),
         'last_date': fields.function(
-            _get_last_cost_info, method=True,
-            type='char', string='Data ultimo',
+            _get_last_cost_info, method=True, type='char', string='Data ultimo',
             store=False, multi=True, readonly=True),
+
+        'check_user_id': fields.many2one('res.users', 'Utente'),
+        'check_timestamp': fields.datetime('Data controllo'),
+        'check_note': fields.char('Note controllo', size=100),
+        'check_verified': fields.boolean('Verificato'),
         }
 
 
@@ -551,14 +570,11 @@ class MrpBomIndustrialHistoryLine(orm.Model):
     _rec_name = 'product_id'
 
     _columns = {
-        'history_id': fields.many2one(
-            'mrp.bom.industrial.history', 'Storico'),
-        'product_id': fields.many2one(
-            'product.product', 'DB', required=True),
-        'previous': fields.float(
-            'Precedente', digits=(16, 2)),
-        'current': fields.float(
-            'Corrente', digits=(16, 2), required=True),
+        'history_id': fields.many2one('mrp.bom.industrial.history', 'Storico'),
+        'product_id': fields.many2one('product.product', 'DB', required=True),
+        'previous': fields.float('Precedente', digits=(16, 2)),
+        'current': fields.float('Corrente', digits=(16, 2), required=True),
+
     }
 
 

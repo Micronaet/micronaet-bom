@@ -159,9 +159,18 @@
                      <field name="qty" />
                      <field name="uom_id" />
                      <!--<field name="cost" />-->
+
+                     <button name="check_verified_button" string="Verificato ora" type="object" attrs="{'invisible': [('check_verified','=',True)]}"/>
+                     <button name="check_verified_clean_button" string="Non verificato" type="object" attrs="{'invisible': [('check_verified','=',False)]}" confirm="Attenzione, verranno cancellati i dati di una eventuale precedente verifica, confermi?"/>
+
+                     <field name="check_verified" readonly="1"/>
+                     <field name="check_user_id" readonly="1"/>
+                     <field name="check_timestamp" readonly="1" />
+                     <field name="check_note" />
                  </tree>
              </field>
          </record>
+
          <record model="ir.ui.view" id="view_mrp_bom_industrial_cost_line_form">
              <field name="name">mrp.bom.industrial.cost.line.form</field>
              <field name="model">mrp.bom.industrial.cost.line</field>

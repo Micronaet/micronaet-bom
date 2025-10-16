@@ -393,7 +393,6 @@ class MrpProduction(orm.Model):
                     purchase_db, mode='product',
                     )
             f_log_fabric.close()
-            pdb.set_trace()
 
         # Get product BOM dynamic lines (from active order):
         product_data = sale_pool.get_component_in_product_order_open(cr, uid, context=context)

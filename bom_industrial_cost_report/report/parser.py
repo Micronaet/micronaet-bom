@@ -239,8 +239,7 @@ class ProductProductBOMDump(orm.Model):
         """
         product_pool = self.pool.get('product.product')
         current = self.browse(cr, uid, ids, context=context)[0]
-        return product_pool.open_single_report_with_compare_dump(
-            cr, uid, [current.product_id.id], context=context)
+        return product_pool.open_single_report_with_compare_dump(cr, uid, [current.product_id.id], context=context)
 
     def get_html_tag(self, data, tag='td', parameters=None):
         """ Format tag data

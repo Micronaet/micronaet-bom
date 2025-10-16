@@ -258,9 +258,9 @@ class MrpProduction(orm.Model):
                 # total[0] += stock_mt
             return True
 
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         # Start procedure:
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         if context is None:
             context = {}
 
@@ -281,18 +281,16 @@ class MrpProduction(orm.Model):
         only_negative = data.get('only_negative', False)
         exclude_inventory_category = data.get('exclude_inventory_category', False)
 
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         # Exclude marked "no report" inventory category:
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         if exclude_inventory_category:
             # TODO load exclude category:
-            inventory_pool = self.pool.get(
-                'product.product.inventory.category')
+            inventory_pool = self.pool.get('product.product.inventory.category')
             exclude_inventory_ids = inventory_pool.search(cr, uid, [
                 ('not_in_report', '=', True),
                 ], context=context)
-            _logger.warning('Excluded [%s] inventory category' % (
-                exclude_inventory_ids, ))
+            _logger.warning('Excluded [%s] inventory category' % (exclude_inventory_ids, ))
         else:
             exclude_inventory_ids = []
 
@@ -309,7 +307,7 @@ class MrpProduction(orm.Model):
         now = '%s' % datetime.now()
         xls_log = '/home/administrator/photo/log/report_explode_%s_%s.xlsx' % (
             mode, now.replace('/', '_').replace(':', '.'))
-        # Save in context if if will be used after:
+        # Save in context if it will be used after:
         context['component_logfile'] = xls_log
 
         _logger.warning('Log file: %s' % xls_log)
@@ -380,22 +378,25 @@ class MrpProduction(orm.Model):
 
             cr.execute(query)
             fabric_ids = [item[0] for item in cr.fetchall()]
-            fabrics = product_pool.browse(
-                    cr, uid, fabric_ids, context=context)
+            fabrics = product_pool.browse(cr, uid, fabric_ids, context=context)
 
             # Log selection:
             write_xls_line('selection', ['Elenco tessuti'])
             write_xls_line_list('selection', [f.default_code for f in fabrics])
 
+            f_log_fabric = open('/tmp/tx_fabrics.csv', 'w')
             for fabric in fabrics:
+                f_log_fabric.write('{}\n'.format(fabric.default_code))
+
                 add_x_item(
                     y_axis, fabric, category_fabric,
                     purchase_db, mode='product',
                     )
+            f_log_fabric.close()
+            pdb.set_trace()
 
         # Get product BOM dynamic lines (from active order):
-        product_data = sale_pool.get_component_in_product_order_open(
-            cr, uid, context=context)
+        product_data = sale_pool.get_component_in_product_order_open(cr, uid, context=context)
         product_proxy = product_data['product']
 
         # TODO manage all product for particular category?
@@ -414,25 +415,19 @@ class MrpProduction(orm.Model):
                 # todo Remove log:
 
                 # Remove placeholder elements:
-                if item.product_id.bom_placeholder or \
-                        item.product_id.bom_alternative:
-                    _logger.warning('Placeholder product jumped: %s' %
-                                    item.product_id.default_code)
+                if item.product_id.bom_placeholder or item.product_id.bom_alternative:
+                    _logger.warning('Placeholder product jumped: %s' % item.product_id.default_code)
                     continue
 
                 # -------------------------------------------------------------
                 # Filter:
                 # -------------------------------------------------------------
                 # NOTE: Filter category always in hw not component!
-                if with_type_ids and \
-                        item.category_id.type_id.id not in with_type_ids:
+                if with_type_ids and item.category_id.type_id.id not in with_type_ids:
                     continue  # Jump not in category selected
-                if without_type_ids and \
-                        item.category_id.type_id.id in without_type_ids:
+                if without_type_ids and item.category_id.type_id.id in without_type_ids:
                     continue  # Jump not in category selected
-                if exclude_inventory_ids and \
-                        item.product_id.inventory_category_id.id\
-                        in exclude_inventory_ids:
+                if exclude_inventory_ids and item.product_id.inventory_category_id.id in exclude_inventory_ids:
                     _logger.warning('Product category not in report')
                     continue  # Jump BOM element in excluded category
 
@@ -440,8 +435,7 @@ class MrpProduction(orm.Model):
                 half_bom_ids = item.product_id.half_bom_ids
                 if mode == 'halfwork' and half_bom_ids:  # hw with component
                     # 10/01/2018 change first with recent
-                    if first_supplier_id and first_supplier_id != \
-                                item.product_id.recent_supplier_id.id:
+                    if first_supplier_id and first_supplier_id != item.product_id.recent_supplier_id.id:
                         continue  # Jump not supplier present
 
                     category = item.category_id.type_id.name if \
@@ -449,12 +443,12 @@ class MrpProduction(orm.Model):
                     add_x_item(y_axis, item, category, purchase_db)
                 elif mode == 'component' and not half_bom_ids:  # comp. in BOM
                     # 10/01/2018 restore supplier filter on recent_supplier_id
-                    if first_supplier_id and first_supplier_id != \
-                                item.product_id.recent_supplier_id.id:
+                    if first_supplier_id and first_supplier_id != item.product_id.recent_supplier_id.id:
                         continue  # Jump not supplier present
 
                     if mp_mode == 'fabric' and item.product_id.id not in fabric_ids:  # jump not fabric
                         continue
+
                     category = item.category_id.type_id.name if (
                             item.category_id and item.category_id.type_id) else _('No category')
                     # todo write category as component mode (pipe / fabric)
@@ -468,13 +462,11 @@ class MrpProduction(orm.Model):
                                     item.product_id.recent_supplier_id.id:
                             continue  # Jump not supplier present
 
-                        if mp_mode == 'fabric' and component.product_id.id \
-                                not in fabric_ids:
+                        if mp_mode == 'fabric' and component.product_id.id not in fabric_ids:
                             continue
 
-                        if exclude_inventory_ids and \
-                                component.product_id.inventory_category_id.id \
-                                in exclude_inventory_ids:
+                        if (exclude_inventory_ids and component.product_id.inventory_category_id.id
+                                in exclude_inventory_ids):
                             continue  # Jump BOM element in excluded category
 
                         # Create ad hoc category:

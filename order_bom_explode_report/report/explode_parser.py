@@ -868,8 +868,7 @@ class MrpProduction(orm.Model):
                                     '', 0,  # +MM
                                     comp_remain,  # -OC
                                     0, 'COMPONENT NOT IN FILTER X LIST (CMPT)',
-                                    comp.category_id.name if comp.category_id\
-                                    else 'NO CATEGORY',
+                                    comp.category_id.name if comp.category_id else 'NO CATEGORY',
                                     ))
                                 continue
 

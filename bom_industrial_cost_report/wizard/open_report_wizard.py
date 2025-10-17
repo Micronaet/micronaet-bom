@@ -76,28 +76,25 @@ class SaleOrder(orm.Model):
             'min_margin': margin,
             'report_name': 'industrial_cost_bom_report',
         }, context=context)
-        filename, mail_message = wizard_pool.action_print_invoice_cost_analysis(
-            cr, uid, [wizard_id], context=ctx)
+        filename, mail_message = wizard_pool.action_print_invoice_cost_analysis(cr, uid, [wizard_id], context=ctx)
 
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         # Report in ODT mode:
-        # ---------------------------------------------------------------------
-        now = now.strftime(DEFAULT_SERVER_DATETIME_FORMAT).replace(
-            '-', '_').replace(':', '.')
+        # --------------------------------------------------------------------------------------------------------------
+        now = now.strftime(DEFAULT_SERVER_DATETIME_FORMAT).replace('-', '_').replace(':', '.')
 
         # Create attachment block for send after:
         xlsx_raw = open(filename, 'rb').read()
         attachments = [('Controllo margini OC e FT %s.xlsx' % now, xlsx_raw)]
 
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         # Send report:
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         # Send mail with attachment:
         group_pool = self.pool.get('res.groups')
         model_pool = self.pool.get('ir.model.data')
         thread_pool = self.pool.get('mail.thread')
-        group_id = model_pool.get_object_reference(
-            cr, uid, 'bom_industrial_cost_report', 'group_margin_report')[1]
+        group_id = model_pool.get_object_reference(cr, uid, 'bom_industrial_cost_report', 'group_margin_report')[1]
         partner_ids = []
         for user in group_pool.browse(
                 cr, uid, group_id, context=context).users:
@@ -112,6 +109,7 @@ class SaleOrder(orm.Model):
                 body += ' - %s: Totale <b>%s</b> su %s righe<br/>\n' % (
                     state, int(total[0]), int(total[1]),
                     )
+
         thread_pool.message_post(
             cr, uid, False,
             type='email',
@@ -146,6 +144,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             context = {}
         save_mode = context.get('save_mode')
         if save_mode:
+            margin_error_f = open('/home/administrator/photo/log/margin_error.csv', 'w')
             mail_message = {
                 'Fatturato': {
                     'NIENTE DISTINTA': [0.0, 0.0],  # Total, lines
@@ -298,28 +297,25 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         excel_pool.merge_cell(ws_name, [row, 0, row, 11])
 
         row += 1
-        excel_pool.write_xls_line(
-            ws_name, row, header, default_format=excel_format['header'])
+        excel_pool.write_xls_line(ws_name, row, header, default_format=excel_format['header'])
         excel_pool.freeze_panes(ws_name, 2, 6)
         excel_pool.autofilter(ws_name, row, 0, row, len(header) - 1)
 
         partner_cache = {}
         line_ids = line_pool.search(cr, uid, domain, context=context)
         hidden_row = []  # Hide old records
-        for line in sorted(
-                line_pool.browse(cr, uid, line_ids, context=context),
-                key=lambda l: (
-                    l.invoice_id.partner_id.name,
-                    l.invoice_id.date_invoice,
-                )):
+        for line in sorted(line_pool.browse(cr, uid, line_ids, context=context),
+                key=lambda l: (l.invoice_id.partner_id.name, l.invoice_id.date_invoice)):
 
-            # -----------------------------------------------------------------
+            # ----------------------------------------------------------------------------------------------------------
             # Read data:
-            # -----------------------------------------------------------------
+            # ----------------------------------------------------------------------------------------------------------
             invoice = line.invoice_id
+            invoice_number = invoice.number
             partner = invoice.partner_id
             product = line.product_id
-            code5 = (product.default_code or '')[:5]
+            default_code = product.default_code or ''
+            code5 = default_code[:5]
             quantity = line.quantity
             # order = line.order_id  todo get incoterms here to test
 
@@ -329,8 +325,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                     partner.industrial_transport_rate,
                     partner.industrial_extra_discount,
                 ]
-            industrial_transport_rate, industrial_extra_discount = \
-                partner_cache[partner]
+            industrial_transport_rate, industrial_extra_discount = partner_cache[partner]
 
             # -----------------------------------------------------------------
             # Calc data used:
@@ -374,9 +369,16 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             if not db:
                 margin_comment = 'NIENTE DISTINTA'
                 color = excel_format['grey']
+
+                # Log:
+                margin_error_f.write('FATTURATO|{}|{}|{}\n'.format(
+                    margin_comment, default_code, invoice_number,
+                ))
+
             elif margin_rate <= 0:
                 margin_comment = 'NEGATIVO'
                 color = excel_format['red']
+
             elif recharge_rate < min_margin:
                 margin_comment = 'BASSO'
                 color = excel_format['yellow']
@@ -388,9 +390,9 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 mail_message[ws_name][margin_comment][0] += subtotal
                 mail_message[ws_name][margin_comment][1] += 1
 
-            # -----------------------------------------------------------------
+            # ----------------------------------------------------------------------------------------------------------
             # Write data:
-            # -----------------------------------------------------------------
+            # ----------------------------------------------------------------------------------------------------------
             row += 1
             invoice_date = invoice.date_invoice
 
@@ -437,8 +439,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                 error,
                 margin_comment,
             ]
-            excel_pool.write_xls_line(
-                ws_name, row, data, default_format=color['text'])
+            excel_pool.write_xls_line(ws_name, row, data, default_format=color['text'])
 
         # ---------------------------------------------------------------------
         # Update with total:
@@ -526,9 +527,11 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             # Read data:
             # -----------------------------------------------------------------
             order = line.order_id
+            order_number = order.name
             partner = order.partner_id
             product = line.product_id
-            code5 = (product.default_code or '')[:5]
+            default_code = product.default_code or ''
+            code5 = default_code[:5]
             quantity = line.product_uom_qty
 
             # Cache parameter
@@ -537,8 +540,7 @@ class ProductBomReportLimitWizard(orm.TransientModel):
                     partner.industrial_transport_rate,
                     partner.industrial_extra_discount,
                 ]
-            industrial_transport_rate, industrial_extra_discount = \
-                partner_cache[partner]
+            industrial_transport_rate, industrial_extra_discount = partner_cache[partner]
 
             # -----------------------------------------------------------------
             # Calc data used:
@@ -583,6 +585,11 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             if not db:
                 margin_comment = 'NIENTE DISTINTA'
                 color = excel_format['grey']
+                # Log:
+                margin_error_f.write('ORDINATO|{}|{}|{}\n'.format(
+                    margin_comment, default_code, order_number,
+                ))
+
             elif margin_rate <= 0:
                 margin_comment = 'NEGATIVO'
                 color = excel_format['red']

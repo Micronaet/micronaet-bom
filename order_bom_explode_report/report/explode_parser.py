@@ -857,8 +857,6 @@ class MrpProduction(orm.Model):
                             comp_remain = item_remain * comp.product_qty
 
                             # OC out item (no prod.):
-                            if comp_code == 'T4D180GN':
-                                pdb.set_trace()
                             if comp_code not in y_axis:
                                 write_xls_line('move', (
                                     block, 'NOT USED', order.name, '', date,

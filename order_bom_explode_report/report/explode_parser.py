@@ -373,7 +373,7 @@ class MrpProduction(orm.Model):
             # todo add also not_in_report check!!!  and not_in_report='f'
             query = ('''
                 SELECT id from product_product
-                WHERE substring(default_code, 1, 3) IN ('%s');''' %
+                WHERE UPPER(substring(default_code, 1, 3)) IN ('%s');''' %
                      "','".join(fabric_list))
 
             cr.execute(query)

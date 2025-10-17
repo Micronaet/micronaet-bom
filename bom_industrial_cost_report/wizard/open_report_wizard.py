@@ -144,7 +144,10 @@ class ProductBomReportLimitWizard(orm.TransientModel):
             context = {}
         save_mode = context.get('save_mode')
         if save_mode:
-            margin_error_f = open('/home/administrator/photo/log/margin_error.csv', 'w')
+            log_file = '/home/administrator/photo/log/margin_error.csv'
+            margin_error_f = open(log_file, 'w')
+            _logger.info('Open Log file: {}'.format(log_file))
+
             mail_message = {
                 'Fatturato': {
                     'NIENTE DISTINTA': [0.0, 0.0],  # Total, lines
@@ -187,14 +190,12 @@ class ProductBomReportLimitWizard(orm.TransientModel):
         order_comment = ''
         if from_date:
             domain.append(('invoice_id.date_invoice', '>=', from_date))
-            order_domain.append(('order_id.date_order', '>=',
-                                 '%s 00:00:00' % from_date))
+            order_domain.append(('order_id.date_order', '>=', '%s 00:00:00' % from_date))
             comment += 'FT dalla data %s' % from_date
             order_comment += 'OC dalla data %s' % from_date
         if to_date:
             domain.append(('invoice_id.date_invoice', '<=', to_date))
-            order_domain.append(('order_id.date_order', '<=',
-                                 '%s 23:59:59' % to_date))
+            order_domain.append(('order_id.date_order', '<=', '%s 23:59:59' % to_date))
             comment += 'FT alla data %s' % to_date
             order_comment += 'OC alla data %s' % to_date
 

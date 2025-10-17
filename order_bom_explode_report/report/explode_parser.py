@@ -853,7 +853,7 @@ class MrpProduction(orm.Model):
 
                     elif mode == 'component':
                         for comp in item.product_id.half_bom_ids:
-                            comp_code = comp.product_id.default_code
+                            comp_code = comp.product_id.default_code or ''
                             comp_remain = item_remain * comp.product_qty
 
                             # OC out item (no prod.):

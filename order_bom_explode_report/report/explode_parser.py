@@ -371,10 +371,10 @@ class MrpProduction(orm.Model):
             write_xls_line_list('selection', fabric_list)
 
             # todo add also not_in_report check!!!  and not_in_report='f'
-            query = '''
+            query = ('''
                 SELECT id from product_product
-                WHERE substring(default_code, 1, 3) IN ('%s');
-                ''' % "','".join(fabric_list)
+                WHERE substring(default_code, 1, 3) IN ('%s');''' %
+                     "','".join(fabric_list))
 
             cr.execute(query)
             fabric_ids = [item[0] for item in cr.fetchall()]
@@ -386,7 +386,7 @@ class MrpProduction(orm.Model):
 
             f_log_fabric = open('/tmp/tx_fabrics.csv', 'w')
             for fabric in fabrics:
-                f_log_fabric.write('{}\n'.format(fabric.default_code))
+                f_log_fabric.write('{}|{}\n'.format(fabric.id, fabric.default_code))
 
                 add_x_item(
                     y_axis, fabric, category_fabric,
@@ -406,8 +406,7 @@ class MrpProduction(orm.Model):
         for product in product_proxy:  # XXX Product ordered for now
             # TODO if no dynamic_bom_line_ids 
             # add_x_item(y_axis, product, category, purchase_db)
-            # category = product.category_id.type_id.name if \
-            #     product.category_id and product.category_id.type_id else \
+            # category = product.category_id.type_id.name if product.category_id and product.category_id.type_id else \
             #     _('No category')
             
             for item in product.dynamic_bom_line_ids:  # XXX All Semi-worked:
@@ -446,6 +445,7 @@ class MrpProduction(orm.Model):
                         continue  # Jump not supplier present
 
                     if mp_mode == 'fabric' and item.product_id.id not in fabric_ids:  # jump not fabric
+                        # There's "No category" sheet for Fabric TX Report
                         continue
 
                     category = item.category_id.type_id.name if (
@@ -457,8 +457,7 @@ class MrpProduction(orm.Model):
                     # relative_type = 'half'
                     for component in half_bom_ids:
                         # 10/01/2018 supplier filter on recent_supplier_id
-                        if first_supplier_id and first_supplier_id != \
-                                    item.product_id.recent_supplier_id.id:
+                        if first_supplier_id and first_supplier_id != item.product_id.recent_supplier_id.id:
                             continue  # Jump not supplier present
 
                         if mp_mode == 'fabric' and component.product_id.id not in fabric_ids:
@@ -835,8 +834,7 @@ class MrpProduction(orm.Model):
                                 '', 0,  # +MM
                                 item_remain,  # -OC
                                 0, 'OC HALFWORKED REMAIN (HW)',
-                                item.category_id.name if item.category_id \
-                                    else 'NO CATEGORY',
+                                item.category_id.name if item.category_id else 'NO CATEGORY',
                                 ))
                         # else: TODO log not used
 
@@ -850,8 +848,7 @@ class MrpProduction(orm.Model):
                                 '', 0,  # +MM
                                 item_remain,  # -OC
                                 0, 'OC HALFWORKED REMAIN (HW-0)',
-                                item.category_id.name if item.category_id \
-                                    else 'NO CATEGORY',
+                                item.category_id.name if item.category_id else 'NO CATEGORY',
                                 ))
 
                     elif mode == 'component':
@@ -860,6 +857,8 @@ class MrpProduction(orm.Model):
                             comp_remain = item_remain * comp.product_qty
 
                             # OC out item (no prod.):
+                            if comp_code == 'T4D180GN':
+                                pdb.set_trace()
                             if comp_code not in y_axis:
                                 write_xls_line('move', (
                                     block, 'NOT USED', order.name, '', date,

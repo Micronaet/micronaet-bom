@@ -36,7 +36,7 @@ from openerp.tools import (DEFAULT_SERVER_DATE_FORMAT,
     DEFAULT_SERVER_DATETIME_FORMAT,
     DATETIME_FORMATS_MAP,
     float_compare)
-
+import pdb
 
 _logger = logging.getLogger(__name__)
 

@@ -116,8 +116,7 @@ class MrpProduction(orm.Model):
         group_id = model_pool.get_object_reference(
             cr, uid, 'auto_bom_pipe_report', 'group_pipe_report_admin')[1]
         partner_ids = []
-        for user in group_pool.browse(
-                cr, uid, group_id, context=context).users:
+        for user in group_pool.browse(cr, uid, group_id, context=context).users:
             partner_ids.append(user.partner_id.id)
 
         thread_pool.message_post(

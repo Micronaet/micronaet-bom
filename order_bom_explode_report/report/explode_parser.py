@@ -304,6 +304,7 @@ class MrpProduction(orm.Model):
         now = '%s' % datetime.now()
         xls_log = '/home/administrator/photo/log/report_explode_%s_%s.xlsx' % (
             mp_mode, now.replace('/', '_').replace(':', '.'))
+        _logger.warning('Creating log file: {}'.format(xls_log))
         # Save in context if it will be used after:
         context['component_logfile'] = xls_log
 

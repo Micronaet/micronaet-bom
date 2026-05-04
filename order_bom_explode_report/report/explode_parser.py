@@ -369,9 +369,10 @@ class MrpProduction(orm.Model):
             write_xls_line_list('selection', fabric_list)
 
             # todo add also not_in_report check!!!  and not_in_report='f'
+            # 04-05-2026: Add active check!
             query = ('''
                 SELECT id from product_product
-                WHERE UPPER(substring(default_code, 1, 3)) IN ('%s');''' %
+                WHERE active='t' AND UPPER(substring(default_code, 1, 3)) IN ('%s');''' %
                      "','".join(fabric_list))
 
             cr.execute(query)

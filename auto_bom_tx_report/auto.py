@@ -629,8 +629,7 @@ class MrpProduction(orm.Model):
             stock_value = 0.0
             try:
                 if sal[11] > 0 and purchase:
-                    stock_value = sal[11] * float(
-                        purchase.split(']')[0].split(' ')[-1])
+                    stock_value = sal[11] * float(purchase.split(']')[0].split(' ')[-1])
             except:
                 pass  # remain 0
 
@@ -898,8 +897,7 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         # A. Generate data report:
         # ---------------------------------------------------------------------
-        res, all_component_ids = self.get_explode_report_object(
-            cr, uid, data=data, context=context)
+        res, all_component_ids = self.get_explode_report_object(cr, uid, data=data, context=context)
 
         # ---------------------------------------------------------------------
         # Data record in different sheet: Loop all record to write
@@ -980,8 +978,7 @@ class MrpProduction(orm.Model):
         _logger.info('End creation file %s' % filename)
         return filename
 
-    def send_fabric_mrp_report_scheduler(
-            self, cr, uid, mode='odt', context=None):
+    def send_fabric_mrp_report_scheduler(self, cr, uid, mode='odt', context=None):
         """ Generate PDF with data and send mail
         """
         if context is None:
@@ -1009,9 +1006,9 @@ class MrpProduction(orm.Model):
             'with_type_ids': []
             }
 
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         # Report in ODT mode:
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         now = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         now = now.replace('-', '_').replace(':', '.')
         if mode == 'odt':  # TODO remove, no more used!
@@ -1031,8 +1028,7 @@ class MrpProduction(orm.Model):
                 result, extension = openerp.report.render_report(
                     cr, uid, [mrp_id], report_name, datas, context)
             except:
-                _logger.error('Error generation TX report [%s]' % (
-                    sys.exc_info(),))
+                _logger.error('Error generation TX report [%s]' % (sys.exc_info(),))
                 return False
             attachments = [('Completo_%s.odt' % now, result)]
         elif mode == 'xlsx':
@@ -1058,8 +1054,7 @@ class MrpProduction(orm.Model):
         thread_pool = self.pool.get('mail.thread')
         group_id = model_pool.get_object_reference(cr, uid, 'textilene_status', 'group_textilene_admin')[1]
         partner_ids = []
-        for user in group_pool.browse(
-                cr, uid, group_id, context=context).users:
+        for user in group_pool.browse(cr, uid, group_id, context=context).users:
             partner_ids.append(user.partner_id.id)
 
         thread_pool.message_post(

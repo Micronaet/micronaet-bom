@@ -139,8 +139,7 @@ class MrpProduction(orm.Model):
 
             purchase_cost = purchase.get(product.id, '')
             if not purchase_cost:
-                purchase_price, purchase_date = \
-                    self.get_seller_last_cost(product)
+                purchase_price, purchase_date = self.get_seller_last_cost(product)
                 purchase_cost = '[Contr. costi data %s: costo un. %s]' % (
                     purchase_date,
                     purchase_price,
@@ -236,9 +235,7 @@ class MrpProduction(orm.Model):
                 # Create empty record with fixed data:
                 # -------------------------------------------------------------
                 # Available = purchased + stock - locked
-                available_qty = (
-                    hw_purchased.get(hw_code, 0.0) + product.mx_net_mrp_qty -
-                    product.mx_mrp_b_locked)
+                available_qty = (hw_purchased.get(hw_code, 0.0) + product.mx_net_mrp_qty - product.mx_mrp_b_locked)
                 hw_fabric[hw_code] = [
                     # 0. Stock - MRP - assigned (Before was: mx_net_qty)
                     available_qty if available_qty else 0.0,
@@ -274,7 +271,7 @@ class MrpProduction(orm.Model):
 
         # Read wizard parameters:
         mode = data.get('mode', 'halfwork')
-        mp_mode = data.get('mp_mode', False)
+        mp_mode = data.get('mp_mode', '')
         first_supplier_id = data.get('first_supplier_id', False)
         with_type_ids = data.get('with_type_ids', [])
         without_type_ids = data.get('without_type_ids', [])
@@ -306,7 +303,7 @@ class MrpProduction(orm.Model):
         # ---------------------------------------------------------------------
         now = '%s' % datetime.now()
         xls_log = '/home/administrator/photo/log/report_explode_%s_%s.xlsx' % (
-            mode, now.replace('/', '_').replace(':', '.'))
+            mp_mode, now.replace('/', '_').replace(':', '.'))
         # Save in context if it will be used after:
         context['component_logfile'] = xls_log
 

@@ -370,7 +370,7 @@
          </record>
 
          <!--res.partner-->
-         <record model="ir.ui.view" id="view_res_partner_rate_tree">
+         <!--<record model="ir.ui.view" id="view_res_partner_rate_tree">
              <field name="name">res.partner.tree</field>
              <field name="model">res.partner</field>
              <field name="inherit_id" ref="base.view_partner_form" />
@@ -384,7 +384,7 @@
                     </page>
                 </xpath>
              </field>
-         </record>
+         </record>-->
 
          <record model="ir.ui.view" id="view_res_partner_rate_tree">
              <field name="name">res.partner.tree</field>

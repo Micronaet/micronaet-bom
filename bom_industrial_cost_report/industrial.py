@@ -53,6 +53,11 @@ class ResPartner(orm.Model):
             'Sconto extra', digits=(16, 4),
             help='In tasso di extra sconto viene tolto dal fatturato',
         ),
+
+        'industrial_pricelist_ids': fields.many2many(
+            'product.product',
+            'partner_bom_selection_pricelist_rel',
+            'partner_id', 'product_id', 'Modello distinte', domain="[('bom_selection', '=', True)]"),
     }
 
 
@@ -729,10 +734,8 @@ class ProductProduct(orm.Model):
         for product in self.browse(cr, uid, ids, context=context):
             cost = product.to_industrial
             res[product.id] = {}
-            res[product.id]['industrial_sale_a'] = \
-                cost * product.company_id.industrial_margin_a / 100.0
-            res[product.id]['industrial_sale_b'] = \
-                cost * product.company_id.industrial_margin_b / 100.0
+            res[product.id]['industrial_sale_a'] = cost * product.company_id.industrial_margin_a / 100.0
+            res[product.id]['industrial_sale_b'] = cost * product.company_id.industrial_margin_b / 100.0
         return res
 
     _columns = {

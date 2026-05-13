@@ -43,6 +43,27 @@ class ResPartner(orm.Model):
     """
     _inherit = 'res.partner'
 
+    def button_print_industrial_pricelist(self, cr, uid, ids, context=None):
+        """ Print all product in partner pricelist
+        """
+        partner = self.browse(cr, uid, ids, context=context)[0]
+        product_ids = [r.product_id.id for r in partner.industrial_pricelist_ids]
+        if not product_ids:
+            raise osv.except_osv(
+                _('Stampa DB prodotti cliente'),
+                _('Non sono presenti distrinte base per i costi, aggiungerle prima di stampare'),
+                )
+
+        datas = {}
+        datas['wizard'] = True  # started from wizard
+        datas['active_ids'] = product_ids
+        return {
+            'type': 'ir.actions.report.xml',
+            'report_name': 'industrial_cost_bom_report',
+            'datas': datas,
+            'context': context,
+        }
+
     _columns = {
         'industrial_transport_rate': fields.float(
             'Tasso trasporto %', digits=(16, 4),

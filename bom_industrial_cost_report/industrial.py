@@ -47,7 +47,7 @@ class ResPartner(orm.Model):
         """ Print all product in partner pricelist
         """
         partner = self.browse(cr, uid, ids, context=context)[0]
-        product_ids = [r.product_id.id for r in partner.industrial_pricelist_ids]
+        product_ids = partner.industrial_pricelist_ids.ids
         if not product_ids:
             raise osv.except_osv(
                 _('Stampa DB prodotti cliente'),

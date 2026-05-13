@@ -381,7 +381,7 @@
                              <separator string="Distinte modello di costo:" colspan="3"/>
                              <button name="button_print_industrial_pricelist" type="object" string="Stampa distinte"/>
 
-                             <field name="industrial_pricelist_ids" context="{'tree_view_ref': 'bom_industrial_cost_report.view_product_bom_selection_tree'}" nolabel="1"/>
+                             <field name="industrial_pricelist_ids" context="{'tree_view_ref': 'bom_industrial_cost_report.view_product_bom_selection_tree'}" nolabel="1" colspan="4"/>
                          </group>
                      </page>
                  </xpath>

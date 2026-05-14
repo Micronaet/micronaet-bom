@@ -43,6 +43,19 @@ class ResPartner(orm.Model):
     """
     _inherit = 'res.partner'
 
+    def button_print_industrial_pricelist_excel(self, cr, uid, ids, context=None):
+        """ Export pricelist for this partner
+        """
+        partner = self.browse(cr, uid, ids, context=context)[0]
+        products = partner.industrial_pricelist_ids
+
+        for product in products:
+            default_code = product.default_code or '?'
+            current_from_industrial = product.current_from_industrial
+            current_to_industrial = product.current_to_industrial
+
+
+
     def button_print_industrial_pricelist(self, cr, uid, ids, context=None):
         """ Print all product in partner pricelist
         """

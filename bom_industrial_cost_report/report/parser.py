@@ -1418,7 +1418,8 @@ class ProductProduct(orm.Model):
             # -----------------------------------------------------------------
             # Update product current industrial price:
             # -----------------------------------------------------------------
-            if update_current_industrial:
+            if update_current_industrial or not product.bom_selection:
+                # Update when required or when bon not selected
                 update_after.append((product.id, {
                     'current_from_industrial': data[0],
                     'current_to_industrial': data[1],

@@ -49,12 +49,41 @@ class ResPartner(orm.Model):
         partner = self.browse(cr, uid, ids, context=context)[0]
         products = partner.industrial_pricelist_ids
 
+        # Pool used:
+        excel_pool = self.pool.get('excel.writer')
+
+        # --------------------------------------------------------------------------------------------------------------
+        # Generate Excel file
+        # --------------------------------------------------------------------------------------------------------------
+        ws_name = 'Listino cliente'
+        excel_pool.create_worksheet(ws_name)
+        row = 0
+        excel_pool.column_width(ws_name, [
+            15, 30,
+            20, 20, 20,
+        ])
+        excel_pool.write_xls_line(ws_name, row, [
+            'Codice prodotto', 'Nome prodotto',
+            'Costo min', 'Costo max', '',
+            ])
+
+        # --------------------------------------------------------------------------------------------------------------
+        # Pricelist data:
+        # --------------------------------------------------------------------------------------------------------------
         for product in products:
             default_code = product.default_code or '?'
             current_from_industrial = product.current_from_industrial
             current_to_industrial = product.current_to_industrial
+            # TODO simulation
 
+            row += 1
+            excel_pool.write_xls_line(ws_name, row, [
+                default_code, product.name,
+                current_from_industrial, current_to_industrial, '',
+                ])
 
+        return excel_pool.return_attachment(
+            cr, uid, 'Listino Cliente', name_of_file='pricelist.xlsx', context=context)
 
     def button_print_industrial_pricelist(self, cr, uid, ids, context=None):
         """ Print all product in partner pricelist

@@ -144,5 +144,3 @@ class SaleOrderCheckOcWizard(orm.TransientModel):
 
         return excel_pool.return_attachment(cr, uid, 'Stampa esploso OC',
             name_of_file='esploso_oc.xlsx', context=context)
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

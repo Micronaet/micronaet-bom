@@ -78,7 +78,7 @@ class ResPartner(orm.Model):
         'industrial_pricelist_ids': fields.many2many(
             'product.product',
             'partner_bom_selection_pricelist_rel',
-            'partner_id', 'product_id', 'Modello distinte', domain="[('bom_selection', '=', True)]"),
+            'partner_id', 'product_id', 'Modello distinte'),  # , domain="[('bom_selection', '=', True)]"),
     }
 
 

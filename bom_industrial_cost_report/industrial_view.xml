@@ -370,13 +370,13 @@
          </record>
 
          <!--res.partner-->
-        <record model="ir.ui.view" id="view_res_partner_page_form_inherit">
+         <record model="ir.ui.view" id="view_res_partner_page_form_inherit">
              <field name="name">res.partner.pricelist.page.form</field>
              <field name="model">res.partner</field>
              <field name="inherit_id" ref="base.view_partner_form" />
              <field name="arch" type="xml">
                  <xpath expr="//notebook/page[@name='sales_purchases']" position="after">
-                     <page name="bom_pricelist_page" string="Modelli listino" groups="bom_industrial_cost_report.group_bom_cost_manager,bom_industrial_cost_report.group_bom_cost_history_manager,bom_industrial_cost_report.group_margin_report"> <!--,group_margin_check_report,group_cost_in_report-->
+                     <page name="bom_pricelist_page" string="Listino cliente" groups="bom_industrial_cost_report.group_bom_cost_manager,bom_industrial_cost_report.group_bom_cost_history_manager,bom_industrial_cost_report.group_margin_report"> <!--,group_margin_check_report,group_cost_in_report-->
                          <group colspan="4" col="4">
                              <separator string="Distinte modello di costo:" colspan="3"/>
                              <button name="button_print_industrial_pricelist" type="object" string="Stampa distinte"/>

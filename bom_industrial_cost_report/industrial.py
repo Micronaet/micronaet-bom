@@ -57,19 +57,47 @@ class ResPartner(orm.Model):
         # --------------------------------------------------------------------------------------------------------------
         ws_name = 'Listino cliente'
         excel_pool.create_worksheet(ws_name)
+
+        excel_pool.set_format(number_format='#,##0.#0')
+        excel_format = {
+            'title': excel_pool.get_format(key='title'),
+            'header': excel_pool.get_format(key='header'),
+            'white': {
+                'text': excel_pool.get_format(key='text'),
+                'number': excel_pool.get_format(key='number'),
+            },
+            'yellow': {
+                'text': excel_pool.get_format(key='bg_yellow'),
+                'number': excel_pool.get_format(key='bg_yellow_number'),
+            },
+            'red': {
+                'text': excel_pool.get_format(key='bg_red'),
+                'number': excel_pool.get_format(key='bg_red_number'),
+            },
+            'green': {
+                'text': excel_pool.get_format(key='bg_green'),
+                'number': excel_pool.get_format(key='bg_green_number'),
+            },
+            'grey': {
+                'text': excel_pool.get_format(key='bg_grey'),
+                'number': excel_pool.get_format(key='bg_grey_number'),
+            },
+        }
+
         row = 0
         excel_pool.column_width(ws_name, [
-            15, 30,
-            20, 20, 20,
+            15, 40,
+            18, 18, 18,
         ])
         excel_pool.write_xls_line(ws_name, row, [
             'Codice prodotto', 'Nome prodotto',
             'Costo min', 'Costo max', '',
-            ])
+            ], excel_format['header'])
 
         # --------------------------------------------------------------------------------------------------------------
         # Pricelist data:
         # --------------------------------------------------------------------------------------------------------------
+        excel_color = excel_format['white']
         for product in products:
             default_code = product.default_code or '?'
             current_from_industrial = product.current_from_industrial
@@ -78,9 +106,10 @@ class ResPartner(orm.Model):
 
             row += 1
             excel_pool.write_xls_line(ws_name, row, [
-                default_code, product.name,
+                (default_code, excel_color['text']),
+                (product.name, excel_color['text']),
                 current_from_industrial, current_to_industrial, '',
-                ])
+                ], excel_color['number'])
 
         return excel_pool.return_attachment(
             cr, uid, 'Listino Cliente', name_of_file='pricelist.xlsx', context=context)

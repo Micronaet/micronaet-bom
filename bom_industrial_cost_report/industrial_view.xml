@@ -326,11 +326,16 @@
                      <field name="industrial_sale_a" />
                      <field name="industrial_sale_b" />
                      <field name="state" invisible="1" />
-                     <button name="bom_selection_on" string="Set BOM on" type="object" icon="star-off" attrs="{'invisible': [('bom_selection','=',True)]}"/>
-                     <button name="bom_selection_off" string="Set BOM off" type="object" icon="star-on" attrs="{'invisible': [('bom_selection','=',False)]}"/>
-                     <button name="open_single_report" string="Print single" type="object" icon="gtk-print" attrs="{'invisible': [('bom_selection','=',False)]}"/>
-                     <button name="open_multi_report" string="Print all" type="object" icon="gtk-dnd-multiple" attrs="{'invisible': [('bom_selection','=',False)]}" help="Nota: Durante la stampa vengono aggiornate le informazioni di prezzo minimo e massimo nei prodotti"/>
-                     <button name="open_xls_report" string="Export XLSX" type="object" icon="terp-go-month" attrs="{'invisible': [('bom_selection','=',False)]}"/>
+                     <button name="bom_selection_on" string="Set BOM on" type="object" icon="star-off" attrs="{'invisible': [('bom_selection','=',True)]}"
+                             groups="bom_industrial_cost_report.group_bom_cost_manager,bom_industrial_cost_report.group_bom_cost_history_manager,bom_industrial_cost_report.group_margin_report" />
+                     <button name="bom_selection_off" string="Set BOM off" type="object" icon="star-on" attrs="{'invisible': [('bom_selection','=',False)]}"
+                             groups="bom_industrial_cost_report.group_bom_cost_manager,bom_industrial_cost_report.group_bom_cost_history_manager,bom_industrial_cost_report.group_margin_report"/>
+                     <button name="open_single_report" string="Print single" type="object" icon="gtk-print" /> <!--attrs="{'invisible': [('bom_selection','=',False)]}"-->
+                     <button name="open_multi_report" string="Print all" type="object" icon="gtk-dnd-multiple" attrs="{'invisible': [('bom_selection','=',False)]}"
+                             groups="bom_industrial_cost_report.group_bom_cost_manager,bom_industrial_cost_report.group_bom_cost_history_manager,bom_industrial_cost_report.group_margin_report"
+                             help="Nota: Durante la stampa vengono aggiornate le informazioni di prezzo minimo e massimo nei prodotti"/>
+                     <button name="open_xls_report" string="Export XLSX" type="object" icon="terp-go-month" attrs="{'invisible': [('bom_selection','=',False)]}"
+                             groups="bom_industrial_cost_report.group_bom_cost_manager,bom_industrial_cost_report.group_bom_cost_history_manager,bom_industrial_cost_report.group_margin_report" />
                  </tree>
              </field>
          </record>
@@ -381,7 +386,7 @@
                              <separator string="Distinte modello di costo:" colspan="3"/>
                              <button name="button_print_industrial_pricelist" type="object" string="Stampa distinte"/>
 
-                             <field name="industrial_pricelist_ids" context="{'tree_view_ref': 'bom_industrial_cost_report.view_product_bom_selection_tree'}" nolabel="1" colspan="4"/>
+                             <field name="industrial_pricelist_ids" context="{'pricelist_embedd': True, 'tree_view_ref': 'bom_industrial_cost_report.view_product_bom_selection_tree'}" nolabel="1" colspan="4"/>
                          </group>
                      </page>
                  </xpath>

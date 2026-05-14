@@ -1407,7 +1407,7 @@ class ProductProduct(orm.Model):
             # -----------------------------------------------------------------
             # Update product industrial price:
             # -----------------------------------------------------------------
-            if update_record:
+            if update_record or not product.bom_selection:
                 update_after.append((product.id, {
                     'from_industrial': data[0],
                     'to_industrial': data[1],
@@ -1475,6 +1475,7 @@ class ProductProduct(orm.Model):
         for product_id, record in update_after:
             self.write(cr, uid, product_id, record, context=context)
         return res
+
 
 class Parser(report_sxw.rml_parse):
     def __init__(self, cr, uid, name, context):

@@ -103,13 +103,12 @@ class ResPartner(orm.Model):
             current_from_industrial = product.current_from_industrial
             current_to_industrial = product.current_to_industrial
             industrial_simulated = product.industrial_simulated
-            # TODO simulation
 
             row += 1
             excel_pool.write_xls_line(ws_name, row, [
                 (default_code, excel_color['text']),
                 (product.name, excel_color['text']),
-                current_from_industrial, current_to_industrial, '',
+                current_from_industrial, current_to_industrial, industrial_simulated,
                 ], excel_color['number'])
 
         return excel_pool.return_attachment(

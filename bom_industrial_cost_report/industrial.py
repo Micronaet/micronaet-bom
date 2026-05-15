@@ -91,7 +91,7 @@ class ResPartner(orm.Model):
         ])
         excel_pool.write_xls_line(ws_name, row, [
             'Codice prodotto', 'Nome prodotto',
-            'Costo min', 'Costo max', '',
+            'Costo min.', 'Costo max.', 'Simulazione',
             ], excel_format['header'])
 
         # --------------------------------------------------------------------------------------------------------------

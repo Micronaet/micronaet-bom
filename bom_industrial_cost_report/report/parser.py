@@ -1404,29 +1404,33 @@ class ProductProduct(orm.Model):
             # Write status in row:
             data[7]['index'] = industrial_index_get_text(data[6])
 
-            # -----------------------------------------------------------------
+            # ----------------------------------------------------------------------------------------------------------
             # Update product industrial price:
-            # -----------------------------------------------------------------
-            if update_record:  #  or not product.bom_selection
+            # ----------------------------------------------------------------------------------------------------------
+            # 1. Simulated:
+            update_data = {
+                'industrial_simulated': data[12],  # Always updated
+            }
+
+            # 2. History:
+            if update_record:
                 # Save history value:
-                update_after.append((product.id, {
+                updata_data.update({
                     'from_industrial': data[0],
                     'to_industrial': data[1],
                     'industrial_missed': data[2],
                     'industrial_index': data[7]['index'],
-                    # 'industrial_simulated': data[12],
-                    }))
+                })
 
-            # -----------------------------------------------------------------
-            # Update product current industrial price:
-            # -----------------------------------------------------------------
+            # 3. Current price:
             if update_current_industrial or not product.bom_selection:
-                # Update when required or when bon not selected
-                update_after.append((product.id, {
+                update_data.update({
                     'current_from_industrial': data[0],
                     'current_to_industrial': data[1],
-                    'industrial_simulated': data[12],
-                    }))
+                })
+
+            # END: Update after:
+            update_after.append((product.id, update_data))
 
             # -----------------------------------------------------------------
             # History:

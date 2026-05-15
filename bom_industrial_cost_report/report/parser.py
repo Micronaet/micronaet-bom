@@ -1408,6 +1408,7 @@ class ProductProduct(orm.Model):
             # Update product industrial price:
             # -----------------------------------------------------------------
             if update_record:  #  or not product.bom_selection
+                # Save history value:
                 update_after.append((product.id, {
                     'from_industrial': data[0],
                     'to_industrial': data[1],

@@ -1413,6 +1413,7 @@ class ProductProduct(orm.Model):
                     'to_industrial': data[1],
                     'industrial_missed': data[2],
                     'industrial_index': data[7]['index'],
+                    'industrial_simulated': data[12],
                     }))
 
             # -----------------------------------------------------------------
@@ -1423,6 +1424,7 @@ class ProductProduct(orm.Model):
                 update_after.append((product.id, {
                     'current_from_industrial': data[0],
                     'current_to_industrial': data[1],
+                    'industrial_simulated': data[12],
                     }))
 
             # -----------------------------------------------------------------

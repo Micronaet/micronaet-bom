@@ -836,26 +836,18 @@ class ProductProduct(orm.Model):
             help='Se il prodotto fa parte di DB viene indicato senza prezzo',
             ),
 
-        'current_from_industrial': fields.float(
-            'Current from industrial cost', digits=(16, 3)),
-        'current_to_industrial': fields.float(
-            'Current to industrial cost', digits=(16, 3)),
+        'industrial_simulated': fields.float('Simulazione', digits=(16, 3)),
+        'current_from_industrial': fields.float('Current from industrial cost', digits=(16, 3)),
+        'current_to_industrial': fields.float('Current to industrial cost', digits=(16, 3)),
 
-        'from_industrial': fields.float(
-            'From industrial cost', digits=(16, 3)),
-        'to_industrial': fields.float(
-            'To industrial cost', digits=(16, 3)),
-        'industrial_missed': fields.boolean('Manca',
-            help='Manca prezzo di alcuni componenti'),
+        'from_industrial': fields.float('From industrial cost', digits=(16, 3)),
+        'to_industrial': fields.float('To industrial cost', digits=(16, 3)),
+        'industrial_missed': fields.boolean('Manca', help='Manca prezzo di alcuni componenti'),
         'industrial_index': fields.text('Indici'),
 
         # Calculated:
         'industrial_sale_a': fields.function(
-            _get_industrial_sale_ab, method=True,
-            type='float', string='Vend. A%', multi=True,
-            store=False),
+            _get_industrial_sale_ab, method=True, type='float', string='Vend. A%', multi=True, store=False),
         'industrial_sale_b': fields.function(
-            _get_industrial_sale_ab, method=True,
-            type='float', string='Vend. B%', multi=True,
-            store=False),
+            _get_industrial_sale_ab, method=True, type='float', string='Vend. B%', multi=True, store=False),
         }

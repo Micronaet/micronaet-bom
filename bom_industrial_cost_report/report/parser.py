@@ -1407,13 +1407,13 @@ class ProductProduct(orm.Model):
             # -----------------------------------------------------------------
             # Update product industrial price:
             # -----------------------------------------------------------------
-            if update_record or not product.bom_selection:
+            if update_record:  #  or not product.bom_selection
                 update_after.append((product.id, {
                     'from_industrial': data[0],
                     'to_industrial': data[1],
                     'industrial_missed': data[2],
                     'industrial_index': data[7]['index'],
-                    'industrial_simulated': data[12],
+                    # 'industrial_simulated': data[12],
                     }))
 
             # -----------------------------------------------------------------

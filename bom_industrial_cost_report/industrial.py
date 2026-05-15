@@ -102,6 +102,7 @@ class ResPartner(orm.Model):
             default_code = product.default_code or '?'
             current_from_industrial = product.current_from_industrial
             current_to_industrial = product.current_to_industrial
+            industrial_simulated = product.industrial_simulated
             # TODO simulation
 
             row += 1

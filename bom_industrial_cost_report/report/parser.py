@@ -795,7 +795,7 @@ class ProductProduct(orm.Model):
         # --------------------------------------------------------------------------------------------------------------
         WS.set_column('A:A', 10)
         WS.set_column('B:B', 35)
-        WS.set_column('C:bX', 10)
+        WS.set_column('C:BX', 10)
 
         header = [
             _('Codice'),

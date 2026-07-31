@@ -872,12 +872,18 @@ class ProductProduct(orm.Model):
                 'extra2': 0.0,
             }
             pdb.set_trace()
-            for table in (r_extra1, r_extra2):
+            for table_name, table in (('extra1', r_extra1), ('extra2', r_extra2)):
                 for item, details, time_qty in table:
                     if time_qty:
                         industrial_cost[cost_db[item.cost_id.name]] = '%s (T. %s)' % (details, time_qty)
                     else:
                         industrial_cost[cost_db[item.cost_id.name]] = details
+                    sub_totals[table_name] += details
+
+            # Update split subtotal:
+            row_data[6] = row_data[3] - sub_totals['extra1'] -sub_totals['extra2']
+            row_data[7] = sub_totals['extra1']
+            row_data[8] = sub_totals['extra2']
 
             # ----------------------------------------------------------------------------------------------------------
             # Print XLS row data:

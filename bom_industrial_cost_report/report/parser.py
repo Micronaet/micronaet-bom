@@ -871,7 +871,6 @@ class ProductProduct(orm.Model):
                 'extra1': 0.0,
                 'extra2': 0.0,
             }
-            pdb.set_trace()
             for table_name, table in (('extra1', r_extra1), ('extra2', r_extra2)):
                 for item, details, time_qty in table:
                     if time_qty:

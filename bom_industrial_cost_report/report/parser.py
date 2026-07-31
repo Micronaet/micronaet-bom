@@ -720,9 +720,9 @@ class ProductProduct(orm.Model):
     def open_xls_report(self, cr, uid, ids, context=None):
         """ Return xls report extracted from get_object method
         """
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         # Utility:
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         def xls_write_row(WS, row, row_data, format_cell):
             """ Print line in XLS file
             """
@@ -779,9 +779,9 @@ class ProductProduct(orm.Model):
             'num_format': '0.00',
             })
 
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         # Get database of industrial cost:
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         cost_db = {}
         cost_pool = self.pool.get('mrp.bom.industrial.cost')
         cost_ids = cost_pool.search(cr, uid, [], order='name', context=context)
@@ -790,12 +790,12 @@ class ProductProduct(orm.Model):
             cost_db[cost.name] = i  # position in Excel file
             i += 1
 
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         # Setup excel layout and columns:
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         WS.set_column('A:A', 10)
         WS.set_column('B:B', 35)
-        WS.set_column('C:AX', 10)
+        WS.set_column('C:bX', 10)
 
         header = [
             _('Codice'),
@@ -804,6 +804,11 @@ class ProductProduct(orm.Model):
             _('Max'),
             _('Simul.'),
             _('Simul. %'),
+
+            _('Costi Mat.'),
+            _('Costi Manod.'),
+            _('Costi Industr.'),
+
             _('Max x 5'),
             _('Costo (anag.)'),
 
@@ -816,9 +821,9 @@ class ProductProduct(orm.Model):
         header.extend(sorted(cost_db, key=lambda x: cost_db[x]))
         xls_write_row(WS, 0, header, format_title)
 
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         # Get product cost information
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------------------------------------------------
         # Extract data from ODT master function:
         row = 0
         records = self.report_get_objects_bom_industrial_cost(cr, uid, datas=datas, context=context)
@@ -842,6 +847,11 @@ class ProductProduct(orm.Model):
                 r_max,
                 simulated_cost,
                 simulated_rate,
+
+                0, # Materiali
+                0, # Manodopera
+                0, # Industriali
+
                 r_max * 5.0,
                 product.standard_price,
 
@@ -857,6 +867,11 @@ class ProductProduct(orm.Model):
             industrial_cost = [0.0 for col in range(0, len(cost_db))]
 
             # Loop on 2 cost table (industrial cost):
+            sub_totals = {
+                'extra1': 0.0,
+                'extra2': 0.0,
+            }
+            pdb.set_trace()
             for table in (r_extra1, r_extra2):
                 for item, details, time_qty in table:
                     if time_qty:
@@ -864,9 +879,9 @@ class ProductProduct(orm.Model):
                     else:
                         industrial_cost[cost_db[item.cost_id.name]] = details
 
-            # -----------------------------------------------------------------
+            # ----------------------------------------------------------------------------------------------------------
             # Print XLS row data:
-            # -----------------------------------------------------------------
+            # ----------------------------------------------------------------------------------------------------------
             row_data.extend(industrial_cost)
             xls_write_row(WS, row, row_data, format_text)
         _logger.info('End export BOM cost on %s' % xls_filename)

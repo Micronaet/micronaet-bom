@@ -24,14 +24,17 @@ import pdb
 import sys
 import xlrd
 import erppeek
-import ConfigParser
+try:
+    import ConfigParser
+except:    
+    import configparser as ConfigParser
 
 # -----------------------------------------------------------------------------
 # Parameters:
 # -----------------------------------------------------------------------------
-# Stagione attuale: 2025-26
-from_date = '2024-09-01'
-to_date = '2025-08-31'
+# Dati anno precedente da utilizzare per Stagione attuale: 2026-27
+from_date = '2025-09-01'
+to_date = '2026-08-31'
 
 # -----------------------------------------------------------------------------
 # Read configuration parameter:

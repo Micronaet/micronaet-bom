@@ -24,16 +24,19 @@ import pdb
 import sys
 import xlrd
 import erppeek
-import ConfigParser
+try:
+    import ConfigParser
+except    
+    import configparser as ConfigParser
 import pickle
 
 
 # -----------------------------------------------------------------------------
 # Parameters:
 # -----------------------------------------------------------------------------
-# Stagione attuale: 2023-24
-from_date = '2022-09-01'
-to_date = '2023-08-31'
+# Stagione attuale: 2026-27
+from_date = '2025-09-01'
+to_date = '2026-08-31'
 
 # -----------------------------------------------------------------------------
 # Read configuration parameter:
@@ -53,8 +56,7 @@ port = config.get('dbaccess', 'port')   # verify if it's necessary: getint
 # Connect to ODOO:
 # -----------------------------------------------------------------------------
 odoo = erppeek.Client(
-    'http://%s:%s' % (
-        server, port),
+    'http://%s:%s' % (server, port),
     db=dbname,
     user=user,
     password=pwd,
@@ -63,7 +65,7 @@ picking_pool = odoo.model('stock.picking')
 move_pool = odoo.model('stock.move')
 product_pool = odoo.model('product.product')
 
-log_f = open('./component_detail.csv', 'w')
+log_f = open('./component_log.csv', 'w')
 product_update = {}
 
 # -----------------------------------------------------------------------------
